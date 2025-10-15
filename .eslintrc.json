@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:jsx-a11y/recommended"
+  ],
+  "plugins": ["jsx-a11y"],
+  "rules": {
+    "jsx-a11y/label-has-associated-control": "error",
+    "jsx-a11y/anchor-is-valid": "error",
+    "jsx-a11y/interactive-supports-focus": "error",
+    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/aria-props": "error",
+    "jsx-a11y/no-redundant-roles": "error"
+  }
+}

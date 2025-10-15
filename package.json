@@ -1,0 +1,53 @@
+{
+  "name": "nfe-portal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "test": "jest",
+    "test:e2e": "playwright test",
+    "lhci": "lhci autorun"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "cloudinary": "^1.41.0",
+    "clsx": "^2.0.0",
+    "framer-motion": "^10.16.0",
+    "next": "^14.2.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwind-merge": "^2.0.0"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^4.1.1",
+    "@lhci/cli": "^0.12.0",
+    "@playwright/test": "^1.40.0",
+    "@storybook/addon-docs": "^9.1.10",
+    "@storybook/addon-onboarding": "^9.1.10",
+    "@storybook/addon-vitest": "^9.1.10",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "autoprefixer": "^10.4.0",
+    "axe-core": "^4.7.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "14.0.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-storybook": "^9.1.10",
+    "playwright": "^1.56.0",
+    "postcss": "^8.4.0",
+    "prettier": "^3.0.0",
+    "sass": "^1.69.0",
+    "storybook": "^9.1.10",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
+  }
+}
+
