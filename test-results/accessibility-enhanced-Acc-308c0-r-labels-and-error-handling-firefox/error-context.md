@@ -1,0 +1,186 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - link "NFE Portal" [ref=e6] [cursor=pointer]:
+        - /url: /
+      - navigation "Main navigation" [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "Home" [ref=e10] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e11]:
+            - link "About" [ref=e12] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e13]:
+            - link "Science" [ref=e14] [cursor=pointer]:
+              - /url: /science
+          - listitem [ref=e15]:
+            - link "Shop" [ref=e16] [cursor=pointer]:
+              - /url: /shop
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e22]:
+        - heading "Understanding Melanocyte Diversity" [level=1] [ref=e23]
+        - paragraph [ref=e24]: Science-backed skincare for melanated skin through barrier-first approach. Join our research community to advance inclusive dermatological science.
+        - generic [ref=e25]:
+          - button "Explore the Science" [ref=e26] [cursor=pointer]:
+            - img [ref=e27]
+            - text: Explore the Science
+          - button "Join Focus Group" [ref=e34] [cursor=pointer]:
+            - img [ref=e35]
+            - text: Join Focus Group
+      - generic [ref=e41]:
+        - generic [ref=e43]:
+          - heading "Not For Everyone" [level=2] [ref=e44]
+          - paragraph [ref=e45]: Our quiet luxury approach focuses on evidence-led formulations specifically designed for melanated skin needs.
+        - generic [ref=e46]:
+          - generic [ref=e49]:
+            - img [ref=e50]
+            - heading "Science-First" [level=3] [ref=e54]
+            - paragraph [ref=e55]: Every ingredient is backed by peer-reviewed research and clinical studies.
+          - generic [ref=e58]:
+            - img [ref=e59]
+            - heading "Barrier-First" [level=3] [ref=e61]
+            - paragraph [ref=e62]: We prioritize skin barrier health to prevent inflammation and hyperpigmentation.
+          - generic [ref=e65]:
+            - img [ref=e66]
+            - heading "Inclusive Research" [level=3] [ref=e68]
+            - paragraph [ref=e69]: Our studies include diverse populations to ensure effective solutions for all skin tones.
+      - generic [ref=e71]:
+        - generic [ref=e73]:
+          - heading "Our Formulations" [level=2] [ref=e74]
+          - paragraph [ref=e75]: Carefully crafted products that address the unique needs of melanated skin.
+        - generic [ref=e76]:
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - 'generic "Category: Face Care" [ref=e82]': Face Care
+              - generic [ref=e83]: New
+            - heading "Face Elixir" [level=3] [ref=e84]
+            - paragraph [ref=e85]: THD Ascorbate + Bakuchiol + Peptides. A potent, barrier-first serum designed specifically for melanated skin.
+            - generic [ref=e86]:
+              - generic [ref=e87]:
+                - img [ref=e88]
+                - generic [ref=e90]: 15% THD Ascorbate (stable vitamin C)
+              - generic [ref=e91]:
+                - img [ref=e92]
+                - generic [ref=e94]: 1% Bakuchiol (retinol alternative)
+              - generic [ref=e95]:
+                - img [ref=e96]
+                - generic [ref=e98]: Copper peptides for skin repair
+            - generic [ref=e99]:
+              - generic [ref=e100]: $89
+              - button "Learn More" [ref=e101] [cursor=pointer]
+          - generic [ref=e105]:
+            - generic [ref=e106]:
+              - 'generic "Category: Body Care" [ref=e107]': Body Care
+              - generic [ref=e108]: Best Seller
+            - heading "Body Elixir" [level=3] [ref=e109]
+            - paragraph [ref=e110]: Ceramide Complex + Botanical Oils. A luxurious body serum featuring cacay oil and blue tansy for comprehensive nourishment.
+            - generic [ref=e111]:
+              - generic [ref=e112]:
+                - img [ref=e113]
+                - generic [ref=e115]: Ceramide complex for barrier repair
+              - generic [ref=e116]:
+                - img [ref=e117]
+                - generic [ref=e119]: Cacay oil (non-comedogenic)
+              - generic [ref=e120]:
+                - img [ref=e121]
+                - generic [ref=e123]: Blue tansy for anti-inflammatory benefits
+            - generic [ref=e124]:
+              - generic [ref=e125]: $79
+              - button "Learn More" [ref=e126] [cursor=pointer]
+      - generic [ref=e128]:
+        - generic [ref=e130]:
+          - heading "Interactive Science Layer" [level=2] [ref=e131]
+          - paragraph [ref=e132]: Explore the science behind melanocyte diversity and skin barrier function through our interactive research tools.
+        - generic [ref=e133]:
+          - generic [ref=e135]:
+            - generic [ref=e136]:
+              - heading "Skin Layers Map" [level=3] [ref=e137]:
+                - img [ref=e138]
+                - text: Skin Layers Map
+              - paragraph [ref=e145]: Interactive visualization of skin layer interactions with active ingredients.
+            - region "Skin Layers Interactive Map" [ref=e147]:
+              - heading "Skin Layers Interactive Map" [level=2] [ref=e148]
+              - paragraph [ref=e149]: Explore the different layers of human skin and their characteristics.
+              - generic [ref=e150]:
+                - paragraph [ref=e151]: Interactive map will be loaded here (dynamic import with ssr:false)
+                - list [ref=e152]:
+                  - listitem [ref=e153]: Epidermis Layer
+                  - listitem [ref=e154]: Dermis Layer
+                  - listitem [ref=e155]: Subcutaneous Layer
+          - generic [ref=e157]:
+            - generic [ref=e158]:
+              - heading "Melanocyte Map" [level=3] [ref=e159]:
+                - img [ref=e160]
+                - text: Melanocyte Map
+              - paragraph [ref=e172]: Educational tool showing melanocyte distribution and function across populations.
+            - region "Melanocyte Distribution Map" [ref=e174]:
+              - heading "Melanocyte Distribution Map" [level=2] [ref=e175]
+              - paragraph [ref=e176]: Visualize melanocyte distribution patterns across different skin regions.
+              - generic [ref=e177]:
+                - paragraph [ref=e178]: Interactive map will be loaded here (dynamic import with ssr:false)
+                - list [ref=e179]:
+                  - listitem [ref=e180]: Facial Melanocytes
+                  - listitem [ref=e181]: Body Melanocytes
+                  - listitem [ref=e182]: Extremity Melanocytes
+      - generic [ref=e185]:
+        - heading "Join Our Research Community" [level=2] [ref=e186]
+        - paragraph [ref=e187]: Your skin, your data, your privacy. Participate in secure, private research that advances inclusive dermatological science.
+        - generic [ref=e188]:
+          - button "Join Research Community" [ref=e189] [cursor=pointer]:
+            - img [ref=e190]
+            - text: Join Research Community
+          - button "Learn More" [ref=e195] [cursor=pointer]
+      - generic [ref=e197]:
+        - generic [ref=e199]:
+          - heading "Stay Connected" [level=2] [ref=e200]
+          - paragraph [ref=e201]: Join our community for updates, exclusive content, and research insights.
+        - generic [ref=e206]:
+          - generic [ref=e207]:
+            - heading "Join Our Research Community" [level=3] [ref=e208]
+            - paragraph [ref=e209]: Get updates on our latest research, product launches, and exclusive content.
+          - generic [ref=e210]:
+            - generic [ref=e211]:
+              - text: First Name
+              - textbox "First Name" [ref=e212]:
+                - /placeholder: Enter your first name
+            - generic [ref=e213]:
+              - text: Email Address
+              - textbox "Email Address" [ref=e214]:
+                - /placeholder: Enter your email
+          - generic [ref=e215]:
+            - checkbox "I agree to receive marketing communications from NFE Beauty. You can unsubscribe at any time.Privacy Policy" [ref=e216]
+            - generic [ref=e217] [cursor=pointer]:
+              - text: I agree to receive marketing communications from NFE Beauty. You can unsubscribe at any time.
+              - link "Privacy Policy" [ref=e218]:
+                - /url: /privacy
+          - button "Subscribe" [ref=e219] [cursor=pointer]:
+            - img
+            - text: Subscribe
+  - contentinfo [ref=e220]:
+    - paragraph [ref=e222]: © 2024 NFE Portal. All rights reserved.
+  - alert [ref=e223]
+  - dialog "Cookie Consent" [ref=e224]:
+    - generic [ref=e225]:
+      - generic [ref=e226]:
+        - generic [ref=e227]:
+          - heading "Cookie Consent" [level=3] [ref=e228]
+          - paragraph [ref=e229]: We use cookies to improve your experience and analyze site usage. By clicking "Accept All", you consent to our use of cookies. You can manage your preferences at any time.
+        - generic [ref=e230]:
+          - button "Decline" [ref=e231] [cursor=pointer]
+          - button "Accept All" [ref=e232] [cursor=pointer]
+      - paragraph [ref=e234]:
+        - text: For more information, please read our
+        - link "Privacy Policy" [ref=e235] [cursor=pointer]:
+          - /url: /privacy
+        - text: and
+        - link "Cookie Policy" [ref=e236] [cursor=pointer]:
+          - /url: /cookies
+        - text: .
+```

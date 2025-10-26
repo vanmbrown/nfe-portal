@@ -7,3 +7,4 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // TODO: Add auth helpers and database types in Week 3
 
+

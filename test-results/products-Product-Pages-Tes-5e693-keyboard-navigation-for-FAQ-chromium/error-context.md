@@ -1,0 +1,471 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - link "NFE Portal" [ref=e6] [cursor=pointer]:
+        - /url: /
+      - navigation "Main navigation" [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "Home" [ref=e10] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e11]:
+            - link "About" [ref=e12] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e13]:
+            - link "Science" [ref=e14] [cursor=pointer]:
+              - /url: /science
+          - listitem [ref=e15]:
+            - link "Shop" [ref=e16] [cursor=pointer]:
+              - /url: /shop
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - img "NFE Face Elixir bottle with dropper" [ref=e24]
+          - img "Close-up of Face Elixir serum texture" [ref=e27]
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - heading "Face Elixir" [level=1] [ref=e30]
+            - paragraph [ref=e31]: THD Ascorbate + Bakuchiol + Peptides
+            - paragraph [ref=e32]: A potent, barrier-first serum designed specifically for melanated skin. Features THD ascorbate (stable vitamin C), bakuchiol (retinol alternative), and copper peptides for comprehensive anti-aging and brightening.
+          - generic [ref=e33]:
+            - generic [ref=e34]: $89USD
+            - generic [ref=e35]:
+              - generic [ref=e36]:
+                - img [ref=e37]
+                - img [ref=e39]
+                - img [ref=e41]
+                - img [ref=e43]
+                - img [ref=e45]
+              - generic [ref=e47]: (4.8) • 127 reviews
+          - generic [ref=e48]:
+            - heading "Key Benefits:" [level=3] [ref=e49]
+            - generic [ref=e50]:
+              - generic [ref=e53]:
+                - paragraph [ref=e54]: Brightening & Even Tone
+                - paragraph [ref=e55]: 4-8 weeks
+              - generic [ref=e58]:
+                - paragraph [ref=e59]: Anti-Aging & Firmness
+                - paragraph [ref=e60]: 6-12 weeks
+              - generic [ref=e63]:
+                - paragraph [ref=e64]: Barrier Support
+                - paragraph [ref=e65]: 2-4 weeks
+          - generic [ref=e67]:
+            - generic [ref=e68]: Volume:30ml / 1 fl oz
+            - generic [ref=e69]: Texture:Lightweight serum, fast-absorbing
+            - generic [ref=e70]: Scent:Unscented
+            - generic [ref=e71]: Shelf Life:24 months unopened, 6 months after opening
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - button "Add to Cart" [ref=e74] [cursor=pointer]:
+                - img [ref=e75]
+                - text: Add to Cart
+              - button [ref=e79] [cursor=pointer]:
+                - img [ref=e80]
+              - button [ref=e82] [cursor=pointer]:
+                - img [ref=e83]
+            - generic [ref=e86]:
+              - generic [ref=e87]: Free Shipping
+              - generic [ref=e88]: 30-Day Returns
+              - generic [ref=e89]: Cruelty-Free
+      - generic [ref=e91]:
+        - generic [ref=e92]:
+          - heading "Complete Ingredient List (INCI)" [level=2] [ref=e93]
+          - paragraph [ref=e94]: Every ingredient in Face Elixir, with concentrations, benefits, and safety information.
+        - generic [ref=e96]:
+          - button "A-Z" [ref=e97] [cursor=pointer]
+          - button "Concentration" [ref=e98] [cursor=pointer]
+          - button "Safety" [ref=e99] [cursor=pointer]
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - generic [ref=e103]:
+              - generic [ref=e104]:
+                - heading "Bakuchiol" [level=3] [ref=e105]
+                - paragraph [ref=e106]: Bakuchiol
+              - generic [ref=e107]:
+                - img [ref=e108]
+                - generic [ref=e111]: safe
+            - generic [ref=e113]:
+              - generic [ref=e114]:
+                - generic [ref=e115]: "Concentration:"
+                - generic [ref=e116]: 1%
+              - generic [ref=e117]:
+                - text: "Source:"
+                - paragraph [ref=e118]: Psoralea corylifolia seed
+              - generic [ref=e119]:
+                - text: "Benefits:"
+                - list [ref=e120]:
+                  - listitem [ref=e121]: Retinol alternative
+                  - listitem [ref=e123]: Anti-aging
+                  - listitem [ref=e125]: Gentle on sensitive skin
+          - generic [ref=e127]:
+            - generic [ref=e129]:
+              - generic [ref=e130]:
+                - heading "Copper Peptide" [level=3] [ref=e131]
+                - paragraph [ref=e132]: Copper Tripeptide-1
+              - generic [ref=e133]:
+                - img [ref=e134]
+                - generic [ref=e137]: safe
+            - generic [ref=e139]:
+              - generic [ref=e140]:
+                - generic [ref=e141]: "Concentration:"
+                - generic [ref=e142]: 0.1%
+              - generic [ref=e143]:
+                - text: "Source:"
+                - paragraph [ref=e144]: Synthetic
+              - generic [ref=e145]:
+                - text: "Benefits:"
+                - list [ref=e146]:
+                  - listitem [ref=e147]: Wound healing
+                  - listitem [ref=e149]: Collagen production
+                  - listitem [ref=e151]: Skin repair
+          - generic [ref=e153]:
+            - generic [ref=e155]:
+              - generic [ref=e156]:
+                - heading "Niacinamide" [level=3] [ref=e157]
+                - paragraph [ref=e158]: Niacinamide
+              - generic [ref=e159]:
+                - img [ref=e160]
+                - generic [ref=e163]: safe
+            - generic [ref=e165]:
+              - generic [ref=e166]:
+                - generic [ref=e167]: "Concentration:"
+                - generic [ref=e168]: 5%
+              - generic [ref=e169]:
+                - text: "Source:"
+                - paragraph [ref=e170]: Synthetic
+              - generic [ref=e171]:
+                - text: "Benefits:"
+                - list [ref=e172]:
+                  - listitem [ref=e173]: Pore refinement
+                  - listitem [ref=e175]: Oil control
+                  - listitem [ref=e177]: Barrier support
+          - generic [ref=e179]:
+            - generic [ref=e181]:
+              - generic [ref=e182]:
+                - heading "Palmitoyl Tripeptide-5" [level=3] [ref=e183]
+                - paragraph [ref=e184]: Palmitoyl Tripeptide-5
+              - generic [ref=e185]:
+                - img [ref=e186]
+                - generic [ref=e189]: safe
+            - generic [ref=e191]:
+              - generic [ref=e192]:
+                - generic [ref=e193]: "Concentration:"
+                - generic [ref=e194]: 0.05%
+              - generic [ref=e195]:
+                - text: "Source:"
+                - paragraph [ref=e196]: Synthetic
+              - generic [ref=e197]:
+                - text: "Benefits:"
+                - list [ref=e198]:
+                  - listitem [ref=e199]: Firmness
+                  - listitem [ref=e201]: Elasticity
+                  - listitem [ref=e203]: Anti-aging
+          - generic [ref=e205]:
+            - generic [ref=e207]:
+              - generic [ref=e208]:
+                - heading "Hyaluronic Acid" [level=3] [ref=e209]
+                - paragraph [ref=e210]: Sodium Hyaluronate
+              - generic [ref=e211]:
+                - img [ref=e212]
+                - generic [ref=e215]: safe
+            - generic [ref=e217]:
+              - generic [ref=e218]:
+                - generic [ref=e219]: "Concentration:"
+                - generic [ref=e220]: 2%
+              - generic [ref=e221]:
+                - text: "Source:"
+                - paragraph [ref=e222]: Fermentation
+              - generic [ref=e223]:
+                - text: "Benefits:"
+                - list [ref=e224]:
+                  - listitem [ref=e225]: Hydration
+                  - listitem [ref=e227]: Plumping
+                  - listitem [ref=e229]: Moisture retention
+          - generic [ref=e231]:
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - heading "THD Ascorbate" [level=3] [ref=e235]
+                - paragraph [ref=e236]: Tetrahexyldecyl Ascorbate
+              - generic [ref=e237]:
+                - img [ref=e238]
+                - generic [ref=e241]: safe
+            - generic [ref=e243]:
+              - generic [ref=e244]:
+                - generic [ref=e245]: "Concentration:"
+                - generic [ref=e246]: 15%
+              - generic [ref=e247]:
+                - text: "Source:"
+                - paragraph [ref=e248]: Synthetic
+              - generic [ref=e249]:
+                - text: "Benefits:"
+                - list [ref=e250]:
+                  - listitem [ref=e251]: Brightening
+                  - listitem [ref=e253]: Antioxidant protection
+                  - listitem [ref=e255]: Collagen synthesis
+        - generic [ref=e259]:
+          - img [ref=e260]
+          - generic [ref=e262]:
+            - heading "Ingredient Safety & Transparency" [level=3] [ref=e263]
+            - paragraph [ref=e264]: All ingredients are carefully selected for their safety profile and efficacy. We avoid known irritants and use only non-comedogenic ingredients suitable for melanated skin.
+            - generic [ref=e265]:
+              - generic [ref=e266]:
+                - img [ref=e267]
+                - generic [ref=e270]: No parabens
+              - generic [ref=e271]:
+                - img [ref=e272]
+                - generic [ref=e275]: No sulfates
+              - generic [ref=e276]:
+                - img [ref=e277]
+                - generic [ref=e280]: No phthalates
+              - generic [ref=e281]:
+                - img [ref=e282]
+                - generic [ref=e285]: No artificial fragrances
+              - generic [ref=e286]:
+                - img [ref=e287]
+                - generic [ref=e290]: No mineral oil
+              - generic [ref=e291]:
+                - img [ref=e292]
+                - generic [ref=e295]: No animal testing
+      - generic [ref=e297]:
+        - generic [ref=e298]:
+          - heading "Clinical Benefits & Results" [level=2] [ref=e299]
+          - paragraph [ref=e300]: Evidence-based benefits backed by clinical research and dermatological studies.
+        - generic [ref=e301]:
+          - generic [ref=e302]:
+            - button "Sort by Timeline" [ref=e303] [cursor=pointer]
+            - button "Sort by Benefit" [ref=e304] [cursor=pointer]
+          - button "Show Clinical Evidence" [ref=e305] [cursor=pointer]
+        - generic [ref=e306]:
+          - generic [ref=e308]:
+            - generic [ref=e309]:
+              - heading "Barrier Support" [level=3] [ref=e310]
+              - generic [ref=e312]:
+                - img [ref=e313]
+                - text: 2-4 weeks
+            - paragraph [ref=e316]: Niacinamide and hyaluronic acid strengthen the skin barrier and improve moisture retention.
+          - generic [ref=e318]:
+            - generic [ref=e319]:
+              - heading "Brightening & Even Tone" [level=3] [ref=e320]
+              - generic [ref=e322]:
+                - img [ref=e323]
+                - text: 4-8 weeks
+            - paragraph [ref=e326]: THD ascorbate provides stable vitamin C benefits without irritation, helping to fade dark spots and even skin tone.
+          - generic [ref=e328]:
+            - generic [ref=e329]:
+              - heading "Anti-Aging & Firmness" [level=3] [ref=e330]
+              - generic [ref=e332]:
+                - img [ref=e333]
+                - text: 6-12 weeks
+            - paragraph [ref=e336]: Bakuchiol and copper peptides work together to stimulate collagen production and improve skin firmness.
+        - generic [ref=e339]:
+          - img [ref=e340]
+          - generic [ref=e343]:
+            - heading "Research-Backed Formulation" [level=3] [ref=e344]
+            - paragraph [ref=e345]: Our Face Elixir is formulated based on extensive clinical research and dermatological studies specifically focused on melanated skin concerns.
+            - generic [ref=e346]:
+              - generic [ref=e347]:
+                - generic [ref=e348]: 15+
+                - generic [ref=e349]: Clinical Studies
+              - generic [ref=e350]:
+                - generic [ref=e351]: 2,500+
+                - generic [ref=e352]: Study Participants
+              - generic [ref=e353]:
+                - generic [ref=e354]: 40%
+                - generic [ref=e355]: Average Improvement
+              - generic [ref=e356]:
+                - generic [ref=e357]: 95%
+                - generic [ref=e358]: Satisfaction Rate
+        - generic [ref=e359]:
+          - heading "Expected Results Timeline" [level=3] [ref=e361]
+          - generic [ref=e363]:
+            - generic [ref=e364]:
+              - generic [ref=e365]: "1"
+              - generic [ref=e366]:
+                - 'heading "Week 1-2: Initial Hydration" [level=4] [ref=e367]'
+                - paragraph [ref=e368]: Improved skin texture and initial hydration benefits
+            - generic [ref=e369]:
+              - generic [ref=e370]: "2"
+              - generic [ref=e371]:
+                - 'heading "Week 4-6: Barrier Improvement" [level=4] [ref=e372]'
+                - paragraph [ref=e373]: Enhanced skin barrier function and reduced sensitivity
+            - generic [ref=e374]:
+              - generic [ref=e375]: "3"
+              - generic [ref=e376]:
+                - 'heading "Week 8-12: Visible Results" [level=4] [ref=e377]'
+                - paragraph [ref=e378]: Significant improvement in target concerns and overall skin health
+      - generic [ref=e380]:
+        - generic [ref=e381]:
+          - heading "How to Use Face Elixir" [level=2] [ref=e382]
+          - paragraph [ref=e383]: Follow these simple steps for optimal results and skin safety.
+        - generic [ref=e386]:
+          - img [ref=e387]
+          - generic [ref=e390]:
+            - heading "Usage Frequency" [level=3] [ref=e391]
+            - paragraph [ref=e392]: Once daily, preferably in the morning
+            - generic [ref=e393]:
+              - generic [ref=e394]:
+                - img [ref=e395]
+                - generic [ref=e401]: Morning
+                - generic [ref=e402]: With SPF
+              - generic [ref=e403]:
+                - img [ref=e404]
+                - generic [ref=e406]: Evening
+                - generic [ref=e407]: With moisturizer
+              - generic [ref=e408]:
+                - img [ref=e409]
+                - generic [ref=e411]: Consistency
+                - generic [ref=e412]: Daily use
+        - generic [ref=e413]:
+          - heading "Step-by-Step Application" [level=3] [ref=e414]
+          - 'button "Step 1: Cleanse 2-3 minutes Start with clean, dry skin. Use a gentle cleanser suitable for your skin type. Remove all makeup, sunscreen, and impurities. Pat skin dry with a clean towel." [ref=e415] [cursor=pointer]':
+            - generic [ref=e417]:
+              - img [ref=e419]
+              - generic [ref=e422]:
+                - generic [ref=e423]:
+                  - 'heading "Step 1: Cleanse" [level=4] [ref=e424]'
+                  - generic [ref=e425]: 2-3 minutes
+                - paragraph [ref=e426]: Start with clean, dry skin. Use a gentle cleanser suitable for your skin type.
+                - paragraph [ref=e427]: Remove all makeup, sunscreen, and impurities. Pat skin dry with a clean towel.
+              - img [ref=e428]
+          - 'button "Step 2: Wait 2-5 minutes Allow skin to completely dry before applying the serum." [ref=e431] [cursor=pointer]':
+            - generic [ref=e433]:
+              - generic [ref=e436]:
+                - generic [ref=e437]:
+                  - 'heading "Step 2: Wait" [level=4] [ref=e438]'
+                  - generic [ref=e439]: 2-5 minutes
+                - paragraph [ref=e440]: Allow skin to completely dry before applying the serum.
+              - img [ref=e441]
+          - 'button "Step 3: Apply 1-2 minutes Apply 2-3 drops to clean skin, avoiding eye area" [ref=e444] [cursor=pointer]':
+            - generic [ref=e446]:
+              - generic [ref=e449]:
+                - generic [ref=e450]:
+                  - 'heading "Step 3: Apply" [level=4] [ref=e451]'
+                  - generic [ref=e452]: 1-2 minutes
+                - paragraph [ref=e453]: Apply 2-3 drops to clean skin, avoiding eye area
+              - img [ref=e454]
+          - 'button "Step 4: Protect 1-2 minutes Follow with SPF during the day or a moisturizer at night." [ref=e457] [cursor=pointer]':
+            - generic [ref=e459]:
+              - generic [ref=e462]:
+                - generic [ref=e463]:
+                  - 'heading "Step 4: Protect" [level=4] [ref=e464]'
+                  - generic [ref=e465]: 1-2 minutes
+                - paragraph [ref=e466]: Follow with SPF during the day or a moisturizer at night.
+              - img [ref=e467]
+        - generic [ref=e469]:
+          - generic [ref=e470]:
+            - heading "Pro Tips" [level=3] [ref=e472]:
+              - img [ref=e473]
+              - text: Pro Tips
+            - list [ref=e477]:
+              - listitem [ref=e478]:
+                - generic [ref=e480]: Start with every other day if you have sensitive skin
+              - listitem [ref=e481]:
+                - generic [ref=e483]: Always follow with SPF during the day
+              - listitem [ref=e484]:
+                - generic [ref=e486]: Store in a cool, dry place away from direct sunlight
+              - listitem [ref=e487]:
+                - generic [ref=e489]: Patch test before first use
+          - generic [ref=e490]:
+            - heading "Important Notes" [level=3] [ref=e492]:
+              - img [ref=e493]
+              - text: Important Notes
+            - list [ref=e496]:
+              - listitem [ref=e497]:
+                - generic [ref=e499]: Always patch test before first use
+              - listitem [ref=e500]:
+                - generic [ref=e502]: Start with every other day if you have sensitive skin
+              - listitem [ref=e503]:
+                - generic [ref=e505]: Discontinue use if irritation occurs
+              - listitem [ref=e506]:
+                - generic [ref=e508]: Consult a dermatologist if you have skin conditions
+        - generic [ref=e511]:
+          - img [ref=e512]
+          - generic [ref=e514]:
+            - heading "Expected Results Timeline" [level=3] [ref=e515]
+            - paragraph [ref=e516]: Use consistently for 8-12 weeks to see full benefits
+            - generic [ref=e517]:
+              - generic [ref=e518]:
+                - generic [ref=e519]: Week 1-2
+                - generic [ref=e520]: Initial hydration and texture improvement
+              - generic [ref=e521]:
+                - generic [ref=e522]: Week 4-6
+                - generic [ref=e523]: Visible improvement in target concerns
+              - generic [ref=e524]:
+                - generic [ref=e525]: Week 8-12
+                - generic [ref=e526]: Optimal results with consistent use
+      - generic [ref=e528]:
+        - generic [ref=e529]:
+          - heading "Frequently Asked Questions" [level=2] [ref=e530]
+          - paragraph [ref=e531]: Everything you need to know about Face Elixir
+        - generic [ref=e532]:
+          - generic:
+            - img
+          - textbox "Search FAQs..." [ref=e533]
+        - generic [ref=e535]:
+          - img [ref=e536]
+          - generic [ref=e539]: 5 of 5 questions
+        - generic [ref=e540]:
+          - generic [ref=e541]:
+            - 'button "Toggle FAQ: Can I use this with other active ingredients?" [expanded] [active] [ref=e542] [cursor=pointer]':
+              - generic [ref=e544]:
+                - heading "Can I use this with other active ingredients?" [level=3] [ref=e545]
+                - img [ref=e547]
+            - paragraph [ref=e551]: Yes, but avoid using with retinol or other vitamin C products. Use with niacinamide, hyaluronic acid, and gentle moisturizers.
+          - 'button "Toggle FAQ: Is this safe for sensitive skin?" [ref=e553] [cursor=pointer]':
+            - generic [ref=e555]:
+              - heading "Is this safe for sensitive skin?" [level=3] [ref=e556]
+              - img [ref=e558]
+          - 'button "Toggle FAQ: Can I use this during pregnancy?" [ref=e561] [cursor=pointer]':
+            - generic [ref=e563]:
+              - heading "Can I use this during pregnancy?" [level=3] [ref=e564]
+              - img [ref=e566]
+          - 'button "Toggle FAQ: How long does one bottle last?" [ref=e569] [cursor=pointer]':
+            - generic [ref=e571]:
+              - heading "How long does one bottle last?" [level=3] [ref=e572]
+              - img [ref=e574]
+          - 'button "Toggle FAQ: Why no coconut or grapeseed oil?" [ref=e577] [cursor=pointer]':
+            - generic [ref=e579]:
+              - heading "Why no coconut or grapeseed oil?" [level=3] [ref=e580]
+              - img [ref=e582]
+        - generic [ref=e586]:
+          - heading "Still have questions?" [level=3] [ref=e587]
+          - paragraph [ref=e588]: Our skincare experts are here to help you find the perfect routine.
+          - generic [ref=e589]:
+            - button "Contact Support" [ref=e590] [cursor=pointer]
+            - button "Schedule Consultation" [ref=e591] [cursor=pointer]
+        - generic [ref=e592]:
+          - heading "Popular Topics" [level=3] [ref=e593]
+          - generic [ref=e594]:
+            - generic [ref=e595] [cursor=pointer]: Skin Compatibility
+            - generic [ref=e596] [cursor=pointer]: Ingredient Safety
+            - generic [ref=e597] [cursor=pointer]: Usage Instructions
+            - generic [ref=e598] [cursor=pointer]: Expected Results
+            - generic [ref=e599] [cursor=pointer]: Storage & Shelf Life
+            - generic [ref=e600] [cursor=pointer]: Pregnancy Safety
+  - contentinfo [ref=e601]:
+    - paragraph [ref=e603]: © 2024 NFE Portal. All rights reserved.
+  - alert [ref=e604]
+  - dialog "Cookie Consent" [ref=e605]:
+    - generic [ref=e606]:
+      - generic [ref=e607]:
+        - generic [ref=e608]:
+          - heading "Cookie Consent" [level=3] [ref=e609]
+          - paragraph [ref=e610]: We use cookies to improve your experience and analyze site usage. By clicking "Accept All", you consent to our use of cookies. You can manage your preferences at any time.
+        - generic [ref=e611]:
+          - button "Decline" [ref=e612] [cursor=pointer]
+          - button "Accept All" [ref=e613] [cursor=pointer]
+      - paragraph [ref=e615]:
+        - text: For more information, please read our
+        - link "Privacy Policy" [ref=e616] [cursor=pointer]:
+          - /url: /privacy
+        - text: and
+        - link "Cookie Policy" [ref=e617] [cursor=pointer]:
+          - /url: /cookies
+        - text: .
+```

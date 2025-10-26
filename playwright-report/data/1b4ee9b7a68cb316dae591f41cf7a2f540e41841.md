@@ -1,0 +1,227 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - link "NFE Portal" [ref=e6]:
+        - /url: /
+      - navigation "Main navigation" [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "Home" [ref=e10]:
+              - /url: /
+          - listitem [ref=e11]:
+            - link "About" [ref=e12]:
+              - /url: /about
+          - listitem [ref=e13]:
+            - link "Science" [ref=e14]:
+              - /url: /science
+          - listitem [ref=e15]:
+            - link "Shop" [ref=e16]:
+              - /url: /shop
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e22]:
+        - heading "About NFE" [level=1] [ref=e23]
+        - paragraph [ref=e24]: We're revolutionizing dermatological research by focusing on melanated skin and creating inclusive solutions for diverse populations worldwide.
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - img
+            - text: Research-Driven
+          - generic [ref=e30]:
+            - img
+            - text: Community-Focused
+          - generic [ref=e35]:
+            - img
+            - text: Privacy-First
+      - generic [ref=e38]:
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - heading "Our Mission" [level=2] [ref=e42]
+            - paragraph [ref=e43]: "NFE (Not For Everyone) was born from a simple observation: the beauty industry has long ignored the unique needs of melanated skin. We're changing that."
+            - paragraph [ref=e44]: Our mission is to advance dermatological science through rigorous research, community engagement, and privacy-first data practices that serve diverse populations.
+            - generic [ref=e45]:
+              - button "Learn About Our Research" [ref=e46] [cursor=pointer]:
+                - img [ref=e47]
+                - text: Learn About Our Research
+              - button "Join Our Community" [ref=e50] [cursor=pointer]:
+                - img [ref=e51]
+                - text: Join Our Community
+          - generic [ref=e58]:
+            - img [ref=e59]
+            - paragraph [ref=e71]: Research & Innovation
+        - blockquote [ref=e72]:
+          - paragraph [ref=e73]: "\"The beauty industry has systematically excluded melanated skin from research and product development. We're not just filling a gap—we're building a new foundation for inclusive dermatological science.\""
+          - generic [ref=e74]: Dr. Sarah Chen, Founder & Chief Scientific Officer•NFE Research Institute
+      - generic [ref=e76]:
+        - generic [ref=e78]:
+          - heading "Our Approach to Melanated Skin Science" [level=2] [ref=e79]
+          - paragraph [ref=e80]: We combine cutting-edge research with community-driven insights to create solutions that truly serve melanated skin needs.
+        - generic [ref=e81]:
+          - generic [ref=e83]:
+            - generic [ref=e84]:
+              - img [ref=e85]
+              - heading "Scientific Rigor" [level=3] [ref=e89]
+            - paragraph [ref=e91]: Every formulation is backed by peer-reviewed research and clinical studies specifically focused on melanated skin concerns and responses.
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - img [ref=e95]
+              - heading "Community-Driven" [level=3] [ref=e100]
+            - paragraph [ref=e102]: Our research is guided by real community needs and feedback, ensuring our solutions address actual problems faced by people with melanated skin.
+          - generic [ref=e104]:
+            - generic [ref=e105]:
+              - img [ref=e106]
+              - heading "Privacy-First" [level=3] [ref=e108]
+            - paragraph [ref=e110]: Your data belongs to you. We use end-to-end encryption and never sell your personal information, ensuring your privacy is always protected.
+      - generic [ref=e114]:
+        - generic [ref=e115]:
+          - heading "Technology & Accessibility Commitment" [level=2] [ref=e116]
+          - paragraph [ref=e117]: We believe that advanced skincare science should be accessible to everyone. Our technology platform is designed with inclusivity at its core.
+          - generic [ref=e118]:
+            - generic [ref=e119]:
+              - img [ref=e121]
+              - generic [ref=e124]:
+                - heading "Global Accessibility" [level=3] [ref=e125]
+                - paragraph [ref=e126]: Our platform is designed to work across different devices, languages, and accessibility needs.
+            - generic [ref=e127]:
+              - img [ref=e129]
+              - generic [ref=e131]:
+                - heading "Data Security" [level=3] [ref=e132]
+                - paragraph [ref=e133]: End-to-end encryption and privacy-first design ensure your information stays secure.
+            - generic [ref=e134]:
+              - img [ref=e136]
+              - generic [ref=e138]:
+                - heading "Inclusive Design" [level=3] [ref=e139]
+                - paragraph [ref=e140]: Every feature is designed with diverse users in mind, from color contrast to screen reader compatibility.
+        - generic [ref=e143]:
+          - img [ref=e144]
+          - paragraph [ref=e146]: Innovation & Inclusion
+      - generic [ref=e148]:
+        - generic [ref=e150]:
+          - heading "Our Team" [level=2] [ref=e151]
+          - paragraph [ref=e152]: We're a diverse team of scientists, researchers, and community advocates united by our commitment to inclusive dermatological science.
+        - generic [ref=e153]:
+          - generic [ref=e155]:
+            - generic [ref=e156]:
+              - img [ref=e158]
+              - heading "Dr. Sarah Chen" [level=3] [ref=e162]
+              - paragraph [ref=e163]: Founder & Chief Scientific Officer
+            - paragraph [ref=e165]: Leading dermatologist with 15+ years of experience in melanated skin research. Published author and advocate for inclusive dermatological science.
+          - generic [ref=e167]:
+            - generic [ref=e168]:
+              - img [ref=e170]
+              - heading "Dr. Maria Rodriguez" [level=3] [ref=e175]
+              - paragraph [ref=e176]: Head of Community Research
+            - paragraph [ref=e178]: Community health specialist focused on inclusive research methodologies. Expert in building trust and engagement with diverse populations.
+          - generic [ref=e180]:
+            - generic [ref=e181]:
+              - img [ref=e183]
+              - heading "Alex Kim" [level=3] [ref=e185]
+              - paragraph [ref=e186]: Chief Technology Officer
+            - paragraph [ref=e188]: Privacy and security expert with a passion for accessible technology. Leads our technical infrastructure and user experience design.
+      - generic [ref=e190]:
+        - generic [ref=e192]:
+          - heading "Compliance & Trust" [level=2] [ref=e193]
+          - paragraph [ref=e194]: We maintain the highest standards of research ethics, data protection, and regulatory compliance in everything we do.
+        - generic [ref=e195]:
+          - generic [ref=e197]:
+            - generic [ref=e198]:
+              - img [ref=e199]
+              - heading "IRB Approved" [level=3] [ref=e202]
+            - paragraph [ref=e204]: All research protocols reviewed and approved by independent ethics boards
+          - generic [ref=e206]:
+            - generic [ref=e207]:
+              - img [ref=e208]
+              - heading "GDPR Compliant" [level=3] [ref=e210]
+            - paragraph [ref=e212]: Full compliance with international data protection regulations
+          - generic [ref=e214]:
+            - generic [ref=e215]:
+              - img [ref=e216]
+              - heading "Peer Reviewed" [level=3] [ref=e219]
+            - paragraph [ref=e221]: Research published in top-tier dermatological journals
+          - generic [ref=e223]:
+            - generic [ref=e224]:
+              - img [ref=e225]
+              - heading "Transparent" [level=3] [ref=e228]
+            - paragraph [ref=e230]: Open about our methods, findings, and limitations
+      - generic [ref=e232]:
+        - generic [ref=e233]:
+          - heading "Our Commitment to You" [level=2] [ref=e234]
+          - paragraph [ref=e235]: We're dedicated to advancing inclusive dermatological science through rigorous research, community engagement, and privacy-first data practices.
+        - generic [ref=e236]:
+          - generic [ref=e237]:
+            - generic [ref=e238]:
+              - img [ref=e239]
+              - heading "Scientific Rigor" [level=3] [ref=e243]
+            - paragraph [ref=e245]: Every formulation is backed by peer-reviewed research and clinical studies specifically focused on melanated skin.
+          - generic [ref=e246]:
+            - generic [ref=e247]:
+              - img [ref=e248]
+              - heading "Privacy First" [level=3] [ref=e250]
+            - paragraph [ref=e252]: Your data belongs to you. We use end-to-end encryption and never sell your personal information.
+          - generic [ref=e253]:
+            - generic [ref=e254]:
+              - img [ref=e255]
+              - heading "Inclusive Research" [level=3] [ref=e260]
+            - paragraph [ref=e262]: Our studies include diverse populations to ensure effective solutions for all skin tones and types.
+          - generic [ref=e263]:
+            - generic [ref=e264]:
+              - img [ref=e265]
+              - heading "Community Focused" [level=3] [ref=e267]
+            - paragraph [ref=e269]: We're building a community-driven approach to skincare research, not just another beauty brand.
+      - generic [ref=e271]:
+        - generic [ref=e273]:
+          - heading "Get in Touch" [level=2] [ref=e274]
+          - paragraph [ref=e275]: Have questions about our research or want to get involved? We'd love to hear from you.
+        - generic [ref=e276]:
+          - generic [ref=e277]:
+            - generic [ref=e278]:
+              - img [ref=e279]
+              - heading "Email Us" [level=3] [ref=e282]
+            - generic [ref=e283]:
+              - paragraph [ref=e284]: For general inquiries and research questions
+              - button "hello@nfe-beauty.com" [ref=e285] [cursor=pointer]:
+                - img [ref=e286]
+                - text: hello@nfe-beauty.com
+          - generic [ref=e289]:
+            - generic [ref=e290]:
+              - img [ref=e291]
+              - heading "Community" [level=3] [ref=e293]
+            - generic [ref=e294]:
+              - paragraph [ref=e295]: Join our research community and focus groups
+              - button "Join Community" [ref=e296] [cursor=pointer]:
+                - img [ref=e297]
+                - text: Join Community
+          - generic [ref=e302]:
+            - generic [ref=e303]:
+              - img [ref=e304]
+              - heading "Research Partnerships" [level=3] [ref=e306]
+            - generic [ref=e307]:
+              - paragraph [ref=e308]: For institutional collaborations and partnerships
+              - button "Research Partnerships" [ref=e309] [cursor=pointer]:
+                - img [ref=e310]
+                - text: Research Partnerships
+  - contentinfo [ref=e314]:
+    - paragraph [ref=e316]: © 2024 NFE Portal. All rights reserved.
+  - alert [ref=e317]
+  - dialog "Cookie Consent" [ref=e318]:
+    - generic [ref=e319]:
+      - generic [ref=e320]:
+        - generic [ref=e321]:
+          - heading "Cookie Consent" [level=3] [ref=e322]
+          - paragraph [ref=e323]: We use cookies to improve your experience and analyze site usage. By clicking "Accept All", you consent to our use of cookies. You can manage your preferences at any time.
+        - generic [ref=e324]:
+          - button "Decline" [ref=e325] [cursor=pointer]
+          - button "Accept All" [ref=e326] [cursor=pointer]
+      - paragraph [ref=e328]:
+        - text: For more information, please read our
+        - link "Privacy Policy" [ref=e329]:
+          - /url: /privacy
+        - text: and
+        - link "Cookie Policy" [ref=e330]:
+          - /url: /cookies
+        - text: .
+```

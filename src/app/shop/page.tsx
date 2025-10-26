@@ -8,6 +8,8 @@ export default function Shop() {
         Access research materials and tools for your NFE studies.
       </p>
       
+      <h2 className="text-2xl font-primary font-bold text-nfe-green mb-6">Available Resources</h2>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-nfe-paper border border-nfe-green/20 rounded-lg p-6">
           <h3 className="text-xl font-primary font-bold text-nfe-green mb-2">
@@ -39,4 +41,5 @@ export default function Shop() {
     </div>
   )
 }
+
 

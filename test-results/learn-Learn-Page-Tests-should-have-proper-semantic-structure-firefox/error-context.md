@@ -1,0 +1,191 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - link "NFE Portal" [ref=e6] [cursor=pointer]:
+        - /url: /
+      - navigation "Main navigation" [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "Home" [ref=e10] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e11]:
+            - link "About" [ref=e12] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e13]:
+            - link "Science" [ref=e14] [cursor=pointer]:
+              - /url: /science
+          - listitem [ref=e15]:
+            - link "Shop" [ref=e16] [cursor=pointer]:
+              - /url: /shop
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - progressbar "Reading progress" [ref=e21]
+      - generic [ref=e25]:
+        - heading "The Science of Melanocyte Diversity" [level=1] [ref=e26]
+        - paragraph [ref=e27]: Understanding the complex world of melanocytes and their role in skin health across diverse populations. Our research-driven approach to skincare science.
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - img [ref=e30]
+            - text: Peer-Reviewed Research
+          - generic [ref=e37]:
+            - img [ref=e38]
+            - text: Inclusive Studies
+          - generic [ref=e43]:
+            - img [ref=e44]
+            - text: Privacy-First
+      - generic [ref=e47]:
+        - generic [ref=e49]:
+          - heading "Understanding Melanocyte Function" [level=2] [ref=e50]
+          - paragraph [ref=e51]: Melanocytes are specialized cells responsible for producing melanin, the pigment that gives our skin its color. But their role extends far beyond aesthetics.
+        - generic [ref=e52]:
+          - generic [ref=e55]:
+            - img [ref=e56]
+            - heading "Genetic Diversity" [level=3] [ref=e68]
+            - paragraph [ref=e69]: Melanocyte density and function vary significantly across populations, influenced by genetic factors and evolutionary adaptations.
+          - generic [ref=e72]:
+            - img [ref=e73]
+            - heading "Barrier Protection" [level=3] [ref=e75]
+            - paragraph [ref=e76]: Melanocytes play a crucial role in skin barrier function, protecting against UV damage and environmental stressors.
+          - generic [ref=e79]:
+            - img [ref=e80]
+            - heading "Health Implications" [level=3] [ref=e82]
+            - paragraph [ref=e83]: Understanding melanocyte function is essential for addressing hyperpigmentation, hypopigmentation, and skin health issues.
+        - blockquote [ref=e84]:
+          - paragraph [ref=e85]: "\"The diversity of melanocyte function across populations represents one of the most understudied areas in dermatology. Our research is changing that.\""
+          - generic [ref=e86]: Dr. Sarah Chen•Journal of Dermatological Science, 2024
+      - generic [ref=e88]:
+        - generic [ref=e90]:
+          - heading "Regional Variations in Melanocyte Function" [level=2] [ref=e91]
+          - paragraph [ref=e92]: Our research reveals fascinating differences in melanocyte behavior across different populations and geographic regions.
+        - generic [ref=e93]:
+          - generic [ref=e97]:
+            - heading "African Populations" [level=3] [ref=e98]
+            - paragraph [ref=e99]: Higher melanocyte density and more efficient melanin production, with unique adaptations to intense UV exposure.
+            - list [ref=e100]:
+              - listitem [ref=e101]: • 2-3x higher melanocyte density
+              - listitem [ref=e102]: • Enhanced UV protection mechanisms
+              - listitem [ref=e103]: • Unique melanosome distribution patterns
+          - generic [ref=e107]:
+            - heading "Asian Populations" [level=3] [ref=e108]
+            - paragraph [ref=e109]: Moderate melanocyte activity with distinct patterns of hyperpigmentation and response to environmental factors.
+            - list [ref=e110]:
+              - listitem [ref=e111]: • Variable melanocyte distribution
+              - listitem [ref=e112]: • Higher PIH susceptibility
+              - listitem [ref=e113]: • Unique aging patterns
+          - generic [ref=e117]:
+            - heading "European Populations" [level=3] [ref=e118]
+            - paragraph [ref=e119]: Lower baseline melanocyte activity with seasonal variations and increased susceptibility to UV damage.
+            - list [ref=e120]:
+              - listitem [ref=e121]: • Seasonal melanocyte activation
+              - listitem [ref=e122]: • Higher UV sensitivity
+              - listitem [ref=e123]: • Distinct aging characteristics
+          - generic [ref=e127]:
+            - heading "Indigenous Populations" [level=3] [ref=e128]
+            - paragraph [ref=e129]: Highly adapted melanocyte function with unique genetic variations and traditional knowledge integration.
+            - list [ref=e130]:
+              - listitem [ref=e131]: • Traditional medicine insights
+              - listitem [ref=e132]: • Genetic diversity preservation
+              - listitem [ref=e133]: • Environmental adaptation strategies
+          - generic [ref=e137]:
+            - heading "Latin American Populations" [level=3] [ref=e138]
+            - paragraph [ref=e139]: Complex melanocyte patterns reflecting diverse genetic heritage and varied environmental exposures.
+            - list [ref=e140]:
+              - listitem [ref=e141]: • Mixed genetic heritage effects
+              - listitem [ref=e142]: • Variable UV adaptation
+              - listitem [ref=e143]: • Unique pigmentation patterns
+          - generic [ref=e147]:
+            - heading "Mixed Heritage" [level=3] [ref=e148]
+            - paragraph [ref=e149]: Fascinating combinations of melanocyte characteristics from different ancestral backgrounds.
+            - list [ref=e150]:
+              - listitem [ref=e151]: • Hybrid melanocyte function
+              - listitem [ref=e152]: • Unique response patterns
+              - listitem [ref=e153]: • Personalized care needs
+      - generic [ref=e155]:
+        - generic [ref=e157]:
+          - heading "Research Impact & Healthcare Implications" [level=2] [ref=e158]
+          - paragraph [ref=e159]: Our research is advancing dermatological science and improving healthcare outcomes for diverse populations worldwide.
+        - generic [ref=e160]:
+          - generic [ref=e162]:
+            - generic [ref=e163]:
+              - img [ref=e164]
+              - heading "Clinical Outcomes" [level=3] [ref=e167]
+            - paragraph [ref=e169]: 40% improvement in hyperpigmentation treatment outcomes using population-specific protocols.
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - img [ref=e173]
+              - heading "Scientific Publications" [level=3] [ref=e176]
+            - paragraph [ref=e178]: 15+ peer-reviewed publications advancing the field of melanocyte research and dermatology.
+          - generic [ref=e180]:
+            - generic [ref=e181]:
+              - img [ref=e182]
+              - heading "Community Impact" [level=3] [ref=e187]
+            - paragraph [ref=e189]: Over 10,000 participants in our research studies, contributing to inclusive dermatological science.
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - img [ref=e193]
+              - heading "Research Partnerships" [level=3] [ref=e200]
+            - paragraph [ref=e202]: Collaborations with 25+ leading dermatology research institutions worldwide.
+        - blockquote [ref=e203]:
+          - paragraph [ref=e204]: "\"This research represents a paradigm shift in how we approach skincare for diverse populations. The implications for clinical practice are profound.\""
+          - generic [ref=e205]: Dr. Maria Rodriguez•International Journal of Dermatology, 2024
+      - generic [ref=e207]:
+        - generic [ref=e208]:
+          - heading "Our Research Commitment" [level=2] [ref=e209]
+          - paragraph [ref=e210]: We're dedicated to advancing inclusive dermatological science through rigorous research, community engagement, and privacy-first data practices.
+        - generic [ref=e211]:
+          - generic [ref=e212]:
+            - generic [ref=e213]:
+              - img [ref=e214]
+              - heading "Scientific Rigor" [level=3] [ref=e221]
+            - paragraph [ref=e223]: Every formulation is backed by peer-reviewed research and clinical studies specifically focused on melanated skin.
+          - generic [ref=e224]:
+            - generic [ref=e225]:
+              - img [ref=e226]
+              - heading "Privacy First" [level=3] [ref=e228]
+            - paragraph [ref=e230]: Your data belongs to you. We use end-to-end encryption and never sell your personal information.
+          - generic [ref=e231]:
+            - generic [ref=e232]:
+              - img [ref=e233]
+              - heading "Inclusive Research" [level=3] [ref=e238]
+            - paragraph [ref=e240]: Our studies include diverse populations to ensure effective solutions for all skin tones and types.
+          - generic [ref=e241]:
+            - generic [ref=e242]:
+              - img [ref=e243]
+              - heading "Community Focused" [level=3] [ref=e245]
+            - paragraph [ref=e247]: We're building a community-driven approach to skincare research, not just another beauty brand.
+      - generic [ref=e250]:
+        - heading "Join Our Research Community" [level=2] [ref=e251]
+        - paragraph [ref=e252]: Your participation helps advance inclusive dermatological science. Join our secure research community and contribute to groundbreaking discoveries.
+        - generic [ref=e253]:
+          - button "Join Research Community" [ref=e254] [cursor=pointer]:
+            - img [ref=e255]
+            - text: Join Research Community
+          - button "Learn More About Research" [ref=e260] [cursor=pointer]:
+            - img [ref=e261]
+            - text: Learn More About Research
+  - contentinfo [ref=e265]:
+    - paragraph [ref=e267]: © 2024 NFE Portal. All rights reserved.
+  - alert [ref=e268]
+  - dialog "Cookie Consent" [ref=e269]:
+    - generic [ref=e270]:
+      - generic [ref=e271]:
+        - generic [ref=e272]:
+          - heading "Cookie Consent" [level=3] [ref=e273]
+          - paragraph [ref=e274]: We use cookies to improve your experience and analyze site usage. By clicking "Accept All", you consent to our use of cookies. You can manage your preferences at any time.
+        - generic [ref=e275]:
+          - button "Decline" [ref=e276] [cursor=pointer]
+          - button "Accept All" [ref=e277] [cursor=pointer]
+      - paragraph [ref=e279]:
+        - text: For more information, please read our
+        - link "Privacy Policy" [ref=e280] [cursor=pointer]:
+          - /url: /privacy
+        - text: and
+        - link "Cookie Policy" [ref=e281] [cursor=pointer]:
+          - /url: /cookies
+        - text: .
+```
