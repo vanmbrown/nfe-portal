@@ -61,11 +61,20 @@ declare global {
 function initializeGA4(): void {
   if (!config.measurementId || !config.consent) return;
 
-  // Load GA4 script
+  // Load GA4 script - defer to avoid blocking main thread
   const script = document.createElement('script');
   script.async = true;
+  script.defer = true; // Defer loading
   script.src = `https://www.googletagmanager.com/gtag/js?id=${config.measurementId}`;
-  document.head.appendChild(script);
+  
+  // Load after page is interactive
+  if (document.readyState === 'complete') {
+    document.head.appendChild(script);
+  } else {
+    window.addEventListener('load', () => {
+      document.head.appendChild(script);
+    }, { once: true });
+  }
 
   // Initialize gtag
   window.gtag = window.gtag || function() {

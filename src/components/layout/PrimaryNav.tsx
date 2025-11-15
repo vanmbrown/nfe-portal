@@ -1,11 +1,15 @@
 import Link from 'next/link'
 
-const navItems = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
-  { href: '/science', label: 'Science' },
-  { href: '/shop', label: 'Shop' },
-]
+  const navItems = [
+    { href: '/', label: 'Home' },
+    { href: '/our-story', label: 'Our Story' },
+    { href: '/articles', label: 'Articles' },
+    { href: '/products', label: 'Products' },
+    { href: '/science', label: 'Science' },
+    { href: '/inci', label: 'Ingredients' },
+    { href: '/shop', label: 'Shop' },
+    { href: '/focus-group/login', label: 'Focus Group', className: 'text-[#C6A664] hover:text-[#E7C686]' },
+  ]
 
 export default function PrimaryNav() {
   return (
@@ -15,7 +19,7 @@ export default function PrimaryNav() {
           <li key={item.href}>
             <Link
               href={item.href}
-              className="hover:text-nfe-gold focus:text-nfe-gold transition-colors duration-motion-base"
+              className={item.className || "hover:text-nfe-gold focus:text-nfe-gold transition-colors duration-motion-base"}
             >
               {item.label}
             </Link>

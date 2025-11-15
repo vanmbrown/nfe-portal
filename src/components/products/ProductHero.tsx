@@ -1,173 +1,119 @@
+'use client';
+
 import React from 'react';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Card, CardContent } from '@/components/ui/Card';
-import { ShoppingCart, Heart, Share, Star } from '@/components/ui/Icon';
-import { ProductData } from '@/content/products/face-elixir';
-import { cn } from '@/lib/utils';
 
 interface ProductHeroProps {
-  product: ProductData;
-  onAddToCart?: () => void;
-  onAddToWishlist?: () => void;
-  onShare?: () => void;
-  className?: string;
+  title: string;
+  shortDescription: string;
+  heroImage: string;
+  ctaLabel: string;
+  status: 'available' | 'coming_soon' | 'future_release';
+  onCtaClick: () => void;
 }
 
-export function ProductHero({ 
-  product, 
-  onAddToCart, 
-  onAddToWishlist, 
-  onShare,
-  className = '' 
+export function ProductHero({
+  title,
+  shortDescription,
+  heroImage,
+  ctaLabel,
+  status,
+  onCtaClick,
 }: ProductHeroProps) {
-  const mainImage = product.images[0];
+  const isDisabled = status === 'future_release';
+  const isAvailable = status === 'available';
+
+  const [imageError, setImageError] = React.useState(false);
 
   return (
-    <section className={cn('py-12 px-4', className)}>
-      <div className="max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Product Images */}
-          <div className="space-y-4">
-            <div className="aspect-square relative bg-nfe-paper rounded-lg overflow-hidden">
-              <Image
-                src={mainImage.src}
-                alt={mainImage.alt}
-                width={mainImage.width}
-                height={mainImage.height}
-                className="object-cover w-full h-full"
-                priority
-              />
-            </div>
-            
-            {/* Additional Images */}
-            {product.images.length > 1 && (
-              <div className="grid grid-cols-3 gap-4">
-                {product.images.slice(1).map((image, index) => (
-                  <div key={index} className="aspect-square relative bg-nfe-paper rounded-lg overflow-hidden">
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      width={image.width}
-                      height={image.height}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Product Info */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-4xl font-bold text-nfe-ink mb-2 font-primary">
-                {product.name}
-              </h1>
-              <p className="text-xl text-nfe-gold mb-4 font-medium">
-                {product.subtitle}
-              </p>
-              <p className="text-lg text-nfe-muted leading-relaxed">
-                {product.description}
-              </p>
-            </div>
-
-            {/* Price and Rating */}
-            <div className="flex items-center gap-6">
-              <div className="text-3xl font-bold text-nfe-ink">
-                ${product.price}
-                <span className="text-lg text-nfe-muted ml-1">{product.currency}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-nfe-gold fill-current" />
-                  ))}
-                </div>
-                <span className="text-sm text-nfe-muted">(4.8) • 127 reviews</span>
-              </div>
-            </div>
-
-            {/* Key Benefits */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-nfe-ink">Key Benefits:</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {product.benefits.slice(0, 4).map((benefit, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-nfe-gold rounded-full mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="font-medium text-nfe-ink">{benefit.title}</p>
-                      <p className="text-sm text-nfe-muted">{benefit.timeline}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Specifications */}
-            <Card variant="outline" className="p-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-nfe-muted">Volume:</span>
-                  <span className="ml-2 font-medium">{product.specifications.volume}</span>
-                </div>
-                <div>
-                  <span className="text-nfe-muted">Texture:</span>
-                  <span className="ml-2 font-medium">{product.specifications.texture}</span>
-                </div>
-                <div>
-                  <span className="text-nfe-muted">Scent:</span>
-                  <span className="ml-2 font-medium">{product.specifications.scent}</span>
-                </div>
-                <div>
-                  <span className="text-nfe-muted">Shelf Life:</span>
-                  <span className="ml-2 font-medium">{product.specifications.shelfLife}</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Action Buttons */}
-            <div className="space-y-4">
-              <div className="flex gap-4">
-                <Button 
-                  size="lg" 
-                  className="flex-1"
-                  onClick={onAddToCart}
-                >
-                  <ShoppingCart className="mr-2" />
-                  Add to Cart
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={onAddToWishlist}
-                >
-                  <Heart className="mr-2" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={onShare}
-                >
-                  <Share className="mr-2" />
-                </Button>
-              </div>
-              
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="text-nfe-green border-nfe-green">
-                  Free Shipping
-                </Badge>
-                <Badge variant="outline" className="text-nfe-green border-nfe-green">
-                  30-Day Returns
-                </Badge>
-                <Badge variant="outline" className="text-nfe-green border-nfe-green">
-                  Cruelty-Free
-                </Badge>
-              </div>
-            </div>
-          </div>
+    <section className="relative h-[45vh] bg-[#0F2C1C] flex flex-col items-center justify-center text-center text-white overflow-hidden">
+      {/* Logo - Always visible with fallback */}
+      <div className="mb-4 z-10" style={{ display: 'block', opacity: 1 }}>
+        {!imageError ? (
+            <Image
+              src="/images/products/1080_PNG_03.png"
+            alt="NFE Logo"
+            width={96}
+            height={96}
+            className="mx-auto w-20 h-20 md:w-24 md:h-24 opacity-90"
+              priority
+              placeholder="blur"
+              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMGYyYzFjIi8+PC9zdmc+"
+              sizes="(max-width: 768px) 80px, 96px"
+              onError={() => {
+                setImageError(true);
+              }}
+              style={{ 
+                display: 'block',
+              width: '80px',
+              height: 'auto',
+              maxWidth: '100%'
+            }}
+          />
+        ) : (
+          <Image
+            src="/images/products/1080_PNG_03.png"
+            alt="NFE Logo"
+            width={80}
+            height={80}
+            className="mx-auto opacity-90"
+            loading="eager"
+            placeholder="blur"
+            blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMGYyYzFjIi8+PC9zdmc+"
+            sizes="80px"
+            style={{
+              width: '80px',
+              height: 'auto',
+              maxWidth: '100%'
+              }}
+            />
+        )}
         </div>
+
+      {/* Title + Subtext */}
+      <h1 className="text-3xl md:text-4xl font-serif text-[#D4AF37] mb-2 z-10">
+          {title}
+        </h1>
+      <p className="text-sm md:text-base text-gray-200 mb-6 tracking-wide z-10">
+          {shortDescription}
+        </p>
+
+      {/* Button */}
+        <button
+          onClick={onCtaClick}
+          disabled={isDisabled}
+          className={`
+          border border-[#D4AF37] text-[#D4AF37] px-6 py-2 rounded-full hover:bg-[#D4AF37] hover:text-[#0F2C1C] transition z-10
+            ${
+              isAvailable
+                ? 'bg-[#D4AF37] text-[#0F2C1C] hover:bg-[#E7C686]'
+                : isDisabled
+              ? 'bg-[#D4AF37]/60 text-[#0F2C1C]/60 cursor-not-allowed border-[#D4AF37]/60'
+              : ''
+            }
+            focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 focus:ring-offset-[#0F2C1C]
+          `}
+          aria-label={ctaLabel}
+        >
+          {ctaLabel}
+        </button>
+
+      {/* Subtle logo watermark in background (optional) */}
+      <div
+        className="absolute inset-0 flex items-center justify-center opacity-5"
+        aria-hidden="true"
+      >
+        <Image
+          src="/images/products/1080_PNG_03.png"
+          alt=""
+          width={800}
+          height={800}
+          className="w-[50vh] md:w-[70vh] h-auto"
+          sizes="(max-width: 768px) 50vh, 70vh"
+          loading="lazy"
+          style={{ display: 'block' }}
+        />
       </div>
     </section>
   );

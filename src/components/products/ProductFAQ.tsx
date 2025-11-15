@@ -1,190 +1,65 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { ChevronDown, ChevronUp, Search, HelpCircle } from '@/components/ui/Icon';
-import { ProductData } from '@/content/products/face-elixir';
-import { cn } from '@/lib/utils';
+'use client';
 
-interface ProductFAQProps {
-  product: ProductData;
-  className?: string;
-}
+import React from 'react';
 
-export function ProductFAQ({ product, className = '' }: ProductFAQProps) {
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+const faq = [
+  {
+    q: "Can the Face Elixir replace my moisturizer?",
+    a: "Yes — for most skin types, the elixir provides sufficient hydration and barrier support. If your skin is very dry, layer beneath a lightweight cream."
+  },
+  {
+    q: "Is the formula safe for sensitive or acne-prone skin?",
+    a: "Yes. No added synthetic fragrance or harsh actives. Every ingredient serves a functional purpose to support balance — suitable even for reactive skin."
+  },
+  {
+    q: "Does the formula contain essential oils?",
+    a: "Yes, in trace amounts — Blue Tansy and Helichrysum essential oils for skin-calming and restorative benefits, not for scent. No synthetic fragrance added."
+  },
+  {
+    q: "Why is the elixir amber-colored?",
+    a: "The warm hue reflects concentrated botanicals and antioxidants — no dyes or colorants."
+  },
+  {
+    q: "Can I use this with sunscreen or retinol?",
+    a: "Yes. It layers beautifully under SPF and alongside retinoids to reduce dryness and maintain barrier integrity."
+  }
+];
 
-  // Filter FAQs based on search term
-  const filteredFAQs = product.faqs.filter(faq =>
-    faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const toggleFAQ = (index: number) => {
-    setOpenFAQ(openFAQ === index ? null : index);
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent, index: number) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      toggleFAQ(index);
-    }
-  };
-
+export function ProductFAQ() {
   return (
-    <section className={cn('py-12 px-4', className)}>
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-nfe-ink mb-4 font-primary">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-lg text-nfe-muted">
-            Everything you need to know about {product.name}
+    <section className="bg-[#FAF9F6] text-[#0F2C1C] py-16 px-4 md:px-6">
+      <h2 className="text-2xl md:text-3xl font-serif text-center mb-8 md:mb-12">FAQ — The Face Elixir</h2>
+      <div className="max-w-3xl mx-auto space-y-4">
+        {faq.map((item, i) => (
+          <details
+            key={i}
+            className="border border-neutral-300 rounded-xl p-4 md:p-6 hover:border-[#D4AF37]/50 transition-colors group"
+          >
+            <summary className="font-serif text-lg md:text-xl cursor-pointer list-none flex justify-between items-center min-h-[44px]">
+              <span className="pr-4">{item.q}</span>
+              <span className="text-[#D4AF37] text-xl font-light flex-shrink-0 group-open:hidden">+</span>
+              <span className="text-[#D4AF37] text-xl font-light flex-shrink-0 hidden group-open:inline">−</span>
+            </summary>
+            <p className="mt-4 text-sm md:text-base leading-relaxed text-[#0F2C1C]">
+              {item.a}
+            </p>
+          </details>
+        ))}
+      </div>
+
+      {/* Contact Support */}
+      <div className="max-w-3xl mx-auto mt-12 pt-8 border-t border-neutral-300">
+        <div className="text-center">
+          <p className="text-center text-sm md:text-base text-neutral-700 mb-6">
+            Still have questions? Our team is here to help you find the perfect NFE ritual.
           </p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative mb-8">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-nfe-muted" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search FAQs..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-nfe-muted rounded-lg focus:ring-2 focus:ring-nfe-gold focus:border-nfe-gold outline-none"
-          />
-        </div>
-
-        {/* FAQ Count */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <HelpCircle className="w-5 h-5 text-nfe-gold" />
-            <span className="text-nfe-muted">
-              {filteredFAQs.length} of {product.faqs.length} questions
-            </span>
-          </div>
-          {searchTerm && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSearchTerm('')}
+          <div className="flex justify-center">
+            <a
+              href="mailto:vanessa@nfebeauty.com?subject=NFE%20Support%20Request"
+              className="inline-flex items-center justify-center border border-[#0F2C1C] text-[#0F2C1C] px-6 py-2 rounded-full hover:bg-[#0F2C1C] hover:text-white transition font-medium min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#0F2C1C] focus:ring-offset-2"
             >
-              Clear Search
-            </Button>
-          )}
-        </div>
-
-        {/* FAQ List */}
-        <div className="space-y-4">
-          {filteredFAQs.length === 0 ? (
-            <Card variant="outline">
-              <CardContent className="p-8 text-center">
-                <Search className="w-12 h-12 text-nfe-muted mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-nfe-ink mb-2">
-                  No FAQs found
-                </h3>
-                <p className="text-nfe-muted">
-                  Try adjusting your search terms or browse all questions.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            filteredFAQs.map((faq, index) => (
-              <Card 
-                key={index} 
-                variant="outline"
-                className={cn(
-                  'transition-all duration-200',
-                  openFAQ === index && 'ring-2 ring-nfe-gold'
-                )}
-              >
-                <div
-                  className="cursor-pointer"
-                  onClick={() => toggleFAQ(index)}
-                  onKeyDown={(e) => handleKeyDown(e, index)}
-                  tabIndex={0}
-                  role="button"
-                  aria-expanded={openFAQ === index}
-                  aria-label={`Toggle FAQ: ${faq.question}`}
-                >
-                  <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg pr-4">
-                      {faq.question}
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      {openFAQ === index ? (
-                        <ChevronUp className="w-5 h-5 text-nfe-gold" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-nfe-muted" />
-                      )}
-                    </div>
-                  </div>
-                  </CardHeader>
-                </div>
-                
-                {openFAQ === index && (
-                  <CardContent className="pt-0">
-                    <div className="border-t border-nfe-muted/20 pt-4">
-                      <p className="text-nfe-muted leading-relaxed">
-                        {faq.answer}
-                      </p>
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
-            ))
-          )}
-        </div>
-
-        {/* Contact Support */}
-        <Card variant="featured" className="mt-8">
-          <CardContent className="p-6">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-nfe-ink mb-2">
-                Still have questions?
-              </h3>
-              <p className="text-nfe-muted mb-4">
-                Our skincare experts are here to help you find the perfect routine.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button variant="primary" size="lg">
-                  Contact Support
-                </Button>
-                <Button variant="outline" size="lg">
-                  Schedule Consultation
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Popular Topics */}
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold text-nfe-ink mb-4 text-center">
-            Popular Topics
-          </h3>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {[
-              'Skin Compatibility',
-              'Ingredient Safety',
-              'Usage Instructions',
-              'Expected Results',
-              'Storage & Shelf Life',
-              'Pregnancy Safety'
-            ].map((topic, index) => (
-              <Badge 
-                key={index} 
-                variant="outline" 
-                className="cursor-pointer hover:bg-nfe-gold hover:text-nfe-ink transition-colors"
-                onClick={() => setSearchTerm(topic.toLowerCase())}
-              >
-                {topic}
-              </Badge>
-            ))}
+              Contact Support
+            </a>
           </div>
         </div>
       </div>

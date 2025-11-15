@@ -1,0 +1,32 @@
+{
+  "products": [
+    {
+      "slug": "face-elixir",
+      "title": "Face Elixir",
+      "short_description": "Hydration + Barrier Support for Melanated Skin",
+      "status": "coming_soon",
+      "hero_image": "/images/products/NFE_face_elixir_30_50_proportions_fixed.png",
+      "seo_title": "Face Elixir | NFE Beauty — Hydration + Barrier Support for Melanated Skin",
+      "seo_description": "A luminous, restorative emulsion that hydrates, firms, and softens the look of uneven tone — formulated for mature, melanated skin.",
+      "related_product": "body-elixir"
+    },
+    {
+      "slug": "body-elixir",
+      "title": "Body Elixir",
+      "short_description": "Nourishing Body Care for Mature Melanated Skin",
+      "status": "future_release",
+      "hero_image": "/images/products/body-elixir-hero.png",
+      "seo_title": "Body Elixir | NFE Beauty — Nourishing Body Care for Mature Melanated Skin",
+      "seo_description": "A rich, restorative body emulsion that deeply hydrates, soothes, and supports the skin's natural barrier — designed specifically for mature, melanated skin.",
+      "related_product": "face-elixir"
+    }
+  ]
+}
+
+
+
+
+
+
+
+

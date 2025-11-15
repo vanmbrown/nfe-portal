@@ -1,0 +1,105 @@
+[
+  {
+    "name": "Niacinamide",
+    "category": "Barrier Repair / Tone",
+    "benefit": "Helps visibly even skin tone and strengthen the skin's natural barrier.",
+    "layer": "Epidermis"
+  },
+  {
+    "name": "Tranexamic Acid",
+    "category": "Tone Support",
+    "benefit": "Supports a more even-looking complexion by supporting the plasmin pathway.",
+    "layer": "Epidermis"
+  },
+  {
+    "name": "Alpha-Arbutin",
+    "category": "Tone Support",
+    "benefit": "Acts at the tyrosinase step to support a more uniform appearance.",
+    "layer": "Epidermis"
+  },
+  {
+    "name": "Kojic Dipalmitate",
+    "category": "Tone Support",
+    "benefit": "Oil-soluble kojic derivative that supports tone evenness and brightened appearance.",
+    "layer": "Epidermis"
+  },
+  {
+    "name": "THD Ascorbate",
+    "category": "Antioxidant / Brightening",
+    "benefit": "Stable vitamin C derivative that supports glow and firmness.",
+    "layer": "Dermis"
+  },
+  {
+    "name": "Bakuchiol",
+    "category": "Retinol Alternative",
+    "benefit": "Encourages collagen renewal with less irritation than retinol.",
+    "layer": "Dermis"
+  },
+  {
+    "name": "Hyaluronic Acid 4D",
+    "category": "Hydration",
+    "benefit": "Multi-weight hyaluronic acid that binds water at multiple skin layers for plump, comfortable skin.",
+    "layer": "Stratum Corneum"
+  },
+  {
+    "name": "Ceramides",
+    "category": "Barrier Support",
+    "benefit": "Replenishes the skin's natural lipid barrier to reduce water loss and improve resilience.",
+    "layer": "Stratum Corneum"
+  },
+  {
+    "name": "CoQ10",
+    "category": "Antioxidant",
+    "benefit": "Defends surface lipids from oxidative stress for a comforted, protected look.",
+    "layer": "Epidermis"
+  },
+  {
+    "name": "Panthenol",
+    "category": "Hydration / Barrier",
+    "benefit": "Humectant and conditioner that supports a comfortable, supple feel.",
+    "layer": "Stratum Corneum"
+  },
+  {
+    "name": "Gamma-PGA",
+    "category": "Hydration",
+    "benefit": "High-molecular-weight poly-γ-glutamate that supports lasting hydration and a smoother feel.",
+    "layer": "Stratum Corneum"
+  },
+  {
+    "name": "Licorice Root",
+    "category": "Tone / Calming",
+    "benefit": "Glabridin-rich botanical used for a calmer, more uniform look.",
+    "layer": "Epidermis"
+  },
+  {
+    "name": "Ectoin",
+    "category": "Hydration / Protection",
+    "benefit": "Extremolyte that helps stabilize water structures and supports comfort under heat, dryness, and pollution.",
+    "layer": "Epidermis"
+  },
+  {
+    "name": "GHK-Cu",
+    "category": "Peptide",
+    "benefit": "Copper peptide used for a smoother, more refined look over time.",
+    "layer": "Dermis"
+  },
+  {
+    "name": "Argireline",
+    "category": "Peptide",
+    "benefit": "Peptide targeting the look of expression lines for a smoother appearance around dynamic areas.",
+    "layer": "Epidermis"
+  },
+  {
+    "name": "Ferulic Acid",
+    "category": "Antioxidant",
+    "benefit": "Phenolic antioxidant that supports stability and complements vitamin antioxidants.",
+    "layer": "Epidermis"
+  },
+  {
+    "name": "Mixed Tocopherols",
+    "category": "Antioxidant",
+    "benefit": "Vitamin E antioxidants that defend surface lipids from oxidative stress.",
+    "layer": "Epidermis"
+  }
+]
+

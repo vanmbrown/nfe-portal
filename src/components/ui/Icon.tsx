@@ -42,5 +42,5 @@ export {
   Check, XCircle, AlertCircle, Info, Mail, Phone, MessageCircle, ShoppingCart, Star, Package,
   Eye, EyeOff, Volume2, VolumeX, Users, Shield, Loader2, BookOpen, Globe, Award,
   TrendingUp, ExternalLink, ArrowRight, CheckCircle, Clock, HelpCircle,
-  Droplets, Sun, Moon
+  Droplets, Sun, Moon, ZoomIn, ZoomOut, Move, Image as ImageIcon, Sparkles, Bug, Layers
 } from 'lucide-react';

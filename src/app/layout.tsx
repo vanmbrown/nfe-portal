@@ -1,14 +1,29 @@
 import type { Metadata } from 'next'
-import { EB_Garamond, Inter } from 'next/font/google'
+import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import '../styles/globals.scss'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { CookieConsent } from '@/components/shared/CookieConsent'
+import SkipLinkHandler from '@/components/shared/SkipLinkHandler'
+import { PageTransition } from '@/components/motion'
 
-const ebGaramond = EB_Garamond({ 
-  subsets: ['latin'],
+const nfeGaramond = localFont({
+  src: [
+    {
+      path: '../../public/fonts/garamondpremrpro.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/garamondpremrpro.woff',
+      weight: '400',
+      style: 'normal',
+    },
+  ],
   variable: '--font-primary',
   display: 'swap',
+  fallback: ['Georgia', 'serif'],
 })
 
 const inter = Inter({ 
@@ -18,6 +33,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://nfe-portal.vercel.app'),
   title: {
     template: '%s | NFE Portal',
     default: 'NFE Portal - Well Aging Through Science',
@@ -51,13 +67,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${ebGaramond.variable} ${inter.variable} font-ui`}>
+      <body className={`${nfeGaramond.variable} ${inter.variable} font-ui`}>
         <Header />
-        <main id="main-content" tabIndex={-1}>
-          {children}
-        </main>
+        <PageTransition>
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
+        </PageTransition>
         <Footer />
         <CookieConsent />
+        <SkipLinkHandler />
       </body>
     </html>
   )

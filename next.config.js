@@ -11,6 +11,19 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  // Optimize CSS
+  swcMinify: true,
+  // Compress responses
+  compress: true,
+  async redirects() {
+    return [
+      {
+        source: '/about',
+        destination: '/our-story',
+        permanent: false, // Set to true if this is a permanent redirect
+      },
+    ];
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {

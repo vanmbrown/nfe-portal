@@ -1,0 +1,91 @@
+{
+  "product": "NFE Face Elixir",
+  "ingredients": [
+    {
+      "inci": "Aqua (Water)",
+      "commonName": "Water",
+      "function": "Solvent",
+      "benefit": "Base solvent for all ingredients",
+      "percentageRange": "q.s.",
+      "phase": "Base (Aqueous)"
+    },
+    {
+      "inci": "Niacinamide",
+      "commonName": "Vitamin B3",
+      "function": "Skin Conditioning / Brightening",
+      "benefit": "Improves tone and texture, supports barrier",
+      "percentageRange": "2\u20135%",
+      "phase": "Actives & Antioxidants"
+    },
+    {
+      "inci": "Tranexamic Acid",
+      "commonName": "Tranexamic Acid",
+      "function": "Skin Conditioning / Brightening",
+      "benefit": "Supports more even-looking complexion",
+      "percentageRange": "3%",
+      "phase": "Actives & Antioxidants"
+    },
+    {
+      "inci": "Alpha-Arbutin",
+      "commonName": "Alpha-Arbutin",
+      "function": "Skin Conditioning / Brightening",
+      "benefit": "Supports tone uniformity",
+      "percentageRange": "2%",
+      "phase": "Actives & Antioxidants"
+    },
+    {
+      "inci": "Kojic Dipalmitate",
+      "commonName": "Kojic Dipalmitate",
+      "function": "Skin Conditioning / Brightening",
+      "benefit": "Supports tone evenness and radiance",
+      "percentageRange": "2%",
+      "phase": "Actives & Antioxidants"
+    },
+    {
+      "inci": "THD Ascorbate",
+      "commonName": "Vitamin C Ester",
+      "function": "Antioxidant / Brightening",
+      "benefit": "Firms, brightens, protects from oxidative stress",
+      "percentageRange": "5.21%",
+      "phase": "Actives & Antioxidants"
+    },
+    {
+      "inci": "Bakuchiol",
+      "commonName": "Bakuchiol",
+      "function": "Skin Conditioning",
+      "benefit": "Supports smoother look and bouncier feel",
+      "percentageRange": "0.5\u20131%",
+      "phase": "Actives & Antioxidants"
+    },
+    {
+      "inci": "Hyaluronic Acid",
+      "commonName": "HA 4D",
+      "function": "Humectant",
+      "benefit": "Multi-level hydration, plumps skin",
+      "percentageRange": "0.1\u20130.5%",
+      "phase": "Actives & Antioxidants"
+    },
+    {
+      "inci": "Ceramides",
+      "commonName": "Ceramides",
+      "function": "Skin Conditioning / Barrier Support",
+      "benefit": "Strengthens barrier, reduces water loss",
+      "percentageRange": "0.1\u20130.5%",
+      "phase": "Preservation & Stability"
+    },
+    {
+      "inci": "CoQ10",
+      "commonName": "Coenzyme Q10",
+      "function": "Antioxidant",
+      "benefit": "Defends against oxidative stress",
+      "percentageRange": "0.1\u20130.5%",
+      "phase": "Actives & Antioxidants"
+    }
+  ]
+}
+
+
+
+
+
+

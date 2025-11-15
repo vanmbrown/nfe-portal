@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Button } from './Button';
 
@@ -166,11 +167,15 @@ export function ProductCard({
       aria-label={`View ${title} product details`}
     >
       <CardHeader>
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-48 object-cover rounded-md mb-4"
-        />
+        <div className="relative w-full h-48 mb-4">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover rounded-md"
+            unoptimized
+          />
+        </div>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
@@ -212,11 +217,15 @@ export function ArticleCard({
       aria-label={`Read article: ${title}`}
     >
       <CardHeader>
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-48 object-cover rounded-md mb-4"
-        />
+        <div className="relative w-full h-48 mb-4">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover rounded-md"
+            unoptimized
+          />
+        </div>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>

@@ -12,10 +12,7 @@ export default function Header() {
       </a>
       <header role="banner" className="bg-nfe-green text-nfe-paper">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-xl font-primary font-bold">
-              NFE Portal
-            </Link>
+          <div className="flex items-center justify-end">
             <PrimaryNav />
           </div>
         </div>

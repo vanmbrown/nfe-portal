@@ -1,0 +1,17 @@
+{
+  "layers": {
+    "layers": [
+      { "name": "Epidermis", "roles": ["Barrier", "Melanin"] },
+      { "name": "Dermis", "roles": ["Collagen", "Elastin"] },
+      { "name": "Hypodermis", "roles": ["Fat", "Cushioning"] }
+    ]
+  },
+  "melanocytes": {
+    "regions": [
+      { "name": "Face", "notes": "Higher density regions" },
+      { "name": "Body", "notes": "Moderate density" },
+      { "name": "Extremities", "notes": "Variable density" }
+    ]
+  }
+}
+

@@ -1,0 +1,93 @@
+[
+  {
+    "inci": "Aqua (Water)",
+    "commonName": "Water",
+    "function": "Solvent",
+    "phase": "Base",
+    "benefit": "Base solvent for all ingredients",
+    "percentageRange": "q.s.",
+    "source": "NFE Face Elixir"
+  },
+  {
+    "inci": "Niacinamide",
+    "commonName": "Vitamin B3",
+    "function": "Skin Conditioning / Brightening",
+    "phase": "Active",
+    "benefit": "Improves tone and texture, supports barrier",
+    "percentageRange": "2–5%",
+    "source": "NFE Face Elixir"
+  },
+  {
+    "inci": "Tranexamic Acid",
+    "commonName": "Tranexamic Acid",
+    "function": "Skin Conditioning / Brightening",
+    "phase": "Active",
+    "benefit": "Supports more even-looking complexion",
+    "percentageRange": "3%",
+    "source": "NFE Face Elixir"
+  },
+  {
+    "inci": "Alpha-Arbutin",
+    "commonName": "Alpha-Arbutin",
+    "function": "Skin Conditioning / Brightening",
+    "phase": "Active",
+    "benefit": "Supports tone uniformity",
+    "percentageRange": "2%",
+    "source": "NFE Face Elixir"
+  },
+  {
+    "inci": "Kojic Dipalmitate",
+    "commonName": "Kojic Dipalmitate",
+    "function": "Skin Conditioning / Brightening",
+    "phase": "Active",
+    "benefit": "Supports tone evenness",
+    "percentageRange": "2%",
+    "source": "NFE Face Elixir"
+  },
+  {
+    "inci": "THD Ascorbate",
+    "commonName": "Vitamin C Ester",
+    "function": "Antioxidant / Brightening",
+    "phase": "Active",
+    "benefit": "Firms, brightens, protects from oxidative stress",
+    "percentageRange": "5.21%",
+    "source": "NFE Face Elixir"
+  },
+  {
+    "inci": "Bakuchiol",
+    "commonName": "Bakuchiol",
+    "function": "Skin Conditioning",
+    "phase": "Active",
+    "benefit": "Supports smoother look and bouncier feel",
+    "percentageRange": "0.5–1%",
+    "source": "NFE Face Elixir"
+  },
+  {
+    "inci": "Hyaluronic Acid",
+    "commonName": "HA 4D",
+    "function": "Humectant",
+    "phase": "Active",
+    "benefit": "Multi-level hydration, plumps skin",
+    "percentageRange": "0.1–0.5%",
+    "source": "NFE Face Elixir"
+  },
+  {
+    "inci": "Ceramides",
+    "commonName": "Ceramides",
+    "function": "Skin Conditioning / Barrier Support",
+    "phase": "Active",
+    "benefit": "Strengthens barrier, reduces water loss",
+    "percentageRange": "0.1–0.5%",
+    "source": "NFE Face Elixir"
+  },
+  {
+    "inci": "CoQ10",
+    "commonName": "Coenzyme Q10",
+    "function": "Antioxidant",
+    "phase": "Active",
+    "benefit": "Defends against oxidative stress",
+    "percentageRange": "0.1–0.5%",
+    "source": "NFE Face Elixir"
+  }
+]
+

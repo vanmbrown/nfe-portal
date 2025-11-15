@@ -1,0 +1,12 @@
+# Generated files
+src/types/supabase.ts
+
+# Dependencies
+node_modules
+.next
+out
+dist
+
+
+
+
