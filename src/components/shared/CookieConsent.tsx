@@ -82,9 +82,9 @@ export function CookieConsent({ onConsentChange }: CookieConsentProps) {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-1">
-            <h3 id="cookie-consent-title" className="font-semibold text-lg mb-2">
+            <h2 id="cookie-consent-title" className="font-semibold text-lg mb-2">
               Cookie Consent
-            </h3>
+            </h2>
             <p id="cookie-consent-description" className="text-sm text-nfe-paper mb-4 md:mb-0">
               We use cookies to improve your experience and analyze site usage. 
               By clicking &quot;Accept All&quot;, you consent to our use of cookies. 

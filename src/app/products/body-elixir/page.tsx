@@ -35,10 +35,12 @@ export default function BodyElixirPage() {
     <div className="min-h-screen">
       {/* Product Hero */}
       <ProductHero 
-        product={bodyElixirData}
-        onAddToCart={handleAddToCart}
-        onAddToWishlist={handleAddToWishlist}
-        onShare={handleShare}
+        title={bodyElixirData.name}
+        shortDescription={bodyElixirData.shortDescription}
+        heroImage={bodyElixirData.images?.[0]?.src || '/images/products/body-elixir-hero.jpg'}
+        ctaLabel="Coming Soon"
+        status="future_release"
+        onCtaClick={() => {/* TODO: Open waitlist modal */}}
       />
 
       {/* Ingredient List */}
@@ -51,7 +53,7 @@ export default function BodyElixirPage() {
       <UsageGuide product={bodyElixirData} />
 
       {/* FAQ */}
-      <ProductFAQ product={bodyElixirData} />
+      <ProductFAQ />
     </div>
   );
 }

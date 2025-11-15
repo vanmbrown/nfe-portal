@@ -1,0 +1,229 @@
+﻿{
+    "ingredients":  [
+                        {
+                            "inci":  "Aqua (Water)",
+                            "commonName":  "Water",
+                            "function":  "Solvent / Hydration Base",
+                            "benefit":  "Serves as the main solvent and hydration base for all ingredients.",
+                            "percentageRange":  "",
+                            "phase":  "Base"
+                        },
+                        {
+                            "inci":  "Rosa Damascena Flower Water",
+                            "commonName":  "Rose Hydrosol",
+                            "function":  "Aromatic Hydrosol / Humectant",
+                            "benefit":  "Provides gentle hydration and a light floral aroma.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Niacinamide",
+                            "commonName":  "Vitamin B3",
+                            "function":  "Skin Conditioning / Brightening",
+                            "benefit":  "Improves tone and texture, supports the skin barrier.",
+                            "percentageRange":  "2–5%",
+                            "phase":  "Active"
+                        },
+                        {
+                            "inci":  "Tranexamic Acid",
+                            "commonName":  "Tranexamic Acid",
+                            "function":  "Skin Conditioning / Brightening",
+                            "benefit":  "Reduces discoloration and inflammation for a more even tone.",
+                            "percentageRange":  "3%",
+                            "phase":  "Active"
+                        },
+                        {
+                            "inci":  "Alpha-Arbutin",
+                            "commonName":  "Alpha Arbutin",
+                            "function":  "Skin Conditioning / Brightening",
+                            "benefit":  "Visibly fades dark spots and hyperpigmentation.",
+                            "percentageRange":  "2%",
+                            "phase":  "Active"
+                        },
+                        {
+                            "inci":  "Kojic Dipalmitate",
+                            "commonName":  "Kojic Dipalmitate",
+                            "function":  "Skin Conditioning / Brightening",
+                            "benefit":  "Supports tone evenness and radiance.",
+                            "percentageRange":  "2%",
+                            "phase":  "Active"
+                        },
+                        {
+                            "inci":  "THD Ascorbate",
+                            "commonName":  "Vitamin C Ester",
+                            "function":  "Antioxidant / Brightening",
+                            "benefit":  "Firms, brightens, and protects from oxidative stress.",
+                            "percentageRange":  "5.21%",
+                            "phase":  "Active"
+                        },
+                        {
+                            "inci":  "Bakuchiol",
+                            "commonName":  "Bakuchiol",
+                            "function":  "Retinol Alternative / Skin Conditioning",
+                            "benefit":  "Supports smoother, firmer, and more youthful-looking skin.",
+                            "percentageRange":  "",
+                            "phase":  "Active"
+                        },
+                        {
+                            "inci":  "Ectoin",
+                            "commonName":  "Ectoin (powder)",
+                            "function":  "Cell Protection / Barrier Support",
+                            "benefit":  "Shields skin from environmental stress and helps maintain hydration.",
+                            "percentageRange":  "2%",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Coenzyme Q10",
+                            "commonName":  "CoQ10",
+                            "function":  "Antioxidant",
+                            "benefit":  "Protects against oxidative damage and supports skin firmness.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Ceramide NP (and) Ceramide AP (and) Ceramide EOP",
+                            "commonName":  "Ceramide Complex",
+                            "function":  "Barrier Repair / Skin Conditioning",
+                            "benefit":  "Strengthens the skin barrier and reduces water loss.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Hyaluronic Acid",
+                            "commonName":  "HA-4D",
+                            "function":  "Humectant / Hydration",
+                            "benefit":  "Provides multi-level hydration and plumps the skin.",
+                            "percentageRange":  "",
+                            "phase":  "Active"
+                        },
+                        {
+                            "inci":  "D-Panthenol",
+                            "commonName":  "Pro-Vitamin B5",
+                            "function":  "Humectant / Barrier Support",
+                            "benefit":  "Hydrates, calms, and strengthens the skin barrier.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Centella Asiatica Extract",
+                            "commonName":  "Centella (Cica) Extract",
+                            "function":  "Soothing / Barrier Repair",
+                            "benefit":  "Accelerates repair, soothes, and boosts collagen production.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Green Tea Extract",
+                            "commonName":  "Camellia Sinensis Extract",
+                            "function":  "Antioxidant / Soothing",
+                            "benefit":  "Provides antioxidant protection and soothes redness.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Rosemary Extract",
+                            "commonName":  "Rosmarinus Officinalis Extract",
+                            "function":  "Antioxidant / Stabilizer",
+                            "benefit":  "Offers antioxidant and antimicrobial support.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Argireline NP (Acetyl Hexapeptide-8)",
+                            "commonName":  "Argireline NP",
+                            "function":  "Peptide / Smoothing",
+                            "benefit":  "Reduces the appearance of expression lines.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Copper Tripeptide-1",
+                            "commonName":  "GHK-Cu",
+                            "function":  "Peptide / Repair",
+                            "benefit":  "Stimulates collagen and elastin synthesis.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Astaxanthin",
+                            "commonName":  "Astaxanthin (Antioxidant Carotenoid)",
+                            "function":  "Antioxidant",
+                            "benefit":  "Neutralizes oxygen radicals and supports photoprotection.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Bisabolol",
+                            "commonName":  "Bisabolol",
+                            "function":  "Soothing / Delivery Enhancer",
+                            "benefit":  "Calms redness and enhances active absorption.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Cacay Oil, Rosehip Oil, Tamanu Oil, Prickly Pear Seed Oil, Sea-Buckthorn Oil, Jojoba Oil, Sweet Almond Oil, Babassu Oil, Carrot Seed Oil, Cocoa Butter, Shea Butter",
+                            "commonName":  "Botanical Oils Blend",
+                            "function":  "Carrier Oils / Emollients",
+                            "benefit":  "Provide nourishment, support skin regeneration, and enhance glow.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Coco-Caprylate/Caprate, C12-15 Alkyl Benzoate, Neossance Squalane",
+                            "commonName":  "Emollients / Esters",
+                            "function":  "Texture and Skin Feel Enhancers",
+                            "benefit":  "Improve spreadability and deliver a lightweight finish.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Montanov 202, Sunflower Lecithin",
+                            "commonName":  "Emulsifiers",
+                            "function":  "Blend Oil and Water Phases",
+                            "benefit":  "Provide a stable, creamy emulsion while supporting barrier repair.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Propanediol, Glycerin, ?-PGA, Silk Amino Acids, Snow Mushroom Extract",
+                            "commonName":  "Hydration Network",
+                            "function":  "Humectants / Film-Formers",
+                            "benefit":  "Bind water, enhance smoothness, and lock in moisture.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Blue Tansy Oil, Helichrysum Oil, Berry CO2 Extract",
+                            "commonName":  "Aromatic \u0026 Botanical Actives",
+                            "function":  "Calming / Sensory / Antioxidant",
+                            "benefit":  "Soothe and provide aromatic and antioxidative support.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Optiphen Plus",
+                            "commonName":  "Optiphen Plus",
+                            "function":  "Preservative",
+                            "benefit":  "Broad-spectrum preservative that ensures safety and stability.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Hydrophobic Silica, Boron Nitride, Gold Mica",
+                            "commonName":  "Soft-Focus Complex",
+                            "function":  "Optical / Aesthetic Enhancers",
+                            "benefit":  "Provide a blurred, radiant, and soft-focus visual effect.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        },
+                        {
+                            "inci":  "Sodium Phytate, Citric Acid, Sodium Hydroxide",
+                            "commonName":  "Stabilizers / Chelators / pH Adjusters",
+                            "function":  "Stabilization / pH Balance",
+                            "benefit":  "Preserve stability and balance formulation pH.",
+                            "percentageRange":  "",
+                            "phase":  "Functional"
+                        }
+                    ],
+    "product":  "NFE Face Elixir"
+}

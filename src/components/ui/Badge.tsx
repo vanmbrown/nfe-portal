@@ -6,6 +6,7 @@ export interface BadgeProps {
   variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  style?: React.CSSProperties;
   'aria-label'?: string;
   onClick?: () => void;
 }
@@ -28,6 +29,7 @@ const sizeClasses = {
 export function Badge({
   children,
   variant = 'default',
+  style,
   size = 'md',
   className = '',
   'aria-label': ariaLabel,
@@ -41,6 +43,7 @@ export function Badge({
         sizeClasses[size],
         className
       )}
+      style={style}
       aria-label={ariaLabel}
       {...props}
     >

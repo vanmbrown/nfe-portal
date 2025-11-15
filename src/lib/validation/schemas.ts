@@ -132,11 +132,188 @@ export const searchQuerySchema = z.object({
 export type SearchQueryData = z.infer<typeof searchQuerySchema>;
 
 // Utility function to get field errors
-export function getFieldError(errors: any, fieldName: string): string | undefined {
+export function getFieldError(
+  errors: Record<string, Array<{ message?: string }>> | null | undefined,
+  fieldName: string
+): string | undefined {
   return errors?.[fieldName]?.[0]?.message;
 }
 
 // Utility function to check if form has errors
-export function hasFormErrors(errors: any): boolean {
+export function hasFormErrors(
+  errors: Record<string, unknown> | null | undefined
+): boolean {
   return Object.keys(errors || {}).length > 0;
 }
+
+// Focus Group Profile Schema
+export const profileSchema = z.object({
+  // Required foundational fields
+  age_range: z.enum(['18-25', '26-35', '36-45', '46-55', '56+'], {
+    required_error: 'Please select your age range',
+  }),
+  fitzpatrick_skin_tone: z
+    .number()
+    .min(1, 'Skin tone must be between 1 and 6')
+    .max(6, 'Skin tone must be between 1 and 6'),
+  top_concerns: z
+    .array(z.string())
+    .min(1, 'Please select at least one skin concern')
+    .max(8, 'Please select no more than 8 concerns'),
+  image_consent: z.boolean().refine((val) => val === true, {
+    message: 'You must consent to image usage to participate',
+  }),
+  
+  // Optional foundational fields
+  gender_identity: z.string().optional(),
+  ethnic_background: z.string().optional(),
+  skin_type: z.enum(['Dry', 'Oily', 'Combination', 'Normal', 'Sensitive']).optional(),
+  lifestyle: z.array(z.string()).optional(),
+  climate_exposure: z.string().optional(),
+  uv_exposure: z.string().optional(),
+  sleep_quality: z.string().optional(),
+  stress_level: z.string().optional(),
+  
+  // Routine & ritual fields (all optional)
+  current_routine: z.string().optional(),
+  routine_frequency: z.string().optional(),
+  known_sensitivities: z.string().optional(),
+  product_use_history: z.string().optional(),
+  ideal_routine: z.string().optional(),
+  ideal_product: z.string().optional(),
+  routine_placement_insight: z.string().optional(),
+  
+  // Financial commitment fields (all optional)
+  avg_spend_per_item: z.number().min(0).optional(),
+  annual_skincare_spend: z.number().min(0).optional(),
+  max_spend_motivation: z.string().optional(),
+  value_stickiness: z.string().optional(),
+  pricing_threshold_proof: z.string().optional(),
+  category_premium_insight: z.string().optional(),
+  
+  // Problem validation fields (all optional)
+  unmet_need: z.string().optional(),
+  money_spent_trying: z.string().optional(),
+  performance_expectation: z.string().optional(),
+  drop_off_reason: z.string().optional(),
+  
+  // Language & identity fields (all optional)
+  elixir_association: z.string().optional(),
+  elixir_ideal_user: z.string().optional(),
+  favorite_brand: z.string().optional(),
+  favorite_brand_reason: z.string().optional(),
+  
+  // Pain point & ingredient fields (all optional)
+  specific_pain_point: z.string().optional(),
+  ingredient_awareness: z.string().optional(),
+  
+  // Influence & advocacy fields (all optional)
+  research_effort_score: z.number().min(1).max(10).optional(),
+  influence_count: z.number().min(0).optional(),
+  brand_switch_influence: z.boolean().optional(),
+  
+  // Consent fields
+  marketing_consent: z.boolean().optional(),
+  data_use_consent: z.boolean().optional(),
+});
+
+export type ProfileData = z.infer<typeof profileSchema>;
+
+// Focus Group Feedback Schema
+export const feedbackSchema = z.object({
+  week_number: z
+    .number()
+    .min(1, 'Week number must be at least 1')
+    .max(52, 'Week number cannot exceed 52'),
+  hydration_rating: z
+    .number()
+    .min(1, 'Rating must be between 1 and 5')
+    .max(5, 'Rating must be between 1 and 5'),
+  tone_rating: z
+    .number()
+    .min(1, 'Rating must be between 1 and 5')
+    .max(5, 'Rating must be between 1 and 5'),
+  texture_rating: z
+    .number()
+    .min(1, 'Rating must be between 1 and 5')
+    .max(5, 'Rating must be between 1 and 5'),
+  overall_rating: z
+    .number()
+    .min(1, 'Rating must be between 1 and 5')
+    .max(5, 'Rating must be between 1 and 5'),
+  notes: z.string().max(2000, 'Notes cannot exceed 2000 characters').optional(),
+});
+
+export type FeedbackData = z.infer<typeof feedbackSchema>;
+
+// Login Schema
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address'),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .max(100, 'Password is too long'),
+});
+
+export type LoginData = z.infer<typeof loginSchema>;
+
+// Register Schema
+export const registerSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, 'Email is required')
+      .email('Please enter a valid email address'),
+    password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters')
+      .max(100, 'Password is too long')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+      ),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+export type RegisterData = z.infer<typeof registerSchema>;
+
+// Focus Group Feedback Schema
+export const focusGroupFeedbackSchema = z.object({
+  week_number: z
+    .number()
+    .min(1, 'Week number must be at least 1')
+    .max(52, 'Week number cannot exceed 52'),
+  product_usage: z.string().max(1000, 'Product usage description is too long').optional(),
+  perceived_changes: z.string().max(2000, 'Perceived changes description is too long').optional(),
+  concerns_or_issues: z.string().max(2000, 'Concerns description is too long').optional(),
+  emotional_response: z.string().max(2000, 'Emotional response description is too long').optional(),
+  overall_rating: z
+    .number()
+    .min(1, 'Rating must be between 1 and 10')
+    .max(10, 'Rating must be between 1 and 10')
+    .optional(),
+  next_week_focus: z.string().max(1000, 'Next week focus description is too long').optional(),
+});
+
+export type FocusGroupFeedbackData = z.infer<typeof focusGroupFeedbackSchema>;
+
+// Focus Group Upload Schema
+export const focusGroupUploadSchema = z.object({
+  week_number: z
+    .number()
+    .min(1, 'Week number must be at least 1')
+    .max(52, 'Week number cannot exceed 52'),
+  notes: z.string().max(1000, 'Notes are too long').optional(),
+  consent_given: z.boolean().refine((val) => val === true, {
+    message: 'You must consent to image usage',
+  }),
+});
+
+export type FocusGroupUploadData = z.infer<typeof focusGroupUploadSchema>;

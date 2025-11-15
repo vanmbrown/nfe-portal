@@ -1,186 +1,95 @@
 # Page snapshot
 
 ```yaml
-- generic [ref=e1]:
+- generic [active] [ref=e1]:
   - link "Skip to main content" [ref=e2]:
     - /url: "#main-content"
   - banner [ref=e3]:
-    - generic [ref=e5]:
-      - link "NFE Portal" [ref=e6]:
-        - /url: /
-      - navigation "Main navigation" [ref=e7]:
-        - list [ref=e8]:
-          - listitem [ref=e9]:
-            - link "Home" [ref=e10]:
-              - /url: /
-          - listitem [ref=e11]:
-            - link "About" [ref=e12]:
-              - /url: /about
-          - listitem [ref=e13]:
-            - link "Science" [ref=e14]:
-              - /url: /science
-          - listitem [ref=e15]:
-            - link "Shop" [ref=e16]:
-              - /url: /shop
-  - main [ref=e17]:
-    - generic [ref=e18]:
-      - generic [ref=e22]:
-        - heading "Understanding Melanocyte Diversity" [level=1] [ref=e23]
-        - paragraph [ref=e24]: Science-backed skincare for melanated skin through barrier-first approach. Join our research community to advance inclusive dermatological science.
-        - generic [ref=e25]:
-          - button "Explore the Science" [ref=e26] [cursor=pointer]:
-            - img [ref=e27]
-            - text: Explore the Science
-          - button "Join Focus Group" [active] [ref=e31] [cursor=pointer]:
-            - img [ref=e32]
-            - text: Join Focus Group
-      - generic [ref=e38]:
+    - navigation "Main navigation" [ref=e6]:
+      - list [ref=e7]:
+        - listitem [ref=e8]:
+          - link "Home" [ref=e9]:
+            - /url: /
+        - listitem [ref=e10]:
+          - link "Our Story" [ref=e11]:
+            - /url: /our-story
+        - listitem [ref=e12]:
+          - link "Articles" [ref=e13]:
+            - /url: /articles
+        - listitem [ref=e14]:
+          - link "Products" [ref=e15]:
+            - /url: /products
+        - listitem [ref=e16]:
+          - link "Science" [ref=e17]:
+            - /url: /science
+        - listitem [ref=e18]:
+          - link "Ingredients" [ref=e19]:
+            - /url: /inci
+        - listitem [ref=e20]:
+          - link "Shop" [ref=e21]:
+            - /url: /shop
+        - listitem [ref=e22]:
+          - link "Focus Group" [ref=e23]:
+            - /url: /focus-group/login
+  - main [ref=e25]:
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - heading "NFE— Not For Everyone" [level=1] [ref=e28]:
+          - text: NFE—
+          - text: Not For Everyone
+        - paragraph [ref=e29]:
+          - text: Minimalist, science-led elixirs for mature melanated skin.
+          - text: Designed to restore balance, radiance, and comfort—every day.
+        - button "Shop the Elixirs" [ref=e30] [cursor=pointer]
+      - img "Vanessa — NFE founder portrait" [ref=e32]
+    - generic [ref=e34]:
+      - heading "Made for Me. Shared with You." [level=2] [ref=e35]
+      - paragraph [ref=e36]: When I couldn't find a moisturizer that truly nourished my dry, mature, melanated skin, I made one. Years later, NFE is my daily ritual — a minimalist, science-led elixir that hydrates deeply, evens tone, and restores the skin's natural resilience.
+    - generic [ref=e37]:
+      - heading "The NFE Ritual" [level=2] [ref=e38]
+      - generic [ref=e39]:
         - generic [ref=e40]:
-          - heading "Not For Everyone" [level=2] [ref=e41]
-          - paragraph [ref=e42]: Our quiet luxury approach focuses on evidence-led formulations specifically designed for melanated skin needs.
-        - generic [ref=e43]:
-          - generic [ref=e46]:
-            - img [ref=e47]
-            - heading "Science-First" [level=3] [ref=e49]
-            - paragraph [ref=e50]: Every ingredient is backed by peer-reviewed research and clinical studies.
-          - generic [ref=e53]:
-            - img [ref=e54]
-            - heading "Barrier-First" [level=3] [ref=e56]
-            - paragraph [ref=e57]: We prioritize skin barrier health to prevent inflammation and hyperpigmentation.
-          - generic [ref=e60]:
-            - img [ref=e61]
-            - heading "Inclusive Research" [level=3] [ref=e63]
-            - paragraph [ref=e64]: Our studies include diverse populations to ensure effective solutions for all skin tones.
-      - generic [ref=e66]:
-        - generic [ref=e68]:
-          - heading "Our Formulations" [level=2] [ref=e69]
-          - paragraph [ref=e70]: Carefully crafted products that address the unique needs of melanated skin.
-        - generic [ref=e71]:
-          - generic [ref=e75]:
-            - generic [ref=e76]:
-              - 'generic "Category: Face Care" [ref=e77]': Face Care
-              - generic [ref=e78]: New
-            - heading "Face Elixir" [level=3] [ref=e79]
-            - paragraph [ref=e80]: THD Ascorbate + Bakuchiol + Peptides. A potent, barrier-first serum designed specifically for melanated skin.
-            - generic [ref=e81]:
-              - generic [ref=e82]:
-                - img [ref=e83]
-                - generic [ref=e85]: 15% THD Ascorbate (stable vitamin C)
-              - generic [ref=e86]:
-                - img [ref=e87]
-                - generic [ref=e89]: 1% Bakuchiol (retinol alternative)
-              - generic [ref=e90]:
-                - img [ref=e91]
-                - generic [ref=e93]: Copper peptides for skin repair
-            - generic [ref=e94]:
-              - generic [ref=e95]: $89
-              - button "Learn More" [ref=e96] [cursor=pointer]
-          - generic [ref=e100]:
-            - generic [ref=e101]:
-              - 'generic "Category: Body Care" [ref=e102]': Body Care
-              - generic [ref=e103]: Best Seller
-            - heading "Body Elixir" [level=3] [ref=e104]
-            - paragraph [ref=e105]: Ceramide Complex + Botanical Oils. A luxurious body serum featuring cacay oil and blue tansy for comprehensive nourishment.
-            - generic [ref=e106]:
-              - generic [ref=e107]:
-                - img [ref=e108]
-                - generic [ref=e110]: Ceramide complex for barrier repair
-              - generic [ref=e111]:
-                - img [ref=e112]
-                - generic [ref=e114]: Cacay oil (non-comedogenic)
-              - generic [ref=e115]:
-                - img [ref=e116]
-                - generic [ref=e118]: Blue tansy for anti-inflammatory benefits
-            - generic [ref=e119]:
-              - generic [ref=e120]: $79
-              - button "Learn More" [ref=e121] [cursor=pointer]
-      - generic [ref=e123]:
-        - generic [ref=e125]:
-          - heading "Interactive Science Layer" [level=2] [ref=e126]
-          - paragraph [ref=e127]: Explore the science behind melanocyte diversity and skin barrier function through our interactive research tools.
-        - generic [ref=e128]:
-          - generic [ref=e130]:
-            - generic [ref=e131]:
-              - heading "Skin Layers Map" [level=3] [ref=e132]:
-                - img [ref=e133]
-                - text: Skin Layers Map
-              - paragraph [ref=e137]: Interactive visualization of skin layer interactions with active ingredients.
-            - region "Skin Layers Interactive Map" [ref=e139]:
-              - heading "Skin Layers Interactive Map" [level=2] [ref=e140]
-              - paragraph [ref=e141]: Explore the different layers of human skin and their characteristics.
-              - generic [ref=e142]:
-                - paragraph [ref=e143]: Interactive map will be loaded here (dynamic import with ssr:false)
-                - list [ref=e144]:
-                  - listitem [ref=e145]: Epidermis Layer
-                  - listitem [ref=e146]: Dermis Layer
-                  - listitem [ref=e147]: Subcutaneous Layer
-          - generic [ref=e149]:
-            - generic [ref=e150]:
-              - heading "Melanocyte Map" [level=3] [ref=e151]:
-                - img [ref=e152]
-                - text: Melanocyte Map
-              - paragraph [ref=e164]: Educational tool showing melanocyte distribution and function across populations.
-            - region "Melanocyte Distribution Map" [ref=e166]:
-              - heading "Melanocyte Distribution Map" [level=2] [ref=e167]
-              - paragraph [ref=e168]: Visualize melanocyte distribution patterns across different skin regions.
-              - generic [ref=e169]:
-                - paragraph [ref=e170]: Interactive map will be loaded here (dynamic import with ssr:false)
-                - list [ref=e171]:
-                  - listitem [ref=e172]: Facial Melanocytes
-                  - listitem [ref=e173]: Body Melanocytes
-                  - listitem [ref=e174]: Extremity Melanocytes
-      - generic [ref=e177]:
-        - heading "Join Our Research Community" [level=2] [ref=e178]
-        - paragraph [ref=e179]: Your skin, your data, your privacy. Participate in secure, private research that advances inclusive dermatological science.
-        - generic [ref=e180]:
-          - button "Join Research Community" [ref=e181] [cursor=pointer]:
-            - img [ref=e182]
-            - text: Join Research Community
-          - button "Learn More" [ref=e187] [cursor=pointer]
-      - generic [ref=e189]:
-        - generic [ref=e191]:
-          - heading "Stay Connected" [level=2] [ref=e192]
-          - paragraph [ref=e193]: Join our community for updates, exclusive content, and research insights.
-        - generic [ref=e198]:
-          - generic [ref=e199]:
-            - heading "Join Our Research Community" [level=3] [ref=e200]
-            - paragraph [ref=e201]: Get updates on our latest research, product launches, and exclusive content.
-          - generic [ref=e202]:
-            - generic [ref=e203]:
-              - text: First Name
-              - textbox "First Name" [ref=e204]:
-                - /placeholder: Enter your first name
-            - generic [ref=e205]:
-              - text: Email Address
-              - textbox "Email Address" [ref=e206]:
-                - /placeholder: Enter your email
-          - generic [ref=e207]:
-            - checkbox "I agree to receive marketing communications from NFE Beauty. You can unsubscribe at any time.Privacy Policy" [ref=e208]
-            - generic [ref=e209] [cursor=pointer]:
-              - text: I agree to receive marketing communications from NFE Beauty. You can unsubscribe at any time.
-              - link "Privacy Policy" [ref=e210]:
-                - /url: /privacy
-          - button "Subscribe" [ref=e211] [cursor=pointer]:
-            - img
-            - text: Subscribe
-  - contentinfo [ref=e214]:
-    - paragraph [ref=e216]: © 2024 NFE Portal. All rights reserved.
-  - alert [ref=e217]
-  - dialog "Cookie Consent" [ref=e218]:
-    - generic [ref=e219]:
-      - generic [ref=e220]:
-        - generic [ref=e221]:
-          - heading "Cookie Consent" [level=3] [ref=e222]
-          - paragraph [ref=e223]: We use cookies to improve your experience and analyze site usage. By clicking "Accept All", you consent to our use of cookies. You can manage your preferences at any time.
-        - generic [ref=e224]:
-          - button "Decline" [ref=e225] [cursor=pointer]
-          - button "Accept All" [ref=e226] [cursor=pointer]
-      - paragraph [ref=e228]:
+          - img "NFE Face Elixir" [ref=e42]
+          - heading "Face Elixir" [level=3] [ref=e43]
+          - paragraph [ref=e44]: A luminous, restorative emulsion that hydrates, firms, and softens the look of uneven tone — formulated for mature, melanated skin.
+          - generic [ref=e45]: Waitlist Open
+          - link "Discover More →" [ref=e46]:
+            - /url: /products/face-elixir
+        - generic [ref=e47]:
+          - generic [ref=e50]: Body Elixir
+          - heading "Body Elixir" [level=3] [ref=e51]
+          - paragraph [ref=e52]: A rich yet fast-absorbing elixir that restores suppleness and glow to dry, crepey skin — your daily ritual for head-to-toe hydration.
+          - generic [ref=e53]: In Development
+          - button "Body Elixir coming soon" [disabled] [ref=e54]: Coming Soon
+    - generic [ref=e55]:
+      - heading "The Science of Nourishment" [level=2] [ref=e56]
+      - paragraph [ref=e57]: Powered by clinically proven actives like Niacinamide, Bakuchiol, THD Ascorbate, and Ceramides — each ingredient is intentionally chosen to hydrate, firm, and balance melanated skin.
+      - link "Explore Ingredients" [ref=e58]:
+        - /url: /inci
+        - button "Explore Ingredients" [ref=e59] [cursor=pointer]
+    - generic [ref=e60]:
+      - link "Focus Group Portal" [ref=e62]:
+        - /url: /focus-group/login
+      - paragraph [ref=e63]: © 2025 NFE Beauty. All rights reserved.
+      - paragraph [ref=e64]: Beautiful skin is layered care. NFE is the nourish & restore layer.
+  - contentinfo [ref=e65]:
+    - paragraph [ref=e67]: © 2024 NFE Portal. All rights reserved.
+  - alert [ref=e68]
+  - dialog "Cookie Consent" [ref=e69]:
+    - generic [ref=e70]:
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - heading "Cookie Consent" [level=2] [ref=e73]
+          - paragraph [ref=e74]: We use cookies to improve your experience and analyze site usage. By clicking "Accept All", you consent to our use of cookies. You can manage your preferences at any time.
+        - generic [ref=e75]:
+          - button "Decline" [ref=e76] [cursor=pointer]
+          - button "Accept All" [ref=e77] [cursor=pointer]
+      - paragraph [ref=e79]:
         - text: For more information, please read our
-        - link "Privacy Policy" [ref=e229]:
+        - link "Privacy Policy" [ref=e80]:
           - /url: /privacy
         - text: and
-        - link "Cookie Policy" [ref=e230]:
+        - link "Cookie Policy" [ref=e81]:
           - /url: /cookies
         - text: .
 ```

@@ -1,7 +1,22 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FadeIn, ScrollReveal, StaggerList } from '@/components/motion';
+import dynamic from 'next/dynamic';
+
+// Lazy load motion components - they use framer-motion which is heavy
+// Add loading placeholders to prevent CLS (Cumulative Layout Shift)
+const FadeIn = dynamic(() => import('@/components/motion').then(mod => mod.FadeIn), {
+  ssr: false,
+  loading: () => <div style={{ minHeight: '1px' }} aria-hidden="true" />, // Prevent CLS
+});
+const ScrollReveal = dynamic(() => import('@/components/motion').then(mod => mod.ScrollReveal), {
+  ssr: false,
+  loading: () => <div style={{ minHeight: '1px' }} aria-hidden="true" />, // Prevent CLS
+});
+const StaggerList = dynamic(() => import('@/components/motion').then(mod => mod.StaggerList), {
+  ssr: false,
+  loading: () => <div style={{ minHeight: '1px' }} aria-hidden="true" />, // Prevent CLS
+});
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
