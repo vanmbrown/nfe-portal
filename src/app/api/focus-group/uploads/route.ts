@@ -1,5 +1,5 @@
-import { NextRequest } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase as createServerSupabaseClient } from '@/lib/supabase/server';
 import { focusGroupUploadSchema } from '@/lib/validation/schemas';
 import { calculateWeekNumber } from '@/lib/focus-group/week-calculation';
 import { uploadToSupabaseStorage, getSignedUrl } from '@/lib/storage/supabase-storage';
@@ -11,25 +11,29 @@ import type { Database } from '@/types/supabase';
  * Handle file upload to Supabase Storage
  */
 export async function POST(req: NextRequest) {
+  // Pass request to createServerSupabaseClient so it can read cookies and Authorization header
+  const supabase = await createServerSupabaseClient(req);
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
   try {
-    const supabase = await createServerSupabase(req);
-
-    // Get authenticated user (uses Authorization header)
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return ApiErrors.unauthorized();
-    }
 
     // Get user's profile
     const { data: profile } = await supabase
       .from('profiles')
-      .select('created_at')
+      .select('id, created_at')
       .eq('user_id', user.id)
       .maybeSingle();
+
+    if (!profile) {
+      return ApiErrors.notFound('User profile not found');
+    }
 
     // Parse form data
     const formData = await req.formData();
@@ -67,26 +71,23 @@ export async function POST(req: NextRequest) {
     }
 
     // Upload files and create records
-    type ImageRow = Database['public']['Tables']['images']['Row'];
-    const uploadResults: ImageRow[] = [];
+    type UploadRow = Database['public']['Tables']['focus_group_uploads']['Row'];
+    const uploadResults: UploadRow[] = [];
 
     for (const file of files) {
       try {
-        // Upload to Supabase Storage
-        const imageUrl = await uploadToSupabaseStorage(supabase, file, user.id, weekNumber);
+        // Upload to Supabase Storage (using profile.id instead of user.id)
+        const imageUrl = await uploadToSupabaseStorage(supabase, file, profile.id, weekNumber);
 
-        // Create database record - using 'images' table from schema
+        // Create database record - using 'focus_group_uploads' table
         const { data: uploadRecord, error: insertError } = await supabase
-          .from('images')
+          .from('focus_group_uploads')
           .insert({
-            user_id: user.id,
-            type: 'during', // Default to 'during' for progress images
-            filename: file.name,
-            url: imageUrl,
-            mime_type: file.type,
-            size: file.size,
-            image_consent: consentGiven,
-            marketing_consent: consentGiven,
+            profile_id: profile.id,
+            week_number: weekNumber,
+            image_url: imageUrl,
+            notes: notes || null,
+            consent_given: consentGiven,
           })
           .select()
           .single();
@@ -122,24 +123,34 @@ export async function POST(req: NextRequest) {
  * Retrieve user's upload history
  */
 export async function GET(req: NextRequest) {
+  // Pass request to createServerSupabaseClient so it can read cookies and Authorization header
+  const supabase = await createServerSupabaseClient(req);
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
   try {
-    const supabase = await createServerSupabase(req);
+    // Get user's profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-    // Get authenticated user (uses Authorization header)
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return ApiErrors.unauthorized();
+    if (!profile) {
+      return ApiErrors.notFound('User profile not found');
     }
 
-    // Get upload history - using 'images' table from schema
+    // Get upload history - using 'focus_group_uploads' table
     const { data: uploads, error: fetchError } = await supabase
-      .from('images')
+      .from('focus_group_uploads')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('profile_id', profile.id)
       .order('created_at', { ascending: false });
 
     if (fetchError) {
@@ -151,8 +162,8 @@ export async function GET(req: NextRequest) {
     const uploadsWithSignedUrls = await Promise.all(
       (uploads || []).map(async (upload: unknown) => {
         try {
-          const uploadRecord = upload as { url?: string; [key: string]: unknown };
-          const url = uploadRecord.url;
+          const uploadRecord = upload as { image_url?: string; [key: string]: unknown };
+          const url = uploadRecord.image_url;
           if (!url || typeof url !== 'string') {
             return uploadRecord;
           }
@@ -160,16 +171,14 @@ export async function GET(req: NextRequest) {
           return {
             ...uploadRecord,
             signed_url: signedUrl,
-            image_url: url, // Add alias for compatibility
           };
         } catch (error) {
           console.error('Error generating signed URL:', error);
-          const uploadRecord = upload as { url?: string; [key: string]: unknown };
-          const url = uploadRecord.url || '';
+          const uploadRecord = upload as { image_url?: string; [key: string]: unknown };
+          const url = uploadRecord.image_url || '';
           return {
             ...uploadRecord,
             signed_url: url, // Fallback to original URL
-            image_url: url, // Add alias for compatibility
           };
         }
       })

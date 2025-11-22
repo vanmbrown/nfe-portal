@@ -33,7 +33,7 @@ export default function LoginPage() {
       } = await supabase.auth.getSession();
 
       if (session) {
-        // Check if user has profile
+        // Check if user has profile and its status
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -43,8 +43,12 @@ export default function LoginPage() {
 
         if (!profile) {
           router.push('/focus-group/profile');
-        } else {
+        } else if (profile.status === 'profile_complete' || profile.status === 'week_active' || profile.status === 'study_complete') {
+          // Profile is complete - redirect to feedback
           router.push('/focus-group/feedback');
+        } else {
+          // Profile exists but not complete - redirect to profile page
+          router.push('/focus-group/profile');
         }
       } else {
         setCheckingSession(false);

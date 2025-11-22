@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createClientSupabase } from '@/lib/supabase/client';
 import { profileSchema, type ProfileData } from '@/lib/validation/schemas';
+import { useProfileData } from '@/app/focus-group/profile/hooks/useProfileData';
+import { useFocusGroup } from '@/app/focus-group/context/FocusGroupContext';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -134,9 +136,13 @@ function CollapsibleSection({
 
 export default function ProfileForm() {
   const router = useRouter();
+  const pathname = usePathname();
+  const { profile: existingProfile, saveProfile, autoSave, isSaving, error: profileError } = useProfileData();
+  const { refreshProfile } = useFocusGroup();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showSavedToast, setShowSavedToast] = useState(false);
   
   // Collapsible section states
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -157,7 +163,7 @@ export default function ProfileForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     setValue,
     watch,
   } = useForm<ProfileData>({
@@ -173,37 +179,77 @@ export default function ProfileForm() {
 
   const topConcerns = watch('top_concerns') || [];
   const lifestyle = watch('lifestyle') || [];
+  
+  // Track if we've loaded the profile to prevent re-loading
+  const profileLoadedRef = useRef<string | null>(null);
 
-  // Load existing profile if editing
+  // Load existing profile if editing - use hook data
   useEffect(() => {
-    const loadProfile = async () => {
-      const supabase = createClientSupabase();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    if (existingProfile && profileLoadedRef.current !== existingProfile.id) {
+      profileLoadedRef.current = existingProfile.id;
+      setIsEditing(true);
+      
+      // Set all form values from profile
+      Object.keys(existingProfile).forEach((key) => {
+        if (existingProfile[key as keyof typeof existingProfile] !== null) {
+          setValue(key as any, existingProfile[key as keyof typeof existingProfile], { shouldDirty: false });
+        }
+      });
+    }
+  }, [existingProfile, setValue]);
 
-      if (!user) return;
+  // Note: Redirect logic is handled by FocusGroupClientLayout to prevent loops
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        // @ts-ignore - Supabase type inference limitation with user_id filter
-        .eq('user_id', user.id)
-        .maybeSingle();
+  // Auto-save on form changes (debounced) - only for editing existing profiles
+  // Use a ref to track if we're already saving to prevent loops
+  const isAutoSavingRef = useRef(false);
+  const authFailedRef = useRef(false); // Track if auth has failed to prevent repeated attempts
+  
+  useEffect(() => {
+    // Don't auto-save if auth has failed
+    if (authFailedRef.current) {
+      return;
+    }
+    
+    if (!isEditing || !isDirty || !existingProfile || isAutoSavingRef.current || isSaving) {
+      return;
+    }
 
-      if (profile && !profileError) {
-        setIsEditing(true);
-        // Set all form values from profile
-        Object.keys(profile).forEach((key) => {
-          if (profile[key as keyof typeof profile] !== null) {
-            setValue(key as any, profile[key as keyof typeof profile]);
-          }
-        });
+    // Debounce auto-save to avoid too many saves
+    const timeoutId = setTimeout(() => {
+      if (isAutoSavingRef.current || isSaving || authFailedRef.current) {
+        return; // Don't save if already saving or auth failed
       }
-    };
+      
+      isAutoSavingRef.current = true;
+      const formValues = watch();
+      autoSave(formValues as Partial<ProfileData>)
+        .then(() => {
+          setShowSavedToast(true);
+          setTimeout(() => setShowSavedToast(false), 3000);
+          authFailedRef.current = false; // Reset on success
+        })
+        .catch((err) => {
+          // Check if it's an auth error
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          if (errorMessage.includes('not authenticated') || errorMessage.includes('Auth session')) {
+            authFailedRef.current = true; // Stop auto-save on auth failure
+            console.warn('Auto-save disabled due to authentication error. Please refresh the page.');
+          } else {
+            // Other errors - log but don't disable auto-save
+            console.error('Auto-save error:', err);
+          }
+        })
+        .finally(() => {
+          isAutoSavingRef.current = false;
+        });
+    }, 2000); // 2 second debounce
 
-    loadProfile();
-  }, [setValue]);
+    return () => {
+      clearTimeout(timeoutId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, isDirty, existingProfile, autoSave, isSaving]);
 
   const toggleConcern = (concern: SkinConcern) => {
     const current = topConcerns;
@@ -226,37 +272,44 @@ export default function ProfileForm() {
     setError(null);
 
     try {
+      const result = await saveProfile(data);
+      
+      // Refresh context to get updated profile status
+      await refreshProfile();
+      
+      // Get updated profile to check if it's now complete
       const supabase = createClientSupabase();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        setError('You must be logged in to save your profile.');
-        setLoading(false);
-        return;
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: updatedProfile } = await supabase
+          .from('profiles')
+          .select('status')
+          .eq('user_id', user.id)
+          .single();
+        
+        const isComplete = updatedProfile?.status === 'profile_complete' || 
+                           updatedProfile?.status === 'week_active' || 
+                           updatedProfile?.status === 'study_complete';
+        
+        if (isComplete) {
+          // Profile is complete - redirect to feedback immediately
+          router.replace('/focus-group/feedback');
+          return;
+        }
       }
-
-      const profileData = {
-        user_id: user.id,
-        ...data,
-        updated_at: new Date().toISOString(),
-      };
-
-      // Use UPSERT to handle both insert and update cases
-      // This prevents duplicate key errors if a profile already exists
-      const { error: upsertError } = await supabase
-        .from('profiles')
-        .upsert(profileData, {
-          onConflict: 'user_id',
-          ignoreDuplicates: false,
-        });
-
-      if (upsertError) throw upsertError;
-
-      router.push('/focus-group/feedback');
-      router.refresh();
+      
+      if (result?.wasFirstSave) {
+        console.log("Redirecting to summary...");
+        router.replace('/focus-group/profile/summary');
+        return;
+      } else {
+        // For subsequent saves that don't complete profile, show toast and stay on page
+        setShowSavedToast(true);
+        setTimeout(() => setShowSavedToast(false), 3000);
+      }
     } catch (err: unknown) {
+      console.error('Error in onSubmit:', err);
       const message = err instanceof Error ? err.message : 'Failed to save profile. Please try again.';
       setError(message);
     } finally {
@@ -266,9 +319,32 @@ export default function ProfileForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl mx-auto">
-      {error && (
+      {/* Show saved toast */}
+      {showSavedToast && (
+        <div className="fixed top-20 right-4 z-[9999] animate-in slide-in-from-top-5">
+          <div className="p-4 bg-green-50 border-2 border-green-300 rounded-md text-green-800 shadow-xl font-semibold">
+            ✓ Changes saved successfully!
+          </div>
+        </div>
+      )}
+
+      {(error || profileError) && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-700">
-          {error}
+          {error || profileError}
+        </div>
+      )}
+
+      {/* Show validation errors */}
+      {Object.keys(errors).length > 0 && (
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-700">
+          <p className="font-semibold mb-2">Please fix the following errors:</p>
+          <ul className="list-disc list-inside space-y-1">
+            {Object.entries(errors).map(([key, error]) => (
+              <li key={key}>
+                {key}: {error?.message || 'Invalid value'}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -970,8 +1046,8 @@ export default function ProfileForm() {
       </CollapsibleSection>
 
       <div className="flex gap-4 pt-4">
-        <Button type="submit" variant="primary" disabled={loading} className="flex-1">
-          {loading ? 'Saving...' : isEditing ? 'Update Profile' : 'Save Profile'}
+        <Button type="submit" variant="primary" disabled={loading || isSaving} className="flex-1">
+          {(loading || isSaving) ? 'Saving...' : isEditing ? 'Update Profile' : 'Save Profile'}
         </Button>
         {isEditing && (
           <Button

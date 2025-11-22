@@ -1,20 +1,50 @@
 'use client';
 
-import React from 'react';
-import UploadForm from '@/components/focus-group/UploadForm';
-import UploadGallery from '@/components/focus-group/UploadGallery';
-import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useFocusGroup } from '../context/FocusGroupContext';
+import WeekSelector from '../components/WeekSelector';
+import { useUploads } from './hooks/useUploads';
+import UploadPanel from './components/UploadPanel';
+import { Button } from '@/components/ui/Button';
 
 export default function UploadPage() {
-  const handleSuccess = () => {
-    // Gallery will reload automatically via useEffect
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { currentWeek } = useFocusGroup();
+  const { uploads, isLoading, listUploads, uploadFiles, error } = useUploads();
+  const [week, setWeek] = useState<number>(1);
+
+  // Determine week from query string or context
+  useEffect(() => {
+    const weekParam = searchParams.get('week');
+    if (weekParam) {
+      const weekNum = parseInt(weekParam, 10);
+      if (!isNaN(weekNum) && weekNum > 0) {
+        setWeek(weekNum);
+      }
+    } else if (currentWeek) {
+      setWeek(currentWeek);
+    }
+  }, [searchParams, currentWeek]);
+
+  // Load existing uploads for the week
+  useEffect(() => {
+    if (week > 0) {
+      listUploads(week);
+    }
+  }, [week, listUploads]);
+
+  // Handle file upload
+  const handleUpload = async (files: File[]) => {
+    await uploadFiles(files, week);
   };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="mb-6">
         <h1 className="text-3xl font-primary font-bold text-[#0E2A22] mb-2">
-          Upload Progress Images
+          Upload Week {week} Photos
         </h1>
         <p className="text-gray-600">
           Upload photos showing your progress. We recommend taking photos from the front, left,
@@ -22,26 +52,34 @@ export default function UploadPage() {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Upload Form */}
-        <div>
-          <UploadForm onSuccess={handleSuccess} />
-        </div>
+      {/* Week Selector */}
+      <WeekSelector currentWeek={week} basePath="/focus-group/upload" />
 
-        {/* Upload Gallery */}
-        <div>
-          <UploadGallery />
-        </div>
-      </div>
+      {/* Upload Panel */}
+      <UploadPanel
+        week={week}
+        onUpload={handleUpload}
+        existingUploads={uploads}
+        isLoading={isLoading}
+        error={error}
+      />
 
-      {/* Navigation Link */}
-      <div className="mt-8 text-center">
-        <Link
-          href="/focus-group/feedback"
-          className="text-[#C9A66B] hover:text-[#E7C686] transition-colors text-sm underline"
+      {/* Navigation Buttons */}
+      <div className="mt-8 flex flex-col sm:flex-row gap-4">
+        <Button
+          onClick={() => router.push(`/focus-group/feedback?week=${week}`)}
+          variant="outline"
+          className="flex-1"
         >
-          ← Submit weekly feedback
-        </Link>
+          Back to Week {week} Feedback
+        </Button>
+        <Button
+          onClick={() => router.push('/focus-group/profile/summary')}
+          variant="outline"
+          className="flex-1"
+        >
+          Back to Summary
+        </Button>
       </div>
     </div>
   );

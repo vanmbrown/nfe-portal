@@ -23,9 +23,13 @@ export default function NFEHomePage() {
 		  Minimalist, science-led elixirs for mature melanated skin.<br />
 		  Designed to restore balance, radiance, and comfort—every day.
 		</p>
-		<Button className="bg-[#D6B370] text-[#1B3A34] px-8 py-3 text-lg rounded-2xl hover:bg-[#E3C58E] transition">
+		<Link
+		  href="/shop"
+		  className="bg-[#D6B370] text-[#1B3A34] px-8 py-3 text-lg rounded-2xl hover:bg-[#E3C58E] transition text-center inline-flex items-center justify-center"
+		  aria-label="Shop the NFE Face and Body Elixirs"
+		>
 		  Shop the Elixirs
-		</Button>
+		</Link>
 	  </div>
 
 	  {/* Right: Full-height hero image */}

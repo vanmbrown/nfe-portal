@@ -32,16 +32,32 @@ try {
   )
 }
 
+// Singleton client instance to prevent multiple GoTrueClient instances
+let supabaseClient: ReturnType<typeof createClient<Database>> | null = null;
+
 export const createClientSupabase = () => {
-  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  // Return existing client if available (client-side only)
+  if (typeof window !== 'undefined' && supabaseClient) {
+    return supabaseClient;
+  }
+
+  // Create new client with proper storage configuration
+  const client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
       flowType: 'pkce',
-      // redirectTo is not a valid option in Supabase client config
-      // Use it in signIn/signUp methods instead
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      storageKey: 'nfe-portal-supabase-auth', // Shared storage key to prevent multiple instances
     },
-  })
+  });
+
+  // Cache client for client-side
+  if (typeof window !== 'undefined') {
+    supabaseClient = client;
+  }
+
+  return client;
 }
 

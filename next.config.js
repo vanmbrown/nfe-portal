@@ -13,8 +13,8 @@ const nextConfig = {
   },
   // Optimize CSS
   swcMinify: true,
-  // Compress responses
-  compress: true,
+  // Compress responses - temporarily disabled to debug CSS loading
+  compress: false,
   async redirects() {
     return [
       {

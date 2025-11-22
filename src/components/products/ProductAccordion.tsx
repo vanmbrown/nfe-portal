@@ -11,11 +11,22 @@ interface ProductAccordionProps {
   ingredients: string; // HTML string
   textureScentExperience?: string; // HTML string - optional, will be combined with details
   faq?: Array<{ q: string; a: string }>; // FAQ items - optional
+  faqContent?: React.ReactNode; // Custom FAQ markup - optional
 }
 
 type AccordionSection = 'details' | 'benefits' | 'usage' | 'ingredients' | 'faq';
 
-export function ProductAccordion({ details, benefits, usage, ingredients, textureScentExperience, faq }: ProductAccordionProps) {
+type SectionContent = string | React.ReactNode;
+
+export function ProductAccordion({
+  details,
+  benefits,
+  usage,
+  ingredients,
+  textureScentExperience,
+  faq,
+  faqContent,
+}: ProductAccordionProps) {
   const [openSection, setOpenSection] = useState<AccordionSection | null>(null);
 
   const toggleSection = (section: AccordionSection) => {
@@ -59,7 +70,7 @@ export function ProductAccordion({ details, benefits, usage, ingredients, textur
   const sections: {
     id: AccordionSection;
     title: string;
-    content: string;
+    content: SectionContent;
   }[] = [
     {
       id: 'details',
@@ -81,17 +92,19 @@ export function ProductAccordion({ details, benefits, usage, ingredients, textur
       title: 'Ingredients',
       content: ingredients,
     },
-    ...(faq && faq.length > 0 ? [{
-      id: 'faq' as AccordionSection,
-      title: 'FAQ — The Face Elixir',
-      content: formatFAQ(faq),
-    }] : []),
+    ...((faqContent || (faq && faq.length > 0))
+      ? [{
+          id: 'faq' as AccordionSection,
+          title: 'FAQ — The Face Elixir',
+          content: faqContent ?? formatFAQ(faq),
+        }]
+      : []),
   ];
 
   return (
     <section className="bg-[#FAF9F6] text-[#0F2C1C] py-16 px-4 md:px-6">
       <div className="max-w-3xl mx-auto">
-        {sections.map((section, index) => {
+        {sections.map((section) => {
           const isOpen = openSection === section.id;
 
           return (
@@ -144,8 +157,13 @@ export function ProductAccordion({ details, benefits, usage, ingredients, textur
                         [&_span.text-\\[\\#D4AF37\\]]:text-[#D4AF37] [&_span.mr-3]:mr-3
                         [&_details]:border [&_details]:border-neutral-300 [&_details]:rounded-xl [&_details]:p-4 [&_details]:md:p-6
                         [&_details]:hover:border-[\\#D4AF37]/50 [&_details]:transition-colors [&_details]:group [&_details]:mb-4`}
-                      dangerouslySetInnerHTML={{ __html: sanitizeHTML(section.content) }}
-                    />
+                    >
+                      {typeof section.content === 'string' ? (
+                        <div dangerouslySetInnerHTML={{ __html: sanitizeHTML(section.content) }} />
+                      ) : (
+                        section.content
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

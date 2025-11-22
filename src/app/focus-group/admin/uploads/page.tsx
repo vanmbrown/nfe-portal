@@ -38,7 +38,7 @@ export default function AdminUploadsPage() {
         const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
 
         if (userError || !currentUser) {
-          router.push('/focus-group/login');
+          router.push('/login');
           return;
         }
 

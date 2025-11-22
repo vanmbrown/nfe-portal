@@ -11,6 +11,7 @@ interface ProductHeroProps {
   ctaLabel: string;
   status: 'available' | 'coming_soon' | 'future_release';
   onCtaClick: () => void;
+  ctaSlot?: React.ReactNode;
 }
 
 export function ProductHero({
@@ -20,6 +21,7 @@ export function ProductHero({
   ctaLabel,
   status,
   onCtaClick,
+  ctaSlot,
 }: ProductHeroProps) {
   const isDisabled = status === 'future_release';
   const isAvailable = status === 'available';
@@ -80,24 +82,28 @@ export function ProductHero({
         </p>
 
       {/* Button */}
-        <button
-          onClick={onCtaClick}
-          disabled={isDisabled}
-          className={`
-          border border-[#D4AF37] text-[#D4AF37] px-6 py-2 rounded-full hover:bg-[#D4AF37] hover:text-[#0F2C1C] transition z-10
-            ${
-              isAvailable
-                ? 'bg-[#D4AF37] text-[#0F2C1C] hover:bg-[#E7C686]'
-                : isDisabled
-              ? 'bg-[#D4AF37]/60 text-[#0F2C1C]/60 cursor-not-allowed border-[#D4AF37]/60'
-              : ''
-            }
-            focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 focus:ring-offset-[#0F2C1C]
-          `}
-          aria-label={ctaLabel}
-        >
-          {ctaLabel}
-        </button>
+      <div className="z-10">
+        {ctaSlot ?? (
+          <button
+            onClick={onCtaClick}
+            disabled={isDisabled}
+            className={`
+              border border-[#D4AF37] text-[#D4AF37] px-6 py-2 rounded-full hover:bg-[#D4AF37] hover:text-[#0F2C1C] transition
+              ${
+                isAvailable
+                  ? 'bg-[#D4AF37] text-[#0F2C1C] hover:bg-[#E7C686]'
+                  : isDisabled
+                  ? 'bg-[#D4AF37]/60 text-[#0F2C1C]/60 cursor-not-allowed border-[#D4AF37]/60'
+                  : ''
+              }
+              focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 focus:ring-offset-[#0F2C1C]
+            `}
+            aria-label={ctaLabel}
+          >
+            {ctaLabel}
+          </button>
+        )}
+      </div>
 
       {/* Subtle logo watermark in background (optional) */}
       <div

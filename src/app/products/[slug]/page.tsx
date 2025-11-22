@@ -1,10 +1,5 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { ProductHero } from '@/components/products/ProductHero';
-import { ProductTabs } from '@/components/products/ProductTabs';
-import { ProductExperience } from '@/components/products/ProductExperience';
-import { RitualPairing } from '@/components/products/RitualPairing';
-import { WaitlistModal } from '@/components/products/WaitlistModal';
 import { ProductPageClient } from './ProductPageClient';
 import type { Product } from '@/types/products';
 import fs from 'fs';

@@ -2,87 +2,100 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useFocusGroup } from '../context/FocusGroupContext';
 import { createClientSupabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
+import ParticipantTable from './components/ParticipantTable';
+import FeedbackTable from './components/FeedbackTable';
+import MessageManagement from './components/MessageManagement';
+import { Card, CardContent } from '@/components/ui/Card';
 
-interface Profile {
-  id: string;
-  user_id: string;
-  age_range: string | null;
-  top_concerns: string[] | null;
-  created_at: string;
-  is_admin?: boolean;
-  email?: string | null;
-}
-
-interface Feedback {
-  id: string;
-  user_id: string;
-  week_number: number;
-  hydration_rating: number;
-  tone_rating: number;
-  texture_rating: number;
-  overall_rating: number;
-  notes: string | null;
-  created_at: string;
-}
-
-interface ProfileWithFeedback extends Profile {
-  totalFeedback: number;
-  latestRating: number | null;
-  lastSubmitted: string;
-  email: string | null;
-}
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+type FeedbackRow = Database['public']['Tables']['focus_group_feedback']['Row'];
+type UploadRow = Database['public']['Tables']['focus_group_uploads']['Row'];
 
 export default function FocusGroupAdmin() {
   const router = useRouter();
+  const { isAdmin: contextIsAdmin, isLoading: isContextLoading } = useFocusGroup();
   const [user, setUser] = useState<User | null>(null);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [feedback, setFeedback] = useState<Feedback[]>([]);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
+  const [profiles, setProfiles] = useState<ProfileRow[]>([]);
+  const [feedback, setFeedback] = useState<FeedbackRow[]>([]);
+  const [uploads, setUploads] = useState<UploadRow[]>([]);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'messages' | 'feedback' | 'uploads'>('overview');
 
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Start with context admin status (from server-side layout)
+        // This is more reliable than client-side checks which can fail due to CORS
+        let confirmedIsAdmin = contextIsAdmin;
+        
         const supabase = createClientSupabase();
 
-        // Get current user
+        // Get current user (auth already verified by server-side layout)
         const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
 
         if (userError || !currentUser) {
-          router.push('/focus-group/login');
-          return;
+          console.error('[Admin Page] Auth error:', userError);
+          // If context says we're admin, trust it even if client-side auth fails
+          if (contextIsAdmin) {
+            confirmedIsAdmin = true;
+            // Continue loading data even if client-side auth fails
+          } else {
+            setError('Failed to load user');
+            setIsAdmin(false);
+            setCheckingAdmin(false);
+            setLoading(false);
+            return;
+          }
+        } else {
+          setUser(currentUser);
+
+          // Directly check admin status from database (more reliable than context)
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+
+          if (profileError) {
+            console.error('[Admin Page] Profile fetch error:', profileError);
+            // Trust context if database query fails
+            confirmedIsAdmin = contextIsAdmin;
+          } else {
+            const directIsAdmin = profileData?.is_admin === true;
+            confirmedIsAdmin = directIsAdmin || contextIsAdmin;
+            console.log('[Admin Page] Admin Check:', {
+              is_admin: profileData?.is_admin,
+              directIsAdmin,
+              contextIsAdmin,
+              finalIsAdmin: confirmedIsAdmin
+            });
+          }
         }
 
-        setUser(currentUser);
+        // Set admin status
+        setIsAdmin(confirmedIsAdmin);
+        setCheckingAdmin(false);
 
-        // Check if user is admin
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          // @ts-ignore - Supabase type inference limitation with user_id filter
-          .eq('user_id', currentUser.id)
-          .maybeSingle();
-
-        if (profileError) {
-          console.error('Error checking admin status:', profileError);
-          setError('Failed to verify admin access');
+        // Only load admin data if we're confirmed as admin
+        if (!confirmedIsAdmin) {
+          console.log('[Admin Page] Not admin, skipping data load');
           setLoading(false);
           return;
         }
 
-        if (!profile || !('is_admin' in profile) || !profile.is_admin) {
-          // Not an admin, redirect to home
-          router.push('/focus-group/feedback');
-          return;
-        }
-
-        // Load all participant profiles
+        // Load all participant profiles (including status and current_week)
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, user_id, age_range, top_concerns, created_at')
+          .select('*')
           .order('created_at', { ascending: false });
 
         if (profilesError) {
@@ -92,10 +105,10 @@ export default function FocusGroupAdmin() {
           return;
         }
 
-        // Load all feedback entries
+        // Load all feedback entries from focus_group_feedback table
         const { data: feedbackData, error: feedbackError } = await supabase
-          .from('feedback')
-          .select('id, user_id, week, hydration_rating, tone_rating, texture_rating, overall_rating, notes, created_at')
+          .from('focus_group_feedback')
+          .select('*')
           .order('created_at', { ascending: false });
 
         if (feedbackError) {
@@ -105,23 +118,43 @@ export default function FocusGroupAdmin() {
           return;
         }
 
-        // Note: Email retrieval requires server-side admin access
-        // For now, we'll show user_id. To show emails, either:
-        // 1. Store email in profiles table when creating profile
-        // 2. Create a server-side API route with admin access
-        // For now, profiles don't have email field, so we'll show user_id
-        const profilesWithEmails = (profilesData || []).map((profile) => ({
-          ...profile,
-          email: null, // Email not available in profiles table
-        }));
+        // Load all uploads from focus_group_uploads table
+        const { data: uploadsData, error: uploadsError } = await supabase
+          .from('focus_group_uploads')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-        setProfiles(profilesWithEmails as unknown as Profile[]);
-        setFeedback(
-          (feedbackData || []).map((f) => ({
-            ...f,
-            week_number: f.week,
-          })) as unknown as Feedback[]
-        );
+        if (uploadsError) {
+          console.error('Error loading uploads:', uploadsError);
+          // Don't fail completely if uploads fail
+        }
+
+        setProfiles((profilesData || []) as ProfileRow[]);
+        setFeedback((feedbackData || []) as FeedbackRow[]);
+        setUploads((uploadsData || []) as UploadRow[]);
+
+        // Load unread message counts for each participant
+        const participantUserIds = (profilesData || [])
+          .filter((p) => !p.is_admin)
+          .map((p) => p.user_id);
+
+        const counts: Record<string, number> = {};
+        if (participantUserIds.length > 0) {
+          const { data: messagesData } = await supabase
+            .from('focus_group_messages')
+            .select('recipient_id')
+            .in('recipient_id', participantUserIds)
+            .eq('sender_role', 'admin')
+            .eq('is_read', false);
+
+          if (messagesData) {
+            messagesData.forEach((msg) => {
+              const userId = msg.recipient_id;
+              counts[userId] = (counts[userId] || 0) + 1;
+            });
+          }
+        }
+        setUnreadCounts(counts);
         setLoading(false);
       } catch (err) {
         console.error('Unexpected error:', err);
@@ -131,13 +164,41 @@ export default function FocusGroupAdmin() {
     };
 
     loadData();
-  }, [router]);
+  }, [router, contextIsAdmin]);
 
-  if (loading) {
+  if (loading || isContextLoading || checkingAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-[#0F2C1C] text-lg">Loading dashboard...</p>
+          <p className="text-xs text-gray-500 mt-2">Checking admin status...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    console.log('[Admin Page] Access Denied - isAdmin is false', { isAdmin, checkingAdmin, contextIsAdmin });
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F6F5F3]">
+        <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md w-full mx-4">
+          <h1 className="text-2xl font-primary font-bold text-red-800 mb-4">Access Denied</h1>
+          <p className="text-gray-600 mb-4">
+            You do not have administrative privileges to access this dashboard.
+          </p>
+          <div className="text-xs text-left bg-gray-100 p-3 rounded mb-4">
+            <p><strong>Debug Info:</strong></p>
+            <p>isAdmin: {String(isAdmin)}</p>
+            <p>checkingAdmin: {String(checkingAdmin)}</p>
+            <p>contextIsAdmin: {String(contextIsAdmin)}</p>
+            <p className="mt-2 text-blue-600">Check browser console for detailed logs</p>
+          </div>
+          <Link
+            href="/focus-group/feedback"
+            className="inline-block w-full px-6 py-3 bg-[#0E2A22] text-white rounded-lg hover:bg-[#1a4d3d] transition-colors font-medium"
+          >
+            Return to Feedback
+          </Link>
         </div>
       </div>
     );
@@ -159,173 +220,170 @@ export default function FocusGroupAdmin() {
     );
   }
 
-  // Merge feedback summary into profiles for easy viewing
-  const profilesWithFeedback: ProfileWithFeedback[] = profiles.map((p) => {
-    const userFeedback = feedback.filter((f) => f.user_id === p.user_id);
-    const latestFeedback = userFeedback[0];
-    const avgRating = userFeedback.length > 0
-      ? userFeedback.reduce((sum, f) => sum + f.overall_rating, 0) / userFeedback.length
-      : null;
+  // Calculate statistics
+  const participantProfiles = profiles; // Show all profiles including admins
+  const totalParticipants = participantProfiles.length;
+  const totalFeedbackEntries = feedback.length;
+  const totalUploads = uploads.length;
+  const avgSatisfaction =
+    feedback.length > 0
+      ? (
+          feedback.reduce((acc, f) => acc + (f.overall_rating || 0), 0) / feedback.length
+        ).toFixed(1)
+      : '0.0';
 
-    return {
-      ...p,
-      totalFeedback: userFeedback.length,
-      latestRating: latestFeedback?.overall_rating || null,
-      lastSubmitted: latestFeedback?.created_at
-        ? new Date(latestFeedback.created_at).toLocaleDateString()
-        : 'No submissions yet',
-      email: p.email || null,
-    };
+  // Calculate feedback and upload counts per user
+  const feedbackCounts: Record<string, number> = {};
+  feedback.forEach((f) => {
+    // Get user_id from profile_id
+    const profile = profiles.find((p) => p.id === f.profile_id);
+    if (profile) {
+      feedbackCounts[profile.user_id] = (feedbackCounts[profile.user_id] || 0) + 1;
+    }
   });
 
-  // Calculate summary statistics
-  const totalParticipants = profiles.length;
-  const totalFeedbackEntries = feedback.length;
-  const avgSatisfaction = feedback.length > 0
-    ? (feedback.reduce((acc, f) => acc + f.overall_rating, 0) / feedback.length).toFixed(1)
-    : '0.0';
+  const uploadCounts: Record<string, number> = {};
+  uploads.forEach((u) => {
+    // Get user_id from profile_id
+    const profile = profiles.find((p) => p.id === u.profile_id);
+    if (profile) {
+      uploadCounts[profile.user_id] = (uploadCounts[profile.user_id] || 0) + 1;
+    }
+  });
+
+
+  const tabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'participants', label: 'Participants' },
+    { id: 'messages', label: 'Messages' },
+    { id: 'feedback', label: 'Feedback' },
+    { id: 'uploads', label: 'Uploads' },
+  ] as const;
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 md:px-6">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-serif font-semibold text-[#0F2C1C] mb-2">
-              Focus Group Admin Dashboard
-            </h1>
-            <p className="text-[#0F2C1C] text-base md:text-lg">
-              Welcome, {user?.email}. You have administrative access.
-            </p>
+        <h1 className="text-3xl md:text-4xl font-semibold text-[#0E2A22] mb-2">
+          Focus Group Admin Dashboard
+        </h1>
+        <p className="text-gray-600">
+          Welcome, {user?.email}. Manage participants, view feedback, and communicate with users.
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="flex space-x-8" aria-label="Tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === tab.id
+                  ? 'border-[#C9A66B] text-[#0E2A22]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          {/* Summary Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="p-6 text-center">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">Total Participants</h3>
+                <p className="text-3xl font-bold text-[#0E2A22]">{totalParticipants}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">Total Feedback</h3>
+                <p className="text-3xl font-bold text-[#0E2A22]">{totalFeedbackEntries}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">Total Uploads</h3>
+                <p className="text-3xl font-bold text-[#0E2A22]">{totalUploads}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">Avg. Satisfaction</h3>
+                <p className="text-3xl font-bold text-[#0E2A22]">{avgSatisfaction}/10</p>
+              </CardContent>
+            </Card>
           </div>
-          <a
-            href="/focus-group/admin/uploads"
-            className="px-4 py-2 bg-[#0F2C1C] text-white rounded-lg hover:bg-[#2A4C44] transition font-medium"
-          >
-            View Uploads
-          </a>
-        </div>
-      </div>
 
-      {/* Summary Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-[#0F2C1C] text-white p-6 rounded-lg text-center shadow-md">
-          <h3 className="text-sm md:text-base font-serif mb-2">Total Participants</h3>
-          <p className="text-3xl md:text-4xl font-bold">{totalParticipants}</p>
-        </div>
-        <div className="bg-[#0F2C1C] text-white p-6 rounded-lg text-center shadow-md">
-          <h3 className="text-sm md:text-base font-serif mb-2">Total Feedback Entries</h3>
-          <p className="text-3xl md:text-4xl font-bold">{totalFeedbackEntries}</p>
-        </div>
-        <div className="bg-[#0F2C1C] text-white p-6 rounded-lg text-center shadow-md">
-          <h3 className="text-sm md:text-base font-serif mb-2">Avg. Satisfaction</h3>
-          <p className="text-3xl md:text-4xl font-bold">
-            {avgSatisfaction}/5
-          </p>
-        </div>
-      </div>
-
-      {/* Participants Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm md:text-base">
-            <thead className="bg-[#0F2C1C] text-white">
-              <tr>
-                <th className="p-3 md:p-4 text-left font-serif font-semibold">User ID</th>
-                <th className="p-3 md:p-4 text-left font-serif font-semibold">Age Range</th>
-                <th className="p-3 md:p-4 text-left font-serif font-semibold">Top Concerns</th>
-                <th className="p-3 md:p-4 text-left font-serif font-semibold">Joined</th>
-                <th className="p-3 md:p-4 text-left font-serif font-semibold">Feedback Entries</th>
-                <th className="p-3 md:p-4 text-left font-serif font-semibold">Latest Rating</th>
-                <th className="p-3 md:p-4 text-left font-serif font-semibold">Last Submission</th>
-              </tr>
-            </thead>
-            <tbody>
-              {profilesWithFeedback.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-500">
-                    No participants yet.
-                  </td>
-                </tr>
-              ) : (
-                profilesWithFeedback.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="p-3 md:p-4 text-[#0F2C1C] font-mono text-xs">
-                      {p.user_id.slice(0, 8)}...
-                    </td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">
-                      {p.age_range || 'N/A'}
-                    </td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">
-                      {p.top_concerns && p.top_concerns.length > 0
-                        ? p.top_concerns.slice(0, 2).join(', ') + (p.top_concerns.length > 2 ? '...' : '')
-                        : 'N/A'}
-                    </td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">
-                      {new Date(p.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C] font-medium">
-                      {p.totalFeedback}
-                    </td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">
-                      {p.latestRating !== null ? `${p.latestRating}/5` : 'N/A'}
-                    </td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">
-                      {p.lastSubmitted}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Feedback Details Section */}
-      {feedback.length > 0 && (
-        <div className="mt-8 bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="bg-[#0F2C1C] text-white p-4 md:p-6">
-            <h2 className="text-xl md:text-2xl font-serif font-semibold">Recent Feedback Entries</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm md:text-base">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-3 md:p-4 text-left font-serif font-semibold text-[#0F2C1C]">Week</th>
-                  <th className="p-3 md:p-4 text-left font-serif font-semibold text-[#0F2C1C]">Hydration</th>
-                  <th className="p-3 md:p-4 text-left font-serif font-semibold text-[#0F2C1C]">Tone</th>
-                  <th className="p-3 md:p-4 text-left font-serif font-semibold text-[#0F2C1C]">Texture</th>
-                  <th className="p-3 md:p-4 text-left font-serif font-semibold text-[#0F2C1C]">Overall</th>
-                  <th className="p-3 md:p-4 text-left font-serif font-semibold text-[#0F2C1C]">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {feedback.slice(0, 20).map((f) => (
-                  <tr
-                    key={f.id}
-                    className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">Week {f.week_number}</td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">{f.hydration_rating}/5</td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">{f.tone_rating}/5</td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">{f.texture_rating}/5</td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C] font-medium">{f.overall_rating}/5</td>
-                    <td className="p-3 md:p-4 text-[#0F2C1C]">
-                      {new Date(f.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {feedback.length > 20 && (
-              <div className="p-4 text-center text-gray-500 text-sm">
-                Showing 20 of {feedback.length} entries
+          {/* Quick Actions */}
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold text-[#0E2A22] mb-4">Quick Actions</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Link
+                  href="/focus-group/admin/uploads"
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <h3 className="font-medium text-[#0E2A22] mb-1">View All Uploads</h3>
+                  <p className="text-sm text-gray-600">Browse participant image uploads</p>
+                </Link>
+                <button
+                  onClick={() => setActiveTab('messages')}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                >
+                  <h3 className="font-medium text-[#0E2A22] mb-1">Send Messages</h3>
+                  <p className="text-sm text-gray-600">Communicate with participants</p>
+                </button>
+                <button
+                  onClick={() => setActiveTab('participants')}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                >
+                  <h3 className="font-medium text-[#0E2A22] mb-1">Manage Participants</h3>
+                  <p className="text-sm text-gray-600">View and manage participant profiles</p>
+                </button>
               </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
         </div>
+      )}
+
+      {activeTab === 'participants' && (
+        <ParticipantTable
+          profiles={profiles}
+          feedbackCounts={feedbackCounts}
+          uploadCounts={uploadCounts}
+        />
+      )}
+
+      {activeTab === 'messages' && (
+        <MessageManagement profiles={profiles} unreadCounts={unreadCounts} />
+      )}
+
+      {activeTab === 'feedback' && <FeedbackTable feedback={feedback} profiles={profiles} />}
+
+      {activeTab === 'uploads' && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-[#0E2A22] mb-4">Upload Management</h2>
+              <p className="text-gray-600 mb-6">
+                View and manage all participant image uploads
+              </p>
+              <Link
+                href="/focus-group/admin/uploads"
+                className="inline-block px-6 py-3 bg-[#C9A66B] text-white rounded-lg hover:bg-[#E7C686] transition-colors font-medium"
+              >
+                Go to Uploads Page
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

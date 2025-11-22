@@ -1,137 +1,85 @@
-import React from 'react';
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { ArticleHero } from '@/components/articles/ArticleHero';
-import { ArticleBody } from '@/components/articles/ArticleBody';
-import { ArticleNavigation } from '@/components/articles/ArticleNavigation';
-import { ArticleShare } from '@/components/articles/ArticleShare';
-import { ArticleSchema } from '@/components/articles/ArticleSchema';
-import type { Article, ArticleMetadata } from '@/types/articles';
-import fs from 'fs';
-import path from 'path';
+import Image from "next/image";
+import type { Metadata } from "next";
+import { remark } from "remark";
+import html from "remark-html";
+import { getAllArticles, getArticleBySlug } from "@/lib/articles";
 
-// Generate static params for all articles
+type Props = {
+  params: { slug: string };
+};
+
 export async function generateStaticParams() {
-  try {
-    const filePath = path.join(process.cwd(), 'data', 'articles', 'index.json');
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const articlesData = JSON.parse(fileContents);
-    const articles: ArticleMetadata[] = articlesData.articles;
-    return articles.map((article) => ({
-      slug: article.slug,
-    }));
-  } catch (error) {
-    return [];
-  }
+  const articles = getAllArticles();
+  return articles.map((article) => ({ slug: article.slug }));
 }
 
-// Fetch article data
-async function getArticle(slug: string): Promise<Article | null> {
-  try {
-    const filePath = path.join(process.cwd(), 'data', 'articles', `${slug}.json`);
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContents);
-  } catch (error) {
-    return null;
-  }
-}
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const article = getArticleBySlug(params.slug);
 
-// Get all articles for navigation
-function getAllArticles(): ArticleMetadata[] {
-  try {
-    const filePath = path.join(process.cwd(), 'data', 'articles', 'index.json');
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const articlesData = JSON.parse(fileContents);
-    return articlesData.articles;
-  } catch (error) {
-    return [];
-  }
-}
-
-interface ArticlePageProps {
-  params: {
-    slug: string;
+  return {
+    title: article.title,
+    description: article.excerpt,
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      images: article.image ? [{ url: article.image }] : [],
+    },
   };
 }
 
-export default async function ArticlePage({ params }: ArticlePageProps) {
-  const article = await getArticle(params.slug);
+export default async function ArticlePage({ params }: Props) {
+  const article = getArticleBySlug(params.slug);
+  const processed = await remark().use(html).process(article.content);
+  const contentHtml = processed.toString();
 
-  if (!article) {
-    notFound();
-  }
-
-  const allArticles = getAllArticles();
-  const currentIndex = allArticles.findIndex((a) => a.slug === params.slug);
-  const previousArticle = currentIndex > 0 ? allArticles[currentIndex - 1] : undefined;
-  const nextArticle = currentIndex < allArticles.length - 1 ? allArticles[currentIndex + 1] : undefined;
-
-  // Format date
-  const date = new Date(article.date);
-  const formattedDate = date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = article.date
+    ? new Date(article.date).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "";
 
   return (
-    <>
-      {/* Schema.org Markup */}
-      <ArticleSchema article={article} />
+    <main className="w-full bg-white">
+      {article.image && (
+        <div className="relative w-full h-[60vh]">
+          <Image
+            src={article.image}
+            alt={article.title}
+            fill
+            className="object-cover"
+            sizes="100vw"
+            priority
+          />
+        </div>
+      )}
 
-      <div className="min-h-screen bg-white">
-        {/* Hero Image */}
-        <ArticleHero
-          imageUrl={article.featuredImage}
-          imageAlt="Water ripple texture evoking calmness and reflection"
-        />
-
-      {/* Article Body */}
-      <article className="max-w-3xl mx-auto px-6 py-16">
-        {/* Title */}
-        <h1 className="text-4xl md:text-5xl font-serif text-[#1B3A34] mb-4">
-          {article.title}
-        </h1>
-
-        {/* Author & Date */}
-        <p className="uppercase tracking-wide text-xs text-[#2B2B2B]/60 mb-10">
-          By {article.author} • {formattedDate}
-        </p>
-
-        {/* Body Content */}
-        <ArticleBody content={article.body} />
-
-        {/* Disclaimer Section */}
-        <div className="border-t border-[#E5E5E5] mt-12 pt-8 text-center">
-          <p className="text-xs text-[#2B2B2B]/40 italic max-w-xl mx-auto">
-            NFE is a cosmetic product. It does not diagnose, treat, cure, or prevent disease. Results vary based on consistency and care.
+      <section className="article-wrapper px-6 py-12">
+        <div className="max-w-3xl mx-auto text-center mb-10">
+          <p className="text-xs tracking-[0.3em] uppercase text-[#0D2818]/70 mb-2">
+            Articles & Editorials
           </p>
+          <h1 className="text-4xl md:text-5xl font-serif text-[#0D2818] mb-4">
+            {article.title}
+          </h1>
+          <p className="text-sm text-gray-600 mb-6">
+            {article.author && <span>By {article.author}</span>}
+            {article.author && formattedDate && <span> • </span>}
+            {formattedDate}
+          </p>
+          {article.excerpt && (
+            <p className="text-lg md:text-xl text-[#0D2818]/80 font-light leading-relaxed max-w-2xl mx-auto">
+              {article.excerpt}
+            </p>
+          )}
         </div>
 
-        {/* Social Share */}
-        <ArticleShare
-          title={article.title}
-          url={`/articles/${article.slug}`}
+        <article
+          className="prose prose-lg mx-auto max-w-3xl text-[#0D2818]"
+          dangerouslySetInnerHTML={{ __html: contentHtml }}
         />
-
-        {/* Navigation */}
-        <ArticleNavigation
-          previousArticle={previousArticle}
-          nextArticle={nextArticle}
-        />
-
-        {/* Back to Articles */}
-        <div className="mt-12 text-center">
-          <Link
-            href="/articles"
-            className="inline-block text-sm text-[#1B3A34] border-b border-[#1B3A34] hover:border-[#2A4C44] hover:text-[#2A4C44] transition-colors"
-          >
-            ← Back to Articles
-          </Link>
-        </div>
-      </article>
-    </div>
-    </>
+      </section>
+    </main>
   );
 }
-
