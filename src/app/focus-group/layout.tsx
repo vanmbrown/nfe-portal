@@ -42,7 +42,7 @@ export default async function FocusGroupLayout({
 
   const profileIsAdmin =
   rawIsAdmin === true ||
-  rawIsAdmin === 1 ||
+  (typeof rawIsAdmin === "number" && rawIsAdmin === 1) ||
   (typeof rawIsAdmin === "string" && rawIsAdmin.toLowerCase() === "true");
   const emailIsAdmin = user?.email ? isAdminEmail(user.email) : false;
   const isAdmin = profileIsAdmin || emailIsAdmin;
