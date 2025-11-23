@@ -40,10 +40,16 @@ export default async function FocusGroupLayout({
   // Handle both boolean true and string "true" cases
   const rawIsAdmin = profile?.is_admin;
 
-  const profileIsAdmin =
-  rawIsAdmin === true ||
-  (typeof rawIsAdmin === "number" && rawIsAdmin === 1) ||
-  (typeof rawIsAdmin === "string" && rawIsAdmin.toLowerCase() === "true");
+  let profileIsAdmin = false;
+
+  if (rawIsAdmin === true) {
+   profileIsAdmin = true;
+  } else if (rawIsAdmin === 1) {
+   profileIsAdmin = true;
+  } else if (typeof rawIsAdmin === "string") {
+   profileIsAdmin = rawIsAdmin.toLowerCase() === "true";
+  }
+  
   const emailIsAdmin = user?.email ? isAdminEmail(user.email) : false;
   const isAdmin = profileIsAdmin || emailIsAdmin;
   
