@@ -53,7 +53,7 @@ export default function MessagesPage() {
 
     // Set up polling to refresh messages every 10 seconds
     const interval = setInterval(() => {
-      fetchMessages(userId, true);
+      fetchMessages(userId);
     }, 10000);
 
     return () => {
