@@ -3,21 +3,17 @@ import { Database } from '@/types/supabase'
 import { cookies } from 'next/headers'
 import type { NextRequest } from 'next/server'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 // Validate environment variables
-if (!supabaseUrl || supabaseUrl === 'your_supabase_project_url') {
-  throw new Error(
-    'Missing or invalid NEXT_PUBLIC_SUPABASE_URL. Please update .env.local with your Supabase project URL.'
-  )
+if (!supabaseUrl) {
+  throw new Error('Missing SUPABASE_URL')
 }
 
-if (!supabaseAnonKey || supabaseAnonKey === 'your_supabase_anon_key') {
-  throw new Error(
-    'Missing or invalid NEXT_PUBLIC_SUPABASE_ANON_KEY. Please update .env.local with your Supabase anon key.'
-  )
+if (!supabaseAnonKey) {
+  throw new Error('Missing SUPABASE_ANON_KEY')
 }
 
 // Server-side client for authenticated requests (uses Authorization header or cookies)
