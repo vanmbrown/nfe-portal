@@ -38,16 +38,16 @@ export default async function FocusGroupLayout({
 
   // Check admin status - prioritize database column, fallback to email
   // Handle both boolean true and string "true" cases
-  const rawIsAdmin = profile?.is_admin;
+ const rawIsAdmin = profile?.is_admin;
 
   let profileIsAdmin = false;
 
   if (rawIsAdmin === true) {
    profileIsAdmin = true;
-  } else if (rawIsAdmin === 1) {
+  } else if ((rawIsAdmin as unknown) === 1) {
    profileIsAdmin = true;
   } else if (typeof rawIsAdmin === "string") {
-   profileIsAdmin = rawIsAdmin.toLowerCase() === "true";
+   profileIsAdmin = (rawIsAdmin as string).toLowerCase() === "true";
   }
   
   const emailIsAdmin = user?.email ? isAdminEmail(user.email) : false;
