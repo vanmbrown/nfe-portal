@@ -9,7 +9,7 @@ const navItems = [
   { href: '/inci', label: 'Ingredients' },
   { href: '/shop', label: 'Shop' },
   { href: '/subscribe', label: 'Subscribe' },
-  { href: '/focus-group/login', label: 'Focus Group', className: 'text-[#C6A664] hover:text-[#E7C686]' },
+  { href: '/community-input', label: 'Community Input', className: 'text-[#C6A664] hover:text-[#E7C686]' },
 ]
 
 export default function PrimaryNav() {

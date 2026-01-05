@@ -44,7 +44,7 @@ export default function SubscribePage() {
       </h1>
 
       <p className="text-lg text-gray-700 mb-8">
-        Subscribe for weekly articles, exclusive insights, and upcoming releases.
+        Subscribe for occasional, thoughtful notes on caring for mature melanated skin—plus behind-the-scenes updates as NFE evolves. No spam, no pressure.
       </p>
 
       {status === "success" ? (

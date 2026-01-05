@@ -15,22 +15,26 @@ export default function NFEHomePage() {
       {/* Left: Tagline and CTA */}
       <div className="md:col-span-6 flex flex-col justify-center px-10 md:px-16 py-24 text-white">
 	  
-		<h1 className="text-5xl md:text-6xl font-serif mb-6 leading-tight">
-		  NFE—<br />
-		  <span className="text-[#C6A664]">Not For Everyone</span>
-		</h1>
-		<p className="max-w-lg text-lg md:text-xl text-gray-200 mb-8">
-		  Minimalist, science-led elixirs for mature melanated skin.<br />
-		  Designed to restore balance, radiance, and comfort—every day.
-		</p>
-		<Link
-		  href="/shop"
-		  className="bg-[#D6B370] text-[#1B3A34] px-8 py-3 text-lg rounded-2xl hover:bg-[#E3C58E] transition text-center inline-flex items-center justify-center"
-		  aria-label="Shop the NFE Face and Body Elixirs"
-		>
-		  Shop the Elixirs
-		</Link>
-	  </div>
+        <h1 className="text-5xl md:text-6xl font-serif mb-6 leading-tight">
+          NFE—<br />
+          <span className="text-[#C6A664]">Not For Everyone</span>
+        </h1>
+        <div className="mb-8">
+          <p className="max-w-lg text-lg md:text-xl text-gray-200 mb-4">
+            Minimalist, science-led elixirs for mature melanated skin.
+          </p>
+          <p className="max-w-lg text-base md:text-lg text-gray-300 font-light italic">
+            NFE is currently in a quiet development chapter. The Face Elixir waitlist is open while I decide on the most sustainable path to launch.
+          </p>
+        </div>
+        <Link
+          href="/subscribe"
+          className="bg-[#D6B370] text-[#1B3A34] px-8 py-3 text-lg rounded-2xl hover:bg-[#E3C58E] transition text-center inline-flex items-center justify-center"
+          aria-label="Join the Waitlist"
+        >
+          Join the Waitlist
+        </Link>
+      </div>
 
 	  {/* Right: Full-height hero image */}
 	  <div className="md:col-span-6 relative min-h-[90vh]">
@@ -135,14 +139,6 @@ export default function NFEHomePage() {
 
       {/* Footer */}
       <footer className="bg-[#1B3A34] text-gray-200 py-10 text-center border-t border-[#2A4C44]">
-        <div className="mb-4">
-          <Link 
-            href="/focus-group/login" 
-            className="text-[#C6A664] hover:text-[#E7C686] transition-colors text-sm underline"
-          >
-            Focus Group Portal
-          </Link>
-        </div>
         <p className="text-sm">© {new Date().getFullYear()} NFE Beauty. All rights reserved.</p>
         <p className="mt-2 text-xs text-gray-200">Beautiful skin is layered care. NFE is the nourish & restore layer.</p>
       </footer>
