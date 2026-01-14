@@ -22,8 +22,55 @@ export async function POST(req: Request) {
     const emailErrors = [];
     const dbErrors = [];
 
-    // 1. Send Email Notification to Owner (Priority: High)
-    if (process.env.RESEND_API_KEY) {
+    // 1. Check for duplicate email/product combination first (Priority: High)
+    let dbSuccess = false;
+    try {
+      const supabase = createAdminSupabase();
+      
+      // Check if email/product combination already exists
+      const { data: existingEntry, error: checkError } = await supabase
+        .from("waitlist")
+        .select("email, product")
+        .eq("email", email.toLowerCase().trim())
+        .eq("product", product)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned (expected if not found)
+        console.error("[waitlist] Database check failed:", checkError);
+        dbErrors.push(checkError.message);
+      } else if (existingEntry) {
+        // Email/product combination already exists
+        return NextResponse.json(
+          { error: "This email is already on the waitlist for this product." },
+          { status: 409 }
+        );
+      }
+
+      // 2. Insert new waitlist entry
+      const { error: insertError } = await supabase
+        .from("waitlist")
+        .insert({ email: email.toLowerCase().trim(), product });
+
+      if (insertError) {
+        // Double-check for duplicate (in case of race condition)
+        if (insertError.code === '23505' || insertError.message?.includes('duplicate') || insertError.message?.includes('already exists')) {
+          return NextResponse.json(
+            { error: "This email is already on the waitlist for this product." },
+            { status: 409 }
+          );
+        }
+        console.error("[waitlist] Database insert failed:", insertError);
+        dbErrors.push(insertError.message);
+      } else {
+        dbSuccess = true;
+      }
+    } catch (dbError: any) {
+      console.error("[waitlist] Database connection failed:", dbError);
+      dbErrors.push(dbError.message);
+    }
+
+    // 3. Send Email Notification to Owner (Priority: High) - Only if successfully added
+    if (dbSuccess && process.env.RESEND_API_KEY) {
       try {
         await resend.emails.send({
           from: "NFE Beauty <notifications@nfebeauty.com>",
@@ -40,31 +87,11 @@ export async function POST(req: Request) {
         console.error("[waitlist] Email send failed:", emailError);
         emailErrors.push(emailError.message);
       }
-    } else {
+    } else if (!process.env.RESEND_API_KEY) {
       console.warn("[waitlist] RESEND_API_KEY missing");
     }
 
-    // 2. Save to Database (Priority: High)
-    try {
-      const supabase = createAdminSupabase();
-      const { error } = await supabase.from("waitlist").insert({ email, product });
-
-      if (error) {
-        if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('already exists')) {
-          return NextResponse.json(
-            { error: "This email is already on the waitlist for this product." },
-            { status: 409 }
-          );
-        }
-        console.error("[waitlist] Database insert failed:", error);
-        dbErrors.push(error.message);
-      }
-    } catch (dbError: any) {
-      console.error("[waitlist] Database connection failed:", dbError);
-      dbErrors.push(dbError.message);
-    }
-
-    // 3. AI Agent Forwarding (Priority: Low)
+    // 4. AI Agent Forwarding (Priority: Low)
     if (process.env.FORWARD_TO_AI_URL) {
       fetch(process.env.FORWARD_TO_AI_URL, {
         method: "POST",

@@ -16,23 +16,45 @@ export async function POST(req: Request) {
     const emailErrors = [];
     const dbErrors = [];
 
-    // 1. Save to Database (Priority: High)
-    // We use the Admin client to bypass RLS and ensure we can write to the table.
+    // 1. Check for duplicate email first (Priority: High)
+    // We use the Admin client to bypass RLS and ensure we can check the table.
     let dbSuccess = false;
     try {
       const supabase = createAdminSupabase();
-      const { error } = await supabase.from("subscribers").insert({ email });
+      
+      // Check if email already exists
+      const { data: existingSubscriber, error: checkError } = await supabase
+        .from("subscribers")
+        .select("email")
+        .eq("email", email.toLowerCase().trim())
+        .single();
 
-      if (error) {
-        // If it's a duplicate, we treat it as a "soft" success (user is already subscribed)
-        if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('already exists')) {
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned (expected if not found)
+        console.error("[subscribe] Database check failed:", checkError);
+        dbErrors.push(checkError.message);
+      } else if (existingSubscriber) {
+        // Email already exists
+        return NextResponse.json(
+          { error: "This email is already subscribed." },
+          { status: 409 }
+        );
+      }
+
+      // 2. Insert new subscriber
+      const { error: insertError } = await supabase
+        .from("subscribers")
+        .insert({ email: email.toLowerCase().trim() });
+
+      if (insertError) {
+        // Double-check for duplicate (in case of race condition)
+        if (insertError.code === '23505' || insertError.message?.includes('duplicate') || insertError.message?.includes('already exists')) {
           return NextResponse.json(
             { error: "This email is already subscribed." },
             { status: 409 }
           );
         }
-        console.error("[subscribe] Database insert failed:", error);
-        dbErrors.push(error.message);
+        console.error("[subscribe] Database insert failed:", insertError);
+        dbErrors.push(insertError.message);
       } else {
         dbSuccess = true;
       }
@@ -41,7 +63,7 @@ export async function POST(req: Request) {
       dbErrors.push(dbError.message);
     }
 
-    // 2. Send Confirmation Email to Subscriber (Priority: High)
+    // 3. Send Confirmation Email to Subscriber (Priority: High)
     if (dbSuccess && process.env.RESEND_API_KEY) {
       try {
         await resend.emails.send({
@@ -63,7 +85,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Send Email Notification to Owner (Priority: High)
+    // 4. Send Email Notification to Owner (Priority: High)
     // We want to notify Vanessa immediately.
     if (dbSuccess && process.env.RESEND_API_KEY) {
       try {
@@ -81,7 +103,7 @@ export async function POST(req: Request) {
       console.warn("[subscribe] RESEND_API_KEY missing");
     }
 
-    // 4. AI Agent Forwarding (Priority: Low - Fire and Forget)
+    // 5. AI Agent Forwarding (Priority: Low - Fire and Forget)
     if (process.env.FORWARD_TO_AI_URL) {
       fetch(process.env.FORWARD_TO_AI_URL, {
         method: "POST",
