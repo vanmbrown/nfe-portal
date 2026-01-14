@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa.mccaleb@gmail.com";
+const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa@nfebeauty.com";
 
 export async function POST(req: Request) {
   try {
