@@ -1,57 +1,49 @@
-'use client';
+import Link from "next/link";
+import Image from "next/image";
+import { getAllArticles } from "@/lib/articles";
 
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArticleGrid } from '@/components/articles/ArticleGrid';
-import type { ArticleMetadata } from '@/types/articles';
-
-export default function ArticlesPage() {
-  const [articles, setArticles] = useState<ArticleMetadata[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Fetch articles data from public directory
-    fetch('/data/articles/index.json')
-      .then((res) => res.json())
-      .then((data) => {
-        setArticles(data.articles || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error loading articles:', err);
-        setLoading(false);
-      });
-  }, []);
+export default function ArticlesIndexPage() {
+  const articles = getAllArticles();
 
   return (
-    <div className="min-h-screen bg-[#F8F5F2]">
-      {/* Hero Banner */}
-      <section className="w-full text-center py-24 border-b border-[#E5E5E5] bg-white">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1 className="text-5xl md:text-6xl font-serif tracking-tight text-[#1B3A34] mb-4">
-            Articles
-          </h1>
-          <p className="mt-4 text-lg text-[#2B2B2B]/70 max-w-2xl mx-auto leading-relaxed">
-            A thoughtful collection of reflections, rituals, and real conversations on the care of mature melanated skin.
-          </p>
-        </motion.div>
-      </section>
+    <main className="max-w-7xl mx-auto px-6 py-16">
+      <h1 className="text-4xl md:text-5xl font-serif text-center text-[#0D2818] mb-12">
+        Articles & Editorials
+      </h1>
 
-      {/* Articles Grid */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        {loading ? (
-          <div className="text-center py-16">
-            <p className="text-[#2B2B2B]/60">Loading articles...</p>
-          </div>
-        ) : (
-          <ArticleGrid articles={articles} showFilters={true} />
-        )}
-      </section>
-    </div>
+      <div className="grid md:grid-cols-2 gap-12">
+        {articles.map((article) => (
+          <Link
+            key={article.slug}
+            href={`/articles/${article.slug}`}
+            className="cursor-pointer border border-gray-200 rounded-xl hover:shadow-lg transition p-4 bg-white"
+          >
+            {article.image && (
+              <div className="relative w-full h-60 overflow-hidden rounded-lg mb-4">
+                <Image
+                  src={article.image}
+                  alt={article.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
+            )}
+
+            <h2 className="text-xl	 font-semibold text-[#0D2818] mb-2">
+              {article.title}
+            </h2>
+
+            <p className="text-sm text-gray-500 mb-4">{article.date}</p>
+
+            <p className="text-gray-700 mb-4">{article.excerpt}</p>
+
+            <span className="text-sm text-[#0D2818] font-medium border-b border-[#0D2818]">
+              Read article →
+            </span>
+          </Link>
+        ))}
+      </div>
+    </main>
   );
 }
-

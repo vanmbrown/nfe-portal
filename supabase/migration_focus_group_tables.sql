@@ -44,6 +44,16 @@ CREATE INDEX IF NOT EXISTS idx_focus_group_uploads_created_at ON focus_group_upl
 ALTER TABLE focus_group_feedback ENABLE ROW LEVEL SECURITY;
 ALTER TABLE focus_group_uploads ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for idempotent migrations)
+DROP POLICY IF EXISTS "Users can view own focus group feedback" ON focus_group_feedback;
+DROP POLICY IF EXISTS "Users can insert own focus group feedback" ON focus_group_feedback;
+DROP POLICY IF EXISTS "Users can update own focus group feedback" ON focus_group_feedback;
+DROP POLICY IF EXISTS "Admins can view all focus group feedback" ON focus_group_feedback;
+DROP POLICY IF EXISTS "Users can view own focus group uploads" ON focus_group_uploads;
+DROP POLICY IF EXISTS "Users can insert own focus group uploads" ON focus_group_uploads;
+DROP POLICY IF EXISTS "Users can delete own focus group uploads" ON focus_group_uploads;
+DROP POLICY IF EXISTS "Admins can view all focus group uploads" ON focus_group_uploads;
+
 -- Focus Group Feedback policies
 -- Users can read and write their own feedback (via profile relationship)
 CREATE POLICY "Users can view own focus group feedback"

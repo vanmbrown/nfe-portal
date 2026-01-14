@@ -1,0 +1,60 @@
+import fs from "fs";
+import path from "path";
+import { notFound } from "next/navigation";
+import { remark } from "remark";
+import html from "remark-html";
+import { getArticleBySlug } from "@/lib/articles";
+
+export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  const article = getArticleBySlug(params.slug);
+
+  if (!article) {
+    return notFound();
+  }
+
+  // ---- Load Markdown Content ----
+  const mdPath = path.join(process.cwd(), "src", "content", "articles", `${params.slug}.md`);
+  if (!fs.existsSync(mdPath)) {
+    console.error("Missing markdown file:", mdPath);
+    return notFound();
+  }
+
+  const fileContent = fs.readFileSync(mdPath, "utf8");
+
+  const processed = await remark()
+    .use(html)
+    .process(fileContent);
+
+  const contentHtml = processed.toString();
+
+  return (
+    <main className="max-w-4xl mx-auto px-6 py-16">
+      {/* HERO IMAGE */}
+      {article.image && (
+        <div className="w-full h-72 md:h-96 overflow-hidden rounded-lg mb-10">
+          <img
+            src={article.image}
+            alt={article.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+
+      {/* TITLE */}
+      <h1 className="text-4xl md:text-5xl font-serif text-[#0D2818] mb-4">
+        {article.title}
+      </h1>
+
+      {/* META */}
+      <p className="text-sm uppercase tracking-wide text-gray-600 mb-10">
+        BY {article.author} • {article.date}
+      </p>
+
+      {/* ARTICLE CONTENT */}
+      <article
+        className="prose prose-lg max-w-none text-[#0D2818]"
+        dangerouslySetInnerHTML={{ __html: contentHtml }}
+      />
+    </main>
+  );
+}

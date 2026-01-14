@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "melasma-and-mature-skin",
+    "title": "What I Wish I’d Known When My Melasma First Showed Up",
+    "date": "2026-01-04",
+    "author": "Vanessa",
+    "image": "/images/articles/melasma-article.jpg",
+    "excerpt": "Melasma isn't just about sun exposure—it's about heat, hormones, and healing. Here's my personal journey and what actually helped.",
+    "file": "melasma-and-mature-skin.md"
+  },
+  {
+    "slug": "black-dont-crack",
+    "title": "Black Don’t Crack? The Truth About Sunscreen and Mature Melanated Skin",
+    "date": "2025-10-31",
+    "author": "NFE Beauty",
+    "image": "/images/articles/black_dont_crack.jpg",
+    "excerpt": "For years, many believed deeper skin tones didn’t need sunscreen. Discover why SPF is essential for mature melanated skin.",
+    "file": "black-dont-crack.md"
+  },
+  {
+    "slug": "water-vs-oil",
+    "title": "Solving the Hidden Problem: Why Oil Alone Fails Mature Melanated Skin",
+    "date": "2025-11-16",
+    "author": "NFE Beauty",
+    "image": "/images/articles/water_vs_oil.png",
+    "excerpt": "Oil alone isn’t enough. Understanding hydration vs moisture is key for mature melanated skin.",
+    "file": "water-vs-oil.md"
+  }
+]

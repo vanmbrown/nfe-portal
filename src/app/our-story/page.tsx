@@ -1,21 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
-import { VideoLightbox } from '@/components/ui/VideoLightbox';
-import { Play } from 'lucide-react';
+import StoryHero from '@/components/story/StoryHero';
 
 export default function OurStoryPage() {
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
-  const videoUrl = 'https://www.youtube.com/shorts/rK3Vc7JcG7M';
-
-  // Debug: Log state changes
-  useEffect(() => {
-    console.log('OurStoryPage - isVideoOpen state changed to:', isVideoOpen);
-  }, [isVideoOpen]);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 30 },
@@ -25,58 +17,7 @@ export default function OurStoryPage() {
 
   return (
     <>
-      {/* Hero Section - Full-Bleed Visual + Overlay Text */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Golden Filter */}
-        <div className="absolute inset-0">
-          <Image
-            src="/images/products/20251003_175927.jpg"
-            alt="Vanessa, Founder of NFE"
-            fill
-            className="object-cover"
-            style={{
-              filter: 'sepia(20%) saturate(80%) brightness(105%)',
-            }}
-            priority
-            placeholder="blur"
-            blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjZjhmNWYyIi8+PC9zdmc+"
-            sizes="100vw"
-          />
-          {/* Frosted Overlay for Text Readability */}
-          <div className="absolute inset-0 bg-black/15 mix-blend-multiply pointer-events-none" />
-        </div>
-
-        {/* Text Overlay */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative z-20 text-center text-white px-4 max-w-2xl mx-auto"
-        >
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 drop-shadow-lg">
-            Vanessa&apos;s Story
-          </h1>
-          <p className="text-xl md:text-2xl lg:text-3xl font-serif mb-8 drop-shadow-md">
-            Made for Me. Shared with You.
-          </p>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('Button clicked, setting isVideoOpen to true');
-              setIsVideoOpen(true);
-              console.log('State updated, isVideoOpen should be:', true);
-            }}
-            className="inline-flex items-center gap-2 bg-[#D6B370] hover:bg-[#E7C686] text-[#1B3A34] px-6 py-3 rounded-full font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#D6B370] focus:ring-offset-2 focus:ring-offset-transparent relative z-50 cursor-pointer pointer-events-auto"
-            aria-label="Play video about Vanessa's story"
-            type="button"
-            style={{ position: 'relative', zIndex: 50 }}
-          >
-            <Play size={20} fill="currentColor" />
-            Play Video
-          </button>
-        </motion.div>
-      </section>
+      <StoryHero />
 
       {/* Section 2 – The Narrative Block */}
       <section className="py-16 md:py-24 px-4 md:px-8 bg-[#F8F5F2]">
@@ -178,20 +119,13 @@ export default function OurStoryPage() {
             </p>
             <Link href="/shop">
               <Button className="bg-[#D6B370] hover:bg-[#E7C686] text-[#1B3A34] px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all">
-                Shop NFE Elixirs
+                Discover the Elixirs
               </Button>
             </Link>
           </motion.div>
         </div>
       </section>
 
-      {/* Video Lightbox */}
-      <VideoLightbox
-        isOpen={isVideoOpen}
-        onClose={() => setIsVideoOpen(false)}
-        videoUrl={videoUrl}
-        title="Vanessa's Story - Made for Me. Shared with You."
-      />
     </>
   );
 }

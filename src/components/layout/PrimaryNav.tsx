@@ -1,15 +1,16 @@
 import Link from 'next/link'
 
-  const navItems = [
-    { href: '/', label: 'Home' },
-    { href: '/our-story', label: 'Our Story' },
-    { href: '/articles', label: 'Articles' },
-    { href: '/products', label: 'Products' },
-    { href: '/science', label: 'Science' },
-    { href: '/inci', label: 'Ingredients' },
-    { href: '/shop', label: 'Shop' },
-    { href: '/focus-group/login', label: 'Focus Group', className: 'text-[#C6A664] hover:text-[#E7C686]' },
-  ]
+const navItems = [
+  { href: '/', label: 'Home' },
+  { href: '/our-story', label: 'Our Story' },
+  { href: '/articles', label: 'Articles' },
+  { href: '/products', label: 'Products' },
+  { href: '/science', label: 'Science' },
+  { href: '/inci', label: 'Ingredients' },
+  { href: '/shop', label: 'Ritual' },
+  { href: '/subscribe', label: 'Subscribe' },
+  { href: '/community-input', label: 'Community Input', className: 'text-[#C6A664] hover:text-[#E7C686]' },
+]
 
 export default function PrimaryNav() {
   return (

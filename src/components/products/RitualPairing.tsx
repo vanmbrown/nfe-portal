@@ -22,6 +22,7 @@ export function RitualPairing({ relatedProduct }: RitualPairingProps) {
   // Check if product is available (not coming soon or future release)
   const isAvailable = relatedProduct.status === 'available';
   const isComingSoon = relatedProduct.status === 'coming_soon' || relatedProduct.status === 'future_release';
+  const isBodyElixir = relatedProduct.title === 'Body Elixir' || relatedProduct.status === 'future_release';
 
   return (
     <section
@@ -52,9 +53,9 @@ export function RitualPairing({ relatedProduct }: RitualPairingProps) {
         <button
           disabled
           className="border border-[#D4AF37] text-[#D4AF37] px-6 py-2 rounded-full opacity-70 cursor-not-allowed hover:opacity-90 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 focus:ring-offset-[#0F2C1C] min-h-[44px]"
-          aria-label={`${relatedProduct.title} coming soon`}
+          aria-label={isBodyElixir ? `${relatedProduct.title} in development` : `${relatedProduct.title} coming soon`}
         >
-          Coming Soon
+          {isBodyElixir ? 'IN DEVELOPMENT' : 'Coming Soon'}
         </button>
       )}
     </section>

@@ -1,5 +1,5 @@
-import { NextRequest } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase as createServerSupabaseClient } from '@/lib/supabase/server';
 import { focusGroupFeedbackSchema } from '@/lib/validation/schemas';
 import { calculateWeekNumber } from '@/lib/focus-group/week-calculation';
 import { successResponse, ApiErrors } from '@/lib/api/response';
@@ -10,18 +10,18 @@ import type { Database } from '@/types/supabase';
  * Submit weekly feedback
  */
 export async function POST(req: NextRequest) {
+  // Pass request to createServerSupabaseClient so it can read cookies and Authorization header
+  const supabase = await createServerSupabaseClient(req);
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
   try {
-    const supabase = await createServerSupabase(req);
-
-    // Get authenticated user (uses Authorization header)
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return ApiErrors.unauthorized();
-    }
 
     // Get user's profile to calculate week number
     const { data: profile } = await supabase
@@ -54,12 +54,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check for existing feedback for this week
-    const { data: existingFeedback } = await supabase
-      .from('feedback')
+    // Get user's profile ID
+    const { data: userProfile } = await supabase
+      .from('profiles')
       .select('id')
       .eq('user_id', user.id)
-      .eq('week', weekNumber)
+      .maybeSingle();
+
+    if (!userProfile) {
+      return ApiErrors.notFound('User profile not found');
+    }
+
+    // Check for existing feedback for this week
+    const { data: existingFeedback } = await supabase
+      .from('focus_group_feedback')
+      .select('id')
+      .eq('profile_id', userProfile.id)
+      .eq('week_number', weekNumber)
       .maybeSingle();
 
     if (existingFeedback) {
@@ -68,39 +79,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Map focusGroupFeedbackSchema fields to database schema fields
-    // Database expects: hydration_rating, tone_rating, texture_rating, overall_rating (1-5), notes
-    // Form provides: overall_rating (1-10), product_usage, perceived_changes, concerns_or_issues, emotional_response, next_week_focus
-    const notesText = [
-      data.product_usage && `Product Usage: ${data.product_usage}`,
-      data.perceived_changes && `Perceived Changes: ${data.perceived_changes}`,
-      data.concerns_or_issues && `Concerns/Issues: ${data.concerns_or_issues}`,
-      data.emotional_response && `Emotional Response: ${data.emotional_response}`,
-      data.next_week_focus && `Next Week Focus: ${data.next_week_focus}`,
-    ].filter(Boolean).join('\n\n') || null;
-
-    // Scale rating from 1-10 (form) to 1-5 (database)
-    // Formula: (value - 1) * (5 - 1) / (10 - 1) + 1 = (value - 1) * 4/9 + 1
-    const scaleRating = (rating: number | undefined): number => {
-      if (!rating) return 3; // Default to middle
-      // Scale 1-10 to 1-5, rounding to nearest integer
-      return Math.round(((rating - 1) * 4 / 9) + 1);
-    };
-
-    const scaledRating = scaleRating(data.overall_rating);
-
     // Insert feedback - using the correct table name and structure from schema
+    // Database expects: profile_id, week_number, product_usage, perceived_changes, concerns_or_issues, emotional_response, overall_rating, next_week_focus
     const { data: feedback, error: insertError } = await supabase
-      .from('feedback')
+      .from('focus_group_feedback')
       .insert({
-        user_id: user.id,
-        week: weekNumber,
-        // Use scaled overall_rating for all rating fields
-        hydration_rating: scaledRating,
-        tone_rating: scaledRating,
-        texture_rating: scaledRating,
-        overall_rating: scaledRating,
-        notes: notesText,
+        profile_id: userProfile.id,
+        week_number: weekNumber,
+        product_usage: data.product_usage || null,
+        perceived_changes: data.perceived_changes || null,
+        concerns_or_issues: data.concerns_or_issues || null,
+        emotional_response: data.emotional_response || null,
+        overall_rating: data.overall_rating || null,
+        next_week_focus: data.next_week_focus || null,
       })
       .select()
       .single();
@@ -123,25 +114,35 @@ export async function POST(req: NextRequest) {
  * Retrieve user's feedback history
  */
 export async function GET(req: NextRequest) {
+  // Pass request to createServerSupabaseClient so it can read cookies and Authorization header
+  const supabase = await createServerSupabaseClient(req);
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
   try {
-    const supabase = await createServerSupabase(req);
+    // Get user's profile ID
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-    // Get authenticated user (uses Authorization header)
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return ApiErrors.unauthorized();
+    if (!userProfile) {
+      return ApiErrors.notFound('User profile not found');
     }
 
-    // Get feedback history - using correct table name and user_id
+    // Get feedback history - using correct table name and profile_id
     const { data: feedback, error: fetchError } = await supabase
-      .from('feedback')
+      .from('focus_group_feedback')
       .select('*')
-      .eq('user_id', user.id)
-      .order('week', { ascending: true });
+      .eq('profile_id', userProfile.id)
+      .order('week_number', { ascending: true });
 
     if (fetchError) {
       console.error('Fetch error:', fetchError);

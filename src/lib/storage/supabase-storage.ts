@@ -4,6 +4,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
+import sharp from 'sharp';
 
 const BUCKET_NAME = 'focus-group-uploads';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -22,6 +23,8 @@ export async function uploadToSupabaseStorage(
   profileId: string,
   weekNumber: number
 ): Promise<string> {
+  // Note: This function uses profileId for folder structure
+  // The API route maps user_id to profile_id before calling this
 
   // Validate file size
   if (file.size > MAX_FILE_SIZE) {
@@ -35,14 +38,28 @@ export async function uploadToSupabaseStorage(
 
   // Generate unique filename
   const timestamp = Date.now();
-  const fileExt = file.name.split('.').pop() || 'jpg';
-  const fileName = `week-${weekNumber}-${timestamp}.${fileExt}`;
+  const fileName = `week-${weekNumber}-${timestamp}.jpg`;
   const filePath = `${profileId}/${fileName}`;
 
-  // Upload file
+  // Convert File to Buffer
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  // Strip EXIF data and optimize image
+  const processedBuffer = await sharp(buffer)
+    .rotate() // Auto-rotate based on EXIF orientation before stripping
+    .withMetadata({
+      exif: {},      // Remove EXIF data
+      icc: undefined, // Remove color profile
+    })
+    .jpeg({ quality: 90 }) // Re-compress with good quality
+    .toBuffer();
+
+  // Upload processed image
   const { data, error } = await supabase.storage
     .from(BUCKET_NAME)
-    .upload(filePath, file, {
+    .upload(filePath, processedBuffer, {
+      contentType: 'image/jpeg',
       cacheControl: '3600',
       upsert: false,
     });
