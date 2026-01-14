@@ -38,7 +38,7 @@ export default function BodyElixirPage() {
         title={bodyElixirData.name}
         shortDescription={bodyElixirData.shortDescription}
         heroImage={bodyElixirData.images?.[0]?.src || '/images/products/body-elixir-hero.jpg'}
-        ctaLabel="Coming Soon"
+        ctaLabel="IN DEVELOPMENT"
         status="future_release"
         onCtaClick={() => {/* TODO: Open waitlist modal */}}
       />

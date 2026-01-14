@@ -66,7 +66,7 @@ export default function ProductCard({
             disabled
             className="w-full bg-[#CDA64D]/30 text-white/60 py-3 rounded-full cursor-not-allowed"
           >
-            Coming Soon
+            {title === "Body Elixir" ? "IN DEVELOPMENT" : "Coming Soon"}
           </button>
         )}
       </div>

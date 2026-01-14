@@ -116,9 +116,9 @@ export default function NFEHomePage() {
             <button
               disabled
               className="border border-gray-300 text-gray-200 px-6 py-2 rounded-full cursor-not-allowed opacity-60 text-sm md:text-base font-medium min-h-[44px] flex items-center justify-center"
-              aria-label="Body Elixir coming soon"
+              aria-label="Body Elixir in development"
             >
-              Coming Soon
+              IN DEVELOPMENT
             </button>
           </motion.div>
         </div>
