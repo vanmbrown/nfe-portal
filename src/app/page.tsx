@@ -136,12 +136,6 @@ export default function NFEHomePage() {
           <Button className="bg-[#1B3A34] text-[#D6B370] px-8 py-3 text-lg rounded-2xl hover:bg-[#2A4C44] transition">Explore Ingredients</Button>
         </Link>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-[#1B3A34] text-gray-200 py-10 text-center border-t border-[#2A4C44]">
-        <p className="text-sm">© {new Date().getFullYear()} NFE Beauty. All rights reserved.</p>
-        <p className="mt-2 text-xs text-gray-200">Beautiful skin is layered care. NFE is the nourish & restore layer.</p>
-      </footer>
    </>
   );
 }

@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa.mccaleb@gmail.com";
 
 export async function POST(req: Request) {
   try {
@@ -21,12 +22,12 @@ export async function POST(req: Request) {
     const emailErrors = [];
     const dbErrors = [];
 
-    // 1. Send Email Notification (Priority: High)
-    if (process.env.FORWARD_TO_EMAIL && process.env.RESEND_API_KEY) {
+    // 1. Send Email Notification to Owner (Priority: High)
+    if (process.env.RESEND_API_KEY) {
       try {
         await resend.emails.send({
-          from: "NFE Portal <notifications@nfebeauty.com>",
-          to: process.env.FORWARD_TO_EMAIL,
+          from: "NFE Beauty <notifications@nfebeauty.com>",
+          to: OWNER_EMAIL,
           subject: `New Waitlist: ${product}`,
           html: `
             <h2>New Waitlist Submission</h2>
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
         emailErrors.push(emailError.message);
       }
     } else {
-      console.warn("[waitlist] Email configuration missing");
+      console.warn("[waitlist] RESEND_API_KEY missing");
     }
 
     // 2. Save to Database (Priority: High)

@@ -81,6 +81,9 @@ function ScienceTabContent() {
 
   return (
     <section id="science-panel" className="container mx-auto px-4 py-8" style={{ position: 'relative', zIndex: 1 }}>
+      <p className="text-[#FDFCF8] text-base md:text-lg mb-6 leading-relaxed max-w-3xl">
+        Mature melanated skin has overlapping needs—hydration, barrier support, tone, and firmness. This tool maps your specific concerns to the key actives in the NFE ritual, so you can see exactly what's working for you (and why).
+      </p>
       <h1 className="text-[#FDFCF8] text-[1.75rem] font-primary font-bold mb-6 tracking-[0.5px]">
         Your Personalized Ingredient Map
       </h1>

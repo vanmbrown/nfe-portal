@@ -15,7 +15,7 @@ export default function ShopPage() {
       <section className="min-h-screen bg-green-950 pt-28 pb-20">
         <div className="container mx-auto px-6">
           <h1 className="text-center text-4xl md:text-5xl font-serif text-[#D4AF37] mb-6">
-            Shop the NFE Ritual
+            Discover the NFE Ritual
           </h1>
           <p className="text-center text-white/80 max-w-2xl mx-auto mb-12">
             Explore our collection of restorative elixirs designed to nourish, strengthen, and illuminate melanated skin.

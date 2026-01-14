@@ -119,7 +119,7 @@ export default function OurStoryPage() {
             </p>
             <Link href="/shop">
               <Button className="bg-[#D6B370] hover:bg-[#E7C686] text-[#1B3A34] px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all">
-                Shop NFE Elixirs
+                Discover the Elixirs
               </Button>
             </Link>
           </motion.div>

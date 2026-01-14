@@ -88,13 +88,13 @@ export default function WaitlistModal() {
           <div className="text-center py-6">
             <div className="text-6xl mb-4 text-green-600">✓</div>
             <h2 className="text-2xl font-semibold text-green-800 mb-3">
-              Successfully Added to Waitlist!
+              You&apos;ve been added to the Face Elixir waitlist.
             </h2>
             <p className="text-gray-700 mb-2 text-base">
               Thank you for your interest in the NFE Face Elixir.
             </p>
             <p className="text-gray-600 mb-6">
-              We&apos;ll notify you as soon as it launches. Check your inbox for confirmation.
+              We&apos;ll notify you as soon as it launches.
             </p>
             <button
               onClick={() => {

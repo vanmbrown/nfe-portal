@@ -103,18 +103,20 @@ export default function CommunityInputPage() {
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Name (Optional)</label>
+            <label className="block text-sm font-medium text-gray-700">Name <span className="text-red-500">*</span></label>
             <input
               type="text"
+              required
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#C6A664] focus:border-transparent"
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
             />
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Email (Optional)</label>
+            <label className="block text-sm font-medium text-gray-700">Email <span className="text-red-500">*</span></label>
             <input
               type="email"
+              required
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#C6A664] focus:border-transparent"
               value={formData.email}
               onChange={e => setFormData({...formData, email: e.target.value})}
@@ -168,8 +170,8 @@ export default function CommunityInputPage() {
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            Anything else you’d like to share?
-            <span className="block text-xs font-normal text-gray-500 mt-1">What feels missing from your routine? What do you wish existed?</span>
+            Anything else you'd like to share?
+            <span className="block text-xs font-normal text-gray-500 mt-1">What products are you currently using? What feels missing from your routine? What do you wish existed?</span>
           </label>
           <textarea
             rows={5}

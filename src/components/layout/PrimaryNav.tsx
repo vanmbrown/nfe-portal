@@ -7,7 +7,7 @@ const navItems = [
   { href: '/products', label: 'Products' },
   { href: '/science', label: 'Science' },
   { href: '/inci', label: 'Ingredients' },
-  { href: '/shop', label: 'Shop' },
+  { href: '/shop', label: 'Ritual' },
   { href: '/subscribe', label: 'Subscribe' },
   { href: '/community-input', label: 'Community Input', className: 'text-[#C6A664] hover:text-[#E7C686]' },
 ]

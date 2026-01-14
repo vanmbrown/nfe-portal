@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa.mccaleb@gmail.com";
 
 export async function POST(req: Request) {
   try {
@@ -13,11 +14,11 @@ export async function POST(req: Request) {
     const dbErrors = [];
 
     // 1. Send Email Notification
-    if (process.env.FORWARD_TO_EMAIL && process.env.RESEND_API_KEY) {
+    if (process.env.RESEND_API_KEY) {
       try {
         await resend.emails.send({
-          from: "NFE Portal <notifications@nfebeauty.com>",
-          to: process.env.FORWARD_TO_EMAIL,
+          from: "NFE Beauty <notifications@nfebeauty.com>",
+          to: OWNER_EMAIL,
           subject: "New Community Input Submission",
           html: `
             <h2>New Community Input</h2>
