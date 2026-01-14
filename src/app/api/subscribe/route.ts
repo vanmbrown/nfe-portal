@@ -27,9 +27,9 @@ export async function POST(req: Request) {
         .from("subscribers")
         .select("email")
         .eq("email", email.toLowerCase().trim())
-        .single();
+        .maybeSingle();
 
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned (expected if not found)
+      if (checkError) {
         console.error("[subscribe] Database check failed:", checkError);
         dbErrors.push(checkError.message);
       } else if (existingSubscriber) {
@@ -64,43 +64,53 @@ export async function POST(req: Request) {
     }
 
     // 3. Send Confirmation Email to Subscriber (Priority: High)
-    if (dbSuccess && process.env.RESEND_API_KEY) {
-      try {
-        await resend.emails.send({
-          from: "NFE Beauty <notifications@nfebeauty.com>",
-          to: email,
-          subject: "Welcome to NFE Beauty",
-          html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #1B3A34;">Thank you for subscribing!</h2>
-              <p>You've successfully joined the NFE Beauty community. You'll receive occasional, thoughtful notes on caring for mature melanated skin—plus behind-the-scenes updates as NFE evolves.</p>
-              <p>No spam, no pressure. Just honest skin wisdom when I have something meaningful to share.</p>
-              <p style="margin-top: 30px; color: #666; font-size: 14px;">With gratitude,<br>Vanessa<br>NFE Beauty</p>
-            </div>
-          `,
-        });
-      } catch (emailError: any) {
-        console.error("[subscribe] Confirmation email send failed:", emailError);
-        emailErrors.push(emailError.message);
+    if (dbSuccess) {
+      if (!process.env.RESEND_API_KEY) {
+        console.error("[subscribe] RESEND_API_KEY is missing - cannot send confirmation email");
+        emailErrors.push("Email service not configured");
+      } else {
+        try {
+          const confirmationResult = await resend.emails.send({
+            from: "NFE Beauty <notifications@nfebeauty.com>",
+            to: email,
+            subject: "Welcome to NFE Beauty",
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #1B3A34;">Thank you for subscribing!</h2>
+                <p>You've successfully joined the NFE Beauty community. You'll receive occasional, thoughtful notes on caring for mature melanated skin—plus behind-the-scenes updates as NFE evolves.</p>
+                <p>No spam, no pressure. Just honest skin wisdom when I have something meaningful to share.</p>
+                <p style="margin-top: 30px; color: #666; font-size: 14px;">With gratitude,<br>Vanessa<br>NFE Beauty</p>
+              </div>
+            `,
+          });
+          console.log("[subscribe] Confirmation email sent successfully:", confirmationResult);
+        } catch (emailError: any) {
+          console.error("[subscribe] Confirmation email send failed:", emailError);
+          emailErrors.push(emailError.message);
+        }
       }
     }
 
     // 4. Send Email Notification to Owner (Priority: High)
     // We want to notify Vanessa immediately.
-    if (dbSuccess && process.env.RESEND_API_KEY) {
-      try {
-        await resend.emails.send({
-          from: "NFE Beauty <notifications@nfebeauty.com>",
-          to: OWNER_EMAIL,
-          subject: "New Newsletter Subscriber",
-          html: `<p><strong>Email:</strong> ${email}</p><p><strong>Time:</strong> ${new Date().toISOString()}</p>`,
-        });
-      } catch (emailError: any) {
-        console.error("[subscribe] Notification email send failed:", emailError);
-        emailErrors.push(emailError.message);
+    if (dbSuccess) {
+      if (!process.env.RESEND_API_KEY) {
+        console.error("[subscribe] RESEND_API_KEY is missing - cannot send owner notification");
+        emailErrors.push("Email service not configured");
+      } else {
+        try {
+          const notificationResult = await resend.emails.send({
+            from: "NFE Beauty <notifications@nfebeauty.com>",
+            to: OWNER_EMAIL,
+            subject: "New Newsletter Subscriber",
+            html: `<p><strong>Email:</strong> ${email}</p><p><strong>Time:</strong> ${new Date().toISOString()}</p>`,
+          });
+          console.log("[subscribe] Owner notification email sent successfully to:", OWNER_EMAIL, notificationResult);
+        } catch (emailError: any) {
+          console.error("[subscribe] Notification email send failed:", emailError);
+          emailErrors.push(emailError.message);
+        }
       }
-    } else if (!process.env.RESEND_API_KEY) {
-      console.warn("[subscribe] RESEND_API_KEY missing");
     }
 
     // 5. AI Agent Forwarding (Priority: Low - Fire and Forget)

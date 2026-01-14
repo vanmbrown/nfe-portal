@@ -33,9 +33,9 @@ export async function POST(req: Request) {
         .select("email, product")
         .eq("email", email.toLowerCase().trim())
         .eq("product", product)
-        .single();
+        .maybeSingle();
 
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned (expected if not found)
+      if (checkError) {
         console.error("[waitlist] Database check failed:", checkError);
         dbErrors.push(checkError.message);
       } else if (existingEntry) {
@@ -70,25 +70,29 @@ export async function POST(req: Request) {
     }
 
     // 3. Send Email Notification to Owner (Priority: High) - Only if successfully added
-    if (dbSuccess && process.env.RESEND_API_KEY) {
-      try {
-        await resend.emails.send({
-          from: "NFE Beauty <notifications@nfebeauty.com>",
-          to: OWNER_EMAIL,
-          subject: `New Waitlist: ${product}`,
-          html: `
-            <h2>New Waitlist Submission</h2>
-            <p><strong>Product:</strong> ${product}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Time:</strong> ${new Date().toISOString()}</p>
-          `,
-        });
-      } catch (emailError: any) {
-        console.error("[waitlist] Email send failed:", emailError);
-        emailErrors.push(emailError.message);
+    if (dbSuccess) {
+      if (!process.env.RESEND_API_KEY) {
+        console.error("[waitlist] RESEND_API_KEY is missing - cannot send owner notification");
+        emailErrors.push("Email service not configured");
+      } else {
+        try {
+          const notificationResult = await resend.emails.send({
+            from: "NFE Beauty <notifications@nfebeauty.com>",
+            to: OWNER_EMAIL,
+            subject: `New Waitlist: ${product}`,
+            html: `
+              <h2>New Waitlist Submission</h2>
+              <p><strong>Product:</strong> ${product}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Time:</strong> ${new Date().toISOString()}</p>
+            `,
+          });
+          console.log("[waitlist] Owner notification email sent successfully to:", OWNER_EMAIL, notificationResult);
+        } catch (emailError: any) {
+          console.error("[waitlist] Email send failed:", emailError);
+          emailErrors.push(emailError.message);
+        }
       }
-    } else if (!process.env.RESEND_API_KEY) {
-      console.warn("[waitlist] RESEND_API_KEY missing");
     }
 
     // 4. AI Agent Forwarding (Priority: Low)
