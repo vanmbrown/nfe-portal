@@ -76,7 +76,7 @@ export async function POST(req: Request) {
         emailErrors.push("Email service not configured");
       } else {
         try {
-          const notificationResult = await resend.emails.send({
+          await resend.emails.send({
             from: "NFE Beauty <notifications@nfebeauty.com>",
             to: OWNER_EMAIL,
             subject: `New Waitlist: ${product}`,
@@ -87,7 +87,6 @@ export async function POST(req: Request) {
               <p><strong>Time:</strong> ${new Date().toISOString()}</p>
             `,
           });
-          console.log("[waitlist] Owner notification email sent successfully to:", OWNER_EMAIL, notificationResult);
         } catch (emailError: any) {
           console.error("[waitlist] Email send failed:", emailError);
           emailErrors.push(emailError.message);

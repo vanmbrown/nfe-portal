@@ -98,13 +98,12 @@ export async function POST(req: Request) {
         emailErrors.push("Email service not configured");
       } else {
         try {
-          const notificationResult = await resend.emails.send({
+          await resend.emails.send({
             from: "NFE Beauty <notifications@nfebeauty.com>",
             to: OWNER_EMAIL,
             subject: "New Newsletter Subscriber",
             html: `<p><strong>Email:</strong> ${email}</p><p><strong>Time:</strong> ${new Date().toISOString()}</p>`,
           });
-          console.log("[subscribe] Owner notification email sent successfully to:", OWNER_EMAIL, notificationResult);
         } catch (emailError: any) {
           console.error("[subscribe] Notification email send failed:", emailError);
           emailErrors.push(emailError.message);

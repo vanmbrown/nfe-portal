@@ -42,16 +42,12 @@ export default function WaitlistModal() {
 
       clearTimeout(timeoutId);
 
-      console.log('[WaitlistModal] Response status:', res.status, 'ok:', res.ok);
-
       if (res.ok) {
         // Read the response to ensure it's complete before updating state
         try {
-          const data = await res.json();
-          console.log('[WaitlistModal] Success response:', data);
+          await res.json();
         } catch (e) {
           // Response might not have JSON body, that's okay
-          console.log('[WaitlistModal] No JSON body in response');
         }
         // Update status after response is fully consumed
         setStatus('success');
