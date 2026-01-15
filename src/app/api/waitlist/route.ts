@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa@nfebeauty.com";
+const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa.mccaleb@gmail.com";
 
 export async function POST(req: Request) {
   try {
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       } else if (existingEntry) {
         // Email/product combination already exists
         return NextResponse.json(
-          { error: "This email is already on the waitlist for this product." },
+          { code: "duplicate", message: "This email address is already on the list." },
           { status: 409 }
         );
       }
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
         // Double-check for duplicate (in case of race condition)
         if (insertError.code === '23505' || insertError.message?.includes('duplicate') || insertError.message?.includes('already exists')) {
           return NextResponse.json(
-            { error: "This email is already on the waitlist for this product." },
+            { code: "duplicate", message: "This email address is already on the list." },
             { status: 409 }
           );
         }

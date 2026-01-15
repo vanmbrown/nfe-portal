@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa@nfebeauty.com";
+const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa.mccaleb@gmail.com";
 
 export async function POST(req: Request) {
   try {
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       } else if (existingSubscriber) {
         // Email already exists
         return NextResponse.json(
-          { error: "This email is already subscribed." },
+          { code: "duplicate", message: "This email address is already on the list." },
           { status: 409 }
         );
       }
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
         // Double-check for duplicate (in case of race condition)
         if (insertError.code === '23505' || insertError.message?.includes('duplicate') || insertError.message?.includes('already exists')) {
           return NextResponse.json(
-            { error: "This email is already subscribed." },
+            { code: "duplicate", message: "This email address is already on the list." },
             { status: 409 }
           );
         }
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
           const confirmationResult = await resend.emails.send({
             from: "NFE Beauty <notifications@nfebeauty.com>",
             to: email,
-            subject: "Welcome to NFE Beauty",
+            subject: "Welcome to the NFE Community",
             html: `
               <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2 style="color: #1B3A34;">Thank you for subscribing!</h2>
@@ -83,7 +83,6 @@ export async function POST(req: Request) {
               </div>
             `,
           });
-          console.log("[subscribe] Confirmation email sent successfully:", confirmationResult);
         } catch (emailError: any) {
           console.error("[subscribe] Confirmation email send failed:", emailError);
           emailErrors.push(emailError.message);
@@ -92,7 +91,7 @@ export async function POST(req: Request) {
     }
 
     // 4. Send Email Notification to Owner (Priority: High)
-    // We want to notify Vanessa immediately.
+    // We want to notify vanessa.mccaleb@gmail.com immediately.
     if (dbSuccess) {
       if (!process.env.RESEND_API_KEY) {
         console.error("[subscribe] RESEND_API_KEY is missing - cannot send owner notification");

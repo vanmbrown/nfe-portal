@@ -27,8 +27,14 @@ export default function SubscribePage() {
         setEmail("");
       } else {
         const data = await res.json().catch(() => ({ error: "Unknown error" }));
-        setStatus("error");
-        setErrorMessage(data.error || "Something went wrong. Please try again.");
+        // Check for duplicate error
+        if (res.status === 409 && data.code === "duplicate") {
+          setStatus("error");
+          setErrorMessage(data.message || "This email address is already on the list.");
+        } else {
+          setStatus("error");
+          setErrorMessage(data.error || "Something went wrong. Please try again.");
+        }
       }
     } catch (error) {
       console.error("Subscribe form error:", error);

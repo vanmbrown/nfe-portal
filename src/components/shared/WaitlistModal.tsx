@@ -60,7 +60,12 @@ export default function WaitlistModal() {
         const data = await res.json().catch(() => ({ error: 'Unknown error' }));
         console.error('[WaitlistModal] Error response:', data);
         setStatus('error');
-        setErrorMessage(data.error || 'Something went wrong. Please try again.');
+        // Check for duplicate error
+        if (res.status === 409 && data.code === "duplicate") {
+          setErrorMessage(data.message || "This email address is already on the list.");
+        } else {
+          setErrorMessage(data.error || 'Something went wrong. Please try again.');
+        }
       }
     } catch (error: any) {
       console.error('Waitlist submission error:', error);
