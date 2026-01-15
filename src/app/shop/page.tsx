@@ -36,8 +36,8 @@ export default function ShopPage() {
               description="A rich yet fast-absorbing elixir that restores suppleness and glow to dry, crepey skin."
               status="In Development"
               waitlist={false}
-              imageSrc="/images/products/body-elixir-detail.jpg"
-              imageAlt="Body Elixir"
+              href={null}
+              showImage={false}
             />
           </div>
         </div>

@@ -13,6 +13,7 @@ interface ProductCardProps {
   imageAlt?: string;
   href?: string | null;
   showImage?: boolean;
+  reserveImageSpace?: boolean;
 }
 
 export default function ProductCard({
@@ -24,6 +25,7 @@ export default function ProductCard({
   imageAlt,
   href = '/products/face-elixir',
   showImage = true,
+  reserveImageSpace = true,
 }: ProductCardProps) {
   const openWaitlist = useWaitlistStore((s) => s.open);
 
@@ -48,6 +50,8 @@ export default function ProductCard({
                 priority
               />
             </div>
+          ) : reserveImageSpace ? (
+            <div className="w-full h-[350px] mb-4" />
           ) : null}
           <h3 className="text-2xl font-serif text-white mb-2">{title}</h3>
         </Link>
@@ -64,6 +68,8 @@ export default function ProductCard({
                 priority
               />
             </div>
+          ) : reserveImageSpace ? (
+            <div className="w-full h-[350px] mb-4" />
           ) : null}
           <h3 className="text-2xl font-serif text-white mb-2">{title}</h3>
         </>
