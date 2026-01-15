@@ -29,8 +29,8 @@ export default function ProductsPage() {
               description="A rich yet fast-absorbing elixir that restores suppleness and glow to dry, crepey skin — your daily ritual for head-to-toe hydration."
               badge="In Development"
               waitlist={false}
-              imageSrc="/images/products/body-elixir-detail.jpg"
-              imageAlt="Body Elixir"
+              href={null}
+              showImage={false}
             />
           </div>
         </div>
