@@ -102,8 +102,14 @@ export default function NFEHomePage() {
             className="bg-[#1A3B2C] rounded-2xl p-6 md:p-8 flex flex-col items-center text-white shadow-lg opacity-80"
           >
             <div className="flex justify-center items-center mb-6">
-              <div className="w-40 h-40 bg-[#2A4C44] rounded-lg flex items-center justify-center">
-                <span className="text-gray-200 text-sm">Body Elixir</span>
+              <div className="w-40 h-40 rounded-lg flex items-center justify-center">
+                <Image
+                  src="/images/products/radiant-body-elixir-white.png"
+                  alt="Radiant Body Elixir Bottle"
+                  width={160}
+                  height={160}
+                  className="w-40 h-auto rounded-lg object-contain"
+                />
               </div>
             </div>
             <h3 className="text-xl md:text-2xl font-serif mb-2">Body Elixir</h3>

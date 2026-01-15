@@ -37,7 +37,9 @@ export default function ShopPage() {
               status="In Development"
               waitlist={false}
               href={null}
-              showImage={false}
+              showImage={true}
+              imageSrc="/images/products/radiant-body-elixir-white.png"
+              imageAlt="Radiant Body Elixir Bottle"
             />
           </div>
         </div>
