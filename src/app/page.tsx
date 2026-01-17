@@ -28,7 +28,7 @@ export default function NFEHomePage() {
           </p>
         </div>
         <Link
-          href="/subscribe"
+          href="/products/face-elixir"
           className="bg-[#D6B370] text-[#1B3A34] px-8 py-3 text-lg rounded-2xl hover:bg-[#E3C58E] transition text-center inline-flex items-center justify-center"
           aria-label="Join the Waitlist"
         >

@@ -14,6 +14,7 @@ export default function StoryHero() {
         fill
         className="object-cover"
         priority
+        unoptimized
       />
 
       {/* Dark overlay */}

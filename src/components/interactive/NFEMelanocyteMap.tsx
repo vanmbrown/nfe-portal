@@ -118,6 +118,7 @@ export default function NFEMelanocyteMap({
   const [activeId, setActiveId] = useState<string>('');
   const [themeDark, setThemeDark] = useState(true);
   const [groupFilter, setGroupFilter] = useState({ tone: true, hydrate: true, antioxidant: true, peptide: true });
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   // Pan/zoom state using useReducer - locked in place (no panning)
   const [mapState, dispatch] = useReducer(mapReducer, initialMapState);
@@ -140,6 +141,16 @@ export default function NFEMelanocyteMap({
       initializeActives().then(setAllActivesLoaded);
     }
   }, [contextActives]);
+
+  // Detect large screen for responsive placeholder
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsLargeScreen(window.matchMedia('(min-width: 1024px)').matches);
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   // Use context actives (already filtered) and apply search query
   const filtered = useMemo(() => {
@@ -207,15 +218,15 @@ export default function NFEMelanocyteMap({
         <div className={`absolute inset-0 ${themeDark ? 'bg-[radial-gradient(transparent_1px,rgba(11,41,30,0.9)_1px)]' : 'bg-[radial-gradient(transparent_1px,rgba(250,250,248,0.5)_1px)]'} [background-size:16px_16px] opacity-20`} />
       </div>
 
-      <div className="mx-auto max-w-7xl p-4 md:p-8 w-full overflow-x-hidden">
+      <div className="mx-auto max-w-7xl p-4 md:p-8 w-full">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 w-full">
-          <div className="min-w-0 flex-1">
+          <div className="flex-1">
             <motion.h1
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
               id="melanocyte-map-title"
-              className="text-3xl md:text-5xl font-primary font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-nfe-gold via-nfe-green to-nfe-gold"
+              className="text-[clamp(2rem,4vw,4.5rem)] leading-[1.05] tracking-tight break-normal [word-break:normal] [overflow-wrap:normal] [hyphens:none] font-primary font-semibold text-nfe-gold lg:bg-gradient-to-r lg:from-nfe-gold lg:to-nfe-gold/70 lg:bg-clip-text lg:text-transparent"
             >
               Melanocyte Interaction Map
             </motion.h1>
@@ -225,8 +236,8 @@ export default function NFEMelanocyteMap({
             {/* Non-functional badges removed per UX requirements */}
             {/* Future badges can be conditionally rendered here if needed */}
           </div>
-          <div className="flex flex-col sm:flex-row items-end gap-3 min-w-0 flex-shrink-0">
-            <div className="flex items-center gap-2 flex-wrap justify-end">
+          <div className="flex flex-wrap items-center gap-2 w-full max-w-full min-w-0">
+            <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap shrink-0">
               {Object.entries(GROUPS).map(([key, meta]) => (
                 <Button
                   key={key}
@@ -241,14 +252,16 @@ export default function NFEMelanocyteMap({
                 </Button>
               ))}
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0 flex-shrink-0">
+            <div className="w-full lg:w-auto lg:min-w-[360px] lg:max-w-[450px] min-w-0">
               <SimpleInput
-                className={`flex-1 min-w-0 max-w-full ${inputBg} placeholder:${mutedTextColor}`}
-                placeholder="Search actives, roles, mechanisms…"
+                className={`w-full min-w-0 ${inputBg} placeholder:${mutedTextColor}`}
+                placeholder={isLargeScreen ? "Search actives, roles, mechanisms…" : "Search actives, roles…"}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search actives"
               />
+            </div>
+            <div className="flex shrink-0 gap-2">
               <Button variant="outline" size="sm" onClick={() => setQuery('')} aria-label="Clear search" className="flex-shrink-0">
                 Clear
               </Button>
