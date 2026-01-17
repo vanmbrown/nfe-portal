@@ -3,7 +3,8 @@ import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa.mccaleb@gmail.com";
+const ADMIN_NOTIFICATION_EMAIL =
+  process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
 export async function POST(req: Request) {
   try {
@@ -74,11 +75,14 @@ export async function POST(req: Request) {
       if (!process.env.RESEND_API_KEY) {
         console.error("[waitlist] RESEND_API_KEY is missing - cannot send owner notification");
         emailErrors.push("Email service not configured");
+      } else if (!ADMIN_NOTIFICATION_EMAIL) {
+        console.error("[waitlist] ADMIN_NOTIFICATION_EMAIL is missing - cannot send owner notification");
+        emailErrors.push("Admin notification email not configured");
       } else {
         try {
           await resend.emails.send({
             from: "NFE Beauty <notifications@nfebeauty.com>",
-            to: OWNER_EMAIL,
+            to: ADMIN_NOTIFICATION_EMAIL,
             subject: `New Waitlist: ${product}`,
             html: `
               <h2>New Waitlist Submission</h2>

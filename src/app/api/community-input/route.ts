@@ -3,7 +3,8 @@ import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa.mccaleb@gmail.com";
+const ADMIN_NOTIFICATION_EMAIL =
+  process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
 export async function POST(req: Request) {
   try {
@@ -14,11 +15,11 @@ export async function POST(req: Request) {
     const dbErrors = [];
 
     // 1. Send Email Notification
-    if (process.env.RESEND_API_KEY) {
+    if (process.env.RESEND_API_KEY && ADMIN_NOTIFICATION_EMAIL) {
       try {
         await resend.emails.send({
           from: "NFE Beauty <notifications@nfebeauty.com>",
-          to: OWNER_EMAIL,
+          to: ADMIN_NOTIFICATION_EMAIL,
           subject: "New Community Input Submission",
           html: `
             <h2>New Community Input</h2>
@@ -36,6 +37,12 @@ export async function POST(req: Request) {
         console.error("[community-input] Email send failed:", emailError);
         emailErrors.push(emailError.message);
       }
+    } else if (!process.env.RESEND_API_KEY) {
+      console.error("[community-input] RESEND_API_KEY is missing - cannot send owner notification");
+      emailErrors.push("Email service not configured");
+    } else if (!ADMIN_NOTIFICATION_EMAIL) {
+      console.error("[community-input] ADMIN_NOTIFICATION_EMAIL is missing - cannot send owner notification");
+      emailErrors.push("Admin notification email not configured");
     }
 
     // 2. Save to Database

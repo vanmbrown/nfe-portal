@@ -3,7 +3,8 @@ import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const OWNER_EMAIL = process.env.FORWARD_TO_EMAIL || "vanessa.mccaleb@gmail.com";
+const ADMIN_NOTIFICATION_EMAIL =
+  process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
 export async function POST(req: Request) {
   try {
@@ -91,16 +92,18 @@ export async function POST(req: Request) {
     }
 
     // 4. Send Email Notification to Owner (Priority: High)
-    // We want to notify vanessa.mccaleb@gmail.com immediately.
     if (dbSuccess) {
       if (!process.env.RESEND_API_KEY) {
         console.error("[subscribe] RESEND_API_KEY is missing - cannot send owner notification");
         emailErrors.push("Email service not configured");
+      } else if (!ADMIN_NOTIFICATION_EMAIL) {
+        console.error("[subscribe] ADMIN_NOTIFICATION_EMAIL is missing - cannot send owner notification");
+        emailErrors.push("Admin notification email not configured");
       } else {
         try {
           await resend.emails.send({
             from: "NFE Beauty <notifications@nfebeauty.com>",
-            to: OWNER_EMAIL,
+            to: ADMIN_NOTIFICATION_EMAIL,
             subject: "New Newsletter Subscriber",
             html: `<p><strong>Email:</strong> ${email}</p><p><strong>Time:</strong> ${new Date().toISOString()}</p>`,
           });
