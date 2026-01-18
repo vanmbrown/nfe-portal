@@ -2,8 +2,6 @@
 const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
-    // Explicitly disable Turbopack - use webpack instead
-    turbo: undefined,
   },
   images: {
     formats: ['image/avif', 'image/webp'],
