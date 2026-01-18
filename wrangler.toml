@@ -1,2 +1,7 @@
 name = "nfe-portal"
 compatibility_date = "2026-01-18"
+main = ".open-next/worker.js"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = ".open-next/assets"
