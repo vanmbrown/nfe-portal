@@ -11,7 +11,7 @@ export const dynamicParams = false;
 export const revalidate = false;
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateStaticParams() {
@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
   const meta = (articlesIndex as Array<{ slug: string; title: string; excerpt: string; image?: string }>).find(
     (article) => article.slug === slug
   );
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ArticlePage({ params }: Props) {
-  const { slug } = params;
+  const { slug } = await params;
   const typedSlug = slug as ArticleSlug;
   const loader = articleMDX[typedSlug];
   if (!loader) {
