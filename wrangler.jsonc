@@ -1,11 +1,11 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "nfe-portal",
   "main": ".open-next/worker.js",
+  "compatibility_date": "2026-01-18",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",
-    "not_found_handling": "404-page",
-    "html_handling": "auto-trailing-slash"
-  },
-  "compatibility_date": "2026-01-18",
-  "compatibility_flags": ["nodejs_compat"]
+    "binding": "ASSETS"
+  }
 }
