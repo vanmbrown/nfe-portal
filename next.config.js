@@ -11,8 +11,6 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Optimize CSS
-  swcMinify: true,
   // Compress responses
   compress: true,
   async redirects() {

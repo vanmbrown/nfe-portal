@@ -103,8 +103,9 @@ export default function CommunityInputPage() {
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Name <span className="text-red-500">*</span></label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name <span className="text-red-500">*</span></label>
             <input
+              id="name"
               type="text"
               required
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#C6A664] focus:border-transparent"
@@ -113,8 +114,9 @@ export default function CommunityInputPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Email <span className="text-red-500">*</span></label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email <span className="text-red-500">*</span></label>
             <input
+              id="email"
               type="email"
               required
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#C6A664] focus:border-transparent"
@@ -125,8 +127,9 @@ export default function CommunityInputPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Age Range</label>
+          <label htmlFor="ageRange" className="block text-sm font-medium text-gray-700">Age Range</label>
           <select
+            id="ageRange"
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#C6A664] focus:border-transparent bg-white"
             value={formData.ageRange}
             onChange={e => setFormData({...formData, ageRange: e.target.value})}
@@ -139,11 +142,12 @@ export default function CommunityInputPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label htmlFor="skinDescription" className="block text-sm font-medium text-gray-700">
             How would you describe your skin?
             <span className="block text-xs font-normal text-gray-500 mt-1">(e.g., dry, oily, combination, sensitive, etc.)</span>
           </label>
           <input
+            id="skinDescription"
             type="text"
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#C6A664] focus:border-transparent"
             value={formData.skinDescription}
@@ -152,7 +156,7 @@ export default function CommunityInputPage() {
         </div>
 
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">Top Skin Concerns (Select all that apply)</label>
+          <div className="block text-sm font-medium text-gray-700">Top Skin Concerns (Select all that apply)</div>
           <div className="grid md:grid-cols-2 gap-3">
             {SKIN_CONCERNS.map(concern => (
               <label key={concern} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
@@ -169,11 +173,12 @@ export default function CommunityInputPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Anything else you'd like to share?
+          <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+            Anything else you&apos;d like to share?
             <span className="block text-xs font-normal text-gray-500 mt-1">What products are you currently using? What feels missing from your routine? What do you wish existed?</span>
           </label>
           <textarea
+            id="message"
             rows={5}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#C6A664] focus:border-transparent"
             value={formData.message}
