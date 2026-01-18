@@ -2,11 +2,8 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { remark } from "remark";
-import html from "remark-html";
-import { MDXRemote } from "next-mdx-remote/rsc";
+ 
 import { getAllArticles, getArticleBySlug } from "@/lib/articles";
-import { mdxComponents } from "@/components/articles/MDXComponents";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
@@ -48,25 +45,12 @@ export default async function ArticlePage({ params }: Props) {
       })
     : "";
 
-  // Render MDX or Markdown based on file type
-  let contentElement: React.ReactNode;
-  
-  if (article.isMDX) {
-    // Use MDXRemote for MDX files with component support
-    contentElement = (
-      <MDXRemote source={article.content} components={mdxComponents} />
-    );
-  } else {
-    // Use remark for regular markdown files
-    const processed = await remark().use(html).process(article.content);
-    const contentHtml = processed.toString();
-    contentElement = (
-      <div
-        className="prose prose-lg max-w-3xl text-[#0D2818]"
-        dangerouslySetInnerHTML={{ __html: contentHtml }}
-      />
-    );
-  }
+  const contentElement = (
+    <div
+      className="prose prose-lg max-w-3xl text-[#0D2818]"
+      dangerouslySetInnerHTML={{ __html: article.contentHtml }}
+    />
+  );
 
   return (
     <main className="w-full bg-white">

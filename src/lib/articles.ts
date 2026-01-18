@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { remark } from "remark";
+import html from "remark-html";
 
 export type ArticleMeta = {
   slug: string;
@@ -13,8 +15,7 @@ export type ArticleMeta = {
 };
 
 export type Article = ArticleMeta & {
-  content: string;
-  isMDX?: boolean; // Flag to indicate if this is an MDX file
+  contentHtml: string;
 };
 
 const articlesDir = path.join(process.cwd(), "src", "content", "articles");
@@ -63,45 +64,39 @@ export function getArticleBySlug(slug: string): Article {
 
   const file = fs.readFileSync(filePath, "utf8");
   const { content, data } = matter(file);
-  const isMDX = filePath.endsWith('.mdx');
+  const isMDX = filePath.endsWith(".mdx");
 
-  // For MDX files, keep the full content (including JSX components)
-  // For .md files, use content as-is
+  // For MDX files, strip component definitions but keep the JSX usage as raw HTML.
   let processedContent = content;
-  
   if (isMDX) {
-    // For MDX, we need to strip the component definitions but keep the JSX usage
-    // Find where the markdown content starts (after component definitions)
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     let markdownStartIndex = 0;
-    
-    // Find the first markdown heading (#) - that's where the actual content starts
+
     for (let i = 0; i < lines.length; i++) {
       const trimmed = lines[i].trim();
-      if (trimmed.startsWith('#')) {
+      if (trimmed.startsWith("#")) {
         markdownStartIndex = i;
         break;
       }
     }
-    
-    // If no heading found, find first non-export, non-const line after blank lines
+
     if (markdownStartIndex === 0) {
       let foundExports = false;
       for (let i = 0; i < lines.length; i++) {
         const trimmed = lines[i].trim();
-        if (trimmed.startsWith('export ') || trimmed.startsWith('const ')) {
+        if (trimmed.startsWith("export ") || trimmed.startsWith("const ")) {
           foundExports = true;
         } else if (trimmed && foundExports) {
-          // Found content after exports
           markdownStartIndex = i;
           break;
         }
       }
     }
-    
-    // Keep content from markdown start (this includes JSX component usage)
-    processedContent = lines.slice(markdownStartIndex).join('\n').trim();
+
+    processedContent = lines.slice(markdownStartIndex).join("\n").trim();
   }
+
+  const contentHtml = remark().use(html).processSync(processedContent).toString();
 
   return {
     slug,
@@ -110,7 +105,6 @@ export function getArticleBySlug(slug: string): Article {
     author: (data.author as string) ?? metaFromJson?.author ?? "",
     image: (data.image as string) ?? metaFromJson?.image ?? "",
     excerpt: (data.excerpt as string) ?? metaFromJson?.excerpt ?? "",
-    content: processedContent,
-    isMDX,
+    contentHtml,
   };
 }
