@@ -39,7 +39,9 @@ const nextConfig = {
   },
 };
 
-const withMDX = createMDX({});
+const withMDX = createMDX({
+  extension: /\.mdx?$/,
+});
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
