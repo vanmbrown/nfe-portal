@@ -13,6 +13,8 @@ const nextConfig = {
   },
   // Compress responses
   compress: true,
+  // Turbopack config (Next.js 16 uses Turbopack by default)
+  turbopack: {},
   async redirects() {
     return [
       {
