@@ -102,6 +102,12 @@ export default async function ArticlePage({ params }: Props) {
           <p className="text-xs tracking-[0.3em] uppercase text-[#0D2818]/70 mb-2">
             Articles & Editorials
           </p>
+          {/* Temporary build marker for verification */}
+          {process.env.NEXT_PUBLIC_BUILD_SHA && (
+            <p className="text-xs text-gray-400 mb-2" data-build-sha={process.env.NEXT_PUBLIC_BUILD_SHA}>
+              Build: {process.env.NEXT_PUBLIC_BUILD_SHA}
+            </p>
+          )}
           <h1 className="text-4xl md:text-5xl font-serif text-[#0D2818] mb-4">
             {meta.title}
           </h1>
