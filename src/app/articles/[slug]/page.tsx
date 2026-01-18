@@ -8,7 +8,9 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllArticles, getArticleBySlug } from "@/lib/articles";
 import { mdxComponents } from "@/components/articles/MDXComponents";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
+export const dynamicParams = false;
+export const revalidate = false;
 
 type Props = {
   params: Promise<{ slug: string }>;
