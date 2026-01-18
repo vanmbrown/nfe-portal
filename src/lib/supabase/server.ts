@@ -31,7 +31,7 @@ export const createServerSupabase = async (request?: NextRequest) => {
   
   // If no token in header, try cookies
   if (!accessToken) {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     
     // Extract project ref from URL for cookie name pattern
     const urlMatch = supabaseUrl.match(/https?:\/\/([^.]+)\.supabase\.co/)
