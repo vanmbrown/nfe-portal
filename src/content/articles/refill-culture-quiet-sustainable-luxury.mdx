@@ -23,20 +23,6 @@ export const Callout = ({ title, children }) => (
   </div>
 );
 
-export const KeyTakeaways = ({ items }) => (
-  <div style={{
-    padding: "1.1rem 1.1rem",
-    borderRadius: "18px",
-    border: "1px solid rgba(0,0,0,0.12)",
-    margin: "1.25rem 0"
-  }}>
-    <div style={{ fontWeight: 650, marginBottom: ".45rem" }}>Key takeaways</div>
-    <ul style={{ margin: 0, paddingLeft: "1.15rem", lineHeight: 1.7 }}>
-      {items.map((x, i) => <li key={i}>{x}</li>)}
-    </ul>
-  </div>
-);
-
 export const TwoCol = ({ left, right }) => (
   <div style={{
     display: "grid",
@@ -69,13 +55,12 @@ It looks like **less**—made better.
 
 Refill culture is the shift from “disposable beauty” to **enduring design**: packaging that’s meant to stay, and a routine that’s meant to be repeated.
 
-<KeyTakeaways items={[
-  "Refill is becoming luxury because it signals durability, intention, and repeatable rituals.",
-  "“Recyclable” isn’t the same as “responsibly reduced waste.” Systems matter.",
-  "The most sustainable routine is often fewer products that you actually finish.",
-  "Refill culture supports consistency—and consistency is what changes skin.",
-  "NFE’s philosophy aligns naturally: fewer-but-better daily essentials + refill-minded design."
-]} />
+## Key Takeaways
+- Refill is becoming luxury because it signals durability, intention, and repeatable rituals.
+- “Recyclable” isn’t the same as “responsibly reduced waste.” Systems matter.
+- The most sustainable routine is often fewer products that you actually finish.
+- Refill culture supports consistency—and consistency is what changes skin.
+- NFE’s philosophy aligns naturally: fewer-but-better daily essentials + refill-minded design.
 
 <Divider />
 

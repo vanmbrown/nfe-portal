@@ -28,20 +28,6 @@ export const Callout = ({ title, children }) => (
   </div>
 );
 
-export const KeyTakeaways = ({ items }) => (
-  <div style={{
-    padding: "1.25rem 1.25rem",
-    borderRadius: "18px",
-    border: "1px solid rgba(0,0,0,0.12)",
-    margin: "1.25rem 0"
-  }}>
-    <div style={{ fontWeight: 650, marginBottom: ".5rem" }}>Key takeaways</div>
-    <ul style={{ margin: 0, paddingLeft: "1.2rem", lineHeight: 1.7 }}>
-      {items.map((x, i) => <li key={i}>{x}</li>)}
-    </ul>
-  </div>
-);
-
 export const TwoCol = ({ left, right }) => (
   <div style={{
     display: "grid",
@@ -81,13 +67,12 @@ And it’s also **a marketing shortcut** when it leans on fear, vague claims, or
 
 At NFE, we don’t build from fear. We build from **care**—especially for mature, melanated skin that deserves comfort, resilience, and quiet confidence.
 
-<KeyTakeaways items={[
-  "“Clean” isn’t one universal standard—definitions vary widely.",
-  "“Clean” does not automatically mean safer, gentler, or better-performing.",
-  "The future of clean beauty is shifting from vibes → verifiable standards: transparency, testing, and better manufacturing.",
-  "NFE fits within clean beauty expectations through transparency, thoughtful formulation, and refill-minded design—without fear marketing.",
-  "Our philosophy stays the same: layered care, Barrier Wealth, and fewer-but-better daily essentials."
-]} />
+## Key Takeaways
+- “Clean” isn’t one universal standard—definitions vary widely.
+- “Clean” does not automatically mean safer, gentler, or better-performing.
+- The future of clean beauty is shifting from vibes → verifiable standards: transparency, testing, and better manufacturing.
+- NFE fits within clean beauty expectations through transparency, thoughtful formulation, and refill-minded design—without fear marketing.
+- Our philosophy stays the same: layered care, Barrier Wealth, and fewer-but-better daily essentials.
 
 <Divider />
 

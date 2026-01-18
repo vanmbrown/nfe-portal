@@ -24,20 +24,6 @@ export const Callout = ({ title, children }) => (
   </div>
 );
 
-export const KeyTakeaways = ({ items }) => (
-  <div style={{
-    padding: "1.1rem 1.1rem",
-    borderRadius: "18px",
-    border: "1px solid rgba(0,0,0,0.12)",
-    margin: "1.25rem 0"
-  }}>
-    <div style={{ fontWeight: 650, marginBottom: ".45rem" }}>Key takeaways</div>
-    <ul style={{ margin: 0, paddingLeft: "1.15rem", lineHeight: 1.7 }}>
-      {items.map((x, i) => <li key={i}>{x}</li>)}
-    </ul>
-  </div>
-);
-
 export const TwoCol = ({ left, right }) => (
   <div style={{
     display: "grid",
@@ -73,13 +59,12 @@ In real, grown-woman skincare, brightening should mean:
 
 That’s clarity. Not bleaching.
 
-<KeyTakeaways items={[
-  "Brightening is about clarity and even-looking tone—not becoming lighter.",
-  "For melanated skin, irritation is a major driver of uneven tone. Calm comes first.",
-  "There are 4 useful “brightening” categories: barrier builders, anti-inflammatory soothers, pigment modulators, and texture smoothers.",
-  "The NFE Science page helps you choose ingredients based on your skin type + concern—so you’re not guessing.",
-  "NFE sits in the “nourish & restore” lane: Barrier Wealth + layered care + fewer, better steps."
-]} />
+## Key Takeaways
+- Brightening is about clarity and even-looking tone—not becoming lighter.
+- For melanated skin, irritation is a major driver of uneven tone. Calm comes first.
+- There are 4 useful “brightening” categories: barrier builders, anti-inflammatory soothers, pigment modulators, and texture smoothers.
+- The NFE Science page helps you choose ingredients based on your skin type + concern—so you’re not guessing.
+- NFE sits in the “nourish & restore” lane: Barrier Wealth + layered care + fewer, better steps.
 
 <Divider />
 
