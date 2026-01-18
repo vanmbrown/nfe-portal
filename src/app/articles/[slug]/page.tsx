@@ -2,43 +2,65 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
- 
-import { getAllArticles, getArticleBySlug } from "@/lib/articles";
+import { notFound } from "next/navigation";
+import { articleMDX, allArticleSlugs, type ArticleSlug } from "@/content/articles/registry";
+import articlesIndex from "@/content/articles/articles.json";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
 export const revalidate = false;
 
 type Props = {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 };
 
 export async function generateStaticParams() {
-  const articles = getAllArticles();
-  return articles.map((article) => ({ slug: article.slug }));
+  return allArticleSlugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const { slug } = params;
+  const meta = (articlesIndex as Array<{ slug: string; title: string; excerpt: string; image?: string }>).find(
+    (article) => article.slug === slug
+  );
+
+  if (!meta) {
+    return {
+      title: "Article Not Found",
+    };
+  }
 
   return {
-    title: article.title,
-    description: article.excerpt,
+    title: meta.title,
+    description: meta.excerpt,
     openGraph: {
-      title: article.title,
-      description: article.excerpt,
-      images: article.image ? [{ url: article.image }] : [],
+      title: meta.title,
+      description: meta.excerpt,
+      images: meta.image ? [{ url: meta.image }] : [],
     },
   };
 }
 
 export default async function ArticlePage({ params }: Props) {
-  const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const { slug } = params;
+  const typedSlug = slug as ArticleSlug;
+  const loader = articleMDX[typedSlug];
+  if (!loader) {
+    notFound();
+  }
+
+  const meta = (articlesIndex as Array<{ slug: string; title: string; excerpt?: string; author?: string; date?: string; image?: string }>).find(
+    (article) => article.slug === typedSlug
+  );
+  if (!meta) {
+    notFound();
+  }
+
+  const mod = await loader();
+  const MDXContent = mod.default;
   
-  const formattedDate = article.date
-    ? new Date(article.date).toLocaleDateString("en-US", {
+  const formattedDate = meta.date
+    ? new Date(meta.date).toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
         year: "numeric",
@@ -46,19 +68,18 @@ export default async function ArticlePage({ params }: Props) {
     : "";
 
   const contentElement = (
-    <div
-      className="prose prose-lg max-w-3xl text-[#0D2818]"
-      dangerouslySetInnerHTML={{ __html: article.contentHtml }}
-    />
+    <div className="prose prose-lg max-w-3xl text-[#0D2818]">
+      <MDXContent />
+    </div>
   );
 
   return (
     <main className="w-full bg-white">
-      {article.image && (
+      {meta.image && (
         <div className="relative w-full h-[60vh]">
           <Image
-            src={article.image}
-            alt={article.title}
+            src={meta.image}
+            alt={meta.title}
             fill
             className="object-cover"
             sizes="100vw"
@@ -82,19 +103,19 @@ export default async function ArticlePage({ params }: Props) {
             Articles & Editorials
           </p>
           <h1 className="text-4xl md:text-5xl font-serif text-[#0D2818] mb-4">
-            {article.title}
+            {meta.title}
           </h1>
           {/* Hero excerpt (optional) */}
-          {article.excerpt && (
+          {meta.excerpt && (
             <div className="my-6 max-w-2xl mx-auto border-t border-b border-[#0D2818]/10 py-6">
               <p className="text-xl md:text-2xl text-[#0D2818] font-serif italic leading-relaxed">
-                {article.excerpt}
+                {meta.excerpt}
               </p>
             </div>
           )}
           <p className="text-sm text-gray-600 mb-6">
-            {article.author && <span>By {article.author}</span>}
-            {article.author && formattedDate && <span> • </span>}
+            {meta.author && <span>By {meta.author}</span>}
+            {meta.author && formattedDate && <span> • </span>}
             {formattedDate}
           </p>
         </div>
