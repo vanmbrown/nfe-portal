@@ -2,6 +2,8 @@
 const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
+    // Explicitly disable Turbopack - use webpack instead
+    turbo: undefined,
   },
   images: {
     formats: ['image/avif', 'image/webp'],
@@ -13,8 +15,6 @@ const nextConfig = {
   },
   // Compress responses
   compress: true,
-  // Turbopack config (Next.js 16 uses Turbopack by default)
-  turbopack: {},
   async redirects() {
     return [
       {
