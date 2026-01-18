@@ -52,7 +52,6 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.8.2",
     "@opennextjs/cloudflare": "^1.14.9",
-    "@opennextjs/aws": "^3.6.6",
     "@lhci/cli": "^0.12.0",
     "@next/bundle-analyzer": "^14.2.0",
     "@playwright/test": "^1.40.1",
