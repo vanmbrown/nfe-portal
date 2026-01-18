@@ -4,21 +4,37 @@ import { cookies } from 'next/headers'
 import type { NextRequest } from 'next/server'
 
 // Support both NEXT_PUBLIC_ prefixed and non-prefixed environment variables
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-// Validate environment variables
-if (!supabaseUrl) {
-  throw new Error('Missing SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL')
+// Don't validate at module load time - validate when functions are called
+// This allows the module to be imported during build time even if env vars aren't set
+const getSupabaseUrl = () => {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!url) {
+    throw new Error('Missing SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL')
+  }
+  return url
 }
 
-if (!supabaseAnonKey) {
-  throw new Error('Missing SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY')
+const getSupabaseAnonKey = () => {
+  const key = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!key) {
+    throw new Error('Missing SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY')
+  }
+  return key
+}
+
+const getSupabaseServiceRoleKey = () => {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!key) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY for admin operations')
+  }
+  return key
 }
 
 // Server-side client for authenticated requests (uses Authorization header or cookies)
 export const createServerSupabase = async (request?: NextRequest) => {
+  const supabaseUrl = getSupabaseUrl()
+  const supabaseAnonKey = getSupabaseAnonKey()
+  
   let accessToken: string | null = null
   
   // Try to get access token from Authorization header first
@@ -75,9 +91,8 @@ export const createServerSupabase = async (request?: NextRequest) => {
 
 // Admin client with service role (use sparingly, only for admin operations)
 export const createAdminSupabase = () => {
-  if (!supabaseServiceRoleKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY for admin operations')
-  }
+  const supabaseUrl = getSupabaseUrl()
+  const supabaseServiceRoleKey = getSupabaseServiceRoleKey()
   
   return createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
     auth: {
