@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack && npx @cloudflare/next-on-pages",
+    "build": "next build --webpack && npx opennextjs-cloudflare build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.8.2",
-    "@cloudflare/next-on-pages": "^1.12.2",
+    "@opennextjs/cloudflare": "^1.14.9",
     "@lhci/cli": "^0.12.0",
     "@next/bundle-analyzer": "^14.2.0",
     "@playwright/test": "^1.40.1",
