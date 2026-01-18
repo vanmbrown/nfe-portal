@@ -2,7 +2,15 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy Resend instantiation - only create when needed (not at module load time)
+const getResend = () => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not configured");
+  }
+  return new Resend(apiKey);
+};
+
 const ADMIN_NOTIFICATION_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
@@ -17,6 +25,7 @@ export async function POST(req: Request) {
     // 1. Send Email Notification
     if (process.env.RESEND_API_KEY && ADMIN_NOTIFICATION_EMAIL) {
       try {
+        const resend = getResend();
         await resend.emails.send({
           from: "NFE Beauty <notifications@nfebeauty.com>",
           to: ADMIN_NOTIFICATION_EMAIL,
