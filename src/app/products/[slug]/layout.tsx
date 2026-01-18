@@ -5,9 +5,9 @@ import fs from 'fs';
 import path from 'path';
 
 interface ProductLayoutProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
   children: React.ReactNode;
 }
 
@@ -24,7 +24,8 @@ async function getProductMetadata(slug: string): Promise<ProductMetadata | null>
 }
 
 export async function generateMetadata({ params }: ProductLayoutProps): Promise<Metadata> {
-  const product = await getProductMetadata(params.slug);
+  const { slug } = await params;
+  const product = await getProductMetadata(slug);
 
   if (!product) {
     return {

@@ -5,9 +5,9 @@ import fs from 'fs';
 import path from 'path';
 
 interface ArticleLayoutProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
   children: React.ReactNode;
 }
 
@@ -24,7 +24,8 @@ async function getArticleMetadata(slug: string): Promise<ArticleMetadata | null>
 }
 
 export async function generateMetadata({ params }: ArticleLayoutProps): Promise<Metadata> {
-  const article = await getArticleMetadata(params.slug);
+  const { slug } = await params;
+  const article = await getArticleMetadata(slug);
 
   if (!article) {
     return {
