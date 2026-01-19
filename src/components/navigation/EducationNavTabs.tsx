@@ -24,9 +24,9 @@ export default function EducationNavTabs() {
 
   return (
     <div className="w-full border-b border-[#C9A66B]/30 bg-gradient-to-br from-[#0B291E] via-[#0E2A22] to-[#0B291E]">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 overflow-x-auto">
         <div
-          className="flex gap-1 overflow-x-auto whitespace-nowrap overscroll-x-contain [-webkit-overflow-scrolling:touch] px-1"
+          className="flex gap-1 overflow-x-auto whitespace-nowrap overscroll-x-contain [-webkit-overflow-scrolling:touch] min-w-max"
           role="tablist"
           aria-label="Education navigation"
         >
