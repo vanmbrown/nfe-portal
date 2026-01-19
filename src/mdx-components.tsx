@@ -4,6 +4,7 @@ import {
   Divider,
   KeyTakeaways,
   TwoCol,
+  ScienceDiagram,
 } from "@/components/articles/MDXComponents";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
@@ -13,5 +14,6 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     Divider,
     KeyTakeaways,
     TwoCol,
+    ScienceDiagram,
   };
 }

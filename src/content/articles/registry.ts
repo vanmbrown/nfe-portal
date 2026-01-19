@@ -9,8 +9,8 @@ export const articleMDX = {
     import("./why_aging_melanated_skin_ages_differently.mdx"),
   "barrier-wealth-midlife-dryness-after-45": () =>
     import("./drier_skin_after_45.mdx"),
-  "black-dont-crack": () => import("./black-dont-crack.md"),
-  "water-vs-oil": () => import("./water-vs-oil.md"),
+  "black-dont-crack": () => import("./black-dont-crack.mdx"),
+  "water-vs-oil": () => import("./water-vs-oil.mdx"),
 } as const;
 
 export type ArticleSlug = keyof typeof articleMDX;

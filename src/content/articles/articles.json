@@ -51,7 +51,7 @@
     "author": "NFE Beauty",
     "image": "/images/articles/black_dont_crack.jpg",
     "excerpt": "For years, many believed deeper skin tones didn’t need sunscreen. Discover why SPF is essential for mature melanated skin.",
-    "file": "black-dont-crack.md"
+    "file": "black-dont-crack.mdx"
   },
   {
     "slug": "water-vs-oil",
@@ -60,7 +60,7 @@
     "author": "NFE Beauty",
     "image": "/images/articles/water_vs_oil.png",
     "excerpt": "Oil alone isn’t enough. Understanding hydration vs moisture is key for mature melanated skin.",
-    "file": "water-vs-oil.md"
+    "file": "water-vs-oil.mdx"
   }
 ]
 
