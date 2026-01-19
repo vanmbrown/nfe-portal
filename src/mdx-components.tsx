@@ -5,6 +5,7 @@ import {
   KeyTakeaways,
   TwoCol,
   ScienceDiagram,
+  ProductCard,
 } from "@/components/articles/MDXComponents";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
@@ -15,5 +16,6 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     KeyTakeaways,
     TwoCol,
     ScienceDiagram,
+    ProductCard,
   };
 }

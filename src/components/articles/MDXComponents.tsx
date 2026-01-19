@@ -91,6 +91,35 @@ export const ScienceDiagram = ({ title, caption, kind }: { title?: string; capti
   </div>
 );
 
+export const ProductCard = ({ title, subtitle, description, tags }: { title: string; subtitle?: string; description: string; tags?: string[] }) => (
+  <div style={{
+    padding: "1.5rem",
+    borderRadius: "18px",
+    border: "1px solid rgba(0,0,0,0.12)",
+    background: "rgba(0,0,0,0.02)",
+    margin: "1.25rem 0"
+  }}>
+    <div style={{ fontWeight: 650, fontSize: "1.1rem", marginBottom: ".5rem" }}>{title}</div>
+    {subtitle && <div style={{ fontSize: "0.9rem", color: "rgba(0,0,0,0.6)", marginBottom: ".75rem" }}>{subtitle}</div>}
+    <div style={{ lineHeight: 1.65, marginBottom: tags && tags.length > 0 ? ".75rem" : "0" }}>{description}</div>
+    {tags && tags.length > 0 && (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: ".75rem" }}>
+        {tags.map((tag, i) => (
+          <span key={i} style={{
+            padding: "0.25rem 0.75rem",
+            borderRadius: "12px",
+            fontSize: "0.75rem",
+            background: "rgba(0,0,0,0.05)",
+            color: "rgba(0,0,0,0.7)"
+          }}>
+            {tag}
+          </span>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
 // Export all components as a single object for MDX
 export const mdxComponents = {
   Divider,
@@ -98,5 +127,6 @@ export const mdxComponents = {
   KeyTakeaways,
   TwoCol,
   ScienceDiagram,
+  ProductCard,
 };
 
