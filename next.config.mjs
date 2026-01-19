@@ -1,7 +1,5 @@
 import createMDX from "@next/mdx";
 import bundleAnalyzer from "@next/bundle-analyzer";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -43,9 +41,6 @@ const nextConfig = {
 
 const withMDX = createMDX({
   extension: /\.mdx?$/,
-  options: {
-    remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter],
-  },
 });
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
