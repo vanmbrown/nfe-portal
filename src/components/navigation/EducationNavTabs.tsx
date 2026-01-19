@@ -25,7 +25,11 @@ export default function EducationNavTabs() {
   return (
     <div className="w-full border-b border-[#C9A66B]/30 bg-gradient-to-br from-[#0B291E] via-[#0E2A22] to-[#0B291E]">
       <div className="container mx-auto px-4">
-        <div className="flex space-x-1" role="tablist" aria-label="Education navigation">
+        <div
+          className="flex gap-1 overflow-x-auto whitespace-nowrap overscroll-x-contain [-webkit-overflow-scrolling:touch] px-1"
+          role="tablist"
+          aria-label="Education navigation"
+        >
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -35,7 +39,7 @@ export default function EducationNavTabs() {
                 role="tab"
                 aria-selected={isActive}
                 aria-controls={tab.id === 'science' ? 'science-panel' : 'inci-panel'}
-                className={`px-6 py-4 font-medium text-sm transition-colors relative ${
+                className={`flex-none px-6 py-4 font-medium text-sm transition-colors relative ${
                   isActive
                     ? 'text-[#E7C686]'
                     : 'text-[#D5D2C7] hover:text-[#FDFCF8]'

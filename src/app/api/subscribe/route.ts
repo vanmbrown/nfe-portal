@@ -15,8 +15,10 @@ const ADMIN_NOTIFICATION_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
 export async function POST(req: Request) {
+  console.log("[subscribe] POST hit");
   try {
     const { email } = await req.json();
+    console.log("[subscribe] email:", email);
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
@@ -111,14 +113,16 @@ export async function POST(req: Request) {
       } else {
         try {
           const resend = getResend();
-          await resend.emails.send({
+          console.log("[subscribe] sending admin receipt to vanessa@nfebeauty.com");
+          const resp = await resend.emails.send({
             from: "NFE Beauty <notifications@nfebeauty.com>",
-            to: ADMIN_NOTIFICATION_EMAIL,
+            to: "vanessa@nfebeauty.com",
             subject: "New Newsletter Subscriber",
             html: `<p><strong>Email:</strong> ${email}</p><p><strong>Time:</strong> ${new Date().toISOString()}</p>`,
           });
+          console.log("[subscribe] admin receipt response:", resp);
         } catch (emailError: any) {
-          console.error("[subscribe] Notification email send failed:", emailError);
+          console.error("[subscribe] admin receipt failed:", emailError);
           emailErrors.push(emailError.message);
         }
       }

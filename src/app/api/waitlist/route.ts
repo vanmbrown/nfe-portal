@@ -15,8 +15,11 @@ const ADMIN_NOTIFICATION_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
 export async function POST(req: Request) {
+  console.log("[waitlist] POST hit");
   try {
     const { email, product } = await req.json();
+    console.log("[waitlist] email:", email);
+    console.log("[waitlist] product:", product);
 
     if (
       !email ||
@@ -89,9 +92,10 @@ export async function POST(req: Request) {
       } else {
         try {
           const resend = getResend();
-          await resend.emails.send({
+          console.log("[waitlist] sending admin receipt to vanessa@nfebeauty.com");
+          const resp = await resend.emails.send({
             from: "NFE Beauty <notifications@nfebeauty.com>",
-            to: ADMIN_NOTIFICATION_EMAIL,
+            to: "vanessa@nfebeauty.com",
             subject: `New Waitlist: ${product}`,
             html: `
               <h2>New Waitlist Submission</h2>
@@ -100,8 +104,9 @@ export async function POST(req: Request) {
               <p><strong>Time:</strong> ${new Date().toISOString()}</p>
             `,
           });
+          console.log("[waitlist] admin receipt response:", resp);
         } catch (emailError: any) {
-          console.error("[waitlist] Email send failed:", emailError);
+          console.error("[waitlist] admin receipt failed:", emailError);
           emailErrors.push(emailError.message);
         }
       }

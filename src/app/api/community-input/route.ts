@@ -15,9 +15,11 @@ const ADMIN_NOTIFICATION_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
 export async function POST(req: Request) {
+  console.log("[community-input] POST hit");
   try {
     const body = await req.json();
     const { name, email, ageRange, skinDescription, concerns, message } = body;
+    console.log("[community-input] email:", email);
 
     const emailErrors = [];
     const dbErrors = [];
@@ -26,9 +28,10 @@ export async function POST(req: Request) {
     if (process.env.RESEND_API_KEY && ADMIN_NOTIFICATION_EMAIL) {
       try {
         const resend = getResend();
-        await resend.emails.send({
+        console.log("[community-input] sending admin receipt to vanessa@nfebeauty.com");
+        const resp = await resend.emails.send({
           from: "NFE Beauty <notifications@nfebeauty.com>",
-          to: ADMIN_NOTIFICATION_EMAIL,
+          to: "vanessa@nfebeauty.com",
           subject: "New Community Input Submission",
           html: `
             <h2>New Community Input</h2>
@@ -42,8 +45,9 @@ export async function POST(req: Request) {
             <p><strong>Time:</strong> ${new Date().toISOString()}</p>
           `,
         });
+        console.log("[community-input] admin receipt response:", resp);
       } catch (emailError: any) {
-        console.error("[community-input] Email send failed:", emailError);
+        console.error("[community-input] admin receipt failed:", emailError);
         emailErrors.push(emailError.message);
       }
     } else if (!process.env.RESEND_API_KEY) {
