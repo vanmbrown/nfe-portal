@@ -6,17 +6,11 @@ import { notFound } from "next/navigation";
 import { articleMDX, allArticleSlugs, type ArticleSlug } from "@/content/articles/registry";
 import articlesIndex from "@/content/articles/articles.json";
 
-export const dynamic = "force-static";
-export const dynamicParams = false;
-export const revalidate = false;
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
-
-export async function generateStaticParams() {
-  return allArticleSlugs.map((slug) => ({ slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
