@@ -15,7 +15,7 @@ const navItems = [
 export default function PrimaryNav() {
   return (
     <nav role="navigation" aria-label="Main navigation">
-      <ul className="flex space-x-6">
+      <ul className="flex flex-wrap gap-x-6 gap-y-3">
         {navItems.map((item) => (
           <li key={item.href}>
             <Link
