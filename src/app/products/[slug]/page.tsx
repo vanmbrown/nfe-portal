@@ -2,33 +2,20 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import { ProductPageClient } from './ProductPageClient';
 import type { Product } from '@/types/products';
-import fs from 'fs';
-import path from 'path';
+import { productData, productsIndex, type ProductSlug } from '@/content/products/registry';
 
-// Generate static params for all products
-export async function generateStaticParams() {
-  try {
-    const filePath = path.join(process.cwd(), 'data', 'products', 'index.json');
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const productsData = JSON.parse(fileContents);
-    const products = productsData.products;
-    return products.map((product: { slug: string }) => ({
-      slug: product.slug,
-    }));
-  } catch (error) {
-    return [];
-  }
-}
+// Force dynamic rendering for Cloudflare Workers compatibility
+export const dynamic = 'force-dynamic';
 
-// Fetch product data
+// Fetch product data using static imports
 async function getProduct(slug: string): Promise<Product | null> {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'products', `${slug}.json`);
-    if (!fs.existsSync(filePath)) {
+    const loader = productData[slug as ProductSlug];
+    if (!loader) {
       return null;
     }
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContents) as Product;
+    const mod = await loader();
+    return mod.default as Product;
   } catch (error) {
     console.error('Error loading product:', error);
     return null;
@@ -38,11 +25,11 @@ async function getProduct(slug: string): Promise<Product | null> {
 // Get all products for related product lookup
 async function getAllProducts() {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'products', 'index.json');
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const productsData = JSON.parse(fileContents);
+    const mod = await productsIndex();
+    const productsData = mod.default as { products: Array<{ slug: string }> };
     return productsData.products || [];
   } catch (error) {
+    console.error('Error loading products index:', error);
     return [];
   }
 }
