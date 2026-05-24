@@ -79,7 +79,7 @@ export default function WaitlistModal() {
       <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl relative">
         <button
           onClick={close}
-          className="absolute top-3 right-3 text-2xl font-bold text-[#0F2C1C] hover:text-[#0F2C1C]/70 transition"
+          className="absolute top-3 right-3 text-2xl font-bold text-nfe-green-900 hover:text-nfe-green-900/70 transition"
           aria-label="Close waitlist modal"
         >
           ×
@@ -110,7 +110,7 @@ export default function WaitlistModal() {
           </div>
         ) : (
           <>
-            <h2 className="text-xl font-semibold mb-4 text-[#0F2C1C]">
+            <h2 className="text-xl font-semibold mb-4 text-nfe-green-900">
               Be the first to experience the NFE Face Elixir
             </h2>
 
@@ -125,7 +125,7 @@ export default function WaitlistModal() {
               id="waitlist-email"
               type="email"
               placeholder="Enter your email"
-              className="w-full border rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-[#CDA64D]"
+              className="w-full border rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-nfe-gold"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => {
@@ -139,18 +139,20 @@ export default function WaitlistModal() {
             <button
               onClick={handleSubmit}
               disabled={status === 'loading' || !email}
-              className="w-full py-2 bg-[#CDA64D] text-white rounded font-medium hover:bg-[#b78f3c] transition focus:outline-none focus:ring-2 focus:ring-[#CDA64D] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2 bg-nfe-gold text-white rounded font-medium hover:bg-nfe-gold-hover transition focus:outline-none focus:ring-2 focus:ring-nfe-gold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {status === 'loading' ? 'Submitting...' : 'Join Waitlist'}
             </button>
 
-            {status === 'error' && errorMessage && (
-              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded text-center">
-                <p className="text-red-600 text-sm font-medium">
-                  {errorMessage}
-                </p>
-              </div>
-            )}
+            <div role="status" aria-live="polite" aria-atomic="true">
+              {status === 'error' && errorMessage && (
+                <div role="alert" className="mt-3 p-3 bg-red-50 border border-red-200 rounded text-center">
+                  <p className="text-red-600 text-sm font-medium">
+                    {errorMessage}
+                  </p>
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>

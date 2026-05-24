@@ -85,14 +85,14 @@ export default function SubscribePage() {
             value={email}
             required
             onChange={(e) => setEmail(e.target.value)}
-            className="border border-gray-300 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#C6A34F]"
+            className="border border-gray-300 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-nfe-gold"
             placeholder="Your email"
           />
 
           <button
             type="submit"
             disabled={status === "idle" && !email}
-            className="bg-[#C6A34F] text-white font-medium py-3 rounded hover:bg-[#b78f3c] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-nfe-gold text-white font-medium py-3 rounded hover:bg-nfe-gold-hover transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Subscribe
           </button>

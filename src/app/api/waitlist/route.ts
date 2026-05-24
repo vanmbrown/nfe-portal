@@ -27,7 +27,6 @@ export async function POST(req: Request) {
     }
 
     const { email, product } = await req.json();
-    console.log("[waitlist] processing waitlist request");
 
     if (
       !email ||

@@ -27,7 +27,6 @@ export async function POST(req: Request) {
     }
 
     const { email } = await req.json();
-    console.log("[subscribe] processing subscription request");
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });

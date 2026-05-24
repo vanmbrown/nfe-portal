@@ -28,7 +28,6 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { name, email, ageRange, skinDescription, concerns, message } = body;
-    console.log("[community-input] processing submission");
     const safeName = escapeHtml(name);
     const safeEmail = escapeHtml(email);
     const safeAgeRange = escapeHtml(ageRange);
@@ -43,7 +42,6 @@ export async function POST(req: Request) {
     if (process.env.RESEND_API_KEY && ADMIN_NOTIFICATION_EMAIL) {
       try {
         const resend = getResend();
-        console.log("[community-input] sending admin receipt to vanessa@nfebeauty.com");
         await resend.emails.send({
           from: "NFE Beauty <notifications@nfebeauty.com>",
           to: "vanessa@nfebeauty.com",

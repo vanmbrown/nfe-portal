@@ -10,7 +10,7 @@ import ActiveIngredientIndex from './ActiveIngredientIndex';
 // Lazy load heavy map components - only load when needed
 const NFEMelanocyteMap = dynamic(() => import('./NFEMelanocyteMap'), {
   loading: () => (
-    <div className="flex items-center justify-center min-h-[400px] bg-[#0B291E] rounded-lg">
+    <div className="flex items-center justify-center min-h-[400px] bg-nfe-green-900 rounded-lg">
       <p className="text-[#FDFCF8]">Loading map...</p>
     </div>
   ),
@@ -19,7 +19,7 @@ const NFEMelanocyteMap = dynamic(() => import('./NFEMelanocyteMap'), {
 
 const NFESkinLayersMap = dynamic(() => import('./NFESkinLayersMap'), {
   loading: () => (
-    <div className="flex items-center justify-center min-h-[400px] bg-[#0B291E] rounded-lg">
+    <div className="flex items-center justify-center min-h-[400px] bg-nfe-green-900 rounded-lg">
       <p className="text-[#FDFCF8]">Loading map...</p>
     </div>
   ),
@@ -95,7 +95,7 @@ function ScienceTabContent() {
           </label>
           <select
             id="skin-type-select"
-            className="w-full rounded-md border border-[#C9A66B] bg-white px-3 py-2 text-sm md:text-base text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#C9A66B]"
+            className="w-full rounded-md border border-nfe-gold bg-white px-3 py-2 text-sm md:text-base text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-nfe-gold"
             value={skinType}
             onChange={(e) => {
               setSkinType(e.target.value);
@@ -115,7 +115,7 @@ function ScienceTabContent() {
           <legend className="block mb-2 text-base md:text-lg font-semibold text-[#FDFCF8] tracking-tight">
             Primary Skin Concerns
           </legend>
-          <div className="max-h-48 overflow-y-auto border border-[#C9A66B] rounded-md bg-white p-2">
+          <div className="max-h-48 overflow-y-auto border border-nfe-gold rounded-md bg-white p-2">
             {SKIN_CONCERNS.map((opt) => {
               const isSelected = concerns.includes(opt);
               return (
@@ -131,7 +131,7 @@ function ScienceTabContent() {
                       }
                       setSubmitted(false);
                     }}
-                    className="w-4 h-4 text-[#C9A66B] border-gray-300 rounded focus:ring-[#C9A66B]"
+                    className="w-4 h-4 text-nfe-gold border-gray-300 rounded focus:ring-nfe-gold"
                   />
                   <span className="text-sm text-gray-900">
                     {opt.replace(/[_-]/g, ' ').replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1))}
@@ -150,7 +150,7 @@ function ScienceTabContent() {
           disabled={!canSubmit || loading}
           className={`px-8 py-3 rounded-md font-semibold text-white transition-colors ${
             canSubmit && !loading
-              ? 'bg-[#C9A66B] hover:bg-[#B8955A] cursor-pointer'
+              ? 'bg-nfe-gold hover:bg-nfe-gold-hover cursor-pointer'
               : 'bg-gray-400 cursor-not-allowed'
           }`}
         >
