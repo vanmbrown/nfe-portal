@@ -18,7 +18,7 @@ export default function INCIPage() {
   ];
 
   return (
-    <main id="inci-panel" className="min-h-screen w-full bg-[#F6F5F3]">
+    <div id="inci-panel" className="min-h-screen w-full bg-[#F6F5F3]">
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl md:text-4xl font-primary font-bold text-[#0E2A22] mb-8">
           NFE Ingredient Transparency
@@ -56,7 +56,7 @@ export default function INCIPage() {
           {activeTab === 'glossary' && <IngredientGlossary />}
         </motion.div>
       </div>
-    </main>
+    </div>
   );
 }
 

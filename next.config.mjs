@@ -22,7 +22,7 @@ const nextConfig = {
       {
         source: "/about",
         destination: "/our-story",
-        permanent: false,
+        permanent: true,
       },
     ];
   },

@@ -12,9 +12,9 @@ export default function ShopPage() {
     <>
       <WaitlistModal />
 
-      <section className="min-h-screen bg-green-950 pt-28 pb-20">
+      <section className="min-h-screen bg-nfe-green-900 pt-28 pb-20">
         <div className="container mx-auto px-6">
-          <h1 className="text-center text-4xl md:text-5xl font-serif text-[#D4AF37] mb-6">
+          <h1 className="text-center text-4xl md:text-5xl font-serif text-nfe-gold mb-6">
             Discover the NFE Ritual
           </h1>
           <p className="text-center text-white/80 max-w-2xl mx-auto mb-12">

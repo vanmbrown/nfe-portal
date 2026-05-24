@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
+import { escapeHtml } from "@/lib/utils/sanitize";
+import { subscribeRatelimit } from "@/lib/ratelimit";
 
 // Lazy Resend instantiation - only create when needed (not at module load time)
 const getResend = () => {
@@ -15,10 +17,16 @@ const ADMIN_NOTIFICATION_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
 export async function POST(req: Request) {
-  console.log("[subscribe] POST hit");
   try {
+    if (subscribeRatelimit) {
+      const ip = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for') ?? 'anonymous';
+      const { success } = await subscribeRatelimit.limit(ip);
+      if (!success) {
+        return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+      }
+    }
+
     const { email } = await req.json();
-    console.log("[subscribe] email:", email);
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
@@ -113,14 +121,12 @@ export async function POST(req: Request) {
       } else {
         try {
           const resend = getResend();
-          console.log("[subscribe] sending admin receipt to vanessa@nfebeauty.com");
-          const resp = await resend.emails.send({
+          await resend.emails.send({
             from: "NFE Beauty <notifications@nfebeauty.com>",
             to: "vanessa@nfebeauty.com",
             subject: "New Newsletter Subscriber",
-            html: `<p><strong>Email:</strong> ${email}</p><p><strong>Time:</strong> ${new Date().toISOString()}</p>`,
+            html: `<p><strong>Email:</strong> ${escapeHtml(email)}</p><p><strong>Time:</strong> ${new Date().toISOString()}</p>`,
           });
-          console.log("[subscribe] admin receipt response:", resp);
         } catch (emailError: any) {
           console.error("[subscribe] admin receipt failed:", emailError);
           emailErrors.push(emailError.message);

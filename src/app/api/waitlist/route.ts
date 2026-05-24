@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
+import { escapeHtml } from "@/lib/utils/sanitize";
+import { waitlistRatelimit } from "@/lib/ratelimit";
 
 // Lazy Resend instantiation - only create when needed (not at module load time)
 const getResend = () => {
@@ -15,11 +17,16 @@ const ADMIN_NOTIFICATION_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
 export async function POST(req: Request) {
-  console.log("[waitlist] POST hit");
   try {
+    if (waitlistRatelimit) {
+      const ip = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for') ?? 'anonymous';
+      const { success } = await waitlistRatelimit.limit(ip);
+      if (!success) {
+        return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+      }
+    }
+
     const { email, product } = await req.json();
-    console.log("[waitlist] email:", email);
-    console.log("[waitlist] product:", product);
 
     if (
       !email ||
@@ -92,19 +99,17 @@ export async function POST(req: Request) {
       } else {
         try {
           const resend = getResend();
-          console.log("[waitlist] sending admin receipt to vanessa@nfebeauty.com");
-          const resp = await resend.emails.send({
+          await resend.emails.send({
             from: "NFE Beauty <notifications@nfebeauty.com>",
             to: "vanessa@nfebeauty.com",
-            subject: `New Waitlist: ${product}`,
+            subject: `New Waitlist: ${escapeHtml(product)}`,
             html: `
               <h2>New Waitlist Submission</h2>
-              <p><strong>Product:</strong> ${product}</p>
-              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Product:</strong> ${escapeHtml(product)}</p>
+              <p><strong>Email:</strong> ${escapeHtml(email)}</p>
               <p><strong>Time:</strong> ${new Date().toISOString()}</p>
             `,
           });
-          console.log("[waitlist] admin receipt response:", resp);
         } catch (emailError: any) {
           console.error("[waitlist] admin receipt failed:", emailError);
           emailErrors.push(emailError.message);

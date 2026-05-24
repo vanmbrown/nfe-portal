@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin/', '/api/', '/_next/', '/private/'],
     },
-    sitemap: 'https://nfe-portal-dev.vercel.app/sitemap.xml',
+    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nfebeauty.com'}/sitemap.xml`,
   }
 }

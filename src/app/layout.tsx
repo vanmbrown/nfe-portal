@@ -22,8 +22,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <Header />
 
-        {/* REMOVE PageTransition — it does not exist and was breaking hydration */}
-        {children}
+        <main id="main-content">
+          {children}
+        </main>
 
         <Footer />
 

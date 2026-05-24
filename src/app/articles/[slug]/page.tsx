@@ -54,10 +54,11 @@ export default async function ArticlePage({ params }: Props) {
   const MDXContent = mod.default;
   
   const formattedDate = meta.date
-    ? new Date(meta.date).toLocaleDateString("en-US", {
+    ? new Date(`${meta.date}T12:00:00Z`).toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
         year: "numeric",
+        timeZone: "UTC",
       })
     : "";
 
@@ -68,7 +69,7 @@ export default async function ArticlePage({ params }: Props) {
   );
 
   return (
-    <main className="w-full bg-white">
+    <div className="w-full bg-white">
       {meta.image && (
         <div className="relative w-full h-[60vh]">
           <Image
@@ -133,6 +134,6 @@ export default async function ArticlePage({ params }: Props) {
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

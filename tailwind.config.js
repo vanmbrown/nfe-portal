@@ -11,8 +11,10 @@ module.exports = {
       colors: {
         'nfe-green': '#103B2A',
         'nfe-green-900': '#0b291e',
+        'nfe-green-800': '#1B3A34',
         'nfe-green-700': '#14543c',
         'nfe-gold': '#C6A664',
+        'nfe-gold-hover': '#b78f3c',
         'nfe-ink': '#111111',
         'nfe-paper': '#FAFAF8',
         'nfe-muted': '#6B6B6B',
