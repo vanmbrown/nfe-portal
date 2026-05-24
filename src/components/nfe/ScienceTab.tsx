@@ -111,10 +111,10 @@ function ScienceTabContent() {
           </select>
         </div>
 
-        <div style={{ position: 'relative', zIndex: 10 }}>
-          <div className="block mb-2 text-base md:text-lg font-semibold text-[#FDFCF8] tracking-tight">
+        <fieldset style={{ position: 'relative', zIndex: 10 }} className="border-0 p-0 m-0">
+          <legend className="block mb-2 text-base md:text-lg font-semibold text-[#FDFCF8] tracking-tight">
             Primary Skin Concerns
-          </div>
+          </legend>
           <div className="max-h-48 overflow-y-auto border border-[#C9A66B] rounded-md bg-white p-2">
             {SKIN_CONCERNS.map((opt) => {
               const isSelected = concerns.includes(opt);
@@ -140,7 +140,7 @@ function ScienceTabContent() {
               );
             })}
           </div>
-        </div>
+        </fieldset>
       </div>
 
       {/* Submit Button */}

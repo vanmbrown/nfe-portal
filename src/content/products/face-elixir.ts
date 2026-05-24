@@ -67,7 +67,7 @@ export const faceElixirData: ProductData = {
   id: 'face-elixir',
   name: 'Face Elixir',
   subtitle: 'THD Ascorbate + Bakuchiol + Peptides',
-  description: 'A potent, barrier-first serum designed specifically for melanated skin. Features THD ascorbate (stable vitamin C), bakuchiol (retinol alternative), and copper peptides for comprehensive anti-aging and brightening.',
+  description: 'A potent, barrier-first serum designed specifically for melanated skin. Features THD ascorbate (stable vitamin C), bakuchiol (retinol alternative), and copper peptides to support a visibly firmer, more even-looking complexion.',
   shortDescription: 'Stable vitamin C serum with bakuchiol and peptides for melanated skin',
   price: 89,
   currency: 'USD',

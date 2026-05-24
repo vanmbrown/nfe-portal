@@ -136,7 +136,7 @@ export default function NFEHomePage() {
           The Science of Nourishment
         </motion.h2>
         <p className="max-w-3xl mx-auto text-lg leading-relaxed mb-12">
-          Powered by clinically proven actives like Niacinamide, Bakuchiol, THD Ascorbate, and Ceramides — each ingredient is intentionally chosen to hydrate, firm, and balance melanated skin.
+          Powered by science-backed actives — Niacinamide, Bakuchiol, THD Ascorbate, and Ceramides — each ingredient intentionally chosen to hydrate, firm, and balance melanated skin.
         </p>
         <Link href="/inci">
           <Button className="bg-[#1B3A34] text-[#D6B370] px-8 py-3 text-lg rounded-2xl hover:bg-[#2A4C44] transition">Explore Ingredients</Button>
