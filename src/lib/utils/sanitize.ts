@@ -1,7 +1,18 @@
 /**
  * HTML Sanitization Utility
- * Uses DOMPurify to sanitize HTML content before rendering
+ * Uses DOMPurify for client-side rendering; escapeHtml for server-side API routes.
  */
+
+// Server-safe HTML escape — no DOM dependency, safe in API routes and Workers
+export function escapeHtml(str: unknown): string {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
 
 import DOMPurify from 'dompurify';
 

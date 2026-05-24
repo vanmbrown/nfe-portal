@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
+import { escapeHtml } from "@/lib/utils/sanitize";
+import { messageRatelimit } from "@/lib/ratelimit";
 
 // Lazy Resend instantiation - only create when needed (not at module load time)
 const getResend = () => {
@@ -15,11 +17,24 @@ const ADMIN_NOTIFICATION_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
 export async function POST(req: Request) {
-  console.log("[community-input] POST hit");
   try {
+    if (messageRatelimit) {
+      const ip = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for') ?? 'anonymous';
+      const { success } = await messageRatelimit.limit(ip);
+      if (!success) {
+        return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+      }
+    }
+
     const body = await req.json();
     const { name, email, ageRange, skinDescription, concerns, message } = body;
-    console.log("[community-input] email:", email);
+    console.log("[community-input] processing submission");
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeAgeRange = escapeHtml(ageRange);
+    const safeSkinDescription = escapeHtml(skinDescription);
+    const safeConcerns = Array.isArray(concerns) ? concerns.map(escapeHtml).join(', ') : escapeHtml(concerns);
+    const safeMessage = escapeHtml(message);
 
     const emailErrors = [];
     const dbErrors = [];
@@ -29,23 +44,22 @@ export async function POST(req: Request) {
       try {
         const resend = getResend();
         console.log("[community-input] sending admin receipt to vanessa@nfebeauty.com");
-        const resp = await resend.emails.send({
+        await resend.emails.send({
           from: "NFE Beauty <notifications@nfebeauty.com>",
           to: "vanessa@nfebeauty.com",
           subject: "New Community Input Submission",
           html: `
             <h2>New Community Input</h2>
-            <p><strong>Name:</strong> ${name || 'Not provided'}</p>
-            <p><strong>Email:</strong> ${email || 'Not provided'}</p>
-            <p><strong>Age Range:</strong> ${ageRange}</p>
-            <p><strong>Skin Description:</strong> ${skinDescription}</p>
-            <p><strong>Concerns:</strong> ${Array.isArray(concerns) ? concerns.join(', ') : concerns}</p>
+            <p><strong>Name:</strong> ${safeName || 'Not provided'}</p>
+            <p><strong>Email:</strong> ${safeEmail || 'Not provided'}</p>
+            <p><strong>Age Range:</strong> ${safeAgeRange}</p>
+            <p><strong>Skin Description:</strong> ${safeSkinDescription}</p>
+            <p><strong>Concerns:</strong> ${safeConcerns}</p>
             <p><strong>Message:</strong></p>
-            <pre style="white-space: pre-wrap; font-family: sans-serif;">${message}</pre>
+            <pre style="white-space: pre-wrap; font-family: sans-serif;">${safeMessage}</pre>
             <p><strong>Time:</strong> ${new Date().toISOString()}</p>
           `,
         });
-        console.log("[community-input] admin receipt response:", resp);
       } catch (emailError: any) {
         console.error("[community-input] admin receipt failed:", emailError);
         emailErrors.push(emailError.message);
