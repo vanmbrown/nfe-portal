@@ -68,7 +68,7 @@ export default async function ArticlePage({ params }: Props) {
   );
 
   return (
-    <main className="w-full bg-white">
+    <div className="w-full bg-white">
       {meta.image && (
         <div className="relative w-full h-[60vh]">
           <Image
@@ -133,6 +133,6 @@ export default async function ArticlePage({ params }: Props) {
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
