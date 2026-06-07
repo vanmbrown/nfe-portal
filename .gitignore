@@ -22,6 +22,9 @@ build/
 .cursor/
 .claude/
 
+# NFE confidential developer handoff materials
+NFE_Developer_Handoff/
+
 # Build artifacts
 .open-next/
 
