@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next';
 import { getAllArticles } from '@/lib/articles';
+import { getSiteUrl } from '@/lib/site-url';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nfebeauty.com';
+  const baseUrl = getSiteUrl();
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [

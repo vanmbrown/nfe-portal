@@ -45,7 +45,7 @@ export default function OurStoryPage() {
               </p>
 
               <p className="text-lg leading-relaxed font-serif">
-                As I aged, I embraced a new philosophy: <em className="text-[#6B5230] not-italic font-semibold">well-aging, not anti-aging</em>. If you&apos;re lucky, you get to age. My goal is simply to do it well—to stay vibrant, balanced, and confident in my own skin. For me, that means a holistic, layered approach: I move my body, eat well, protect my skin from the sun, and nourish it daily with NFE.
+                As I aged, I embraced a new philosophy: <em className="text-[#6B5230] not-italic font-semibold">well-aging, not age resistance</em>. If you&apos;re lucky, you get to age. My goal is simply to do it well—to stay vibrant, balanced, and confident in my own skin. For me, that means a holistic, layered approach: I move my body, eat well, protect my skin from the sun, and nourish it daily with NFE.
               </p>
 
               <p className="text-lg leading-relaxed font-serif">
@@ -99,7 +99,7 @@ export default function OurStoryPage() {
               Honest Skincare. Designed for the Journey.
             </h2>
             <p className="text-lg md:text-xl leading-relaxed font-serif text-white/90 max-w-3xl mx-auto">
-              NFE isn&apos;t anti-aging—it&apos;s pro-wellness. Our formulations are crafted for mature, melanated skin, built on nourishment, science, and simplicity. We believe in healthy barrier function, visible radiance, and the confidence that comes from care—not perfection.
+              NFE is built for well-aging and skin confidence. Our formulations are crafted for mature, melanated skin, built on nourishment, science, and simplicity. We believe in healthy barrier function, visible radiance, and the confidence that comes from care—not perfection.
             </p>
           </motion.div>
         </div>

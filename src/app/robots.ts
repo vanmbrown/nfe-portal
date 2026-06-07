@@ -1,12 +1,15 @@
 import { MetadataRoute } from 'next'
+import { getSiteUrl } from '@/lib/site-url'
 
 export default function robots(): MetadataRoute.Robots {
+  const siteUrl = getSiteUrl()
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
       disallow: ['/admin/', '/api/', '/_next/', '/private/'],
     },
-    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nfebeauty.com'}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
   }
 }

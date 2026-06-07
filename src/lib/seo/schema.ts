@@ -3,6 +3,8 @@
  * Generates structured data for SEO and rich snippets
  */
 
+import { getSiteUrl } from '@/lib/site-url';
+
 // Base schema interfaces
 interface BaseSchema {
   '@context': string;
@@ -103,12 +105,14 @@ interface BreadcrumbSchema extends BaseSchema {
 
 // Schema builders
 export function buildOrganizationSchema(): OrganizationSchema {
+  const siteUrl = getSiteUrl();
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'NFE Beauty',
-    url: 'https://nfe-portal.vercel.app',
-    logo: 'https://nfe-portal.vercel.app/logo.png',
+    url: siteUrl,
+    logo: `${siteUrl}/logo.png`,
     description: 'Science-backed skincare for melanated skin through barrier-first approach',
     foundingDate: '2024',
     address: {
@@ -129,15 +133,17 @@ export function buildOrganizationSchema(): OrganizationSchema {
 }
 
 export function buildWebSiteSchema(): WebSiteSchema {
+  const siteUrl = getSiteUrl();
+
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'NFE Portal',
-    url: 'https://nfe-portal.vercel.app',
+    name: 'NFE Beauty',
+    url: siteUrl,
     description: 'Science-backed skincare for melanated skin through barrier-first approach',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://nfe-portal.vercel.app/search?q={search_term_string}',
+      target: `${siteUrl}/search?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   };
@@ -151,12 +157,14 @@ export function buildProductSchema(product: {
   currency: string;
   images: Array<{ src: string; alt: string }>;
 }): ProductSchema {
+  const siteUrl = getSiteUrl();
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     description: product.description,
-    image: product.images.map(img => `https://nfe-portal.vercel.app${img.src}`),
+    image: product.images.map(img => `${siteUrl}${img.src}`),
     brand: {
       '@type': 'Brand',
       name: 'NFE Beauty',
@@ -183,12 +191,14 @@ export function buildArticleSchema(article: {
   url: string;
   image?: string;
 }): ArticleSchema {
+  const siteUrl = getSiteUrl();
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: article.title,
     description: article.description,
-    image: article.image ? [`https://nfe-portal.vercel.app${article.image}`] : [],
+    image: article.image ? [`${siteUrl}${article.image}`] : [],
     author: {
       '@type': 'Organization',
       name: article.author,
@@ -198,7 +208,7 @@ export function buildArticleSchema(article: {
       name: 'NFE Beauty',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://nfe-portal.vercel.app/logo.png',
+        url: `${siteUrl}/logo.png`,
       },
     },
     datePublished: article.datePublished,
@@ -228,12 +238,14 @@ export function buildBreadcrumbSchema(breadcrumbs: Array<{
 
 // Research organization schema for scientific content
 export function buildResearchOrganizationSchema(): OrganizationSchema {
+  const siteUrl = getSiteUrl();
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'NFE Research',
-    url: 'https://nfe-portal.vercel.app/research',
-    logo: 'https://nfe-portal.vercel.app/logo.png',
+    url: `${siteUrl}/research`,
+    logo: `${siteUrl}/logo.png`,
     description: 'Dermatological research focused on melanated skin and inclusive skincare science',
     foundingDate: '2024',
     address: {

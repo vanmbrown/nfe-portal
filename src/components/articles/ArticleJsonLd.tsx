@@ -1,6 +1,7 @@
 'use client';
 
 import Script from 'next/script';
+import { getSiteUrl } from '@/lib/site-url';
 
 type ArticleJsonLdProps = {
   slug: string;
@@ -19,7 +20,7 @@ export function ArticleJsonLd({
   publishedAt,
   modifiedAt,
 }: ArticleJsonLdProps) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nfebeauty.com';
+  const siteUrl = getSiteUrl();
 
   const jsonLd = {
     '@context': 'https://schema.org',
