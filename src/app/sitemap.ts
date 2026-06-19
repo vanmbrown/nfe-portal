@@ -8,15 +8,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     '/',
+    '/concierge',
     '/our-story',
     '/articles',
+    '/inci',
     '/learn',
+    '/privacy',
     '/products',
     '/products/face-elixir',
     '/products/body-elixir',
+    '/ritual',
     '/science',
     '/shop',
     '/subscribe',
+    '/cookies',
   ].map((path) => ({
     url: `${baseUrl}${path}`,
     lastModified: now,
