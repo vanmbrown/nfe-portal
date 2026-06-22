@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Alert } from '@/components/ui/Alert';
-import { AlertCircle, CheckCircle, Clock, TrendingUp, ExternalLink } from '@/components/ui/Icon';
+import { CheckCircle, Clock, TrendingUp } from '@/components/ui/Icon';
 import { ProductData } from '@/content/products/face-elixir';
 import { cn } from '@/lib/utils';
 
@@ -14,7 +13,6 @@ interface BenefitsTableProps {
 
 export function BenefitsTable({ product, className = '' }: BenefitsTableProps) {
   const [sortBy, setSortBy] = useState<'timeline' | 'benefit'>('timeline');
-  const [showClinical, setShowClinical] = useState(false);
 
   // Sort benefits based on current sort option
   const sortedBenefits = [...product.benefits].sort((a, b) => {
@@ -55,10 +53,10 @@ export function BenefitsTable({ product, className = '' }: BenefitsTableProps) {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-nfe-ink mb-4 font-primary">
-            Clinical Benefits & Results
+            Benefits & Ritual Expectations
           </h2>
           <p className="text-lg text-nfe-muted">
-            Evidence-based benefits backed by clinical research and dermatological studies.
+            Cosmetic skincare benefits framed with measured, claim-safe language.
           </p>
         </div>
 
@@ -80,13 +78,6 @@ export function BenefitsTable({ product, className = '' }: BenefitsTableProps) {
               Sort by Benefit
             </Button>
           </div>
-          <Button
-            variant={showClinical ? 'primary' : 'outline'}
-            size="sm"
-            onClick={() => setShowClinical(!showClinical)}
-          >
-            {showClinical ? 'Hide' : 'Show'} Clinical Evidence
-          </Button>
         </div>
 
         {/* Benefits Grid */}
@@ -111,56 +102,25 @@ export function BenefitsTable({ product, className = '' }: BenefitsTableProps) {
                 </p>
               </CardHeader>
               
-              {showClinical && benefit.clinicalEvidence && (
-                <CardContent className="pt-0">
-                  <Alert variant="info" className="mb-4">
-                    <div className="flex items-start gap-3">
-                      <TrendingUp className="w-5 h-5 text-nfe-gold flex-shrink-0 mt-0.5" />
-                      <div>
-                        <h4 className="font-semibold text-nfe-ink mb-2">Clinical Evidence</h4>
-                        <p className="text-sm text-nfe-muted">
-                          {benefit.clinicalEvidence}
-                        </p>
-                      </div>
-                    </div>
-                  </Alert>
-                </CardContent>
-              )}
             </Card>
           ))}
         </div>
 
-        {/* Clinical Studies Summary */}
+        {/* Proof discipline summary */}
         <Card variant="featured" className="mb-8">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <TrendingUp className="w-6 h-6 text-nfe-gold flex-shrink-0 mt-1" />
               <div>
                 <h3 className="text-lg font-semibold text-nfe-ink mb-2">
-                  Research-Backed Formulation
+                  Proof Discipline
                 </h3>
-                <p className="text-nfe-muted mb-4">
-                  Our {product.name} is formulated based on extensive clinical research 
-                  and dermatological studies specifically focused on melanated skin concerns.
+                <p className="text-nfe-muted">
+                  {product.name} is presented as cosmetic skincare. Future
+                  testing, customer feedback, and review signals will be kept
+                  distinct so the brand can build trust without overstating
+                  results.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-nfe-gold mb-1">15+</div>
-                    <div className="text-nfe-muted">Clinical Studies</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-nfe-gold mb-1">2,500+</div>
-                    <div className="text-nfe-muted">Study Participants</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-nfe-gold mb-1">40%</div>
-                    <div className="text-nfe-muted">Average Improvement</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-nfe-gold mb-1">95%</div>
-                    <div className="text-nfe-muted">Satisfaction Rate</div>
-                  </div>
-                </div>
               </div>
             </div>
           </CardContent>
@@ -169,7 +129,7 @@ export function BenefitsTable({ product, className = '' }: BenefitsTableProps) {
         {/* Usage Timeline */}
         <Card variant="outline">
           <CardHeader>
-            <CardTitle className="text-xl">Expected Results Timeline</CardTitle>
+            <CardTitle className="text-xl">Ritual Feel Timeline</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -179,7 +139,7 @@ export function BenefitsTable({ product, className = '' }: BenefitsTableProps) {
                 </div>
                 <div>
                   <h4 className="font-semibold text-nfe-ink">Week 1-2: Initial Hydration</h4>
-                  <p className="text-sm text-nfe-muted">Improved skin texture and initial hydration benefits</p>
+                  <p className="text-sm text-nfe-muted">Skin may feel more cushioned, hydrated, and comfortable.</p>
                 </div>
               </div>
               
@@ -188,8 +148,8 @@ export function BenefitsTable({ product, className = '' }: BenefitsTableProps) {
                   2
                 </div>
                 <div>
-                  <h4 className="font-semibold text-nfe-ink">Week 4-6: Barrier Improvement</h4>
-                  <p className="text-sm text-nfe-muted">Enhanced skin barrier function and reduced sensitivity</p>
+                  <h4 className="font-semibold text-nfe-ink">Week 4-6: Barrier Comfort</h4>
+                  <p className="text-sm text-nfe-muted">Consistent use may support a steadier, more nourished skin feel.</p>
                 </div>
               </div>
               
@@ -198,8 +158,8 @@ export function BenefitsTable({ product, className = '' }: BenefitsTableProps) {
                   3
                 </div>
                 <div>
-                  <h4 className="font-semibold text-nfe-ink">Week 8-12: Visible Results</h4>
-                  <p className="text-sm text-nfe-muted">Significant improvement in target concerns and overall skin health</p>
+                  <h4 className="font-semibold text-nfe-ink">Week 8-12: Visible Radiance</h4>
+                  <p className="text-sm text-nfe-muted">Skin may appear more supple, radiant, and even-looking with continued use.</p>
                 </div>
               </div>
             </div>

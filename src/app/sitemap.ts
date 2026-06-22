@@ -9,6 +9,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     '/',
     '/concierge',
+    '/discovery',
+    '/founder-access',
     '/our-story',
     '/articles',
     '/inci',
@@ -20,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/ritual',
     '/science',
     '/shop',
+    '/skin-ritual-quiz',
     '/subscribe',
     '/cookies',
   ].map((path) => ({

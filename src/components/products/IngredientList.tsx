@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Tooltip } from '@/components/ui/Tooltip';
 import { AlertCircle, CheckCircle, Info } from '@/components/ui/Icon';
 import { ProductData } from '@/content/products/face-elixir';
 import { cn } from '@/lib/utils';
@@ -13,7 +12,7 @@ interface IngredientListProps {
 }
 
 export function IngredientList({ product, className = '' }: IngredientListProps) {
-  const [sortBy, setSortBy] = useState<'alphabetical' | 'concentration' | 'safety'>('alphabetical');
+  const [sortBy, setSortBy] = useState<'alphabetical' | 'safety'>('alphabetical');
   const [showAll, setShowAll] = useState(false);
 
   // Sort ingredients based on current sort option
@@ -21,10 +20,6 @@ export function IngredientList({ product, className = '' }: IngredientListProps)
     switch (sortBy) {
       case 'alphabetical':
         return a.inci.localeCompare(b.inci);
-      case 'concentration':
-        const aConc = parseFloat(a.concentration?.replace('%', '') || '0');
-        const bConc = parseFloat(b.concentration?.replace('%', '') || '0');
-        return bConc - aConc;
       case 'safety':
         const safetyOrder = { safe: 0, caution: 1, avoid: 2 };
         return safetyOrder[a.safety] - safetyOrder[b.safety];
@@ -69,7 +64,7 @@ export function IngredientList({ product, className = '' }: IngredientListProps)
             Complete Ingredient List (INCI)
           </h2>
           <p className="text-lg text-nfe-muted">
-            Every ingredient in {product.name}, with concentrations, benefits, and safety information.
+            Every ingredient in {product.name}, with function, benefits, and safety information.
           </p>
         </div>
 
@@ -82,13 +77,6 @@ export function IngredientList({ product, className = '' }: IngredientListProps)
               onClick={() => setSortBy('alphabetical')}
             >
               A-Z
-            </Button>
-            <Button
-              variant={sortBy === 'concentration' ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => setSortBy('concentration')}
-            >
-              Concentration
             </Button>
             <Button
               variant={sortBy === 'safety' ? 'primary' : 'outline'}
@@ -124,13 +112,6 @@ export function IngredientList({ product, className = '' }: IngredientListProps)
               
               <CardContent className="pt-0">
                 <div className="space-y-3">
-                  {ingredient.concentration && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-nfe-ink">Concentration:</span>
-                      <Badge variant="default">{ingredient.concentration}</Badge>
-                    </div>
-                  )}
-                  
                   <div>
                     <span className="text-sm font-medium text-nfe-ink">Source:</span>
                     <p className="text-sm text-nfe-muted mt-1">{ingredient.source}</p>
@@ -175,8 +156,9 @@ export function IngredientList({ product, className = '' }: IngredientListProps)
                   Ingredient Safety & Transparency
                 </h3>
                 <p className="text-nfe-muted mb-4">
-                  All ingredients are carefully selected for their safety profile and efficacy. 
-                  We avoid known irritants and use only non-comedogenic ingredients suitable for melanated skin.
+                  Ingredients are selected for cosmetic suitability, skin feel,
+                  and compatibility with a barrier-first ritual for melanated
+                  skin.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                   <div className="flex items-center gap-2">

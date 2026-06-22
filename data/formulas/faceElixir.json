@@ -5,7 +5,6 @@
                             "commonName":  "Water",
                             "function":  "Solvent / Hydration Base",
                             "benefit":  "Serves as the main solvent and hydration base for all ingredients.",
-                            "percentageRange":  "",
                             "phase":  "Base"
                         },
                         {
@@ -13,7 +12,6 @@
                             "commonName":  "Rose Hydrosol",
                             "function":  "Aromatic Hydrosol / Humectant",
                             "benefit":  "Provides gentle hydration and a light floral aroma.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -21,7 +19,6 @@
                             "commonName":  "Vitamin B3",
                             "function":  "Skin Conditioning / Brightening",
                             "benefit":  "Improves tone and texture, supports the skin barrier.",
-                            "percentageRange":  "2–5%",
                             "phase":  "Active"
                         },
                         {
@@ -29,7 +26,6 @@
                             "commonName":  "Tranexamic Acid",
                             "function":  "Skin Conditioning / Brightening",
                             "benefit":  "Reduces discoloration and inflammation for a more even tone.",
-                            "percentageRange":  "3%",
                             "phase":  "Active"
                         },
                         {
@@ -37,7 +33,6 @@
                             "commonName":  "Alpha Arbutin",
                             "function":  "Skin Conditioning / Brightening",
                             "benefit":  "Visibly fades dark spots and hyperpigmentation.",
-                            "percentageRange":  "2%",
                             "phase":  "Active"
                         },
                         {
@@ -45,7 +40,6 @@
                             "commonName":  "Kojic Dipalmitate",
                             "function":  "Skin Conditioning / Brightening",
                             "benefit":  "Supports tone evenness and radiance.",
-                            "percentageRange":  "2%",
                             "phase":  "Active"
                         },
                         {
@@ -53,7 +47,6 @@
                             "commonName":  "Vitamin C Ester",
                             "function":  "Antioxidant / Brightening",
                             "benefit":  "Firms, brightens, and protects from oxidative stress.",
-                            "percentageRange":  "5.21%",
                             "phase":  "Active"
                         },
                         {
@@ -61,7 +54,6 @@
                             "commonName":  "Bakuchiol",
                             "function":  "Retinol Alternative / Skin Conditioning",
                             "benefit":  "Supports smoother, firmer, and more youthful-looking skin.",
-                            "percentageRange":  "",
                             "phase":  "Active"
                         },
                         {
@@ -69,7 +61,6 @@
                             "commonName":  "Ectoin (powder)",
                             "function":  "Cell Protection / Barrier Support",
                             "benefit":  "Shields skin from environmental stress and helps maintain hydration.",
-                            "percentageRange":  "2%",
                             "phase":  "Functional"
                         },
                         {
@@ -77,7 +68,6 @@
                             "commonName":  "CoQ10",
                             "function":  "Antioxidant",
                             "benefit":  "Protects against oxidative damage and supports skin firmness.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -85,7 +75,6 @@
                             "commonName":  "Ceramide Complex",
                             "function":  "Barrier Repair / Skin Conditioning",
                             "benefit":  "Strengthens the skin barrier and reduces water loss.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -93,7 +82,6 @@
                             "commonName":  "HA-4D",
                             "function":  "Humectant / Hydration",
                             "benefit":  "Provides multi-level hydration and plumps the skin.",
-                            "percentageRange":  "",
                             "phase":  "Active"
                         },
                         {
@@ -101,7 +89,6 @@
                             "commonName":  "Pro-Vitamin B5",
                             "function":  "Humectant / Barrier Support",
                             "benefit":  "Hydrates, calms, and strengthens the skin barrier.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -109,7 +96,6 @@
                             "commonName":  "Centella (Cica) Extract",
                             "function":  "Soothing / Barrier Repair",
                             "benefit":  "Accelerates repair, soothes, and boosts collagen production.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -117,7 +103,6 @@
                             "commonName":  "Camellia Sinensis Extract",
                             "function":  "Antioxidant / Soothing",
                             "benefit":  "Provides antioxidant protection and soothes redness.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -125,7 +110,6 @@
                             "commonName":  "Rosmarinus Officinalis Extract",
                             "function":  "Antioxidant / Stabilizer",
                             "benefit":  "Offers antioxidant and antimicrobial support.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -133,7 +117,6 @@
                             "commonName":  "Argireline NP",
                             "function":  "Peptide / Smoothing",
                             "benefit":  "Reduces the appearance of expression lines.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -141,7 +124,6 @@
                             "commonName":  "GHK-Cu",
                             "function":  "Peptide / Repair",
                             "benefit":  "Stimulates collagen and elastin synthesis.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -149,7 +131,6 @@
                             "commonName":  "Astaxanthin (Antioxidant Carotenoid)",
                             "function":  "Antioxidant",
                             "benefit":  "Neutralizes oxygen radicals and supports photoprotection.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -157,7 +138,6 @@
                             "commonName":  "Bisabolol",
                             "function":  "Soothing / Delivery Enhancer",
                             "benefit":  "Calms redness and enhances active absorption.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -165,7 +145,6 @@
                             "commonName":  "Botanical Oils Blend",
                             "function":  "Carrier Oils / Emollients",
                             "benefit":  "Provide nourishment, support skin regeneration, and enhance glow.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -173,7 +152,6 @@
                             "commonName":  "Emollients / Esters",
                             "function":  "Texture and Skin Feel Enhancers",
                             "benefit":  "Improve spreadability and deliver a lightweight finish.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -181,7 +159,6 @@
                             "commonName":  "Emulsifiers",
                             "function":  "Blend Oil and Water Phases",
                             "benefit":  "Provide a stable, creamy emulsion while supporting barrier repair.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -189,7 +166,6 @@
                             "commonName":  "Hydration Network",
                             "function":  "Humectants / Film-Formers",
                             "benefit":  "Bind water, enhance smoothness, and lock in moisture.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -197,7 +173,6 @@
                             "commonName":  "Aromatic \u0026 Botanical Actives",
                             "function":  "Calming / Sensory / Antioxidant",
                             "benefit":  "Soothe and provide aromatic and antioxidative support.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -205,7 +180,6 @@
                             "commonName":  "Optiphen Plus",
                             "function":  "Preservative",
                             "benefit":  "Broad-spectrum preservative that ensures safety and stability.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -213,7 +187,6 @@
                             "commonName":  "Soft-Focus Complex",
                             "function":  "Optical / Aesthetic Enhancers",
                             "benefit":  "Provide a blurred, radiant, and soft-focus visual effect.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
@@ -221,7 +194,6 @@
                             "commonName":  "Stabilizers / Chelators / pH Adjusters",
                             "function":  "Stabilization / pH Balance",
                             "benefit":  "Preserve stability and balance formulation pH.",
-                            "percentageRange":  "",
                             "phase":  "Functional"
                         }
                     ],

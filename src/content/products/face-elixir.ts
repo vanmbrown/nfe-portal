@@ -13,7 +13,6 @@ export interface ProductImage {
 export interface Ingredient {
   name: string;
   inci: string;
-  concentration?: string;
   benefits: string[];
   source: string;
   safety: 'safe' | 'caution' | 'avoid';
@@ -23,7 +22,6 @@ export interface Benefit {
   title: string;
   description: string;
   timeline: string;
-  clinicalEvidence?: string;
 }
 
 export interface FAQ {
