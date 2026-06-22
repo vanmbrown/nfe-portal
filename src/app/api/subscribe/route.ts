@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createAdminSupabase } from "@/lib/supabase/server";
 import { escapeHtml } from "@/lib/utils/sanitize";
 import { subscribeRatelimit } from "@/lib/ratelimit";
+import type { NfeAttributionContext } from "@/lib/analytics/utm";
 
 // Lazy Resend instantiation - only create when needed (not at module load time)
 const getResend = () => {
@@ -16,6 +17,82 @@ const getResend = () => {
 const ADMIN_NOTIFICATION_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL || process.env.FORWARD_TO_EMAIL;
 
+function cleanString(value: unknown, maxLength = 180): string | undefined {
+  if (typeof value !== "string") return undefined;
+
+  const cleaned = value.trim().slice(0, maxLength);
+  return cleaned || undefined;
+}
+
+function cleanBoolean(value: unknown): boolean | undefined {
+  return typeof value === "boolean" ? value : undefined;
+}
+
+function cleanAttribution(value: unknown): NfeAttributionContext {
+  if (!value || typeof value !== "object") return {};
+
+  const attribution = value as Record<string, unknown>;
+
+  return {
+    utmSource: cleanString(attribution.utmSource),
+    utmMedium: cleanString(attribution.utmMedium),
+    utmCampaign: cleanString(attribution.utmCampaign),
+    utmTerm: cleanString(attribution.utmTerm),
+    utmContent: cleanString(attribution.utmContent),
+    referrer: cleanString(attribution.referrer, 300),
+    landingPage: cleanString(attribution.landingPage, 300),
+    capturedAt: cleanString(attribution.capturedAt, 60),
+  };
+}
+
+function cleanContext(value: unknown) {
+  if (!value || typeof value !== "object") return {};
+
+  const context = value as Record<string, unknown>;
+
+  return {
+    intent: cleanString(context.intent),
+    pagePath: cleanString(context.pagePath),
+    consentSource: cleanString(context.consentSource),
+    marketingOptIn: cleanBoolean(context.marketingOptIn),
+    privacyPolicyAccepted: cleanBoolean(context.privacyPolicyAccepted),
+  };
+}
+
+function renderOptionalContext({
+  source,
+  context,
+  attribution,
+}: {
+  source?: string;
+  context: ReturnType<typeof cleanContext>;
+  attribution: NfeAttributionContext;
+}) {
+  const rows = [
+    ["Source", source],
+    ["Intent", context.intent],
+    ["Page", context.pagePath],
+    ["Consent Source", context.consentSource],
+    ["Marketing Opt-In", context.marketingOptIn],
+    ["Privacy Accepted", context.privacyPolicyAccepted],
+    ["UTM Source", attribution.utmSource],
+    ["UTM Medium", attribution.utmMedium],
+    ["UTM Campaign", attribution.utmCampaign],
+    ["UTM Content", attribution.utmContent],
+    ["Landing Page", attribution.landingPage],
+    ["Referrer", attribution.referrer],
+  ].filter(([, value]) => value !== undefined && value !== "");
+
+  if (rows.length === 0) return "";
+
+  return rows
+    .map(
+      ([label, value]) =>
+        `<p><strong>${escapeHtml(label)}:</strong> ${escapeHtml(String(value))}</p>`
+    )
+    .join("");
+}
+
 export async function POST(req: Request) {
   try {
     if (subscribeRatelimit) {
@@ -26,7 +103,11 @@ export async function POST(req: Request) {
       }
     }
 
-    const { email } = await req.json();
+    const payload = await req.json();
+    const { email } = payload;
+    const source = cleanString(payload.source);
+    const context = cleanContext(payload.context);
+    const attribution = cleanAttribution(payload.attribution);
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
@@ -125,7 +206,11 @@ export async function POST(req: Request) {
             from: "NFE Beauty <notifications@nfebeauty.com>",
             to: "vanessa@nfebeauty.com",
             subject: "New Newsletter Subscriber",
-            html: `<p><strong>Email:</strong> ${escapeHtml(email)}</p><p><strong>Time:</strong> ${new Date().toISOString()}</p>`,
+            html: `
+              <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+              <p><strong>Time:</strong> ${new Date().toISOString()}</p>
+              ${renderOptionalContext({ source, context, attribution })}
+            `,
           });
         } catch (emailError: any) {
           console.error("[subscribe] admin receipt failed:", emailError);
@@ -139,7 +224,13 @@ export async function POST(req: Request) {
       fetch(process.env.FORWARD_TO_AI_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "subscribe", email }),
+        body: JSON.stringify({
+          type: "subscribe",
+          email,
+          source,
+          context,
+          attribution,
+        }),
       }).catch((err) => console.error("[subscribe] AI forward failed:", err));
     }
 

@@ -1,12 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { NFE_EVENT_NAMES } from "@/lib/analytics/events";
+import { trackNfeEvent } from "@/lib/analytics/track";
+import {
+  buildAttributionForRequest,
+  preserveAttributionFromLocation,
+  type NfeAttributionContext,
+} from "@/lib/analytics/utm";
 
 export default function SubscribePage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [attribution, setAttribution] = useState<NfeAttributionContext>({});
+
+  useEffect(() => {
+    setAttribution(preserveAttributionFromLocation());
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,13 +31,36 @@ export default function SubscribePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          source: "subscribe_page",
+          context: {
+            intent: "founder_access",
+            pagePath:
+              typeof window !== "undefined" ? window.location.pathname : "/subscribe",
+            consentSource: "subscribe_page",
+            marketingOptIn: true,
+            privacyPolicyAccepted: true,
+          },
+          attribution: {
+            ...attribution,
+            ...buildAttributionForRequest(),
+          },
+        }),
       });
 
       if (res.ok) {
-        const data = await res.json().catch(() => ({}));
         setStatus("success");
         setEmail("");
+        trackNfeEvent({
+          name: NFE_EVENT_NAMES.founderAccessJoined,
+          area: "subscribe",
+          pagePath:
+            typeof window !== "undefined" ? window.location.pathname : "/subscribe",
+          source: "subscribe_page",
+          formId: "subscribe-email",
+          consentGranted: true,
+        });
       } else {
         const data = await res.json().catch(() => ({ error: "Unknown error" }));
         // Check for duplicate error
@@ -36,6 +71,16 @@ export default function SubscribePage() {
           setStatus("error");
           setErrorMessage(data.error || "Something went wrong. Please try again.");
         }
+        trackNfeEvent({
+          name: NFE_EVENT_NAMES.formFailed,
+          area: "subscribe",
+          pagePath:
+            typeof window !== "undefined" ? window.location.pathname : "/subscribe",
+          source: "subscribe_page",
+          formId: "subscribe-email",
+          consentGranted: true,
+          metadata: { status: res.status },
+        });
       }
     } catch (error) {
       console.error("Subscribe form error:", error);
