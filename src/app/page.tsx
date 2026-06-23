@@ -146,7 +146,7 @@ export default function NFEHomePage() {
             />
             <img
               {...mobileHeroProps}
-              className="h-full w-full object-cover object-center lg:object-[65%_center]"
+              className="h-full w-full object-cover object-center lg:object-[70%_center]"
             />
           </picture>
           <div className="absolute inset-0 bg-gradient-to-t from-nfe-green-900/20 via-transparent to-transparent" />
