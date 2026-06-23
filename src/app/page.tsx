@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import Image from 'next/image'
+import Image, { getImageProps } from 'next/image'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -84,6 +84,27 @@ function MaisonLink({
 }
 
 export default function NFEHomePage() {
+  const heroAlt =
+    'NFE Face Elixir bottle with gold pump in a warm sculptural setting.'
+  const {
+    props: { srcSet: desktopHeroSrcSet },
+  } = getImageProps({
+    src: '/images/homepage/nfe-home-hero-product-vessel-desktop.webp',
+    alt: heroAlt,
+    width: 1440,
+    height: 1200,
+    sizes: '(min-width: 1024px) 48vw, 100vw',
+    priority: true,
+  })
+  const { props: mobileHeroProps } = getImageProps({
+    src: '/images/homepage/nfe-home-hero-product-vessel-mobile.webp',
+    alt: heroAlt,
+    width: 900,
+    height: 1200,
+    sizes: '100vw',
+    priority: true,
+  })
+
   return (
     <div className="bg-nfe-paper text-nfe-ink">
       <section className="grid min-h-[86vh] bg-[#efe4d5] lg:grid-cols-[1.05fr_0.95fr]">
@@ -117,15 +138,18 @@ export default function NFEHomePage() {
           </div>
         </div>
         <div className="relative min-h-[420px] overflow-hidden lg:min-h-full">
-          <Image
-            src="/images/products/20251003_175948-EDIT.jpg"
-            alt="NFE founder portrait with warm editorial lighting"
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 48vw"
-            className="object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-nfe-green-900/50 via-transparent to-transparent" />
+          <picture className="absolute inset-0 block">
+            <source
+              media="(min-width: 1024px)"
+              srcSet={desktopHeroSrcSet}
+              sizes="48vw"
+            />
+            <img
+              {...mobileHeroProps}
+              className="h-full w-full object-cover object-center"
+            />
+          </picture>
+          <div className="absolute inset-0 bg-gradient-to-t from-nfe-green-900/20 via-transparent to-transparent" />
         </div>
       </section>
 
@@ -138,6 +162,15 @@ export default function NFEHomePage() {
             <h2 className="font-serif text-4xl text-nfe-green-900 md:text-5xl">
               Made from the questions mainstream skincare did not answer well.
             </h2>
+            <div className="relative mt-8 aspect-[4/5] max-w-sm overflow-hidden rounded-3xl bg-white shadow-sm">
+              <Image
+                src="/images/products/20251003_175948-EDIT.jpg"
+                alt="Vanessa McCaleb, founder of NFE Beauty"
+                fill
+                sizes="(max-width: 768px) 80vw, 28vw"
+                className="object-cover object-center"
+              />
+            </div>
           </div>
           <div className="space-y-6 text-lg leading-8 text-nfe-muted">
             <p>
