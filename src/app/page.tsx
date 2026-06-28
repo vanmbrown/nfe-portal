@@ -91,17 +91,19 @@ export default function NFEHomePage() {
   } = getImageProps({
     src: '/images/homepage/nfe-home-hero-product-vessel-desktop.webp',
     alt: heroAlt,
-    width: 1440,
-    height: 1200,
+    width: 3600,
+    height: 2547,
     sizes: '(min-width: 1024px) 48vw, 100vw',
+    quality: 90,
     priority: true,
   })
   const { props: mobileHeroProps } = getImageProps({
     src: '/images/homepage/nfe-home-hero-product-vessel-mobile.webp',
     alt: heroAlt,
-    width: 900,
-    height: 1200,
+    width: 2000,
+    height: 2827,
     sizes: '100vw',
+    quality: 90,
     priority: true,
   })
 
@@ -137,7 +139,7 @@ export default function NFEHomePage() {
             <span>Tone integrity</span>
           </div>
         </div>
-        <div className="relative min-h-[420px] overflow-hidden lg:min-h-full">
+        <div className="relative min-h-[420px] overflow-hidden md:min-h-[680px] lg:min-h-full">
           <picture className="absolute inset-0 block">
             <source
               media="(min-width: 1024px)"
@@ -146,9 +148,10 @@ export default function NFEHomePage() {
             />
             <img
               {...mobileHeroProps}
-              className="h-full w-full object-cover object-center lg:object-[70%_center]"
+              className="h-full w-full object-cover object-center md:object-[50%_35%] lg:object-[70%_center]"
             />
           </picture>
+          <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-32 bg-gradient-to-r from-[#efe4d5] via-[#efe4d5]/65 to-transparent lg:block" />
           <div className="absolute inset-0 bg-gradient-to-t from-nfe-green-900/20 via-transparent to-transparent" />
         </div>
       </section>

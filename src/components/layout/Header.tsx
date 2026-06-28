@@ -12,7 +12,7 @@ export default function Header() {
       </a>
       <header role="banner" className="bg-nfe-green text-nfe-paper">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:grid lg:grid-cols-[minmax(5rem,1fr)_auto_minmax(5rem,1fr)]">
             <Link
               href="/"
               aria-label="NFE Beauty — home"
@@ -20,7 +20,9 @@ export default function Header() {
             >
               NFE
             </Link>
-            <PrimaryNav />
+            <div className="lg:-translate-x-14">
+              <PrimaryNav />
+            </div>
           </div>
         </div>
       </header>
