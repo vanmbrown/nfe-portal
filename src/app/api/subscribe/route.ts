@@ -4,6 +4,8 @@ import { createAdminSupabase } from "@/lib/supabase/server";
 import { escapeHtml } from "@/lib/utils/sanitize";
 import { subscribeRatelimit } from "@/lib/ratelimit";
 import type { NfeAttributionContext } from "@/lib/analytics/utm";
+import { syncBeehiivSubscriber } from "@/lib/beehiiv/subscriber";
+import type { ConsentSource, CustomerIntentType } from "@/lib/customer-intelligence/types";
 
 // Lazy Resend instantiation - only create when needed (not at module load time)
 const getResend = () => {
@@ -26,6 +28,38 @@ function cleanString(value: unknown, maxLength = 180): string | undefined {
 
 function cleanBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
+}
+
+function cleanIntent(value: unknown): CustomerIntentType {
+  const supportedIntents: CustomerIntentType[] = [
+    'founder_access',
+    'discovery',
+    'skin_ritual_quiz',
+    'concierge',
+    'review',
+    'replenishment',
+    'wholesale',
+    'press',
+  ];
+
+  return typeof value === 'string' && supportedIntents.includes(value as CustomerIntentType)
+    ? (value as CustomerIntentType)
+    : 'founder_access';
+}
+
+function cleanConsentSource(value: unknown): ConsentSource {
+  const supportedSources: ConsentSource[] = [
+    'subscribe_page',
+    'founder_access',
+    'discovery',
+    'skin_ritual_quiz',
+    'concierge',
+    'future_form',
+  ];
+
+  return typeof value === 'string' && supportedSources.includes(value as ConsentSource)
+    ? (value as ConsentSource)
+    : 'subscribe_page';
 }
 
 function cleanAttribution(value: unknown): NfeAttributionContext {
@@ -63,10 +97,14 @@ function renderOptionalContext({
   source,
   context,
   attribution,
+  beehiivStatus,
+  beehiivReason,
 }: {
   source?: string;
   context: ReturnType<typeof cleanContext>;
   attribution: NfeAttributionContext;
+  beehiivStatus?: string;
+  beehiivReason?: string;
 }) {
   const rows = [
     ["Source", source],
@@ -81,6 +119,8 @@ function renderOptionalContext({
     ["UTM Content", attribution.utmContent],
     ["Landing Page", attribution.landingPage],
     ["Referrer", attribution.referrer],
+    ["Beehiiv Status", beehiivStatus],
+    ["Beehiiv Reason", beehiivReason],
   ].filter(([, value]) => value !== undefined && value !== "");
 
   if (rows.length === 0) return "";
@@ -115,6 +155,8 @@ export async function POST(req: Request) {
 
     const emailErrors = [];
     const dbErrors = [];
+    let beehiivStatus: string | undefined;
+    let beehiivReason: string | undefined;
 
     // 1. Check for duplicate email first (Priority: High)
     // We use the Admin client to bypass RLS and ensure we can check the table.
@@ -191,6 +233,21 @@ export async function POST(req: Request) {
       }
     }
 
+    if (dbSuccess) {
+      const beehiivResult = await syncBeehiivSubscriber({
+        email,
+        intent: cleanIntent(context.intent),
+        source: cleanConsentSource(context.consentSource ?? source),
+        pagePath: context.pagePath,
+        consentSource: context.consentSource,
+        marketingOptIn: context.marketingOptIn,
+        privacyPolicyAccepted: context.privacyPolicyAccepted,
+        attribution,
+      });
+      beehiivStatus = beehiivResult.status;
+      beehiivReason = beehiivResult.reason;
+    }
+
     // 4. Send Email Notification to Owner (Priority: High)
     if (dbSuccess) {
       if (!process.env.RESEND_API_KEY) {
@@ -209,7 +266,13 @@ export async function POST(req: Request) {
             html: `
               <p><strong>Email:</strong> ${escapeHtml(email)}</p>
               <p><strong>Time:</strong> ${new Date().toISOString()}</p>
-              ${renderOptionalContext({ source, context, attribution })}
+              ${renderOptionalContext({
+                source,
+                context,
+                attribution,
+                beehiivStatus,
+                beehiivReason,
+              })}
             `,
           });
         } catch (emailError: any) {

@@ -99,11 +99,17 @@ Each payload shape includes:
 
 Email is optional at the type level because some future events may be anonymous or aggregate-only until consent and storage support are present.
 
-## Beehiiv and CRM Mapping
+## Beehiiv and CRM Integration
 
 Tag and field mappings live in `src/lib/customer-intelligence/tags.ts`.
 
-These mappings are definitions only. They do not create Beehiiv subscribers, segments, automations, or API calls.
+The Beehiiv / CRM Integration Foundation adds a server-side adapter in
+`src/lib/beehiiv/subscriber.ts`. It can create or update a Beehiiv subscriber
+after the supported `/subscribe` path succeeds, provided that explicit consent
+is present and server-side Beehiiv environment variables are configured.
+
+This integration does not create Beehiiv automations, Shopify sync, Concierge
+opt-ins, Science captures, or new public forms.
 
 Default tag families:
 
@@ -135,6 +141,7 @@ The API:
 - validates email
 - inserts only email into the existing subscribers table
 - sends the existing confirmation email
+- attempts a consent-gated Beehiiv sync when configured server-side
 - includes sanitized context in owner notification and optional forwarding payloads
 
 ## Later Phase Boundaries
@@ -144,7 +151,7 @@ Do not add the following until separately approved:
 - full Skin Ritual Quiz logic
 - Discovery Ritual checkout or Shopify implementation
 - Concierge intake and response system
-- Beehiiv automations or segmentation API writes
+- Beehiiv automations or Shopify sync
 - review collection flows
 - replenishment reminders
 - wholesale or press forms
