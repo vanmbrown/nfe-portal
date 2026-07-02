@@ -167,10 +167,11 @@ export default function NFEHomePage() {
             </h2>
             <div className="relative mt-8 aspect-[4/5] max-w-sm overflow-hidden rounded-3xl bg-white shadow-sm">
               <Image
-                src="/images/products/20251003_175948-EDIT.jpg"
+                src="/images/founder/vanessa-founder-portrait.webp"
                 alt="Vanessa McCaleb, founder of NFE Beauty"
                 fill
                 sizes="(max-width: 768px) 80vw, 28vw"
+                quality={90}
                 className="object-cover object-center"
               />
             </div>
