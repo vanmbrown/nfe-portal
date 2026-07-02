@@ -1,15 +1,13 @@
-"use client";
+import type { Metadata } from 'next'
 
-import React from "react";
-import ScienceTab from "@/components/nfe/ScienceTab";
+import ScienceIntelligence from './ScienceIntelligence'
+
+export const metadata: Metadata = {
+  title: 'Science, Method & Proof | NFE Beauty',
+  description:
+    'NFE Skin Intelligence translates mature, melanated skin priorities into cosmetic formulation logic, ritual guidance, and proof discipline.',
+}
 
 export default function SciencePage() {
-  return (
-    <div
-      id="testing-roadmap"
-      className="min-h-screen w-full scroll-mt-24 bg-gradient-to-br from-[#0B291E] via-[#0E2A22] to-[#0B291E]"
-    >
-      <ScienceTab />
-    </div>
-  );
+  return <ScienceIntelligence />
 }
