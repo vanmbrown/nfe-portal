@@ -539,6 +539,107 @@ const PROOF_STAGES = [
   },
 ]
 
+const SKIN_LAYER_MAP = [
+  {
+    layer: 'Skin surface / stratum corneum',
+    colorName: 'Surface hydration',
+    colorClass: 'bg-[#f4eadb]',
+    accentClass: 'border-[#d8c6ad] text-[#5e4b34]',
+    concern: 'Dryness, ashiness, rough feel, dull surface appearance.',
+    support:
+      'Surface hydration, cushioning, moisture retention, and smoother-feeling skin.',
+    ingredients: ['Hyaluronic Acid 4D', 'Gamma-PGA', 'Panthenol', 'Squalane + Emollients'],
+  },
+  {
+    layer: 'Barrier comfort / lipid layer',
+    colorName: 'Barrier comfort',
+    colorClass: 'bg-[#a5ad86]',
+    accentClass: 'border-[#c8d0ad] text-[#26351f]',
+    concern:
+      'Tightness, dehydration, compromised-feeling comfort, sensitivity awareness.',
+    support:
+      'Barrier comfort, a replenished feel, cushioned skin, and resilience-feeling care.',
+    ingredients: ['Ceramides + Cholesterol', 'Niacinamide', 'Panthenol', 'Squalane + Emollients'],
+  },
+  {
+    layer: 'Epidermal appearance / tone integrity',
+    colorName: 'Tone integrity',
+    colorClass: 'bg-[#d5ae62]',
+    accentClass: 'border-[#e6ca8c] text-[#372914]',
+    concern:
+      'Uneven-looking tone, radiance loss, visible dullness, post-blemish-looking marks.',
+    support:
+      'A more even-looking complexion, tone integrity, visible radiance, and luminous appearance.',
+    ingredients: ['Niacinamide', 'Tranexamic Acid', 'Alpha-Arbutin', 'Licorice Root', 'THD Ascorbate'],
+  },
+  {
+    layer: 'Texture and visible refinement',
+    colorName: 'Texture softness',
+    colorClass: 'bg-[#a66f45]',
+    accentClass: 'border-[#c99a74] text-[#fff8ee]',
+    concern:
+      'Crepey-looking texture, fine line appearance, loss of suppleness, less conditioned feel.',
+    support:
+      'Softens the look of texture, supports supple-looking skin, and helps skin feel smoother.',
+    ingredients: ['Bakuchiol', 'GHK-Cu', 'Argireline', 'Niacinamide', 'THD Ascorbate'],
+  },
+  {
+    layer: 'Environmental / radiance support',
+    colorName: 'Visible radiance',
+    colorClass: 'bg-[#ead7aa]',
+    accentClass: 'border-[#f1dfb6] text-[#4b3517]',
+    concern: 'Oxidative-looking dullness, tired-looking skin, lack of visible vitality.',
+    support:
+      'Antioxidant support, visible radiance, a more rested look, and cosmetic well-aging care.',
+    ingredients: ['THD Ascorbate', 'Licorice Root', 'Bakuchiol', 'CoQ10 + Tocopherols'],
+  },
+]
+
+const CONCERN_MATRIX = [
+  {
+    concern: 'Dryness / ashiness',
+    context: 'Skin surface / stratum corneum',
+    support: 'Surface hydration and moisture retention',
+    ingredients: 'Hyaluronic Acid 4D, Gamma-PGA, Panthenol',
+  },
+  {
+    concern: 'Barrier stress / tightness',
+    context: 'Barrier comfort / lipid layer',
+    support: 'Cushioned feel and barrier comfort',
+    ingredients: 'Ceramides + Cholesterol, Niacinamide, Squalane + Emollients',
+  },
+  {
+    concern: 'Uneven-looking tone',
+    context: 'Epidermal appearance / tone integrity',
+    support: 'Tone appearance and more even-looking complexion',
+    ingredients: 'Niacinamide, Tranexamic Acid, Alpha-Arbutin, Licorice Root',
+  },
+  {
+    concern: 'Radiance loss',
+    context: 'Tone integrity and radiance support',
+    support: 'Visible radiance and luminous appearance',
+    ingredients: 'THD Ascorbate, Licorice Root, CoQ10 + Tocopherols',
+  },
+  {
+    concern: 'Crepey-looking texture',
+    context: 'Texture and visible refinement',
+    support: 'Texture softness and smoother-feeling skin',
+    ingredients: 'Bakuchiol, GHK-Cu, Niacinamide, Squalane + Emollients',
+  },
+  {
+    concern: 'Fine lines appearance',
+    context: 'Visible well-aging support',
+    support: 'Supple-looking skin and visible refinement',
+    ingredients: 'Bakuchiol, Argireline, GHK-Cu, THD Ascorbate',
+  },
+  {
+    concern: 'Sensitivity awareness',
+    context: 'Barrier comfort and visible calm',
+    support: 'Restrained cosmetic care and comfort-first support',
+    ingredients: 'Panthenol, Licorice Root, Ceramides + Cholesterol',
+  },
+]
+
 function includes(concerns: ConcernId[], concern: ConcernId) {
   return concerns.includes(concern)
 }
@@ -1163,36 +1264,279 @@ export default function ScienceIntelligence() {
       </section>
 
       <section className="bg-nfe-green-900 px-6 py-20 text-nfe-paper md:px-12">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+            <div>
             <p className="mb-4 text-xs uppercase tracking-[0.3em] text-nfe-gold">
-              Method for Melanated Skin
+              Skin Layer Intelligence
             </p>
             <h2 className="font-serif text-3xl leading-tight text-nfe-gold md:text-5xl">
-              Melanocyte Interaction Map.
+              The Skin Layer Intelligence Map.
             </h2>
-          </div>
-          <div className="rounded-3xl border border-nfe-paper/15 bg-white/5 p-8">
-            <p className="leading-8 text-nfe-paper/85">
-              Melanated skin deserves more than generic brightening language. NFE
-              thinks about tone, radiance, barrier support, and visible calm as
-              connected concerns. The goal is not to suppress identity or erase
-              natural depth of tone. The goal is to support a more even,
-              luminous, healthy-looking complexion with cosmetic well-aging care.
+            <p className="mt-6 max-w-md leading-7 text-nfe-paper/78">
+              Mature melanated skin is not one concern. Dryness, tone appearance,
+              barrier comfort, radiance, and texture often overlap. NFE organizes
+              its formulas by the way these visible needs show up across the
+              skin surface and appearance layers, with cosmetic support that is
+              layered, restrained, and intentional.
             </p>
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              {[
-                'Tone support is paired with comfort so the ritual does not ignore sensitivity.',
-                'Radiance is framed as a barrier, hydration, and tone story rather than a quick shine.',
-                'Uneven-looking tone is discussed through appearance support, not disease language.',
-                'Proof is separated from promise: founder experience, customer feedback, and future testing stay distinct.',
-              ].map((item) => (
-                <p
-                  key={item}
-                  className="rounded-2xl border border-nfe-paper/10 bg-white/5 p-4 leading-7 text-nfe-paper/80"
+            <p className="mt-5 rounded-2xl border border-nfe-paper/15 bg-white/5 p-5 text-sm leading-6 text-nfe-paper/72">
+              This map is an educational cosmetic framework. NFE products are
+              not intended to diagnose, treat, cure, or prevent disease. Results
+              vary.
+            </p>
+            </div>
+
+            <div className="rounded-3xl border border-nfe-paper/15 bg-white/5 p-5 md:p-8">
+              <div className="grid gap-5">
+                <div className="rounded-[1.75rem] border border-nfe-gold/20 bg-nfe-green-900/70 p-5 md:p-7">
+                  <p className="text-xs uppercase tracking-[0.28em] text-nfe-gold">
+                    Layer Schematic
+                  </p>
+                  <div
+                    className="mt-5 rounded-[1.5rem] border border-nfe-paper/12 bg-white/[0.035] p-2 md:p-3"
+                    aria-label="Simplified cosmetic skin-layer schematic showing surface, barrier, tone appearance, texture, and deeper visual support contexts."
+                  >
+                    <svg
+                      className="mx-auto h-[260px] w-full max-w-5xl overflow-visible md:h-[340px]"
+                      viewBox="0 0 230 170"
+                      preserveAspectRatio="xMidYMid meet"
+                      role="img"
+                      aria-labelledby="skin-layer-schematic-title skin-layer-schematic-description"
+                    >
+                      <title id="skin-layer-schematic-title">
+                        Simplified skin-layer schematic
+                      </title>
+                      <desc id="skin-layer-schematic-description">
+                        A refined cosmetic framework showing visible layer
+                        contexts for surface feel, barrier comfort, tone
+                        appearance, texture softness, and visible radiance.
+                      </desc>
+                      <defs>
+                        <linearGradient id="nfe-schematic-sheen" x1="0" x2="1" y1="0" y2="1">
+                          <stop offset="0" stopColor="#fff8ef" stopOpacity="0.55" />
+                          <stop offset="1" stopColor="#0b2f24" stopOpacity="0" />
+                        </linearGradient>
+                        <clipPath id="nfe-layer-clip">
+                          <rect x="14" y="28" width="160" height="126" rx="16" />
+                        </clipPath>
+                      </defs>
+
+                      <rect
+                        x="14"
+                        y="28"
+                        width="160"
+                        height="126"
+                        rx="18"
+                        fill="#0b2f24"
+                        stroke="rgba(253,252,248,0.38)"
+                        strokeWidth="1.5"
+                      />
+                      <g clipPath="url(#nfe-layer-clip)">
+                        <path
+                          d="M14 28H174V59C144 52 115 64 86 57C58 50 38 57 14 52Z"
+                          fill="#f4eadb"
+                        />
+                        <path
+                          d="M14 52C38 57 58 50 86 57C115 64 144 52 174 59V84H14Z"
+                          fill="#a5ad86"
+                        />
+                        <path
+                          d="M14 84H174V110C146 105 122 116 95 110C66 103 42 112 14 106Z"
+                          fill="#d5ae62"
+                        />
+                        <path
+                          d="M14 106C42 112 66 103 95 110C122 116 146 105 174 110V134H14Z"
+                          fill="#a66f45"
+                        />
+                        <rect x="14" y="134" width="160" height="20" fill="#ead7aa" />
+                        <path
+                          d="M14 28H174V154H14Z"
+                          fill="url(#nfe-schematic-sheen)"
+                        />
+                        <g fill="#6f744f" opacity="0.42">
+                          <circle cx="38" cy="143" r="2.2" />
+                          <circle cx="58" cy="149" r="1.8" />
+                          <circle cx="82" cy="140" r="2" />
+                          <circle cx="106" cy="150" r="2.4" />
+                          <circle cx="130" cy="141" r="1.8" />
+                          <circle cx="154" cy="148" r="2.1" />
+                        </g>
+                      </g>
+
+                      <path
+                        d="M28 42C50 37 66 44 86 42C110 38 128 35 158 42"
+                        fill="none"
+                        stroke="#fff8ef"
+                        strokeLinecap="round"
+                        strokeOpacity="0.62"
+                        strokeWidth="1.4"
+                      />
+                      <path
+                        d="M28 49C52 44 69 52 91 49C116 45 132 43 159 50"
+                        fill="none"
+                        stroke="#fff8ef"
+                        strokeLinecap="round"
+                        strokeOpacity="0.36"
+                        strokeWidth="1"
+                      />
+
+                      <g stroke="rgba(253,252,248,0.28)" strokeWidth="0.8">
+                        <path d="M5 33H0V82H5" fill="none" />
+                        <path d="M5 91H0V130H5" fill="none" />
+                        <path d="M5 139H0V154H5" fill="none" />
+                      </g>
+                      <g fill="#17352a" opacity="0.72" className="text-[5.5px] uppercase tracking-[0.08em]">
+                        <text x="28" y="58">Epidermis</text>
+                        <text x="28" y="113">Dermis</text>
+                        <text x="28" y="148">Hypodermis</text>
+                      </g>
+
+                      <g stroke="rgba(253,252,248,0.36)" strokeWidth="1">
+                        <path d="M172 38H182V56H172" fill="none" />
+                        <path d="M172 64H182V83H172" fill="none" />
+                        <path d="M172 91H182V109H172" fill="none" />
+                        <path d="M172 117H182V133H172" fill="none" />
+                        <path d="M172 140H182V154H172" fill="none" />
+                      </g>
+
+                      <g className="fill-nfe-paper/72 text-[9px] uppercase tracking-[0.02em]">
+                        <text x="187" y="52">Surface</text>
+                        <text x="187" y="78">Barrier</text>
+                        <text x="187" y="105">Tone</text>
+                        <text x="187" y="130">Texture</text>
+                        <text x="187" y="151">Radiance</text>
+                      </g>
+                    </svg>
+                  </div>
+                  <p className="mt-4 max-w-2xl text-sm leading-6 text-nfe-paper/68">
+                    A simplified cosmetic framework for how visible skin needs
+                    appear across the skin&apos;s surface and appearance layers.
+                  </p>
+                </div>
+
+                <div className="rounded-[1.75rem] border border-nfe-gold/20 bg-nfe-green-900/70 p-5 md:p-7">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-nfe-gold">
+                      Layer Context
+                    </p>
+                    <h3 className="mt-2 font-serif text-2xl text-nfe-paper">
+                      Where visible concerns begin. How NFE supports them.
+                    </h3>
+                  </div>
+                  <span className="rounded-full border border-nfe-gold/30 px-4 py-2 text-xs uppercase tracking-[0.18em] text-nfe-gold">
+                    Cosmetic support zones
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {SKIN_LAYER_MAP.map((item, index) => (
+                    <article
+                      key={item.layer}
+                      className="grid gap-4 rounded-2xl border border-nfe-paper/12 bg-white/[0.035] p-4 md:grid-cols-[0.9fr_1.1fr]"
+                    >
+                      <div className="flex items-stretch gap-4">
+                        <div
+                          className={`w-4 shrink-0 rounded-full ${item.colorClass}`}
+                          aria-hidden="true"
+                        />
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.22em] text-nfe-paper/50">
+                            {String(index + 1).padStart(2, '0')} · {item.colorName}
+                          </p>
+                          <h4 className="mt-2 font-serif text-xl leading-tight text-nfe-gold">
+                            {item.layer}
+                          </h4>
+                          <p className="mt-3 text-sm leading-6 text-nfe-paper/72">
+                            <span className="text-nfe-paper/90">Visible concern: </span>
+                            {item.concern}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-sm leading-6 text-nfe-paper/76">
+                          <span className="text-nfe-paper/95">Formula support: </span>
+                          {item.support}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {item.ingredients.map((ingredient) => (
+                            <span
+                              key={ingredient}
+                              className={`rounded-full border bg-white/75 px-3 py-1 text-xs font-medium ${item.accentClass}`}
+                            >
+                              {ingredient}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 rounded-3xl border border-nfe-paper/15 bg-white/5 p-5 md:p-8">
+            <div className="mb-6 max-w-3xl">
+              <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
+                Concern-To-Formula Matrix
+              </p>
+              <h3 className="mt-3 font-serif text-3xl text-nfe-paper">
+                A simpler way to read the formula logic.
+              </h3>
+              <p className="mt-4 leading-7 text-nfe-paper/75">
+                Each row connects a visible concern to its primary skin layer
+                context, cosmetic support language, and public ingredient
+                examples already used in NFE education.
+              </p>
+            </div>
+
+            <div className="hidden overflow-hidden rounded-2xl border border-nfe-paper/12 md:block">
+              <div className="grid grid-cols-[1fr_1.05fr_1.2fr_1.25fr] bg-nfe-gold/14 text-xs uppercase tracking-[0.22em] text-nfe-gold">
+                <div className="p-4">Concern</div>
+                <div className="p-4">Skin layer context</div>
+                <div className="p-4">Formula support</div>
+                <div className="p-4">Example ingredients</div>
+              </div>
+              {CONCERN_MATRIX.map((row) => (
+                <div
+                  key={row.concern}
+                  className="grid grid-cols-[1fr_1.05fr_1.2fr_1.25fr] border-t border-nfe-paper/10 text-sm leading-6 text-nfe-paper/78"
                 >
-                  {item}
-                </p>
+                  <div className="p-4 font-medium text-nfe-paper">{row.concern}</div>
+                  <div className="p-4">{row.context}</div>
+                  <div className="p-4">{row.support}</div>
+                  <div className="p-4">{row.ingredients}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid gap-3 md:hidden">
+              {CONCERN_MATRIX.map((row) => (
+                <article
+                  key={row.concern}
+                  className="rounded-2xl border border-nfe-paper/12 bg-white/[0.035] p-4"
+                >
+                  <h4 className="font-serif text-xl text-nfe-gold">
+                    {row.concern}
+                  </h4>
+                  <div className="mt-3 space-y-2 text-sm leading-6 text-nfe-paper/75">
+                    <p>
+                      <span className="text-nfe-paper/95">Layer context: </span>
+                      {row.context}
+                    </p>
+                    <p>
+                      <span className="text-nfe-paper/95">Formula support: </span>
+                      {row.support}
+                    </p>
+                    <p>
+                      <span className="text-nfe-paper/95">Examples: </span>
+                      {row.ingredients}
+                    </p>
+                  </div>
+                </article>
               ))}
             </div>
           </div>
