@@ -450,7 +450,7 @@ export default function NFEHomePage() {
             Through the Maison
           </p>
           <h2 className="mx-auto max-w-3xl text-center font-serif text-4xl text-nfe-green-900 md:text-5xl">
-            Continue when you are ready to go deeper.
+            Continue into the maison.
           </h2>
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {contextualPathways.map((pathway) => (
