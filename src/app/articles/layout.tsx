@@ -1,27 +1,21 @@
-import type { Metadata } from 'next';
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Articles – NFE Skincare for Mature Melanated Skin',
-  description: 'A thoughtful collection of reflections, rituals, and real conversations on the care of mature melanated skin.',
+  title: 'Journal | NFE Beauty',
+  description:
+    'NFE Journal is the editorial house for well-aging philosophy, mature melanated skin education, ritual intelligence, and proof discipline.',
   openGraph: {
-    title: 'Articles – NFE Skincare for Mature Melanated Skin',
-    description: 'A thoughtful collection of reflections, rituals, and real conversations on the care of mature melanated skin.',
+    title: 'Journal | NFE Beauty',
+    description:
+      'Editorial authority for mature melanated skin: barrier comfort, tone integrity, ritual intelligence, and proof discipline.',
     type: 'website',
   },
-};
+}
 
 export default function ArticlesLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return <>{children}</>;
+  return <>{children}</>
 }
-
-
-
-
-
-
-
-

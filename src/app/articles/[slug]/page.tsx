@@ -1,139 +1,141 @@
-import React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { articleMDX, allArticleSlugs, type ArticleSlug } from "@/content/articles/registry";
-import articlesIndex from "@/content/articles/articles.json";
-
-export const dynamic = "force-dynamic";
+import Link from 'next/link'
+import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import { articleMDX, allArticleSlugs, type ArticleSlug } from '@/content/articles/registry'
+import { getArticleBySlug, getPillarLabel } from '@/lib/articles'
+import { ArticleJsonLd } from '@/components/articles/ArticleJsonLd'
+import {
+  ArticleMaisonLinks,
+  ArticleRelatedLinks,
+} from '@/components/articles/ArticleRelatedLinks'
 
 type Props = {
-  params: Promise<{ slug: string }>;
-};
+  params: Promise<{ slug: string }>
+}
+
+export function generateStaticParams() {
+  return allArticleSlugs.map((slug) => ({ slug }))
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const meta = (articlesIndex as Array<{ slug: string; title: string; excerpt: string; image?: string }>).find(
-    (article) => article.slug === slug
-  );
+  const { slug } = await params
+  const meta = getArticleBySlug(slug)
 
   if (!meta) {
     return {
-      title: "Article Not Found",
-    };
+      title: 'Article Not Found',
+    }
   }
 
+  const title = `${meta.title} | NFE Journal`
+
   return {
-    title: meta.title,
+    title,
     description: meta.excerpt,
     openGraph: {
-      title: meta.title,
+      title,
       description: meta.excerpt,
+      type: 'article',
+      publishedTime: meta.date,
+      authors: [meta.author],
       images: meta.image ? [{ url: meta.image }] : [],
     },
-  };
+  }
 }
 
 export default async function ArticlePage({ params }: Props) {
-  const { slug } = await params;
-  const typedSlug = slug as ArticleSlug;
-  const loader = articleMDX[typedSlug];
+  const { slug } = await params
+  const typedSlug = slug as ArticleSlug
+  const loader = articleMDX[typedSlug]
   if (!loader) {
-    notFound();
+    notFound()
   }
 
-  const meta = (articlesIndex as Array<{ slug: string; title: string; excerpt?: string; author?: string; date?: string; image?: string }>).find(
-    (article) => article.slug === typedSlug
-  );
+  const meta = getArticleBySlug(typedSlug)
   if (!meta) {
-    notFound();
+    notFound()
   }
 
-  const mod = await loader();
-  const MDXContent = mod.default;
-  
-  const formattedDate = meta.date
-    ? new Date(`${meta.date}T12:00:00Z`).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-        timeZone: "UTC",
-      })
-    : "";
+  const mod = await loader()
+  const MDXContent = mod.default
 
-  const contentElement = (
-    <div className="prose prose-lg max-w-3xl text-[#0D2818]">
-      <MDXContent />
-    </div>
-  );
+  const formattedDate = new Date(`${meta.date}T12:00:00Z`).toLocaleDateString(
+    'en-US',
+    {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }
+  )
 
   return (
-    <div className="w-full bg-white">
-      {meta.image && (
-        <div className="relative w-full h-[60vh]">
-          <Image
-            src={meta.image}
-            alt={meta.title}
-            fill
-            className="object-cover"
-            sizes="100vw"
-            priority
-          />
-        </div>
-      )}
+    <div className="bg-nfe-paper text-nfe-ink">
+      <ArticleJsonLd
+        slug={meta.slug}
+        title={meta.title}
+        description={meta.excerpt}
+        image={meta.image ?? '/images/homepage/nfe-home-hero-product-vessel-desktop.webp'}
+        publishedAt={meta.date}
+      />
 
-      <section className="article-wrapper px-6 py-12">
-        <div className="max-w-3xl mx-auto mb-8">
-          <Link 
-            href="/articles" 
-            className="text-[#0D2818]/60 hover:text-[#0D2818] transition-colors text-sm font-medium flex items-center gap-2"
+      <section className="border-b border-nfe-green-900/10 bg-nfe-green-900 px-6 py-20 text-nfe-paper md:py-24">
+        <div className="mx-auto max-w-4xl">
+          <Link
+            href="/articles"
+            className="text-sm uppercase tracking-[0.22em] text-nfe-paper/70 transition hover:text-nfe-gold"
           >
-            ← Back to all Articles & Editorials
+            ← Back to the Journal
           </Link>
-        </div>
 
-        <div className="max-w-3xl mx-auto text-center mb-10">
-          <p className="text-xs tracking-[0.3em] uppercase text-[#0D2818]/70 mb-2">
-            Articles & Editorials
+          <p className="mt-8 text-xs uppercase tracking-[0.3em] text-nfe-gold">
+            {getPillarLabel(meta.pillar)}
+            {meta.series ? ` • ${meta.series}` : ''}
           </p>
-          {/* Temporary build marker for verification */}
-          {process.env.NEXT_PUBLIC_BUILD_SHA && (
-            <p className="text-xs text-gray-400 mb-2" data-build-sha={process.env.NEXT_PUBLIC_BUILD_SHA}>
-              Build: {process.env.NEXT_PUBLIC_BUILD_SHA}
-            </p>
-          )}
-          <h1 className="text-4xl md:text-5xl font-serif text-[#0D2818] mb-4">
+
+          <h1 className="mt-5 font-serif text-4xl leading-tight text-nfe-gold md:text-6xl">
             {meta.title}
           </h1>
-          {/* Hero excerpt (optional) */}
-          {meta.excerpt && (
-            <div className="my-6 max-w-2xl mx-auto border-t border-b border-[#0D2818]/10 py-6">
-              <p className="text-xl md:text-2xl text-[#0D2818] font-serif italic leading-relaxed">
-                {meta.excerpt}
-              </p>
-            </div>
-          )}
-          <p className="text-sm text-gray-600 mb-6">
-            {meta.author && <span>By {meta.author}</span>}
-            {meta.author && formattedDate && <span> • </span>}
-            {formattedDate}
-          </p>
-        </div>
 
-        <article className="prose prose-lg mx-auto max-w-3xl text-[#0D2818]">
-          {contentElement}
+          {meta.excerpt ? (
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-nfe-paper/82 md:text-xl">
+              {meta.excerpt}
+            </p>
+          ) : null}
+
+          <div className="mt-8 flex flex-wrap gap-3 text-sm text-nfe-paper/70">
+            <span>{meta.author}</span>
+            <span>•</span>
+            <span>{formattedDate}</span>
+            {meta.readingMinutes ? (
+              <>
+                <span>•</span>
+                <span>{meta.readingMinutes} min read</span>
+              </>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-16 md:px-12">
+        <article className="prose prose-lg mx-auto max-w-3xl text-nfe-ink prose-headings:font-serif prose-headings:text-nfe-green-900 prose-a:text-nfe-green-900 prose-a:no-underline hover:prose-a:underline">
+          <MDXContent />
         </article>
 
-        <div className="max-w-3xl mx-auto mt-16 pt-8 border-t border-gray-200">
-          <Link 
-            href="/articles" 
-            className="text-[#0D2818]/60 hover:text-[#0D2818] transition-colors text-sm font-medium flex items-center gap-2"
-          >
-            ← Back to all Articles & Editorials
-          </Link>
+        <div className="mx-auto max-w-3xl">
+          <ArticleRelatedLinks slug={meta.slug} />
+          <ArticleMaisonLinks />
+
+          <div className="mt-12 border-t border-nfe-green-900/10 pt-8">
+            <Link
+              href="/articles"
+              className="text-sm uppercase tracking-[0.18em] text-nfe-green-900 transition hover:text-nfe-green-700"
+            >
+              ← Back to the Journal
+            </Link>
+          </div>
         </div>
       </section>
     </div>
-  );
+  )
 }

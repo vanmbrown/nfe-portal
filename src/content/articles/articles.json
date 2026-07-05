@@ -1,66 +1,97 @@
 [
   {
-    "slug": "clean-beauty-myths-future-nfe",
-    "title": "Clean Beauty, Rewritten: Myths, Truths, and What Comes Next",
-    "date": "2026-01-12",
-    "author": "Vanessa",
-    "image": "/images/articles/clean_beauty.png",
-    "excerpt": "Clean beauty is real, messy, and often misunderstood. Here's what it means, the myths that keep us stuck, where the industry is headed, and how NFE fits—without fear marketing.",
-    "file": "clean-beauty-myths-future-nfe.mdx"
+    "slug": "well-aging-not-anti-aging",
+    "title": "Well-Aging, Not Anti-Aging: A Better Language for Mature Melanated Skin",
+    "date": "2026-07-05",
+    "author": "NFE Beauty",
+    "excerpt": "Mature melanated skin does not need fear, reversal language, or urgency marketing. It deserves well-aging care that supports comfort, tone integrity, radiance, and ritual dignity.",
+    "file": "well-aging-not-anti-aging.mdx",
+    "pillar": "well-aging",
+    "featured": true,
+    "readingMinutes": 7
+  },
+  {
+    "slug": "ritual-over-correction",
+    "title": "Ritual Over Correction: Why Daily Rhythm Beats Product Stacking",
+    "date": "2026-07-05",
+    "author": "NFE Beauty",
+    "excerpt": "Correction culture pushes more products, stronger actives, and faster promises. NFE believes mature melanated skin often responds better to ritual intelligence, barrier comfort, and fewer better steps.",
+    "file": "ritual-over-correction.mdx",
+    "pillar": "ritual-intelligence",
+    "featured": true,
+    "readingMinutes": 8
+  },
+  {
+    "slug": "barrier-wealth-aging-melanated-skin",
+    "title": "Barrier Wealth: Why Aging Melanated Skin Ages Differently — and What to Do About It",
+    "date": "2026-01-04",
+    "author": "NFE Beauty",
+    "excerpt": "A barrier-first framework for well-aging melanated skin.",
+    "file": "why_aging_melanated_skin_ages_differently.mdx",
+    "pillar": "barrier-wealth",
+    "featured": true,
+    "series": "Barrier Wealth",
+    "readingMinutes": 12
+  },
+  {
+    "slug": "barrier-wealth-midlife-dryness-after-45",
+    "title": "Midlife Dryness: What Changes After 45",
+    "date": "2026-01-04",
+    "author": "NFE Beauty",
+    "excerpt": "A Barrier Wealth sub-article explaining why skin gets drier after 45 and the simplest barrier-first reset for mature melanated skin.",
+    "file": "drier_skin_after_45.mdx",
+    "pillar": "barrier-wealth",
+    "series": "Barrier Wealth",
+    "readingMinutes": 8
   },
   {
     "slug": "ingredient-translation-brightening-melanated-skin",
     "title": "Ingredient Translation: What \"Brightening\" Really Means for Melanated Skin",
     "date": "2026-01-12",
-    "author": "Vanessa",
-    "image": "/images/articles/ingredient_translation.png",
-    "excerpt": "Brightening isn't bleaching. Learn what \"brightening\" should mean for melanated skin, the ingredient categories that support tone without irritation, and how to use the NFE Science Ingredient Map to choose wisely.",
-    "file": "ingredient-translation-brightening-melanated-skin.mdx"
-  },
-  {
-    "slug": "refill-culture-quiet-sustainable-luxury",
-    "title": "Refill Culture: The Future of Luxury Beauty Is Quietly Sustainable",
-    "date": "2026-01-12",
-    "author": "Vanessa",
-    "image": "/images/articles/refill_culture.png",
-    "excerpt": "Sustainability doesn't have to be loud. Here's why refillables are becoming the new luxury standard, what \"better packaging\" actually means, and how NFE's fewer-but-better philosophy fits.",
-    "file": "refill-culture-quiet-sustainable-luxury.mdx"
-  },
-  {
-    "slug": "barrier-wealth-aging-melanated-skin",
-    "title": "Barrier Wealth: Why Aging Melanated Skin Ages Differently - and What to Do About It",
-    "date": "2026-01-04",
-    "author": "Vanessa",
-    "image": "/images/articles/barrier_wealth_image.png",
-    "excerpt": "A barrier-first framework for well-aging melanated skin.",
-    "file": "why_aging_melanated_skin_ages_differently.mdx"
-  },
-    {
-    "slug": "barrier-wealth-midlife-dryness-after-45",
-    "title": "Midlife Dryness: What Changes After 45",
-    "date": "2026-01-04",
-    "author": "Vanessa",
-    "image": "/images/articles/drier_skin_after_45.png",
-    "excerpt": "A Barrier Wealth sub-article explaining why skin gets drier after 45 and the simplest barrier-first reset for mature melanated skin.",
-    "file": "drier_skin_after_45.mdx"
+    "author": "NFE Beauty",
+    "excerpt": "Brightening is not bleaching. Learn what tone-support language should mean for melanated skin and how to read ingredient education with more clarity.",
+    "file": "ingredient-translation-brightening-melanated-skin.mdx",
+    "pillar": "tone-integrity",
+    "readingMinutes": 9
   },
   {
     "slug": "black-dont-crack",
-    "title": "Black Don’t Crack? The Truth About Sunscreen and Mature Melanated Skin",
+    "title": "Black Don't Crack? The Truth About Sunscreen and Mature Melanated Skin",
     "date": "2025-10-31",
     "author": "NFE Beauty",
-    "image": "/images/articles/black_dont_crack.jpg",
-    "excerpt": "For years, many believed deeper skin tones didn’t need sunscreen. Discover why SPF is essential for mature melanated skin.",
-    "file": "black-dont-crack.mdx"
+    "excerpt": "For years, many believed deeper skin tones did not need sunscreen. Here is why daily UV protection still belongs in mature melanated care.",
+    "file": "black-dont-crack.mdx",
+    "pillar": "tone-integrity",
+    "readingMinutes": 7
   },
   {
     "slug": "water-vs-oil",
     "title": "Solving the Hidden Problem: Why Oil Alone Fails Mature Melanated Skin",
     "date": "2025-11-16",
     "author": "NFE Beauty",
-    "image": "/images/articles/water_vs_oil.png",
-    "excerpt": "Oil alone isn’t enough. Understanding hydration vs moisture is key for mature melanated skin.",
-    "file": "water-vs-oil.mdx"
+    "excerpt": "Oil alone is not enough. Understanding hydration versus moisture is key for mature melanated skin.",
+    "file": "water-vs-oil.mdx",
+    "pillar": "ritual-intelligence",
+    "readingMinutes": 8
+  },
+  {
+    "slug": "clean-beauty-myths-future-nfe",
+    "title": "Clean Beauty, Rewritten: Myths, Truths, and What Comes Next",
+    "date": "2026-01-12",
+    "author": "NFE Beauty",
+    "excerpt": "Clean beauty is real, messy, and often misunderstood. Here is what it means without fear marketing or vague promises.",
+    "file": "clean-beauty-myths-future-nfe.mdx",
+    "pillar": "proof-discipline",
+    "readingMinutes": 10
+  },
+  {
+    "slug": "refill-culture-quiet-sustainable-luxury",
+    "title": "Refill Culture: The Future of Luxury Beauty Is Quietly Sustainable",
+    "date": "2026-01-12",
+    "author": "NFE Beauty",
+    "excerpt": "Sustainability does not have to be loud. Here is why refillables, fewer products, and quiet luxury belong together.",
+    "file": "refill-culture-quiet-sustainable-luxury.mdx",
+    "pillar": "proof-discipline",
+    "readingMinutes": 7
   }
 ]
-
