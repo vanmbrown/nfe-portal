@@ -6,6 +6,7 @@ import {
   type JournalSupportingNoteLabel,
 } from '@/content/articles/journal-supporting-notes'
 import {
+  WELL_AGING_ARTICLE_GROUPS,
   WELL_AGING_SERIES_SLUG,
   WELL_AGING_ARTICLE_ORDER,
   type WellAgingArticleGroupId,
@@ -74,8 +75,17 @@ export function getSupportingNotesForGroup(
     )
 }
 
-export function isJournalSupportingNote(slug: string): boolean {
-  return ALL_JOURNAL_SUPPORTING_NOTE_SLUGS.includes(slug)
+export function getAllJournalSupportingNotes(): Array<{
+  article: ArticleMeta
+  label: JournalSupportingNoteLabel
+  themeEyebrow: string
+}> {
+  return WELL_AGING_ARTICLE_GROUPS.flatMap((group) =>
+    getSupportingNotesForGroup(group.id).map((entry) => ({
+      ...entry,
+      themeEyebrow: group.eyebrow,
+    }))
+  )
 }
 
 export function getArticleBySlug(slug: string): ArticleMeta | undefined {
@@ -150,4 +160,8 @@ export function getArticleCardImage(article: ArticleMeta): string | undefined {
 
 export function isPrimaryArticle(article: ArticleMeta): boolean {
   return article.editorialTier === 'primary'
+}
+
+export function isJournalSupportingNote(slug: string): boolean {
+  return ALL_JOURNAL_SUPPORTING_NOTE_SLUGS.includes(slug)
 }

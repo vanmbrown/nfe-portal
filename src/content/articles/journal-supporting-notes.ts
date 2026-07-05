@@ -15,7 +15,6 @@ export const JOURNAL_SUPPORTING_NOTES_BY_GROUP: Record<
   JournalSupportingNote[]
 > = {
   'philosophy-presence': [
-    { slug: 'well-aging-not-anti-aging', label: 'Foundational Essay' },
     { slug: 'clean-beauty-myths-future-nfe', label: 'Foundational Essay' },
     { slug: 'refill-culture-quiet-sustainable-luxury', label: 'Earlier Note' },
   ],
@@ -31,9 +30,7 @@ export const JOURNAL_SUPPORTING_NOTES_BY_GROUP: Record<
     },
     { slug: 'black-dont-crack', label: 'Earlier Note' },
   ],
-  'body-sensuality-ritual': [
-    { slug: 'ritual-over-correction', label: 'Foundational Essay' },
-  ],
+  'body-sensuality-ritual': [],
   'modern-care': [],
 }
 

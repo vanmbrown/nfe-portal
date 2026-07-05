@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import {
+  getAllJournalSupportingNotes,
   getArticlesBySeriesSlug,
   getFeaturedArticles,
   getLegacyArticles,
@@ -17,7 +18,9 @@ import {
   JournalArticleCard,
   JournalMaisonLinks,
 } from '@/components/articles/JournalArticleCard'
-import { JournalThemeSection } from '@/components/articles/JournalThemeSection'
+import {
+  JournalThemeSection,
+} from '@/components/articles/JournalThemeSection'
 
 export const metadata: Metadata = {
   title: 'Journal | NFE Beauty',
@@ -36,6 +39,7 @@ export default function JournalLandingPage() {
   const seriesArticles = getArticlesBySeriesSlug(WELL_AGING_SERIES_SLUG)
   const primaryCount = getPrimaryArticles().length
   const legacyCount = getLegacyArticles().length
+  const supportingNotes = getAllJournalSupportingNotes()
 
   return (
     <div className="bg-nfe-paper text-nfe-ink">
@@ -78,10 +82,34 @@ export default function JournalLandingPage() {
             {WELL_AGING_SERIES_DEK}
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-nfe-ink/58">
-            Nine primary essays anchor the Journal. {legacyCount} earlier notes
-            remain part of the house, woven into the themes below as supporting
-            editorial reading.
+            {primaryCount} primary essays anchor the Journal. {legacyCount} earlier
+            notes remain part of the house, illustrated where available and woven
+            into the themes below as supporting editorial reading.
           </p>
+          <div className="mt-8 rounded-[1.25rem] border border-nfe-green-900/10 bg-white/70 p-6">
+            <p className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
+              Supporting Editorial Notes · {legacyCount}
+            </p>
+            <ul className="mt-4 columns-1 gap-x-8 text-sm leading-7 text-nfe-ink/68 sm:columns-2 lg:columns-3">
+              {supportingNotes.map(({ article, label, themeEyebrow }) => (
+                <li key={article.slug} className="mb-2 break-inside-avoid">
+                  <Link
+                    href={`/articles/${article.slug}`}
+                    className="transition hover:text-nfe-green-700"
+                  >
+                    <span className="text-[0.68rem] uppercase tracking-[0.22em] text-nfe-ink/45">
+                      {label}
+                    </span>
+                    <span className="mx-2 text-nfe-ink/25">·</span>
+                    <span>{article.title}</span>
+                  </Link>
+                  <span className="mt-1 block text-xs text-nfe-ink/45">
+                    {themeEyebrow}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
           <Link
             href={`/articles/${WELL_AGING_SERIES_SLUG}`}
             className="mt-8 inline-flex text-sm font-medium uppercase tracking-[0.18em] text-nfe-green-900 transition hover:text-nfe-green-700"
@@ -115,7 +143,8 @@ export default function JournalLandingPage() {
               .filter((article): article is NonNullable<typeof article> =>
                 Boolean(article)
               )
-            const supportingNotes = getSupportingNotesForGroup(group.id)
+              .filter((article) => article.slug !== featured?.slug)
+            const groupSupportingNotes = getSupportingNotesForGroup(group.id)
 
             return (
               <JournalThemeSection
@@ -123,7 +152,7 @@ export default function JournalLandingPage() {
                 eyebrow={group.eyebrow}
                 title={group.title}
                 primaryArticles={groupArticles}
-                supportingNotes={supportingNotes}
+                supportingNotes={groupSupportingNotes}
                 compactImageFor={(article) =>
                   article.imageType === 'editorial-science'
                 }
@@ -156,8 +185,8 @@ export default function JournalLandingPage() {
             NFE Journal content is educational and cosmetic in nature. It does not
             diagnose, treat, cure, or prevent disease. Results and experiences vary.
             The primary editorial experience centers on {primaryCount} essays in{' '}
-            {WELL_AGING_SERIES_TITLE}. Earlier notes remain visible within each
-            theme as supporting editorial reading.
+            {WELL_AGING_SERIES_TITLE}. {legacyCount} supporting notes remain part
+            of the Journal with their original illustrations where available.
           </p>
         </div>
       </section>

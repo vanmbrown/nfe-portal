@@ -82,7 +82,7 @@
   },
   {
     "slug": "dark-spots-inflammation-before-brightening",
-    "title": "Dark Spots Are an Inflammation Story Before They Are a Brightening Story",
+    "title": "Uneven Tone Is a Skin-Stress Story Before It Is a Brightening Story",
     "date": "2026-07-05",
     "author": "NFE Beauty",
     "excerpt": "For melanated skin, dark spots are rarely just a surface concern. They often begin with irritation, friction, breakouts, shaving, or inflammation — which means brightening must begin with calm.",
@@ -102,7 +102,7 @@
   },
   {
     "slug": "body-care-neglected-prestige-beauty",
-    "title": "Body Care Is Still the Most Neglected Category in Prestige Beauty",
+    "title": "Body Care Is Prestige Beauty's Missing Ritual",
     "date": "2026-07-05",
     "author": "NFE Beauty",
     "excerpt": "The face receives serums, treatments, and active-led care. The body is too often given lotion. NFE believes mature body skin deserves the same intelligence, performance, and luxury as the face.",
@@ -181,28 +181,6 @@
     "relatedSlugs": ["calm-is-part-of-the-science", "dark-spots-inflammation-before-brightening", "body-care-neglected-prestige-beauty"]
   },
   {
-    "slug": "well-aging-not-anti-aging",
-    "title": "Well-Aging, Not Anti-Aging: A Better Language for Mature Melanated Skin",
-    "date": "2026-07-04",
-    "author": "NFE Beauty",
-    "excerpt": "Mature melanated skin does not need fear, reversal language, or urgency marketing. It deserves well-aging care that supports comfort, tone integrity, radiance, and ritual dignity.",
-    "file": "well-aging-not-anti-aging.mdx",
-    "pillar": "well-aging",
-    "editorialTier": "legacy",
-    "readingMinutes": 7
-  },
-  {
-    "slug": "ritual-over-correction",
-    "title": "Ritual Over Correction: Why Daily Rhythm Beats Product Stacking",
-    "date": "2026-07-04",
-    "author": "NFE Beauty",
-    "excerpt": "Correction culture pushes more products, stronger actives, and faster promises. NFE believes mature melanated skin often responds better to ritual intelligence, barrier comfort, and fewer better steps.",
-    "file": "ritual-over-correction.mdx",
-    "pillar": "ritual-intelligence",
-    "editorialTier": "legacy",
-    "readingMinutes": 8
-  },
-  {
     "slug": "barrier-wealth-aging-melanated-skin",
     "title": "Barrier Wealth: Why Aging Melanated Skin Ages Differently — and What to Do About It",
     "date": "2026-01-04",
@@ -212,7 +190,12 @@
     "pillar": "barrier-wealth",
     "series": "Barrier Wealth",
     "editorialTier": "legacy",
-    "readingMinutes": 12
+    "readingMinutes": 12,
+    "heroImage": "/images/articles/barrier_wealth_image.png",
+    "cardImage": "/images/articles/barrier_wealth_image.png",
+    "imageAlt": "Editorial illustration for Barrier Wealth: mature melanated skin and barrier resilience.",
+    "imageType": "illustration",
+    "imageCredit": null
   },
   {
     "slug": "barrier-wealth-midlife-dryness-after-45",
@@ -224,7 +207,12 @@
     "pillar": "barrier-wealth",
     "series": "Barrier Wealth",
     "editorialTier": "legacy",
-    "readingMinutes": 8
+    "readingMinutes": 8,
+    "heroImage": "/images/articles/drier_skin_after_45.png",
+    "cardImage": "/images/articles/drier_skin_after_45.png",
+    "imageAlt": "Editorial illustration about midlife dryness and barrier comfort after 45.",
+    "imageType": "illustration",
+    "imageCredit": null
   },
   {
     "slug": "ingredient-translation-brightening-melanated-skin",
@@ -235,18 +223,28 @@
     "file": "ingredient-translation-brightening-melanated-skin.mdx",
     "pillar": "tone-integrity",
     "editorialTier": "legacy",
-    "readingMinutes": 9
+    "readingMinutes": 9,
+    "heroImage": "/images/articles/ingredient_translation.png",
+    "cardImage": "/images/articles/ingredient_translation.png",
+    "imageAlt": "Editorial illustration explaining brightening language for melanated skin.",
+    "imageType": "illustration",
+    "imageCredit": null
   },
   {
     "slug": "black-dont-crack",
-    "title": "Black Don't Crack? The Truth About Sunscreen and Mature Melanated Skin",
-    "date": "2025-10-31",
+    "title": "Why Sunscreen Matters for Mature, Melanated Skin",
+    "date": "2026-01-15",
     "author": "NFE Beauty",
-    "excerpt": "For years, many believed deeper skin tones did not need sunscreen. Here is why daily UV protection still belongs in mature melanated care.",
+    "excerpt": "Daily SPF is part of a thoughtful well-aging ritual. For mature, melanated skin, sunscreen helps protect the care you are already giving your skin.",
     "file": "black-dont-crack.mdx",
     "pillar": "tone-integrity",
     "editorialTier": "legacy",
-    "readingMinutes": 7
+    "readingMinutes": 6,
+    "heroImage": "/images/articles/black_dont_crack.jpg",
+    "cardImage": "/images/articles/black_dont_crack.jpg",
+    "imageAlt": "Editorial portrait illustration for sunscreen and mature melanated skin.",
+    "imageType": "illustration",
+    "imageCredit": null
   },
   {
     "slug": "water-vs-oil",
@@ -257,7 +255,12 @@
     "file": "water-vs-oil.mdx",
     "pillar": "ritual-intelligence",
     "editorialTier": "legacy",
-    "readingMinutes": 8
+    "readingMinutes": 8,
+    "heroImage": "/images/articles/water_vs_oil.png",
+    "cardImage": "/images/articles/water_vs_oil.png",
+    "imageAlt": "Editorial illustration comparing hydration and moisture for mature melanated skin.",
+    "imageType": "illustration",
+    "imageCredit": null
   },
   {
     "slug": "clean-beauty-myths-future-nfe",
@@ -268,7 +271,12 @@
     "file": "clean-beauty-myths-future-nfe.mdx",
     "pillar": "proof-discipline",
     "editorialTier": "legacy",
-    "readingMinutes": 10
+    "readingMinutes": 10,
+    "heroImage": "/images/articles/clean_beauty.png",
+    "cardImage": "/images/articles/clean_beauty.png",
+    "imageAlt": "Editorial illustration on clean beauty myths and what comes next for NFE.",
+    "imageType": "illustration",
+    "imageCredit": null
   },
   {
     "slug": "refill-culture-quiet-sustainable-luxury",
@@ -279,6 +287,11 @@
     "file": "refill-culture-quiet-sustainable-luxury.mdx",
     "pillar": "proof-discipline",
     "editorialTier": "legacy",
-    "readingMinutes": 7
+    "readingMinutes": 7,
+    "heroImage": "/images/articles/refill_culture.png",
+    "cardImage": "/images/articles/refill_culture.png",
+    "imageAlt": "Editorial illustration on refill culture and quiet sustainable luxury.",
+    "imageType": "illustration",
+    "imageCredit": null
   }
 ]

@@ -25,6 +25,16 @@ const nextConfig = {
         destination: "/our-story",
         permanent: true,
       },
+      {
+        source: "/articles/well-aging-not-anti-aging",
+        destination: "/journal",
+        permanent: true,
+      },
+      {
+        source: "/articles/ritual-over-correction",
+        destination: "/journal",
+        permanent: true,
+      },
     ];
   },
   webpack: (config, { isServer }) => {

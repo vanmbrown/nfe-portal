@@ -12,8 +12,6 @@ export const articleMDX = {
   'what-mature-skin-needs-from-makeup': () =>
     import('./what-mature-skin-needs-from-makeup.mdx'),
   'shaving-is-a-barrier-event': () => import('./shaving-is-a-barrier-event.mdx'),
-  'well-aging-not-anti-aging': () => import('./well-aging-not-anti-aging.mdx'),
-  'ritual-over-correction': () => import('./ritual-over-correction.mdx'),
   'clean-beauty-myths-future-nfe': () =>
     import('./clean-beauty-myths-future-nfe.mdx'),
   'ingredient-translation-brightening-melanated-skin': () =>
