@@ -107,8 +107,8 @@ export default async function ArticlePage({ params }: Props) {
 
           {!primary ? (
             <div className="mt-6 rounded-[1.25rem] border border-nfe-paper/15 bg-nfe-paper/5 px-5 py-4 text-sm leading-6 text-nfe-paper/78">
-              This is an earlier NFE article kept for reference. For the current
-              editorial experience, begin with{' '}
+              This supporting editorial note remains part of the NFE Journal.
+              For the primary series, begin with{' '}
               <Link
                 href={`/articles/${WELL_AGING_SERIES_SLUG}`}
                 className="text-nfe-gold underline-offset-4 hover:underline"

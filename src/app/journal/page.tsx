@@ -3,7 +3,9 @@ import type { Metadata } from 'next'
 import {
   getArticlesBySeriesSlug,
   getFeaturedArticles,
+  getLegacyArticles,
   getPrimaryArticles,
+  getSupportingNotesForGroup,
 } from '@/lib/articles'
 import {
   WELL_AGING_ARTICLE_GROUPS,
@@ -15,6 +17,7 @@ import {
   JournalArticleCard,
   JournalMaisonLinks,
 } from '@/components/articles/JournalArticleCard'
+import { JournalThemeSection } from '@/components/articles/JournalThemeSection'
 
 export const metadata: Metadata = {
   title: 'Journal | NFE Beauty',
@@ -32,6 +35,7 @@ export default function JournalLandingPage() {
   const featured = getFeaturedArticles()[0]
   const seriesArticles = getArticlesBySeriesSlug(WELL_AGING_SERIES_SLUG)
   const primaryCount = getPrimaryArticles().length
+  const legacyCount = getLegacyArticles().length
 
   return (
     <div className="bg-nfe-paper text-nfe-ink">
@@ -73,6 +77,11 @@ export default function JournalLandingPage() {
           <p className="mt-6 max-w-3xl text-lg leading-8 text-nfe-ink/75">
             {WELL_AGING_SERIES_DEK}
           </p>
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-nfe-ink/58">
+            Nine primary essays anchor the Journal. {legacyCount} earlier notes
+            remain part of the house, woven into the themes below as supporting
+            editorial reading.
+          </p>
           <Link
             href={`/articles/${WELL_AGING_SERIES_SLUG}`}
             className="mt-8 inline-flex text-sm font-medium uppercase tracking-[0.18em] text-nfe-green-900 transition hover:text-nfe-green-700"
@@ -106,27 +115,19 @@ export default function JournalLandingPage() {
               .filter((article): article is NonNullable<typeof article> =>
                 Boolean(article)
               )
+            const supportingNotes = getSupportingNotesForGroup(group.id)
 
             return (
-              <div key={group.id}>
-                <div className="mb-8 max-w-3xl">
-                  <p className="mb-3 text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-                    {group.eyebrow}
-                  </p>
-                  <h2 className="font-serif text-3xl text-nfe-green-900 md:text-4xl">
-                    {group.title}
-                  </h2>
-                </div>
-                <div className="grid gap-5 md:grid-cols-2">
-                  {groupArticles.map((article) => (
-                    <JournalArticleCard
-                      key={article.slug}
-                      article={article}
-                      compactImage={article.imageType === 'editorial-science'}
-                    />
-                  ))}
-                </div>
-              </div>
+              <JournalThemeSection
+                key={group.id}
+                eyebrow={group.eyebrow}
+                title={group.title}
+                primaryArticles={groupArticles}
+                supportingNotes={supportingNotes}
+                compactImageFor={(article) =>
+                  article.imageType === 'editorial-science'
+                }
+              />
             )
           })}
         </div>
@@ -154,8 +155,9 @@ export default function JournalLandingPage() {
           <p className="mt-4 max-w-3xl text-sm leading-7 text-nfe-ink/72">
             NFE Journal content is educational and cosmetic in nature. It does not
             diagnose, treat, cure, or prevent disease. Results and experiences vary.
-            The primary editorial experience currently centers on {primaryCount}{' '}
-            essays in {WELL_AGING_SERIES_TITLE}.
+            The primary editorial experience centers on {primaryCount} essays in{' '}
+            {WELL_AGING_SERIES_TITLE}. Earlier notes remain visible within each
+            theme as supporting editorial reading.
           </p>
         </div>
       </section>

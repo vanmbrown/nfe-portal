@@ -1,8 +1,14 @@
 import articlesIndex from '@/content/articles/articles.json'
 import { getJournalPillar, type JournalPillarId } from '@/content/articles/pillars'
 import {
+  ALL_JOURNAL_SUPPORTING_NOTE_SLUGS,
+  JOURNAL_SUPPORTING_NOTES_BY_GROUP,
+  type JournalSupportingNoteLabel,
+} from '@/content/articles/journal-supporting-notes'
+import {
   WELL_AGING_SERIES_SLUG,
   WELL_AGING_ARTICLE_ORDER,
+  type WellAgingArticleGroupId,
 } from '@/content/articles/well-aging-series'
 
 export type ArticleImageType =
@@ -47,6 +53,29 @@ export function getPrimaryArticles(): ArticleMeta[] {
 
 export function getLegacyArticles(): ArticleMeta[] {
   return getAllArticles().filter((article) => article.editorialTier === 'legacy')
+}
+
+export function getSupportingNotesForGroup(
+  groupId: WellAgingArticleGroupId
+): Array<{ article: ArticleMeta; label: JournalSupportingNoteLabel }> {
+  const notes = JOURNAL_SUPPORTING_NOTES_BY_GROUP[groupId] ?? []
+
+  return notes
+    .map((note) => {
+      const article = getArticleBySlug(note.slug)
+      if (!article || article.editorialTier !== 'legacy') return null
+      return { article, label: note.label }
+    })
+    .filter(
+      (
+        entry
+      ): entry is { article: ArticleMeta; label: JournalSupportingNoteLabel } =>
+        Boolean(entry)
+    )
+}
+
+export function isJournalSupportingNote(slug: string): boolean {
+  return ALL_JOURNAL_SUPPORTING_NOTE_SLUGS.includes(slug)
 }
 
 export function getArticleBySlug(slug: string): ArticleMeta | undefined {
