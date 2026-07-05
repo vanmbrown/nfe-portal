@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 const differencePoints = [
   {
-    title: 'Mature melanated skin specificity',
-    body: 'NFE begins with skin that has lived: dryness, barrier stress, uneven-looking tone, texture changes, and radiance loss.',
+    title: 'Skin that has lived',
+    body: 'NFE begins with experienced melanated skin: dryness, barrier stress, uneven-looking tone, texture changes, and radiance loss.',
   },
   {
     title: 'Two complete elixirs',
@@ -44,8 +44,60 @@ const roadmapItems = [
 
 const proofSignals = [
   'Founder proof rooted in lived experience and formulation discipline.',
-  'Waitlist and Founder Access pathways for structured demand signals.',
+  'Founder Access pathways for structured demand signals.',
   'Future review and replenishment architecture planned before full commerce.',
+]
+
+const threeWayEntries = [
+  {
+    title: 'Founder Access',
+    body: 'For private notes, launch access, and early ritual guidance.',
+    href: '/founder-access',
+    cta: 'Join Founder Access',
+    primary: true,
+  },
+  {
+    title: 'Skin Ritual Quiz',
+    body: 'For understanding which ritual may fit your current skin needs.',
+    href: '/skin-ritual-quiz',
+    cta: 'Take the Skin Ritual Quiz',
+    primary: false,
+  },
+  {
+    title: 'Discovery Ritual',
+    body: 'For the first product experience when ordering opens.',
+    href: '/discovery',
+    cta: 'Explore Discovery Ritual',
+    primary: false,
+  },
+] as const
+
+const contextualPathways = [
+  {
+    label: 'Explore The Atelier',
+    href: '/shop',
+    description: 'Product philosophy and formulation experience.',
+  },
+  {
+    label: 'Read the Science',
+    href: '/science',
+    description: 'Layer logic, concern mapping, and proof discipline.',
+  },
+  {
+    label: 'Ask Concierge',
+    href: '/concierge',
+    description: 'Private guidance inside the maison.',
+  },
+  {
+    label: 'Read the Journal',
+    href: '/journal',
+    description: 'Editorial well-aging language and ritual intelligence.',
+  },
+  {
+    label: 'Explore Discovery Ritual',
+    href: '/discovery',
+    description: 'The considered first experience when ordering opens.',
+  },
 ]
 
 const philosophyCards = [
@@ -112,7 +164,7 @@ export default function NFEHomePage() {
       <section className="grid min-h-[86vh] bg-[#efe4d5] lg:grid-cols-[1.05fr_0.95fr]">
         <div className="flex flex-col justify-center px-6 py-20 md:px-12 lg:px-16">
           <p className="mb-5 text-xs uppercase tracking-[0.32em] text-[#7a4f22]">
-            Luxury-performance skincare for mature, melanated skin.
+            Luxury-performance skincare for skin that has lived.
           </p>
           <h1 className="max-w-4xl font-serif text-5xl leading-[0.95] text-nfe-green-900 md:text-7xl">
             For skin that has lived.
@@ -128,7 +180,7 @@ export default function NFEHomePage() {
             restraint.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <MaisonLink href="/shop">Enter the Atelier</MaisonLink>
+            <MaisonLink href="/founder-access">Join Founder Access</MaisonLink>
             <MaisonLink href="/skin-ritual-quiz" variant="outline">
               Take the Skin Ritual Quiz
             </MaisonLink>
@@ -179,7 +231,7 @@ export default function NFEHomePage() {
           <div className="space-y-6 text-lg leading-8 text-nfe-muted">
             <p>
               NFE began with Vanessa McCaleb&apos;s search for care that could
-              meet dry, mature, melanated skin with specificity and restraint.
+              meet tone-rich, experienced skin with specificity and restraint.
               The brand is founder-led, but the goal is larger than one story:
               to build a disciplined beauty house for skin that has lived.
             </p>
@@ -225,9 +277,14 @@ export default function NFEHomePage() {
               <h2 className="max-w-3xl font-serif text-4xl text-nfe-green-900 md:text-5xl">
                 Two elixirs. One restrained ritual.
               </h2>
+              <p className="mt-4 max-w-2xl leading-7 text-nfe-muted">
+                The Atelier is an editorial product room for formulation
+                philosophy until ordering opens. Explore the elixirs here, not
+                as a checkout path.
+              </p>
             </div>
             <MaisonLink href="/shop" variant="outline">
-              Enter the Atelier
+              Explore The Atelier
             </MaisonLink>
           </div>
           <div className="grid gap-8 md:grid-cols-2">
@@ -239,14 +296,14 @@ export default function NFEHomePage() {
                 For visible radiance, barrier comfort, and even-looking tone.
               </h3>
               <p className="mt-5 leading-7 text-nfe-paper/85">
-                A daily face ritual for mature, melanated skin that feels dry,
-                dull, uneven-looking, or depleted.
+                A daily face ritual for skin navigating dryness, dullness,
+                uneven-looking tone, or a depleted feel.
               </p>
               <Link
                 href="/products/face-elixir"
                 className="mt-8 inline-flex text-sm font-medium uppercase tracking-[0.2em] text-nfe-gold hover:text-nfe-paper"
               >
-                View Face Elixir
+                Explore Face Elixir
               </Link>
             </article>
             <article className="rounded-3xl bg-nfe-green-900 p-8 text-nfe-paper md:p-10">
@@ -264,9 +321,47 @@ export default function NFEHomePage() {
                 href="/products/body-elixir"
                 className="mt-8 inline-flex text-sm font-medium uppercase tracking-[0.2em] text-nfe-gold hover:text-nfe-paper"
               >
-                View Body Elixir
+                Explore Body Elixir
               </Link>
             </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white px-6 py-20 md:px-12">
+        <div className="mx-auto max-w-6xl">
+          <p className="mb-4 text-center text-xs uppercase tracking-[0.3em] text-nfe-green-700">
+            Enter NFE
+          </p>
+          <h2 className="mx-auto max-w-3xl text-center font-serif text-4xl text-nfe-green-900 md:text-5xl">
+            Three ways to enter NFE.
+          </h2>
+          <p className="mx-auto mt-6 max-w-3xl text-center leading-7 text-nfe-muted">
+            NFE is pre-commerce by design. The maison stays open for education,
+            guidance, and product philosophy while checkout remains inactive.
+          </p>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {threeWayEntries.map((entry) => (
+              <article
+                key={entry.title}
+                className="flex h-full flex-col rounded-3xl border border-nfe-green-100 bg-nfe-paper p-8"
+              >
+                <h3 className="font-serif text-2xl text-nfe-green-900">
+                  {entry.title}
+                </h3>
+                <p className="mt-4 flex-1 leading-7 text-nfe-muted">
+                  {entry.body}
+                </p>
+                <div className="mt-8">
+                  <MaisonLink
+                    href={entry.href}
+                    variant={entry.primary ? 'dark' : 'outline'}
+                  >
+                    {entry.cta}
+                  </MaisonLink>
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -288,7 +383,7 @@ export default function NFEHomePage() {
             </p>
             <div className="mt-8">
               <MaisonLink href="/science#testing-roadmap" variant="outline">
-                Visit Science
+                Read the Science
               </MaisonLink>
             </div>
           </div>
@@ -320,9 +415,8 @@ export default function NFEHomePage() {
             Begin with fit, not pressure.
           </h2>
           <p className="mt-6 max-w-xl leading-7 text-nfe-paper/85">
-            The NFE Skin Ritual Quiz will help visitors understand whether Face
-            Elixir, Body Elixir, the Discovery Ritual, or Founder Access is the
-            right next step.
+            An educational fit guide for Face Elixir, Body Elixir, Discovery
+            Ritual, or Founder Access. Guidance first, not purchase pressure.
           </p>
           <div className="mt-8">
             <MaisonLink href="/skin-ritual-quiz" variant="light">
@@ -338,14 +432,41 @@ export default function NFEHomePage() {
             A considered first experience with NFE.
           </h2>
           <p className="mt-6 max-w-xl leading-7 text-nfe-paper/85">
-            Discovery should reduce premium purchase uncertainty without
-            discounting the brand. The commerce flow is not live yet, but the
-            pathway is being prepared with care.
+            A future first-purchase pathway designed to reduce uncertainty
+            without discounting the brand. Ordering is not live yet; the
+            experience is being prepared with care.
           </p>
           <div className="mt-8">
             <MaisonLink href="/discovery" variant="light">
-              Experience the Discovery Ritual
+              Explore Discovery Ritual
             </MaisonLink>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-20 md:px-12">
+        <div className="mx-auto max-w-6xl">
+          <p className="mb-4 text-center text-xs uppercase tracking-[0.3em] text-nfe-green-700">
+            Through the Maison
+          </p>
+          <h2 className="mx-auto max-w-3xl text-center font-serif text-4xl text-nfe-green-900 md:text-5xl">
+            Continue when you are ready to go deeper.
+          </h2>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {contextualPathways.map((pathway) => (
+              <Link
+                key={pathway.href}
+                href={pathway.href}
+                className="rounded-3xl border border-nfe-green-100 bg-white p-6 transition hover:border-nfe-gold/40 hover:bg-nfe-paper"
+              >
+                <p className="text-sm font-medium uppercase tracking-[0.18em] text-nfe-green-900">
+                  {pathway.label}
+                </p>
+                <p className="mt-3 text-sm leading-6 text-nfe-muted">
+                  {pathway.description}
+                </p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -382,15 +503,12 @@ export default function NFEHomePage() {
             Private notes before the full ritual opens.
           </h2>
           <p className="mx-auto mt-6 max-w-2xl leading-7 text-nfe-muted">
-            Join the private list for founder notes, launch access, Discovery
-            Ritual updates, and quiet education on well-aging care. The current
-            supported signup path collects email only.
+            Founder Access is the primary path while checkout remains inactive:
+            private notes, early ritual guidance, and the supported email
+            capture for launch access when ordering opens.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <MaisonLink href="/founder-access">Join Founder Access</MaisonLink>
-            <MaisonLink href="/subscribe" variant="outline">
-              Go to Private List
-            </MaisonLink>
           </div>
         </div>
       </section>
