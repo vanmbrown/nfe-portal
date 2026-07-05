@@ -1,50 +1,30 @@
-import { notFound } from 'next/navigation';
-import FaceElixirHero from '@/components/products/FaceElixirHero';
-import { ProductAccordion } from '@/components/products/ProductAccordion';
-import FaceElixirFAQ, { faceElixirFaqItems } from '@/components/products/face-elixir/FaceElixirFAQ';
-import WaitlistModal from '@/components/shared/WaitlistModal';
-import { productData } from '@/content/products/registry';
-import type { Product } from '@/types/products';
+import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import { ElixirEditorialPage } from '@/components/atelier/ElixirEditorialPage'
+import { faceElixirEditorial } from '@/content/atelier/elixir-editorial'
+import { productData } from '@/content/products/registry'
+import type { Product } from '@/types/products'
 
-// Force dynamic rendering for Cloudflare Workers compatibility
-export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'Face Elixir | The Atelier | NFE Beauty',
+  description:
+    'Face Elixir is NFE\'s daily face ritual for barrier comfort, visible radiance, and tone integrity. An editorial product dossier until ordering opens.',
+}
 
-async function getFaceElixirProduct(): Promise<Product | null> {
+async function getProduct(): Promise<Product | null> {
   try {
-    const loader = productData['face-elixir'];
-    const mod = await loader();
-    return mod.default as Product;
-  } catch (error) {
-    console.error('Error loading face-elixir product:', error);
-    return null;
+    const mod = await productData['face-elixir']()
+    return mod.default as Product
+  } catch {
+    return null
   }
 }
 
 export default async function FaceElixirPage() {
-  const product = await getFaceElixirProduct();
-
-  if (!product) {
-    notFound();
-  }
+  const product = await getProduct()
+  if (!product) notFound()
 
   return (
-    <>
-      <WaitlistModal />
-      <FaceElixirHero />
-
-      <section className="bg-[#FAF9F6]">
-        <div className="max-w-4xl mx-auto">
-          <ProductAccordion
-            details={product.details}
-            benefits={product.benefits}
-            usage={product.usage}
-            ingredients={product.ingredients_inci}
-            textureScentExperience={product.texture_scent_experience}
-            faqContent={<FaceElixirFAQ variant="embedded" />}
-          />
-        </div>
-      </section>
-    </>
-  );
+    <ElixirEditorialPage product={product} editorial={faceElixirEditorial} />
+  )
 }
-

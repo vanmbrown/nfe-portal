@@ -33,7 +33,7 @@ export function ArticleMaisonLinks() {
     { href: '/science', label: 'Science' },
     { href: '/discovery', label: 'Discovery Ritual' },
     { href: '/skin-ritual-quiz', label: 'Skin Ritual Quiz' },
-    { href: '/products', label: 'The Atelier' },
+    { href: '/shop', label: 'The Atelier' },
     { href: '/founder-access', label: 'Founder Access' },
     { href: '/concierge', label: 'Concierge' },
   ]

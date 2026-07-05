@@ -3,7 +3,7 @@ import Link from 'next/link'
 const footerLinks = [
   { href: '/', label: 'Home' },
   { href: '/inci', label: 'Ingredients' },
-  { href: '/products', label: 'The Elixirs' },
+  { href: '/shop', label: 'The Atelier' },
   { href: '/subscribe', label: 'Private List' },
   { href: '/privacy', label: 'Privacy' },
   { href: '/cookies', label: 'Cookies' },

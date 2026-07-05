@@ -115,7 +115,7 @@ export function JournalMaisonLinks() {
       body: 'Find the NFE path that fits your current skin signals.',
     },
     {
-      href: '/products',
+      href: '/shop',
       label: 'The Atelier',
       body: 'Explore Face Elixir and Body Elixir with editorial restraint.',
     },

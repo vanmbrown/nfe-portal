@@ -31,8 +31,8 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: "/articles/ritual-over-correction",
-        destination: "/journal",
+        source: "/products",
+        destination: "/shop",
         permanent: true,
       },
     ];

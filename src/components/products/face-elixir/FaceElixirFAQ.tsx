@@ -14,7 +14,7 @@ export const faceElixirFaqItems: Array<{ q: string; a: ReactNode }> = [
   },
   {
     q: 'Does the formula contain essential oils?',
-    a: 'Yes, in trace amounts — Blue Tansy and Helichrysum essential oils for skin-calming and restorative benefits, not for scent.',
+    a: 'Yes, in trace amounts: Blue Tansy and Helichrysum essential oils for skin-comforting benefits, not for scent.',
   },
   {
     q: 'Why is the elixir amber-colored?',
