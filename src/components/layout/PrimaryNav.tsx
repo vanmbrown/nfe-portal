@@ -5,7 +5,7 @@ const navItems = [
   { href: '/shop', label: 'The Atelier' },
   { href: '/science', label: 'Science' },
   { href: '/ritual', label: 'Ritual' },
-  { href: '/articles', label: 'Journal' },
+  { href: '/journal', label: 'Journal' },
   { href: '/concierge', label: 'Concierge' },
 ]
 

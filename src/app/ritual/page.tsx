@@ -11,7 +11,7 @@ const ritualLinks = [
   { href: '/science', label: 'Discover the Science' },
   { href: '/shop', label: 'Enter the Atelier' },
   { href: '/inci', label: 'Explore Ingredients' },
-  { href: '/articles', label: 'Read the Journal' },
+  { href: '/journal', label: 'Read the Journal' },
 ]
 
 export default function RitualPage() {

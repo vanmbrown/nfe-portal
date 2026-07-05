@@ -1,4 +1,5 @@
 export type JournalPillarId =
+  | 'the-new-language-of-well-aging'
   | 'barrier-wealth'
   | 'well-aging'
   | 'tone-integrity'
@@ -14,11 +15,11 @@ export type JournalPillar = {
 
 export const JOURNAL_PILLARS: JournalPillar[] = [
   {
-    id: 'barrier-wealth',
-    eyebrow: 'Barrier Wealth',
-    title: 'Barrier comfort as the foundation of well-aging.',
+    id: 'the-new-language-of-well-aging',
+    eyebrow: 'The New Language of Well-Aging',
+    title: 'NFE’s primary editorial pillar.',
     description:
-      'Why mature melanated skin often needs barrier-first care before tone, texture, or active chasing can work well.',
+      'Nine essays reframing mature, melanated skincare through presence, barrier intelligence, pigment awareness, sensuality, and support — not correction, disappearance, or fear.',
   },
   {
     id: 'well-aging',

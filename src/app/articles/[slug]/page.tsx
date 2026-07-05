@@ -1,8 +1,15 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { articleMDX, allArticleSlugs, type ArticleSlug } from '@/content/articles/registry'
-import { getArticleBySlug, getPillarLabel } from '@/lib/articles'
+import {
+  getArticleBySlug,
+  getArticleHeroImage,
+  getPillarLabel,
+  isPrimaryArticle,
+} from '@/lib/articles'
+import { WELL_AGING_SERIES_SLUG } from '@/content/articles/well-aging-series'
 import { ArticleJsonLd } from '@/components/articles/ArticleJsonLd'
 import {
   ArticleMaisonLinks,
@@ -28,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const title = `${meta.title} | NFE Journal`
+  const heroImage = getArticleHeroImage(meta)
 
   return {
     title,
@@ -38,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       publishedTime: meta.date,
       authors: [meta.author],
-      images: meta.image ? [{ url: meta.image }] : [],
+      images: heroImage ? [{ url: heroImage, alt: meta.imageAlt ?? meta.title }] : [],
     },
   }
 }
@@ -58,6 +66,13 @@ export default async function ArticlePage({ params }: Props) {
 
   const mod = await loader()
   const MDXContent = mod.default
+  const heroImage = getArticleHeroImage(meta)
+  const primary = isPrimaryArticle(meta)
+  const backHref = primary ? '/journal' : '/journal'
+  const seriesHref =
+    meta.seriesSlug === WELL_AGING_SERIES_SLUG
+      ? `/articles/${WELL_AGING_SERIES_SLUG}`
+      : undefined
 
   const formattedDate = new Date(`${meta.date}T12:00:00Z`).toLocaleDateString(
     'en-US',
@@ -75,25 +90,40 @@ export default async function ArticlePage({ params }: Props) {
         slug={meta.slug}
         title={meta.title}
         description={meta.excerpt}
-        image={meta.image ?? '/images/homepage/nfe-home-hero-product-vessel-desktop.webp'}
+        image={
+          heroImage ?? '/images/homepage/nfe-home-hero-product-vessel-desktop.webp'
+        }
         publishedAt={meta.date}
       />
 
-      <section className="border-b border-nfe-green-900/10 bg-nfe-green-900 px-6 py-20 text-nfe-paper md:py-24">
-        <div className="mx-auto max-w-4xl">
+      <section className="border-b border-nfe-green-900/10 bg-nfe-green-900 text-nfe-paper">
+        <div className="mx-auto max-w-6xl px-6 py-10 md:py-12">
           <Link
-            href="/articles"
+            href={backHref}
             className="text-sm uppercase tracking-[0.22em] text-nfe-paper/70 transition hover:text-nfe-gold"
           >
             ← Back to the Journal
           </Link>
 
+          {!primary ? (
+            <div className="mt-6 rounded-[1.25rem] border border-nfe-paper/15 bg-nfe-paper/5 px-5 py-4 text-sm leading-6 text-nfe-paper/78">
+              This is an earlier NFE article kept for reference. For the current
+              editorial experience, begin with{' '}
+              <Link
+                href={`/articles/${WELL_AGING_SERIES_SLUG}`}
+                className="text-nfe-gold underline-offset-4 hover:underline"
+              >
+                The New Language of Well-Aging
+              </Link>
+              .
+            </div>
+          ) : null}
+
           <p className="mt-8 text-xs uppercase tracking-[0.3em] text-nfe-gold">
-            {getPillarLabel(meta.pillar)}
-            {meta.series ? ` • ${meta.series}` : ''}
+            {meta.series ?? getPillarLabel(meta.pillar)}
           </p>
 
-          <h1 className="mt-5 font-serif text-4xl leading-tight text-nfe-gold md:text-6xl">
+          <h1 className="mt-5 max-w-4xl font-serif text-4xl leading-tight text-nfe-gold md:text-6xl">
             {meta.title}
           </h1>
 
@@ -115,6 +145,34 @@ export default async function ArticlePage({ params }: Props) {
             ) : null}
           </div>
         </div>
+
+        {heroImage ? (
+          <div className="relative mx-auto max-w-6xl px-6 pb-10 md:px-12 md:pb-12">
+            <div
+              className={`relative overflow-hidden rounded-[1.75rem] border border-nfe-paper/10 bg-nfe-green-900/40 ${
+                meta.imageType === 'editorial-science'
+                  ? 'aspect-[4/3] md:aspect-[16/9]'
+                  : meta.imageType === 'editorial-portrait' &&
+                      heroImage.includes('well-aging-not-disappearing')
+                    ? 'aspect-[16/9]'
+                    : 'aspect-[4/5] max-h-[70vh] md:aspect-[16/10] md:max-h-[620px]'
+              }`}
+            >
+              <Image
+                src={heroImage}
+                alt={meta.imageAlt ?? meta.title}
+                fill
+                priority
+                className={`object-cover ${
+                  meta.imageType === 'editorial-science'
+                    ? 'object-center md:object-[center_18%]'
+                    : ''
+                }`}
+                sizes="(max-width: 768px) 100vw, 1152px"
+              />
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <section className="px-6 py-16 md:px-12">
@@ -123,12 +181,26 @@ export default async function ArticlePage({ params }: Props) {
         </article>
 
         <div className="mx-auto max-w-3xl">
+          {seriesHref ? (
+            <div className="mt-12 rounded-[1.5rem] border border-nfe-green-900/10 bg-white/70 p-6">
+              <p className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
+                Editorial Pillar
+              </p>
+              <Link
+                href={seriesHref}
+                className="mt-3 inline-flex font-serif text-2xl text-nfe-green-900 transition hover:text-nfe-green-700"
+              >
+                Explore The New Language of Well-Aging →
+              </Link>
+            </div>
+          ) : null}
+
           <ArticleRelatedLinks slug={meta.slug} />
           <ArticleMaisonLinks />
 
           <div className="mt-12 border-t border-nfe-green-900/10 pt-8">
             <Link
-              href="/articles"
+              href={backHref}
               className="text-sm uppercase tracking-[0.18em] text-nfe-green-900 transition hover:text-nfe-green-700"
             >
               ← Back to the Journal
