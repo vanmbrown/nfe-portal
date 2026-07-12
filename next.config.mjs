@@ -35,6 +35,11 @@ const nextConfig = {
         destination: "/shop",
         permanent: true,
       },
+      {
+        source: "/founders-access",
+        destination: "/founder-access",
+        permanent: true,
+      },
     ];
   },
   webpack: (config, { isServer }) => {

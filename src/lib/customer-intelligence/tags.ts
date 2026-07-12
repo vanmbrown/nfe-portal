@@ -18,6 +18,11 @@ export const NFE_CRM_TAGS = {
   sourceQuiz: 'source-skin-ritual-quiz',
   sourceConcierge: 'source-concierge',
   sourceFutureForm: 'source-future-form',
+  faceElixirInterest: 'face-elixir-interest',
+  bodyElixirInterest: 'body-elixir-interest',
+  newsletterOptIn: 'newsletter-opt-in',
+  topicSubmitted: 'topic-submitted',
+  highIntent: 'high-intent',
 } as const
 
 export const INTENT_TO_CRM_TAGS: Record<CustomerIntentType, string[]> = {
@@ -70,7 +75,29 @@ export const BEEHIIV_CUSTOM_FIELDS = {
   consentSource: 'Consent Source',
   marketingOptIn: 'Marketing Opt-In',
   privacyAccepted: 'Privacy Accepted',
+  lastName: 'Last Name',
+  phoneNumber: 'Phone Number',
+  productInterest: 'Product Interest',
+  primarySkinInterest: 'Primary Skin Interest',
+  topicRequest: 'Topic Request',
+  signupDate: 'Signup Date',
+  sourcePage: 'Source Page',
+  highIntent: 'High Intent',
+  consentStatus: 'Consent Status',
 } as const
+
+export function getProductInterestTags(
+  productInterest?: 'face_elixir' | 'body_elixir' | 'both'
+): string[] {
+  if (!productInterest) return []
+  if (productInterest === 'face_elixir') {
+    return [NFE_CRM_TAGS.faceElixirInterest]
+  }
+  if (productInterest === 'body_elixir') {
+    return [NFE_CRM_TAGS.bodyElixirInterest]
+  }
+  return [NFE_CRM_TAGS.faceElixirInterest, NFE_CRM_TAGS.bodyElixirInterest]
+}
 
 export const CONSENT_SOURCE_TO_CRM_TAG: Record<ConsentSource, string> = {
   subscribe_page: NFE_CRM_TAGS.sourceSubscribe,

@@ -2,11 +2,26 @@ import type { NfeAttributionContext } from '@/lib/analytics/utm'
 import {
   BEEHIIV_CUSTOM_FIELDS,
   getCrmTagsForIntent,
+  getProductInterestTags,
   getSourceCrmTag,
+  NFE_CRM_TAGS,
 } from '@/lib/customer-intelligence/tags'
 import type { ConsentSource, CustomerIntentType } from '@/lib/customer-intelligence/types'
+import type { FounderAccessProductInterest } from '@/content/founder-access/options'
 
 type BeehiivSyncStatus = 'synced' | 'skipped' | 'failed'
+
+export interface FounderAccessProfile {
+  firstName?: string
+  lastName?: string
+  phone?: string
+  productInterest?: FounderAccessProductInterest
+  primarySkinInterests?: string[]
+  topicRequest?: string
+  signupDate?: string
+  sourcePage?: string
+  highIntent?: boolean
+}
 
 interface BeehiivSyncInput {
   email: string
@@ -17,6 +32,7 @@ interface BeehiivSyncInput {
   consentSource?: string
   marketingOptIn?: boolean
   privacyPolicyAccepted?: boolean
+  founderAccess?: FounderAccessProfile
 }
 
 interface BeehiivSyncResult {
@@ -66,17 +82,76 @@ function compact<T extends Record<string, unknown>>(value: T): T {
   ) as T
 }
 
-function buildBeehiivTags(intent: CustomerIntentType, source: ConsentSource) {
-  return Array.from(
-    new Set([...getCrmTagsForIntent(intent), getSourceCrmTag(source)])
-  ).filter(Boolean)
+function buildBeehiivTags(
+  intent: CustomerIntentType,
+  source: ConsentSource,
+  founderAccess?: FounderAccessProfile,
+  marketingOptIn?: boolean
+) {
+  const tags = [
+    ...getCrmTagsForIntent(intent),
+    getSourceCrmTag(source),
+    ...getProductInterestTags(founderAccess?.productInterest),
+  ]
+
+  if (founderAccess?.topicRequest) {
+    tags.push(NFE_CRM_TAGS.topicSubmitted)
+  }
+  if (founderAccess?.highIntent) {
+    tags.push(NFE_CRM_TAGS.highIntent)
+  }
+  if (marketingOptIn) {
+    tags.push(NFE_CRM_TAGS.newsletterOptIn)
+  }
+
+  return Array.from(new Set(tags)).filter(Boolean)
 }
 
 function buildCustomFields(input: BeehiivSyncInput): BeehiivCustomField[] {
-  const fields: BeehiivCustomField[] = [
+  const profile = input.founderAccess
+  const launchStatus =
+    input.source === 'founder_access' ? 'founder_access' : 'private_list'
+
+  const fields: Array<{ name: string; value?: string | boolean }> = [
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.firstName,
+      value: profile?.firstName,
+    },
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.lastName,
+      value: profile?.lastName,
+    },
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.phoneNumber,
+      value: profile?.phone,
+    },
     {
       name: BEEHIIV_CUSTOM_FIELDS.primaryInterest,
       value: input.intent,
+    },
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.primarySkinInterest,
+      value: profile?.primarySkinInterests?.join(', '),
+    },
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.productInterest,
+      value: profile?.productInterest,
+    },
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.topicRequest,
+      value: profile?.topicRequest,
+    },
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.signupDate,
+      value: profile?.signupDate,
+    },
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.sourcePage,
+      value: profile?.sourcePage ?? input.pagePath,
+    },
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.highIntent,
+      value: Boolean(profile?.highIntent),
     },
     {
       name: BEEHIIV_CUSTOM_FIELDS.source,
@@ -84,11 +159,15 @@ function buildCustomFields(input: BeehiivSyncInput): BeehiivCustomField[] {
     },
     {
       name: BEEHIIV_CUSTOM_FIELDS.launchStatus,
-      value: 'private_list',
+      value: launchStatus,
     },
     {
       name: BEEHIIV_CUSTOM_FIELDS.consentSource,
       value: input.consentSource ?? input.source,
+    },
+    {
+      name: BEEHIIV_CUSTOM_FIELDS.consentStatus,
+      value: input.marketingOptIn ? 'newsletter_opt_in' : 'founder_access_only',
     },
     {
       name: BEEHIIV_CUSTOM_FIELDS.marketingOptIn,
@@ -112,7 +191,12 @@ function buildSubscriptionPayload(input: BeehiivSyncInput): BeehiivSubscriptionR
     email: input.email.toLowerCase().trim(),
     reactivate_existing: false,
     send_welcome_email: false,
-    tags: buildBeehiivTags(input.intent, input.source),
+    tags: buildBeehiivTags(
+      input.intent,
+      input.source,
+      input.founderAccess,
+      input.marketingOptIn
+    ),
     custom_fields: buildCustomFields(input),
     utm_source: cleanStringValue(attribution.utmSource),
     utm_medium: cleanStringValue(attribution.utmMedium),

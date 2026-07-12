@@ -36,6 +36,35 @@ if (upstashUrl && upstashToken) {
   });
 }
 
+type RateLimitDecision = 'allow' | 'rate_limited';
+
+async function checkRateLimit(
+  limiter: Ratelimit | null,
+  ip: string,
+  label: string
+): Promise<RateLimitDecision> {
+  if (!limiter) {
+    return 'allow';
+  }
+
+  try {
+    const { success } = await limiter.limit(ip);
+    return success ? 'allow' : 'rate_limited';
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[ratelimit] ${label} unavailable, allowing request:`, message);
+    return 'allow';
+  }
+}
+
+export async function checkSubscribeRateLimit(ip: string): Promise<RateLimitDecision> {
+  return checkRateLimit(subscribeRatelimit, ip, 'subscribe');
+}
+
+export async function checkWaitlistRateLimit(ip: string): Promise<RateLimitDecision> {
+  return checkRateLimit(waitlistRatelimit, ip, 'waitlist');
+}
+
 export { subscribeRatelimit, waitlistRatelimit, messageRatelimit };
 
 

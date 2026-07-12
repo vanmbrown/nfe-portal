@@ -4,7 +4,7 @@ const footerLinks = [
   { href: '/', label: 'Home' },
   { href: '/inci', label: 'Ingredients' },
   { href: '/shop', label: 'The Atelier' },
-  { href: '/subscribe', label: 'Private List' },
+  { href: '/founder-access', label: 'Founder Access' },
   { href: '/privacy', label: 'Privacy' },
   { href: '/cookies', label: 'Cookies' },
 ]
