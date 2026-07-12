@@ -46,7 +46,7 @@ async function verifyEmail(email) {
     .maybeSingle()
   const subscriber = await supabase
     .from('subscribers')
-    .select('email,created_at')
+    .select('email,inserted_at')
     .eq('email', email)
     .maybeSingle()
   return { founder: founder.data, subscriber: subscriber.data }
@@ -112,12 +112,13 @@ const stepRequests = {
   a: [requests[0]],
   b: [requests[1]],
   c: [requests[2], requests[3]],
+  c2: [requests[3]],
   all: requests,
 }
 
 const selected = stepRequests[step]
 if (!selected) {
-  console.error('Unknown step. Use --step=a|b|c|all')
+  console.error('Unknown step. Use --step=a|b|c|c2|all')
   process.exit(1)
 }
 
@@ -137,6 +138,42 @@ const duplicateRows = await supabase
   .select('id', { count: 'exact', head: true })
   .eq('email', duplicateEmail)
 
+function evaluatePass(stepName, apiResults, verification, duplicateRowCount) {
+  if (!apiResults.every((result) => result.status === 200)) {
+    return false
+  }
+
+  if (stepName === 'a') {
+    return Boolean(
+      verification.unchecked.founder &&
+        verification.unchecked.subscriber &&
+        verification.unchecked.founder.beehiiv_status === 'skipped'
+    )
+  }
+
+  if (stepName === 'b') {
+    return Boolean(
+      verification.checked.founder &&
+        verification.checked.subscriber &&
+        verification.checked.founder.newsletter_opt_in === true
+    )
+  }
+
+  if (stepName === 'c' || stepName === 'c2' || stepName === 'all') {
+    const duplicate = verification.duplicate.founder
+    return Boolean(
+      duplicate &&
+        duplicateRowCount === 1 &&
+        duplicate.first_name === 'CloseoutCUpdated' &&
+        duplicate.last_name === 'Upsert' &&
+        duplicate.newsletter_opt_in === true &&
+        duplicate.topic_request === 'Updated topic request'
+    )
+  }
+
+  return false
+}
+
 console.log(
   JSON.stringify(
     {
@@ -146,12 +183,7 @@ console.log(
       apiResults,
       verification,
       duplicateRowCount: duplicateRows.count,
-      pass:
-        apiResults.every((result) => result.status === 200) &&
-        verification.unchecked.founder &&
-        verification.checked.founder &&
-        verification.duplicate.founder &&
-        duplicateRows.count === 1,
+      pass: evaluatePass(step, apiResults, verification, duplicateRows.count ?? 0),
     },
     null,
     2
