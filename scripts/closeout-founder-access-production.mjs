@@ -12,8 +12,9 @@ if (fs.existsSync(envPath)) {
   })
 }
 
-const base = process.argv[2] || 'https://www.nfebeauty.com'
-const ts = Date.now()
+const base = process.argv.find((arg) => arg.startsWith('http')) || 'https://www.nfebeauty.com'
+const step = process.argv.find((arg) => arg.startsWith('--step='))?.split('=')[1] || 'all'
+const ts = process.argv.find((arg) => /^\d{13,}$/.test(arg)) || Date.now()
 
 async function post(label, body) {
   const response = await fetch(`${base}/api/founder-access`, {
@@ -34,8 +35,6 @@ async function post(label, body) {
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
 const service = process.env.SUPABASE_SERVICE_ROLE_KEY
 const supabase = createClient(url, service, { auth: { persistSession: false } })
-
-const step = process.argv.find((arg) => arg.startsWith('--step='))?.split('=')[1] || 'all'
 
 async function verifyEmail(email) {
   const founder = await supabase
@@ -142,6 +141,8 @@ console.log(
   JSON.stringify(
     {
       base,
+      step,
+      ts,
       apiResults,
       verification,
       duplicateRowCount: duplicateRows.count,
