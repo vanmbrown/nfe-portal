@@ -178,10 +178,13 @@ export async function POST(req: Request) {
         .maybeSingle()
 
       if (!existingSubscriber) {
-        await supabase.from('subscribers').insert({
-          email,
-          source: 'founder_access',
-        })
+        const { error: subscriberInsertError } = await supabase
+          .from('subscribers')
+          .insert({ email })
+
+        if (subscriberInsertError) {
+          console.error('[founder-access] subscriber insert failed:', subscriberInsertError)
+        }
       }
     } catch (dbError) {
       console.error('[founder-access] database connection failed:', dbError)
