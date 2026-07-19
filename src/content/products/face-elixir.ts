@@ -69,20 +69,11 @@ export const faceElixirData: ProductData = {
   shortDescription: 'Stable vitamin C serum with bakuchiol and peptides for melanated skin',
   price: 89,
   currency: 'USD',
-  images: [
-    {
-      src: '/images/products/face-elixir-hero.jpg',
-      alt: 'NFE Face Elixir bottle with dropper',
-      width: 800,
-      height: 1000,
-    },
-    {
-      src: '/images/products/face-elixir-detail.jpg',
-      alt: 'Close-up of Face Elixir serum texture',
-      width: 600,
-      height: 600,
-    },
-  ],
+  // Product photography pending. The previous entries referenced 0-byte
+  // placeholder files, which were removed in the pre-Phase-1 stabilization
+  // pass. Restore only real, optimized WebP assets after founder approval.
+  // See docs/nfe-product-photography-needs.md.
+  images: [],
   ingredients: [
     {
       name: 'THD Ascorbate',

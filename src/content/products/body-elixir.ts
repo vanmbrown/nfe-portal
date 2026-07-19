@@ -13,20 +13,11 @@ export const bodyElixirData: ProductData = {
   shortDescription: 'Nourishing body serum with ceramides and botanical oils for melanated skin',
   price: 79,
   currency: 'USD',
-  images: [
-    {
-      src: '/images/products/body-elixir-hero.jpg',
-      alt: 'NFE Body Elixir bottle with pump dispenser',
-      width: 800,
-      height: 1000,
-    },
-    {
-      src: '/images/products/body-elixir-detail.jpg',
-      alt: 'Close-up of Body Elixir serum texture',
-      width: 600,
-      height: 600,
-    },
-  ],
+  // Product photography pending. The previous entries referenced 0-byte
+  // placeholder files, which were removed in the pre-Phase-1 stabilization
+  // pass. Restore only real, optimized WebP assets after founder approval.
+  // See docs/nfe-product-photography-needs.md.
+  images: [],
   ingredients: [
     {
       name: 'Ceramide Complex',
