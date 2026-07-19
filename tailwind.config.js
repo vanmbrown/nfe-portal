@@ -35,8 +35,12 @@ module.exports = {
         'maison-espresso': 'var(--maison-espresso)',
         'maison-umber': 'var(--maison-umber)',
         'maison-hairline': 'var(--maison-hairline)',
-        'maison-text-muted': 'var(--maison-text-muted)',             // proposed
+        'maison-text-muted': 'var(--maison-text-muted)',             // RATIFIED
         'maison-text-subtle-on-dark': 'var(--maison-text-subtle-on-dark)', // proposed
+        // State colors. Candidates only — the current text-red-600 /
+        // text-green-700 fail AA on Bone and Parchment.
+        'maison-error-on-light': 'var(--maison-color-error-on-light)',
+        'maison-success-on-light': 'var(--maison-color-success-on-light)',
       },
       fontFamily: {
         // Sans stays Inter (DDR-2). Figtree deferred. Serif is declared here

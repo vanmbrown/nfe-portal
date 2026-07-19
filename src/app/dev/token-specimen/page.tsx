@@ -59,11 +59,15 @@ const ON_DARK: Array<{ label: string; hex: string; r: number[]; status: string }
   { label: 'text-subtle-on-dark (candidate)', hex: '#8CA097', r: [4.52, 5.62, 6.52], status: 'candidate' },
 ]
 
-const STATES = [
-  { label: 'error — text-red-600 (current, 29 uses)', hex: '#DC2626', white: 4.83, bone: 4.22 },
-  { label: 'error — text-red-700', hex: '#B91C1C', white: 6.47, bone: 5.66 },
-  { label: 'success — text-green-700 (current)', hex: '#15803D', white: 5.02, bone: 4.39 },
-  { label: 'success — text-green-800', hex: '#166534', white: 7.13, bone: 6.24 },
+/** Measured against all four light grounds: Bone, Ivory, Paper, Parchment. */
+const STATES: Array<{ label: string; hex: string; r: number[]; verdict: string }> = [
+  { label: 'error — text-red-600 (CURRENT, 29 uses)', hex: '#DC2626', r: [4.22, 4.6, 4.62, 3.8], verdict: 'FAILS' },
+  { label: 'error — RATIFIED CANDIDATE', hex: '#B91C1C', r: [5.66, 6.16, 6.19, 5.09], verdict: 'AA all' },
+  { label: 'success — text-green-700 (CURRENT)', hex: '#15803D', r: [4.39, 4.77, 4.8, 3.94], verdict: 'FAILS' },
+  { label: 'success — RATIFIED CANDIDATE', hex: '#166534', r: [6.24, 6.79, 6.82, 5.61], verdict: 'AA all' },
+  { label: 'text-green-600', hex: '#16A34A', r: [2.88, 3.14, 3.15, 2.59], verdict: 'FAILS' },
+  { label: 'pkg sage — do not adopt', hex: '#5A7057', r: [4.72, 5.14, 5.17, 4.24], verdict: 'FAILS' },
+  { label: 'pkg clay', hex: '#A04B36', r: [5.17, 5.62, 5.65, 4.64], verdict: 'AA all' },
 ]
 
 function Ratio({ v }: { v: number }) {
@@ -508,25 +512,31 @@ export default function TokenSpecimenPage() {
       {/* ------------------------------------------------------------------ */}
       <Section id="states" title="11 · Success and error states">
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '640px' }}>
             <thead>
               <tr>
                 <th style={th}>State color</th>
                 <th style={th}>Hex</th>
-                <th style={th}>on White</th>
-                <th style={th}>on Bone</th>
+                {LIGHT_GROUNDS.map((g) => (
+                  <th key={g.name} style={th}>
+                    {g.name}
+                  </th>
+                ))}
+                <th style={th}>Verdict</th>
               </tr>
             </thead>
             <tbody>
               {STATES.map((s) => (
-                <tr key={s.label} style={s.bone < 4.5 ? { background: '#FEF2F2' } : undefined}>
+                <tr key={s.label} style={s.verdict === 'FAILS' ? { background: '#FEF2F2' } : undefined}>
                   <td style={{ ...td, color: s.hex }}>{s.label}</td>
                   <td style={{ ...td, fontFamily: 'ui-monospace, monospace', fontSize: '0.78rem' }}>{s.hex}</td>
-                  <td style={td}>
-                    <Ratio v={s.white} />
-                  </td>
-                  <td style={td}>
-                    <Ratio v={s.bone} />
+                  {s.r.map((v, i) => (
+                    <td key={i} style={td}>
+                      <Ratio v={v} />
+                    </td>
+                  ))}
+                  <td style={{ ...td, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    {s.verdict}
                   </td>
                 </tr>
               ))}
@@ -544,12 +554,17 @@ export default function TokenSpecimenPage() {
             maxWidth: '65ch',
           }}
         >
-          <strong>Finding for founder review.</strong> The current error color{' '}
-          <code>text-red-600</code> (29 uses) passes on white at 4.83 but{' '}
-          <strong>fails on Bone at 4.22</strong>. <code>text-green-700</code> likewise passes on
-          white at 5.02 and fails on Bone at 4.39. If the warm Bone ground is ever adopted, both
-          state colors need darkening to <code>red-700</code> and <code>green-800</code>, which pass
-          on both. No change made in this pass.
+          <strong>Both current state colors fail on two grounds, not one.</strong>{' '}
+          <code>text-red-600</code> (29 uses) fails Bone at 4.22 <em>and</em> Parchment at 3.80.{' '}
+          <code>text-green-700</code> fails Bone at 4.39 <em>and</em> Parchment at 3.94. They pass
+          on Paper and Ivory, which is why the defect is invisible today — production renders on
+          Paper. Adopting a warm ground would break both.
+        </p>
+        <p style={{ fontSize: '0.85rem', color: '#666666', marginTop: '1rem', lineHeight: 1.6, maxWidth: '65ch' }}>
+          Candidates are the standard Tailwind darker shades rather than custom hex, so migration is
+          a class swap with no new color to maintain. Note the design package&rsquo;s own{' '}
+          <code>sage #5A7057</code> also fails on Parchment at 4.24 — the same way its{' '}
+          <code>bronze #8E5F2B</code> does. Do not adopt package state colors without testing.
         </p>
       </Section>
 
@@ -638,22 +653,23 @@ export default function TokenSpecimenPage() {
               <td style={{ ...td, fontSize: '0.78rem' }}>shop/page.tsx, elixir-editorial.ts</td>
               <td style={{ ...td, color: '#166534' }}>Approved — may remain</td>
             </tr>
-            <tr style={{ background: '#FFFBEB' }}>
+            <tr>
               <td style={{ ...td, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.75rem' }}>
-                In development
+                A future NFE ritual
               </td>
               <td style={{ ...td, fontSize: '0.78rem' }}>shop/page.tsx:95 — Body Elixir card</td>
-              <td style={{ ...td, color: '#77633C' }}>
-                <strong>FLAGGED for review — unchanged in this pass</strong>
+              <td style={{ ...td, color: '#166534' }}>
+                Approved — replaced &ldquo;In development&rdquo; 2026-07-19
               </td>
             </tr>
           </tbody>
         </table>
         <p style={{ fontSize: '0.85rem', color: '#666666', marginTop: '1rem', lineHeight: 1.6, maxWidth: '65ch' }}>
-          &ldquo;In development&rdquo; is the fallback branch of the status ternary and is public on
-          The Atelier. It violates no DDR-3 rule, so it was not changed. It reads more like internal
-          engineering language than maison voice, which is why it is surfaced here rather than
-          silently kept. Replacement requires separate founder approval.
+          The fallback branch of the status ternary, public on The Atelier. It previously read
+          &ldquo;In development&rdquo;, which violated no DDR-3 rule but read as internal
+          engineering language rather than maison voice. Replaced on founder approval. The
+          replacement adds no urgency, release timing, pricing, checkout language, or CTA, and the
+          card layout is unchanged.
         </p>
       </Section>
     </div>

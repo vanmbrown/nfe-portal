@@ -93,7 +93,74 @@ Measurements and method: `nfe-contrast-token-candidates.md`.
 
 ---
 
-## 4. Inter versus Figtree — DEFERRED
+## 4. Muted text token — RATIFIED
+
+```
+--maison-text-muted: #666666
+```
+
+**Founder reason:** passes WCAG AA across Bone, Ivory, Paper, and the actual Parchment token `#EDE3D1`.
+
+| Ground | Hex | Ratio |
+|---|---|---|
+| Bone | `#F5EFE6` | 5.02 |
+| Ivory | `#FCF9F3` | 5.46 |
+| Paper | `#FAFAF8` | 5.49 |
+| Parchment | `#EDE3D1` | **4.51** (binding) |
+
+Replaces `--nfe-muted #6B6B6B`, which fails on Parchment at 4.19. **Unconsumed until the pilot.**
+
+---
+
+## 5. Token specimen — APPROVED
+
+`/dev/token-specimen` accepted as the Phase 1 exit artifact. Retained as development-only, 404 in production, noindex, excluded from sitemap and navigation, not deployed publicly.
+
+---
+
+## 6. Favicon — SEPARATE MAINTENANCE FIX
+
+Approved NFE brand mark installed as `src/app/icon.png`, sourced from the canonical `nfe-brand-assets` repo (`assets/logo/nfe-publication-logo-512.png`). Gold droplet in a circle on deep green — a mark, not the wordmark.
+
+Scope held narrow as instructed: no header redesign, no wordmark change, no broad metadata rewrite, not bundled into the Our Story pilot.
+
+Result: Best Practices **96 → 100** on all six Lighthouse runs; console errors **1 → 0**.
+
+---
+
+## 7. State colors — CANDIDATES DEFINED, NOT RATIFIED
+
+```
+--maison-color-error-on-light:   #B91C1C
+--maison-color-success-on-light: #166534
+```
+
+**Both current production colors fail on two grounds**, not one:
+
+| Color | Bone | Ivory | Paper | Parchment | Verdict |
+|---|---|---|---|---|---|
+| `text-red-600` `#DC2626` (29 uses) | **4.22** | 4.60 | 4.62 | **3.80** | FAILS |
+| `text-green-700` `#15803D` | **4.39** | 4.77 | 4.80 | **3.94** | FAILS |
+| **error candidate** `#B91C1C` | 5.66 | 6.16 | 6.19 | 5.09 | AA all |
+| **success candidate** `#166534` | 6.24 | 6.79 | 6.82 | 5.61 | AA all |
+
+They pass on Paper and Ivory, which is why the defect is invisible today — production renders on Paper. Adopting a warm ground would break both.
+
+**Do not adopt the design package's state colors either:** its `sage #5A7057` fails on Parchment at 4.24, the same way its `bronze #8E5F2B` does.
+
+Candidates are standard Tailwind darker shades rather than custom hex, so migration is a class swap with no new color to maintain. **Not consumed publicly.**
+
+---
+
+## 8. Public status copy — REPLACED
+
+`In development` → **`A future NFE ritual`** at `src/app/shop/page.tsx:95` (Body Elixir card).
+
+Verified in browser: renders on one line, no overflow, card structure unchanged. No urgency, release timing, pricing, checkout language, or new CTA added.
+
+---
+
+## 9. Inter versus Figtree — DEFERRED
 
 Retain Inter. Specimen deferred until after token architecture. No migration.
 
@@ -106,4 +173,15 @@ Retain Inter. Specimen deferred until after token architecture. No migration.
 | Product sizes | Open — founder verification | Size copy corrections; Face Elixir FAQ fix |
 | Garamond license | Not approved | F-Font-01 serif correction; Phase 1 font loading |
 | Bronze-gold accent | **RATIFIED** — `#77633C` / `#C6A664` | Nothing. Application gated to token phase. |
+| Muted text | **RATIFIED** — `#666666` | Nothing. Unconsumed until pilot. |
+| Token specimen | **APPROVED** | Nothing. Phase 1 complete. |
+| Favicon | **DONE** — `src/app/icon.png` | Nothing. BP restored to 100. |
+| State colors | Candidates defined, not ratified | Pilot — needs founder approval before use |
+| Status copy | **DONE** — "A future NFE ritual" | Nothing |
 | Inter vs Figtree | Deferred | Nothing |
+
+---
+
+## Phase boundary
+
+Per the founder ruling, the Our Story pilot begins only after the favicon, state-color candidates, and copy correction are **complete and reported**. All three are now complete. **The pilot has not been started.**
