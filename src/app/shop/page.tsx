@@ -92,7 +92,7 @@ export default function AtelierPage() {
                     <p className="text-xs uppercase tracking-[0.24em] text-nfe-green-700">
                       {product.status === 'coming_soon'
                         ? 'Founder Access opens first'
-                        : 'In development'}
+                        : 'A future NFE ritual'}
                     </p>
                     <h3 className="mt-3 font-serif text-3xl text-nfe-green-900">
                       {product.title}

@@ -133,7 +133,28 @@ The package's own `--nfe-gold: #C79A56` also passes on all three (4.87:1 / 6.06:
 
 | Token | Value | vs paper | vs white | vs parchment |
 |---|---|---|---|---|
-| `--nfe-color-text-muted` | **`#676767`** | 5.41:1 | 5.66:1 | 4.51:1 |
+| `--maison-text-muted` | **`#666666`** | 5.49:1 | 5.74:1 | 4.51:1 |
+
+**RATIFIED 2026-07-19 as `#666666`.** Note the correction: the value was `#676767` in the original proposal, tested against the audit's transcribed parchment `#EFE4D5`. Against the design package's actual `#EDE3D1` it measures 4.45 and fails — the same failure mode the founder's verification condition caught on the accent. Full four-ground verification of the ratified value: Bone `#F5EFE6` 5.02 · Ivory `#FCF9F3` 5.46 · Paper `#FAFAF8` 5.49 · Parchment `#EDE3D1` **4.51** (binding). Unconsumed until the pilot.
+
+### State colors on light grounds — CANDIDATES, not ratified
+
+```
+--maison-color-error-on-light:   #B91C1C
+--maison-color-success-on-light: #166534
+```
+
+| Color | Bone | Ivory | Paper | Parchment | Verdict |
+|---|---|---|---|---|---|
+| `text-red-600` `#DC2626` (29 uses) | **4.22** | 4.60 | 4.62 | **3.80** | FAILS |
+| `text-green-700` `#15803D` | **4.39** | 4.77 | 4.80 | **3.94** | FAILS |
+| `text-green-600` `#16A34A` | **2.88** | **3.14** | **3.15** | **2.59** | FAILS |
+| pkg `sage #5A7057` | 4.72 | 5.14 | 5.17 | **4.24** | FAILS |
+| pkg `clay #A04B36` | 5.17 | 5.62 | 5.65 | 4.64 | AA all |
+| **error candidate `#B91C1C`** | 5.66 | 6.16 | 6.19 | 5.09 | **AA all** |
+| **success candidate `#166534`** | 6.24 | 6.79 | 6.82 | 5.61 | **AA all** |
+
+Both current colors pass on Paper and Ivory and fail on Bone and Parchment. Production renders on Paper today, which is why the defect is invisible. The package's own `sage` fails on Parchment for the same reason its `bronze` does — do not adopt package state colors without testing.
 
 A four-step darkening of `#6B6B6B`, essentially imperceptible, chosen so a single muted value is safe on every light ground including parchment.
 
@@ -168,7 +189,9 @@ Following the architect's naming:
 ```
 --nfe-color-accent-on-light        #77633C   RATIFIED 2026-07-19
 --nfe-color-accent-on-dark         #C6A664   RATIFIED 2026-07-19 (existing gold, unchanged)
---nfe-color-text-muted             #676767   proposed (replaces #6B6B6B)
+--maison-text-muted                #666666   RATIFIED 2026-07-19 (replaces #6B6B6B)
+--maison-color-error-on-light      #B91C1C   candidate (text-red-600 fails warm grounds)
+--maison-color-success-on-light    #166534   candidate (text-green-700 fails warm grounds)
 --nfe-color-text-subtle-on-dark    #8CA097   proposed (replaces text-nfe-paper/50)
 ```
 

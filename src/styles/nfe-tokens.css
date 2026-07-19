@@ -67,20 +67,48 @@
   --maison-paper: var(--nfe-paper);          /* #FAFAF8 */
 
   /* --------------------------------------------------------------------
-     TEXT TOKENS — PROPOSED, NOT RATIFIED.
+     TEXT TOKENS — text-muted RATIFIED; subtle-on-dark still proposed.
 
      These replace opacity-based meaningful text colors (text-nfe-ink/45,
      text-nfe-paper/50), whose contrast is an accident of stacking context
      rather than a chosen value. Awaiting founder approval.
      -------------------------------------------------------------------- */
 
-  /* Replaces --nfe-muted #6B6B6B, which fails on parchment at 4.25:1.
+  /* RATIFIED 2026-07-19. Replaces --nfe-muted #6B6B6B, which fails on
+     parchment at 4.19:1.
      AA verified: Bone 5.02 / Ivory 5.46 / Parchment 4.51 / Paper 5.49. */
   --maison-text-muted: #666666;
 
   /* Replaces text-nfe-paper/50, which flattens to #859A91 and fails at 4.18:1.
      AA verified on dark: green 4.52 / green-900 5.62 / cacao 6.52. */
   --maison-text-subtle-on-dark: #8ca097;
+
+  /* --------------------------------------------------------------------
+     STATE COLORS ON LIGHT GROUNDS — candidates, NOT ratified, NOT consumed.
+
+     The current production classes fail AA on warm grounds. Measured against
+     all four light grounds:
+
+       text-red-600   #DC2626  Bone 4.22 FAIL   Parchment 3.80 FAIL
+       text-green-700 #15803D  Bone 4.39 FAIL   Parchment 3.94 FAIL
+
+     Both pass on Paper and Ivory, which is why the failure is invisible
+     today: production currently renders on Paper. Adopting Bone or
+     Parchment would break them.
+
+     The design package's own sage #5A7057 also fails on Parchment (4.24),
+     the same way its bronze #8E5F2B does. Do not adopt package state
+     colors without testing.
+
+     Values below are the standard Tailwind darker shades rather than custom
+     hex, so migration is a class swap and there is no new color to maintain.
+     -------------------------------------------------------------------- */
+
+  /* AA verified: Bone 5.66 / Ivory 6.16 / Paper 6.19 / Parchment 5.09. */
+  --maison-color-error-on-light: #b91c1c;
+
+  /* AA verified: Bone 6.24 / Ivory 6.79 / Paper 6.82 / Parchment 5.61. */
+  --maison-color-success-on-light: #166534;
 
   /* --------------------------------------------------------------------
      SPACING — namespaced to avoid the F-Spacing-01 collision.
