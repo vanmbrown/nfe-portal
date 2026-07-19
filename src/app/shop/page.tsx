@@ -91,7 +91,7 @@ export default function AtelierPage() {
                   <div className="p-8">
                     <p className="text-xs uppercase tracking-[0.24em] text-nfe-green-700">
                       {product.status === 'coming_soon'
-                        ? 'Pre-order pathway in preparation'
+                        ? 'Founder Access opens first'
                         : 'In development'}
                     </p>
                     <h3 className="mt-3 font-serif text-3xl text-nfe-green-900">

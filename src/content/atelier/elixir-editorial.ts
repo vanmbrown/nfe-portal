@@ -16,7 +16,7 @@ export type ElixirEditorialProfile = {
 
 export const faceElixirEditorial: ElixirEditorialProfile = {
   slug: 'face-elixir',
-  statusLabel: 'Pre-order pathway in preparation',
+  statusLabel: 'Founder Access opens first',
   emotionalPromise:
     'A daily face ritual for skin that has lived: hydration, barrier comfort, visible radiance, and a more even-looking complexion without asking the skin to perform youth.',
   formulationThesis:
