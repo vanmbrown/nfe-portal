@@ -1,5 +1,9 @@
 // Import design tokens
 @import './tokens.scss';
+// Maison token bridge (Phase 1) — namespaced --maison-*, defined but not
+// consumed by any component. Visually inert. Must load AFTER tokens.scss so
+// its var() aliases resolve. See docs/nfe-maison-token-map.md.
+@import './nfe-tokens.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

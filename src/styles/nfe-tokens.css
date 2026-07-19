@@ -1,0 +1,123 @@
+/* ============================================================================
+   NFE Maison — Token Bridge (Phase 1, file 2.1)
+   ============================================================================
+
+   STATUS: DEFINED, NOT CONSUMED. No component references any token in this
+   file. Importing it is visually inert by design.
+
+   NAMESPACE RULE — read before adding anything here.
+
+   Every token is prefixed `--maison-`. This is deliberate and load-bearing.
+   The design package ships its own `--nfe-*` variables that COLLIDE with
+   production:
+
+       --nfe-gold   production #C6A664   package #C79A56
+
+   Importing the package's tokens/colors.css would silently redefine
+   --nfe-gold and shift gold sitewide. The same hazard exists for spacing:
+   production's --space-* scale is 4px-base, the package's is 8px-base with
+   identical names (F-Spacing-01).
+
+   Therefore:
+     - NEVER redefine --nfe-*, --space-*, --font-*, or --focus-ring here.
+     - NEVER import the design package's CSS directly into the app.
+     - All new tokens use the --maison-* namespace.
+
+   Sources: nfe-founder-decisions-2026-07-19.md, nfe-contrast-token-candidates.md
+   ==========================================================================*/
+
+:root {
+  /* --------------------------------------------------------------------
+     ACCENT PAIR — RATIFIED 2026-07-19 (DDR-7)
+
+     Mapped by surface role. Do NOT use one accent universally.
+     -------------------------------------------------------------------- */
+
+  /* Light surfaces: Bone, Ivory, Parchment, Paper, White.
+     AA verified: 5.05 / 5.50 / 4.54 / 5.53 / 5.78 (parchment binding). */
+  --maison-accent-on-light: #77633c;
+
+  /* Dark surfaces: green, green-900, cacao. Production gold, unchanged.
+     AA verified: 5.38 / 6.70 / 7.77. */
+  --maison-accent-on-dark: #c6a664;
+
+  /* --------------------------------------------------------------------
+     WARM NEUTRAL FIELD — DDR-1 hybrid palette (additive, unapplied)
+
+     Deep NFE green remains the signature anchor. These are additive
+     surfaces for selective use, NOT a replacement palette.
+     -------------------------------------------------------------------- */
+  --maison-bone: #f5efe6;       /* page ground */
+  --maison-ivory: #fcf9f3;      /* cards, raised surfaces */
+  --maison-parchment: #ede3d1;  /* tint bands — the binding contrast ground */
+  --maison-cacao: #1c1510;      /* dark sections */
+  --maison-espresso: #2b2018;   /* primary text on warm grounds */
+  --maison-umber: #6b5945;      /* secondary text, ledes */
+  --maison-hairline: #e3d7c3;   /* borders and rules, 1px */
+
+  /* --------------------------------------------------------------------
+     ANCHOR — production values, ALIASED not redefined.
+     Read-through so maison-namespaced components can reference the live
+     brand colors without duplicating hex.
+     -------------------------------------------------------------------- */
+  --maison-green: var(--nfe-green);          /* #103B2A signature anchor */
+  --maison-green-900: var(--nfe-green-900);  /* #0b291e */
+  --maison-green-700: var(--nfe-green-700);  /* #14543c */
+  --maison-ink: var(--nfe-ink);              /* #111111 */
+  --maison-paper: var(--nfe-paper);          /* #FAFAF8 */
+
+  /* --------------------------------------------------------------------
+     TEXT TOKENS — PROPOSED, NOT RATIFIED.
+
+     These replace opacity-based meaningful text colors (text-nfe-ink/45,
+     text-nfe-paper/50), whose contrast is an accident of stacking context
+     rather than a chosen value. Awaiting founder approval.
+     -------------------------------------------------------------------- */
+
+  /* Replaces --nfe-muted #6B6B6B, which fails on parchment at 4.25:1.
+     AA verified: Bone 5.02 / Ivory 5.46 / Parchment 4.51 / Paper 5.49. */
+  --maison-text-muted: #666666;
+
+  /* Replaces text-nfe-paper/50, which flattens to #859A91 and fails at 4.18:1.
+     AA verified on dark: green 4.52 / green-900 5.62 / cacao 6.52. */
+  --maison-text-subtle-on-dark: #8ca097;
+
+  /* --------------------------------------------------------------------
+     SPACING — namespaced to avoid the F-Spacing-01 collision.
+     Production --space-* is 4px-base and is NOT touched. This is the
+     package's 8px-base scale under a distinct name.
+     -------------------------------------------------------------------- */
+  --maison-space-1: 8px;
+  --maison-space-2: 16px;
+  --maison-space-3: 24px;
+  --maison-space-4: 32px;
+  --maison-space-6: 48px;
+  --maison-space-8: 64px;
+  --maison-space-12: 96px;
+
+  /* --------------------------------------------------------------------
+     GEOMETRY — DDR-5 selective sharpness.
+     Editorial 0–2px; forms and touch controls 2–4px. No oversized pills,
+     no mandated literal-zero on every control.
+     -------------------------------------------------------------------- */
+  --maison-radius-editorial: 0px;
+  --maison-radius-control: 2px;
+  --maison-radius-input: 4px;
+}
+
+/* ============================================================================
+   TOKENS DEFINED ABOVE ARE NOT REFERENCED BY ANY COMPONENT.
+
+   Do not consume them until the approved token phase. Applying them is a
+   separate, founder-gated step — see nfe-maison-token-map.md for adoption
+   status per token.
+
+   Deliberately NOT defined here, and why:
+     --maison-taupe (#9A8770)  fails AA on every light ground (2.72–3.31:1).
+                               Package designates it captions/metadata only.
+                               Excluded to prevent accidental text use.
+     serif font loading        Garamond web embedding NOT approved. See
+                               nfe-founder-decisions-2026-07-19.md §2.
+     --maison-gold (#C79A56)   Package gold is weaker on green than
+                               production's (4.87 vs 5.38). No reason to adopt.
+   ==========================================================================*/
