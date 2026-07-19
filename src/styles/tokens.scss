@@ -33,8 +33,40 @@
   // A11y
   --focus-ring: 2px solid var(--nfe-gold);
   --focus-ring-offset: 2px;
-  
+
   // Min contrast guidance: 4.5:1 for normal text, 3:1 for large text
 }
+
+// ============================================================================
+// MAISON TOKEN BRIDGE — legacy mapping record (Phase 1 file 2.2)
+//
+// This file remains the live source of truth. Nothing above is changed.
+// The mappings below are DOCUMENTATION ONLY, recording which --maison-*
+// token each legacy value corresponds to during the transition. New tokens
+// are defined in ./nfe-tokens.css, which is imported after this file.
+//
+//   LEGACY                 MAISON EQUIVALENT              STATUS
+//   --nfe-green         -> --maison-green (alias)         anchor, unchanged
+//   --nfe-green-900     -> --maison-green-900 (alias)     anchor, unchanged
+//   --nfe-green-700     -> --maison-green-700 (alias)     anchor, unchanged
+//   --nfe-ink           -> --maison-ink (alias)           anchor, unchanged
+//   --nfe-paper         -> --maison-paper (alias)         anchor, unchanged
+//   --nfe-gold          -> --maison-accent-on-dark        RATIFIED, same value
+//                          (on light grounds, use
+//                           --maison-accent-on-light,
+//                           #77633C — the existing gold
+//                           fails AA on light: 1.85-2.32:1)
+//   --nfe-muted         -> --maison-text-muted #666666    PROPOSED, not ratified
+//                          (#6B6B6B fails on parchment
+//                           at 4.25:1)
+//   --space-1..12       -> --maison-space-1..12           PARALLEL, NOT a
+//                          (4px base)   (8px base)        replacement. Both
+//                                                         exist. Do not merge
+//                                                         them (F-Spacing-01).
+//
+// WARNING: the design package defines --nfe-gold as #C79A56, which collides
+// with the #C6A664 above. Never import the package's tokens/colors.css into
+// the app; it would shift gold sitewide. See docs/nfe-maison-token-map.md.
+// ============================================================================
 
 
