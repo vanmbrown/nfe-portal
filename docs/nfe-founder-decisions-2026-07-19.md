@@ -45,7 +45,22 @@ Gates: F-Font-01 (the serif correction) and the Phase 1 font-loading work.
 
 ---
 
-## 3. Bronze-gold accent — PROVISIONALLY APPROVED, value corrected
+## 3. Bronze-gold accent — RATIFIED
+
+**Final ruling:** the accent pair is approved.
+
+```
+--nfe-color-accent-on-light: #77633C   /* Bone, Ivory, Parchment, Paper, White */
+--nfe-color-accent-on-dark:  #C6A664   /* dark green, cacao */
+```
+
+**Founder reason:** `#77633C` preserves the intended bronze-gold hue and clears WCAG AA across the approved light surfaces, including the actual parchment token `#EDE3D1`, where `#78643C` narrowly fails.
+
+**Binding rules:** do not use one accent token universally across all backgrounds; map accent color by surface role; do not adopt `#8E5F2B` as the default bronze without contrast testing, as it fails on the design package's parchment token; preserve the smaller restrained eyebrow treatment rather than solving contrast through larger or louder type; replace opacity-based meaningful text colors with explicit semantic tokens; **do not apply these tokens in production until the approved token phase.**
+
+Tested ratios for both tokens are documented in `nfe-contrast-token-candidates.md`.
+
+### How the value was corrected
 
 **Ruling:** `#78643C` provisionally approved as `--nfe-color-accent-on-light`, conditional on separate verification against Bone, Ivory, Paper, and Parchment, with an explicit instruction not to assume it passes on every light neutral.
 
@@ -72,7 +87,7 @@ One step darker, hue preserved, visually indistinguishable. Clears AA on all six
 | Do not enlarge or embolden eyebrows as primary fix | No type changes made or proposed |
 | Replace opacity-based meaningful text with semantic tokens | Proposed in candidates doc; not yet implemented |
 
-**Awaiting:** ratification of `#77633C` in place of `#78643C`. Nothing is consumed by code until then.
+**Ratified 2026-07-19.** Nothing is consumed by code; application is gated to the approved token phase.
 
 Measurements and method: `nfe-contrast-token-candidates.md`.
 
@@ -90,5 +105,5 @@ Retain Inter. Specimen deferred until after token architecture. No migration.
 |---|---|---|
 | Product sizes | Open — founder verification | Size copy corrections; Face Elixir FAQ fix |
 | Garamond license | Not approved | F-Font-01 serif correction; Phase 1 font loading |
-| Bronze-gold accent | Provisional; `#77633C` proposed | Phase 1 token bridge |
+| Bronze-gold accent | **RATIFIED** — `#77633C` / `#C6A664` | Nothing. Application gated to token phase. |
 | Inter vs Figtree | Deferred | Nothing |
