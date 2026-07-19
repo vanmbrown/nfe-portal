@@ -126,9 +126,38 @@ Scope held narrow as instructed: no header redesign, no wordmark change, no broa
 
 Result: Best Practices **96 → 100** on all six Lighthouse runs; console errors **1 → 0**.
 
+### Legibility verification — 16×16 FAILS
+
+Rendered from the live `/icon.png` via canvas at true pixel density:
+
+| Size | Verdict |
+|---|---|
+| 48×48 | **Legible.** Ring and droplet both clear. |
+| 32×32 | **Legible.** Ring reads as a ring, droplet distinct. |
+| **16×16** | **ILLEGIBLE.** The ring is thinner than one pixel at this scale and breaks into disconnected dots; the droplet collapses to an indistinct blob. Does not read as a mark. |
+
+Per the founder condition ("no additional favicon redesign is required unless it becomes illegible at those sizes"), a remedy **is** required for 16×16.
+
+**Proposed remedy, awaiting approval:** supply a dedicated small-size variant cropped to the droplet, dropping the outer ring margin. Tested at 16×16 and legible. This is a brand-visual change and has **not** been applied.
+
 ---
 
-## 7. State colors — CANDIDATES DEFINED, NOT RATIFIED
+## 7. State colors — RATIFIED
+
+```
+--maison-color-error-on-light:   #B91C1C
+--maison-color-success-on-light: #166534
+```
+
+Both pass WCAG AA on Bone, Ivory, Paper, and Parchment.
+
+**Usage rules:**
+
+- **Not for public use yet**, except when introduced during an approved route migration.
+- **Never** use `text-red-600`, `text-green-600`, or `text-green-700` on warm Maison surfaces without explicit contrast verification.
+- Package `clay #A04B36` is documented as an **acceptable alternative error tone** (AA on all four grounds: 5.17 / 5.62 / 5.65 / 4.64). `#B91C1C` remains the **stronger default** semantic error candidate.
+
+### Supporting measurements
 
 ```
 --maison-color-error-on-light:   #B91C1C
@@ -176,7 +205,7 @@ Retain Inter. Specimen deferred until after token architecture. No migration.
 | Muted text | **RATIFIED** — `#666666` | Nothing. Unconsumed until pilot. |
 | Token specimen | **APPROVED** | Nothing. Phase 1 complete. |
 | Favicon | **DONE** — `src/app/icon.png` | Nothing. BP restored to 100. |
-| State colors | Candidates defined, not ratified | Pilot — needs founder approval before use |
+| State colors | **RATIFIED** — `#B91C1C` / `#166534` | Public use gated to an approved route migration |
 | Status copy | **DONE** — "A future NFE ritual" | Nothing |
 | Inter vs Figtree | Deferred | Nothing |
 

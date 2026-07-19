@@ -84,7 +84,10 @@
   --maison-text-subtle-on-dark: #8ca097;
 
   /* --------------------------------------------------------------------
-     STATE COLORS ON LIGHT GROUNDS — candidates, NOT ratified, NOT consumed.
+     STATE COLORS ON LIGHT GROUNDS — RATIFIED 2026-07-19. NOT consumed.
+
+     Do not use publicly except when introduced during an approved route
+     migration.
 
      The current production classes fail AA on warm grounds. Measured against
      all four light grounds:
@@ -100,8 +103,14 @@
      the same way its bronze #8E5F2B does. Do not adopt package state
      colors without testing.
 
+     NEVER use these on warm Maison surfaces without explicit contrast
+     verification: text-red-600, text-green-600, text-green-700.
+
      Values below are the standard Tailwind darker shades rather than custom
      hex, so migration is a class swap and there is no new color to maintain.
+
+     Package clay #A04B36 is an ACCEPTABLE ALTERNATIVE error tone (AA on all
+     four: 5.17 / 5.62 / 5.65 / 4.64), but #B91C1C is the stronger default.
      -------------------------------------------------------------------- */
 
   /* AA verified: Bone 5.66 / Ivory 6.16 / Paper 6.19 / Parchment 5.09. */
