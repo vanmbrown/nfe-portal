@@ -38,19 +38,46 @@ Each candidate preserves the source hue by scaling RGB proportionally, so the br
 
 ### 2a. Accent on light grounds — the primary fix
 
-| Token | Value | vs paper | vs white | vs parchment |
-|---|---|---|---|---|
-| `--nfe-color-accent-on-light` | **`#78643C`** | 5.45:1 | 5.70:1 | 4.54:1 |
+**Founder ruling 2026-07-19: `#78643C` provisionally approved, conditional on verification against Bone, Ivory, Paper, and Parchment separately, with an explicit instruction not to assume it passes on every light neutral.**
 
-One value clears AA on all three light grounds. It is derived from `#C6A664` with hue preserved, reading as a deeper bronze rather than a different color. Parchment is the binding constraint at 4.54:1; if parchment is later dropped as a ground, `#867144` would suffice on paper and white and would read slightly warmer.
+**That verification was run, and the condition caught a real failure.**
+
+| Ground | Hex | `#78643C` | Verdict |
+|---|---|---|---|
+| Bone (design pkg) | `#F5EFE6` | 4.98:1 | PASS |
+| Ivory (design pkg) | `#FCF9F3` | 5.42:1 | PASS |
+| **Parchment (design pkg)** | **`#EDE3D1`** | **4.48:1** | **FAIL** |
+| Parchment (as measured in Phase 0 audit) | `#EFE4D5` | 4.54:1 | PASS |
+| Paper (production) | `#FAFAF8` | 5.45:1 | PASS |
+| White | `#FFFFFF` | 5.70:1 | PASS |
+
+`#78643C` misses AA on the design package's real parchment by **0.02**. The earlier draft of this document tested parchment as `#EFE4D5`, the value transcribed in the Phase 0 audit, where it passes. The design package's actual token is `#EDE3D1` in `tokens/colors.css`, slightly deeper and warmer, and there it fails.
+
+### Corrected recommendation
+
+| Token | Value | Bone | Ivory | Parchment (pkg) | Parchment (audit) | Paper | White |
+|---|---|---|---|---|---|---|---|
+| `--nfe-color-accent-on-light` | **`#77633C`** | 5.05:1 | 5.50:1 | **4.54:1** | 4.60:1 | 5.53:1 | 5.78:1 |
+
+One step darker than the provisional value, hue preserved, visually indistinguishable from `#78643C`. Clears AA on **all six** light grounds with parchment as the binding constraint at 4.54:1.
+
+**Recommendation:** ratify `#77633C` in place of `#78643C`. It satisfies every condition attached to the provisional approval without changing the design intent.
+
+If `#78643C` is preferred for any reason, it is usable only where the ground is Bone, Ivory, Paper, or White, and must not be used on Parchment tint bands. That is a per-surface restriction the token system would have to encode and enforce, which is more fragile than moving one step darker.
+
+### Note on the design package's own bronze
+
+For reference, the package's `--nfe-bronze: #8E5F2B` **also fails AA on parchment**, at 4.32:1 against `#EDE3D1` and 4.38:1 against `#EFE4D5`. Its `--nfe-bronze-deep: #6F4A20` passes everywhere with a 6.17:1 worst case, but is considerably darker than the NFE gold family. This is worth knowing before adopting package accent values directly: the package's primary accent token is not AA-compliant on the package's own tint band.
 
 ### 2b. Accent on dark grounds — no change
 
-| Token | Value | vs green | vs green-900 |
-|---|---|---|---|
-| `--nfe-color-accent-on-dark` | **`#C6A664`** (unchanged) | 5.38:1 | 6.70:1 |
+| Token | Value | vs green `#103B2A` | vs green-900 `#0b291e` | vs cacao `#1C1510` |
+|---|---|---|---|---|
+| `--nfe-color-accent-on-dark` | **`#C6A664`** (unchanged) | 5.38:1 | 6.70:1 | 7.77:1 |
 
-The existing gold, retained exactly. This is the token that carries the current brand character and it already passes.
+The existing gold, retained exactly, per the ruling to keep the brighter gold family on dark green and cacao. It passes on all three dark grounds including the design package's cacao, so no change is needed even if cacao sections are introduced later.
+
+The package's own `--nfe-gold: #C79A56` also passes on all three (4.87:1 / 6.06:1 / 7.03:1) but is slightly weaker on green. **Production's existing gold is the better value; there is no reason to adopt the package's.**
 
 ### 2c. Muted and subtle text
 

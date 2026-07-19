@@ -78,11 +78,26 @@ Note that both elixirs claim "approximately 2-3 months" despite a 170ml differen
 
 ---
 
-## 5. Questions for Vanessa
+## 5. Tracking slots (founder ruling 2026-07-19)
+
+Confirmed launch size and future/planned size are tracked **separately**. A size appearing in planning material does not make it a launch SKU.
+
+| Slot | Status | Current production claim |
+|---|---|---|
+| **Face Elixir — confirmed launch size** | UNCONFIRMED | `30ml / 1 fl oz` |
+| **Face Elixir — future/planned size, if any** | UNCONFIRMED | 50ml implied by the live FAQ |
+| **Body Elixir — confirmed launch size** | UNCONFIRMED | `200ml / 6.8 fl oz` |
+
+**Explicit caution:** `NFE_face_elixir_30_50_proportions_fixed.png` is **not** proof that both 30ml and 50ml are approved launch SKUs. It is a rendering, not a specification. Treat it as a lead to investigate, not as evidence.
+
+---
+
+## 6. Questions for Vanessa
 
 1. Body Elixir net contents: 200ml, or 125ml/75ml?
-2. Is the Face Elixir a single 30ml SKU, or a 30ml and 50ml pair?
-3. If 50ml is real, which longevity figure is correct: ~3–5 months or ~2–4 months?
-4. Is `FaceElixirSections.tsx` intended to be revived, or should it be deleted as dead code in a later pass?
+2. Face Elixir confirmed **launch** size?
+3. Is 50ml a real future/planned SKU, or outdated planning material?
+4. If 50ml is real, which longevity figure is correct: ~3–5 months or ~2–4 months?
+5. Is `FaceElixirSections.tsx` intended to be revived, or deleted as dead code in a later pass?
 
-Until these are answered, **no size copy changes.**
+Until answered, **no size copy changes.** Note that the live FAQ currently blurs launch and planned sizes by offering customers a choice between 30ml and 50ml while the product data declares a single 30ml SKU.
