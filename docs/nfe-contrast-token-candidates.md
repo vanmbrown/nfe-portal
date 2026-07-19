@@ -1,9 +1,59 @@
 # Contrast-Safe Token Candidates — proposal only
 
-**Status:** **PROPOSAL. Not consumed by any code.** No palette change has been applied.
+**Status:** **RATIFIED 2026-07-19. Not consumed by any code.** No palette change has been applied.
 **Date:** 2026-07-19
-**Related:** DDR-1, F-A11y-01
-**Action required:** Vanessa approves values before any token bridge work begins.
+**Related:** DDR-1, F-A11y-01, DDR-7 (accent pair)
+**Action required:** None. Values are approved. Application is gated to the approved token phase.
+
+---
+
+## RATIFIED ACCENT PAIR
+
+```
+--nfe-color-accent-on-light: #77633C   /* Bone, Ivory, Parchment, Paper, White */
+--nfe-color-accent-on-dark:  #C6A664   /* dark green, green-900, cacao */
+```
+
+**Founder reason for ratification:** `#77633C` preserves the intended bronze-gold hue and clears WCAG AA across the approved light surfaces, including the actual parchment token `#EDE3D1`, where `#78643C` narrowly fails.
+
+### Binding rules
+
+1. **Do not use one accent token universally across all backgrounds.** Map accent color by surface role.
+2. **Do not adopt `#8E5F2B` as the default bronze without contrast testing.** It fails on the design package's own parchment token.
+3. **Preserve the smaller, restrained eyebrow treatment.** Do not solve contrast through larger or louder type.
+4. **Replace opacity-based meaningful text colors with explicit semantic tokens.**
+5. **Do not apply these tokens in production until the approved token phase.**
+
+### Tested ratios — ratified pair
+
+`--nfe-color-accent-on-light: #77633C` (AA normal text = 4.5:1)
+
+| Ground | Hex | Ratio | AA |
+|---|---|---|---|
+| Bone (design pkg) | `#F5EFE6` | 5.05:1 | PASS |
+| Ivory (design pkg) | `#FCF9F3` | 5.50:1 | PASS |
+| **Parchment (design pkg)** | **`#EDE3D1`** | **4.54:1** | **PASS** (binding constraint) |
+| Parchment (Phase 0 audit transcription) | `#EFE4D5` | 4.60:1 | PASS |
+| Paper (production) | `#FAFAF8` | 5.53:1 | PASS |
+| White | `#FFFFFF` | 5.78:1 | PASS |
+
+`--nfe-color-accent-on-dark: #C6A664` (unchanged production gold)
+
+| Ground | Hex | Ratio | AA |
+|---|---|---|---|
+| Green (production) | `#103B2A` | 5.38:1 | PASS |
+| Green-900 (production) | `#0b291e` | 6.70:1 | PASS |
+| Cacao (design pkg) | `#1C1510` | 7.77:1 | PASS |
+
+### Rejected alternatives, for the record
+
+| Value | Source | Why rejected |
+|---|---|---|
+| `#78643C` | earlier proposal | 4.48:1 on parchment `#EDE3D1` — misses AA by 0.02 |
+| `#8E5F2B` | design pkg `--nfe-bronze` | 4.32:1 on `#EDE3D1`, 4.38:1 on `#EFE4D5` — fails on both parchment values |
+| `#C79A56` | design pkg `--nfe-gold` | Passes on dark, but weaker than production's `#C6A664` on green (4.87:1 vs 5.38:1). No reason to adopt. |
+
+Supporting analysis and method follow below.
 
 Every value below was computed with the WCAG 2.x relative-luminance formula against the **actual** token values in `src/styles/tokens.scss` and `tailwind.config.js`, not estimated by eye. Target is **AA for normal text, 4.5:1**.
 
@@ -116,11 +166,13 @@ Opacity remains appropriate for decorative and non-informational elements such a
 Following the architect's naming:
 
 ```
---nfe-color-accent-on-light        #78643C   (new)
---nfe-color-accent-on-dark         #C6A664   (existing gold, unchanged)
---nfe-color-text-muted             #676767   (replaces #6B6B6B)
---nfe-color-text-subtle-on-dark    #8CA097   (replaces text-nfe-paper/50)
+--nfe-color-accent-on-light        #77633C   RATIFIED 2026-07-19
+--nfe-color-accent-on-dark         #C6A664   RATIFIED 2026-07-19 (existing gold, unchanged)
+--nfe-color-text-muted             #676767   proposed (replaces #6B6B6B)
+--nfe-color-text-subtle-on-dark    #8CA097   proposed (replaces text-nfe-paper/50)
 ```
+
+The accent pair is ratified. The two text tokens remain **proposals** and are not yet approved.
 
 **Namespace warning (F-Spacing-01 precedent):** production uses a 4px-base `--space-*` scale while the design package uses an 8px base with identical names. Introduce these color tokens under the `--nfe-color-*` namespace rather than extending existing names, so no in-place redefinition causes a sitewide visual shift.
 
