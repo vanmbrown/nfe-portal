@@ -21,7 +21,7 @@
                             "commonName":  "Vitamin B3",
                             "function":  "Skin Conditioning / Brightening",
                             "benefit":  "Improves tone and texture, supports the skin barrier.",
-                            "percentageRange":  "2–5%",
+                            "percentageRange":  "",
                             "phase":  "Active"
                         },
                         {
@@ -29,7 +29,7 @@
                             "commonName":  "Tranexamic Acid",
                             "function":  "Skin Conditioning / Brightening",
                             "benefit":  "Reduces discoloration and inflammation for a more even tone.",
-                            "percentageRange":  "3%",
+                            "percentageRange":  "",
                             "phase":  "Active"
                         },
                         {
@@ -37,7 +37,7 @@
                             "commonName":  "Alpha Arbutin",
                             "function":  "Skin Conditioning / Brightening",
                             "benefit":  "Visibly fades dark spots and hyperpigmentation.",
-                            "percentageRange":  "2%",
+                            "percentageRange":  "",
                             "phase":  "Active"
                         },
                         {
@@ -45,7 +45,7 @@
                             "commonName":  "Kojic Dipalmitate",
                             "function":  "Skin Conditioning / Brightening",
                             "benefit":  "Supports tone evenness and radiance.",
-                            "percentageRange":  "2%",
+                            "percentageRange":  "",
                             "phase":  "Active"
                         },
                         {
@@ -53,7 +53,7 @@
                             "commonName":  "Vitamin C Ester",
                             "function":  "Antioxidant / Brightening",
                             "benefit":  "Firms, brightens, and protects from oxidative stress.",
-                            "percentageRange":  "5.21%",
+                            "percentageRange":  "",
                             "phase":  "Active"
                         },
                         {
@@ -69,7 +69,7 @@
                             "commonName":  "Ectoin (powder)",
                             "function":  "Cell Protection / Barrier Support",
                             "benefit":  "Shields skin from environmental stress and helps maintain hydration.",
-                            "percentageRange":  "2%",
+                            "percentageRange":  "",
                             "phase":  "Functional"
                         },
                         {
