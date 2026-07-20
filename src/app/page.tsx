@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import Image, { getImageProps } from 'next/image'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -138,26 +138,26 @@ function MaisonLink({
 export default function NFEHomePage() {
   const heroAlt =
     'NFE Face Elixir bottle with gold pump in a warm sculptural setting.'
-  const {
-    props: { srcSet: desktopHeroSrcSet },
-  } = getImageProps({
-    src: '/images/homepage/nfe-home-hero-product-vessel-desktop.webp',
-    alt: heroAlt,
-    width: 3600,
-    height: 2547,
-    sizes: '(min-width: 1024px) 48vw, 100vw',
-    quality: 90,
-    priority: true,
-  })
-  const { props: mobileHeroProps } = getImageProps({
-    src: '/images/homepage/nfe-home-hero-product-vessel-mobile.webp',
-    alt: heroAlt,
-    width: 2000,
-    height: 2827,
-    sizes: '100vw',
-    quality: 90,
-    priority: true,
-  })
+
+  // Static, pre-generated Lanczos-resized WebP variants, served directly —
+  // deliberately NOT routed through next/image's runtime optimizer for this
+  // one hero. Confirmed via a Laplacian-variance audit (2026-07-19/20) that
+  // the runtime resize pipeline was producing measurably softer output than
+  // a proper Lanczos downscale (desktop: 60.48 vs 76.63 sharpness; a static
+  // Lanczos variant lands within 1.5% of an unprocessed reference). Source
+  // is unchanged — same crop, same color, same composition, just a better
+  // resize. Route-scoped: this does not change next.config.mjs or affect
+  // any other image on the site. See docs/nfe-founder-decisions-2026-07-19.md
+  // for the full audit if that gets written up separately.
+  const desktopHeroSrcSet = [
+    '/images/homepage/nfe-home-hero-product-vessel-desktop-960w.webp 960w',
+    '/images/homepage/nfe-home-hero-product-vessel-desktop-1600w.webp 1600w',
+    '/images/homepage/nfe-home-hero-product-vessel-desktop-2200w.webp 2200w',
+  ].join(', ')
+  const mobileHeroSrcSet = [
+    '/images/homepage/nfe-home-hero-product-vessel-mobile-828w.webp 828w',
+    '/images/homepage/nfe-home-hero-product-vessel-mobile-1920w.webp 1920w',
+  ].join(', ')
 
   return (
     <div className="bg-nfe-paper text-nfe-ink">
@@ -199,7 +199,15 @@ export default function NFEHomePage() {
               sizes="48vw"
             />
             <img
-              {...mobileHeroProps}
+              src="/images/homepage/nfe-home-hero-product-vessel-mobile-1920w.webp"
+              srcSet={mobileHeroSrcSet}
+              sizes="100vw"
+              alt={heroAlt}
+              width={1920}
+              height={2714}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="h-full w-full object-cover object-center md:object-[50%_35%] lg:object-[70%_center]"
             />
           </picture>
