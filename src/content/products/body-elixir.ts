@@ -31,7 +31,6 @@ export const bodyElixirData: ProductData = {
     {
       name: 'Ceramide Complex',
       inci: 'Ceramide NP, Ceramide AP, Ceramide EOP',
-      concentration: '2%',
       benefits: ['Barrier repair', 'Moisture retention', 'Skin protection'],
       source: 'Synthetic',
       safety: 'safe',
@@ -39,7 +38,6 @@ export const bodyElixirData: ProductData = {
     {
       name: 'Cacay Oil',
       inci: 'Caryodendron orinocense Seed Oil',
-      concentration: '5%',
       benefits: ['Antioxidant', 'Anti-inflammatory', 'Non-comedogenic'],
       source: 'Caryodendron orinocense seed',
       safety: 'safe',
@@ -47,7 +45,6 @@ export const bodyElixirData: ProductData = {
     {
       name: 'Prickly Pear Seed Oil',
       inci: 'Opuntia ficus-indica Seed Oil',
-      concentration: '3%',
       benefits: ['Vitamin E', 'Antioxidant', 'Skin conditioning'],
       source: 'Opuntia ficus-indica seed',
       safety: 'safe',
@@ -55,7 +52,6 @@ export const bodyElixirData: ProductData = {
     {
       name: 'Blue Tansy',
       inci: 'Tanacetum annuum Flower Oil',
-      concentration: '0.5%',
       benefits: ['Anti-inflammatory', 'Soothing', 'Antimicrobial'],
       source: 'Tanacetum annuum flower',
       safety: 'safe',
@@ -63,7 +59,6 @@ export const bodyElixirData: ProductData = {
     {
       name: 'Gotu Kola Extract',
       inci: 'Centella asiatica Extract',
-      concentration: '1%',
       benefits: ['Wound healing', 'Anti-aging', 'Skin repair'],
       source: 'Centella asiatica leaf',
       safety: 'safe',
@@ -71,7 +66,6 @@ export const bodyElixirData: ProductData = {
     {
       name: 'Bisabolol',
       inci: 'Bisabolol',
-      concentration: '0.5%',
       benefits: ['Anti-inflammatory', 'Soothing', 'Skin conditioning'],
       source: 'Chamomile or synthetic',
       safety: 'safe',

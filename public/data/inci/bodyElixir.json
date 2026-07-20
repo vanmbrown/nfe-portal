@@ -15,7 +15,7 @@
     "function": "Skin Conditioning / Brightening",
     "phase": "Active",
     "benefit": "Improves tone and texture, supports barrier",
-    "percentageRange": "2–5%",
+    "percentageRange": "",
     "source": "NFE Body Elixir",
     "placeholder": true
   },
@@ -25,7 +25,7 @@
     "function": "Antioxidant / Brightening",
     "phase": "Active",
     "benefit": "Firms, brightens, protects from oxidative stress",
-    "percentageRange": "5.21%",
+    "percentageRange": "",
     "source": "NFE Body Elixir",
     "placeholder": true
   },
@@ -35,7 +35,7 @@
     "function": "Skin Conditioning",
     "phase": "Active",
     "benefit": "Supports smoother look",
-    "percentageRange": "0.5–1%",
+    "percentageRange": "",
     "source": "NFE Body Elixir",
     "placeholder": true
   }

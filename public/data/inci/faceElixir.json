@@ -14,7 +14,7 @@
     "function": "Skin Conditioning / Brightening",
     "phase": "Active",
     "benefit": "Improves tone and texture, supports barrier",
-    "percentageRange": "2–5%",
+    "percentageRange": "",
     "source": "NFE Face Elixir"
   },
   {
@@ -23,7 +23,7 @@
     "function": "Skin Conditioning / Brightening",
     "phase": "Active",
     "benefit": "Supports more even-looking complexion",
-    "percentageRange": "3%",
+    "percentageRange": "",
     "source": "NFE Face Elixir"
   },
   {
@@ -32,7 +32,7 @@
     "function": "Skin Conditioning / Brightening",
     "phase": "Active",
     "benefit": "Supports tone uniformity",
-    "percentageRange": "2%",
+    "percentageRange": "",
     "source": "NFE Face Elixir"
   },
   {
@@ -41,7 +41,7 @@
     "function": "Skin Conditioning / Brightening",
     "phase": "Active",
     "benefit": "Supports tone evenness",
-    "percentageRange": "2%",
+    "percentageRange": "",
     "source": "NFE Face Elixir"
   },
   {
@@ -50,7 +50,7 @@
     "function": "Antioxidant / Brightening",
     "phase": "Active",
     "benefit": "Firms, brightens, protects from oxidative stress",
-    "percentageRange": "5.21%",
+    "percentageRange": "",
     "source": "NFE Face Elixir"
   },
   {
@@ -59,7 +59,7 @@
     "function": "Skin Conditioning",
     "phase": "Active",
     "benefit": "Supports smoother look and bouncier feel",
-    "percentageRange": "0.5–1%",
+    "percentageRange": "",
     "source": "NFE Face Elixir"
   },
   {
@@ -68,7 +68,7 @@
     "function": "Humectant",
     "phase": "Active",
     "benefit": "Multi-level hydration, plumps skin",
-    "percentageRange": "0.1–0.5%",
+    "percentageRange": "",
     "source": "NFE Face Elixir"
   },
   {
@@ -77,7 +77,7 @@
     "function": "Skin Conditioning / Barrier Support",
     "phase": "Active",
     "benefit": "Strengthens barrier, reduces water loss",
-    "percentageRange": "0.1–0.5%",
+    "percentageRange": "",
     "source": "NFE Face Elixir"
   },
   {
@@ -86,7 +86,7 @@
     "function": "Antioxidant",
     "phase": "Active",
     "benefit": "Defends against oxidative stress",
-    "percentageRange": "0.1–0.5%",
+    "percentageRange": "",
     "source": "NFE Face Elixir"
   }
 ]

@@ -124,13 +124,6 @@ export function IngredientList({ product, className = '' }: IngredientListProps)
               
               <CardContent className="pt-0">
                 <div className="space-y-3">
-                  {ingredient.concentration && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-nfe-ink">Concentration:</span>
-                      <Badge variant="default">{ingredient.concentration}</Badge>
-                    </div>
-                  )}
-                  
                   <div>
                     <span className="text-sm font-medium text-nfe-ink">Source:</span>
                     <p className="text-sm text-nfe-muted mt-1">{ingredient.source}</p>

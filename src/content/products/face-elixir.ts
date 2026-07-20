@@ -89,7 +89,6 @@ export const faceElixirData: ProductData = {
     {
       name: 'THD Ascorbate',
       inci: 'Tetrahexyldecyl Ascorbate',
-      concentration: '15%',
       benefits: ['Brightening', 'Antioxidant protection', 'Collagen synthesis'],
       source: 'Synthetic',
       safety: 'safe',
@@ -97,7 +96,6 @@ export const faceElixirData: ProductData = {
     {
       name: 'Bakuchiol',
       inci: 'Bakuchiol',
-      concentration: '1%',
       benefits: ['Retinol alternative', 'Anti-aging', 'Gentle on sensitive skin'],
       source: 'Psoralea corylifolia seed',
       safety: 'safe',
@@ -105,7 +103,6 @@ export const faceElixirData: ProductData = {
     {
       name: 'Copper Peptide',
       inci: 'Copper Tripeptide-1',
-      concentration: '0.1%',
       benefits: ['Wound healing', 'Collagen production', 'Skin repair'],
       source: 'Synthetic',
       safety: 'safe',
@@ -113,7 +110,6 @@ export const faceElixirData: ProductData = {
     {
       name: 'Palmitoyl Tripeptide-5',
       inci: 'Palmitoyl Tripeptide-5',
-      concentration: '0.05%',
       benefits: ['Firmness', 'Elasticity', 'Anti-aging'],
       source: 'Synthetic',
       safety: 'safe',
@@ -121,7 +117,6 @@ export const faceElixirData: ProductData = {
     {
       name: 'Niacinamide',
       inci: 'Niacinamide',
-      concentration: '5%',
       benefits: ['Pore refinement', 'Oil control', 'Barrier support'],
       source: 'Synthetic',
       safety: 'safe',
@@ -129,7 +124,6 @@ export const faceElixirData: ProductData = {
     {
       name: 'Hyaluronic Acid',
       inci: 'Sodium Hyaluronate',
-      concentration: '2%',
       benefits: ['Hydration', 'Plumping', 'Moisture retention'],
       source: 'Fermentation',
       safety: 'safe',
@@ -140,7 +134,7 @@ export const faceElixirData: ProductData = {
       title: 'Brightening & Even Tone',
       description: 'THD ascorbate provides stable vitamin C benefits without irritation, helping to fade dark spots and even skin tone.',
       timeline: '4-8 weeks',
-      clinicalEvidence: 'Clinical studies show 15% THD ascorbate reduces hyperpigmentation by 40% in 8 weeks.',
+      clinicalEvidence: 'Clinical studies show THD ascorbate reduces hyperpigmentation by 40% in 8 weeks.',
     },
     {
       title: 'Anti-Aging & Firmness',

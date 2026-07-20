@@ -14,7 +14,7 @@
       "commonName": "Vitamin B3",
       "function": "Skin Conditioning / Brightening",
       "benefit": "Improves tone and texture, supports barrier",
-      "percentageRange": "2\u20135%",
+      "percentageRange": "",
       "phase": "Actives & Antioxidants"
     },
     {
@@ -22,7 +22,7 @@
       "commonName": "Tranexamic Acid",
       "function": "Skin Conditioning / Brightening",
       "benefit": "Supports more even-looking complexion",
-      "percentageRange": "3%",
+      "percentageRange": "",
       "phase": "Actives & Antioxidants"
     },
     {
@@ -30,7 +30,7 @@
       "commonName": "Alpha-Arbutin",
       "function": "Skin Conditioning / Brightening",
       "benefit": "Supports tone uniformity",
-      "percentageRange": "2%",
+      "percentageRange": "",
       "phase": "Actives & Antioxidants"
     },
     {
@@ -38,7 +38,7 @@
       "commonName": "Kojic Dipalmitate",
       "function": "Skin Conditioning / Brightening",
       "benefit": "Supports tone evenness and radiance",
-      "percentageRange": "2%",
+      "percentageRange": "",
       "phase": "Actives & Antioxidants"
     },
     {
@@ -46,7 +46,7 @@
       "commonName": "Vitamin C Ester",
       "function": "Antioxidant / Brightening",
       "benefit": "Firms, brightens, protects from oxidative stress",
-      "percentageRange": "5.21%",
+      "percentageRange": "",
       "phase": "Actives & Antioxidants"
     },
     {
@@ -54,7 +54,7 @@
       "commonName": "Bakuchiol",
       "function": "Skin Conditioning",
       "benefit": "Supports smoother look and bouncier feel",
-      "percentageRange": "0.5\u20131%",
+      "percentageRange": "",
       "phase": "Actives & Antioxidants"
     },
     {
@@ -62,7 +62,7 @@
       "commonName": "HA 4D",
       "function": "Humectant",
       "benefit": "Multi-level hydration, plumps skin",
-      "percentageRange": "0.1\u20130.5%",
+      "percentageRange": "",
       "phase": "Actives & Antioxidants"
     },
     {
@@ -70,7 +70,7 @@
       "commonName": "Ceramides",
       "function": "Skin Conditioning / Barrier Support",
       "benefit": "Strengthens barrier, reduces water loss",
-      "percentageRange": "0.1\u20130.5%",
+      "percentageRange": "",
       "phase": "Preservation & Stability"
     },
     {
@@ -78,7 +78,7 @@
       "commonName": "Coenzyme Q10",
       "function": "Antioxidant",
       "benefit": "Defends against oxidative stress",
-      "percentageRange": "0.1\u20130.5%",
+      "percentageRange": "",
       "phase": "Actives & Antioxidants"
     }
   ]
