@@ -458,8 +458,22 @@ precede Release 1.
 
 ## 15. Confidential Formulation-Percentage Exposure — Minimal Patch Plan
 
-Treated as a separate track from the controlled release, per instruction.
-**No branch created, no deployment performed.**
+**Status update (2026-07-20): implemented, not yet deployed.** The plan below
+was executed on branch `hotfix/inci-percentage-exposure` (base `4f2c411` =
+`origin/main`) as three independent commits, each reviewable and revertible
+on its own:
+
+1. `bf9ba21` — fix: remove confidential face elixir percentages (the two
+   formulas JSON files, exactly as planned below)
+2. `9cc2e0a` — chore: remove unverified public font binaries (the three
+   Garamond files, Section 8)
+3. `847faec` — fix: remove public product concentration data (a **second
+   exposure surface discovered during hotfix validation** — see Section 16,
+   which expands the scope beyond what this section originally planned)
+
+All three commits are pushed to `origin/hotfix/inci-percentage-exposure`.
+**No deployment has been performed.** The remainder of this section is the
+original plan, retained as the record of scope and method.
 
 ### Exact live files exposing percentages (on `origin/main`, today)
 
@@ -540,21 +554,109 @@ Tag the pre-deploy HEAD before deploying. Rollback is a single-commit
 revert or redeploy of the tagged pre-patch commit — no schema, migration, or
 environment variable is touched, so no data-consistency concerns.
 
-### Cached asset / page purge
+### Cached asset / page purge (expanded after Section 16's findings)
 
-**Not verifiable as unnecessary — should be treated as required.** No
-explicit `Cache-Control` configuration was found in `next.config.mjs` or
-`wrangler.jsonc` governing `/data/` paths, so default Cloudflare Workers
-Assets caching applies, which this audit cannot fully characterize from
-code. Because the JSON is fetched client-side at runtime, a stale edge or
-browser cache could keep serving the old percentage-containing response
-after deploy. Recommend an explicit Cloudflare cache purge for this asset
-path as a deployment step, confirmed by whoever has dashboard access — not
-assumed to self-resolve.
+**Not verifiable as unnecessary — treat as required.** No explicit
+`Cache-Control` configuration was found in `next.config.mjs` or
+`wrangler.jsonc` governing these paths, so default Cloudflare Workers Assets
+caching applies, which this audit cannot fully characterize from code. A
+stale edge or browser cache could keep serving old percentage-containing
+responses after deploy. Purge explicitly, confirmed by whoever has
+Cloudflare dashboard access — do not rely on TTL expiration:
+
+- `/inci` (HTML)
+- `/products/face-elixir` (HTML)
+- `/products/body-elixir` (HTML — this page server-renders the ingredient
+  data into its HTML, confirmed in the build output, so the cached page
+  itself contains the old concentrations, not just a JSON fetch)
+- `/data/formulas/faceElixir.json`
+- `/data/inci/faceElixir.json`
+- `/data/inci/bodyElixir.json`
+- Any cached RSC payload variants of the three HTML routes above (Next.js
+  App Router serves `?_rsc=` flight payloads alongside HTML; if the edge
+  caches them, they carry the same rendered data)
 
 ---
 
-## 16. Founder Decisions Required
+## 16. Product-Page Concentration Exposure — Found and Remediated During Hotfix Validation
+
+A **second, independent confidential-concentration exposure** was discovered
+while validating the Section 15 patch's build artifact (a stray "3%" match
+traced to its real source), and remediated as the hotfix's third commit
+(`847faec`). It is both a confidentiality defect and a data-integrity
+defect, and it is live on `origin/main` today.
+
+### Exact affected files (all remediated in `847faec`)
+
+| File | What it exposed | Remediation |
+|---|---|---|
+| `src/content/products/face-elixir.ts` | `concentration` field per ingredient: THD Ascorbate 15%, Bakuchiol 1%, Copper Peptide 0.1%, Palmitoyl Tripeptide-5 0.05%, Niacinamide 5%, Hyaluronic Acid 2% — plus "15%" embedded in the THD ascorbate clinical-evidence sentence | Six `concentration` fields removed (field is optional in the shared type, which is retained); "15% THD ascorbate" → "THD ascorbate" in the claim sentence, efficacy statistic (40% in 8 weeks) unchanged |
+| `src/content/products/body-elixir.ts` | `concentration` per ingredient: Ceramide Complex 2%, Cacay Oil 5%, Prickly Pear Seed Oil 3%, Blue Tansy 0.5%, Gotu Kola Extract 1%, Bisabolol 0.5% | Six `concentration` fields removed |
+| `src/components/products/IngredientList.tsx` | Rendered a "Concentration: <value>" badge for any ingredient carrying the field | Badge rendering block removed entirely — rendering defense: no future content entry can re-expose a value through this component. The `concentration` field stays optional in the TypeScript type for internal compatibility; it is simply never rendered. |
+| `data/inci/faceElixir.json`, `public/data/inci/faceElixir.json` | `percentageRange` values incl. 2–5%, 3%, 2%, 5.21%, 0.5–1%, 0.1–0.5% — statically servable by direct URL even though no component fetches them | All real values blanked to `""` (the files' own undisclosed-value convention); `"q.s."` retained as a qualitative term, not a disclosed concentration |
+| `data/inci/bodyElixir.json`, `public/data/inci/bodyElixir.json` | `percentageRange` values incl. 2–5%, 5.21%, 0.5–1% | Same |
+
+### Exact affected routes
+
+- **`/products/body-elixir`** — the only route that *rendered* the
+  concentration badges: its dedicated page imports `IngredientList` +
+  `BenefitsTable` fed by `bodyElixirData`. The badges were server-rendered
+  into the page HTML (confirmed in the pre-fix build output), customer-
+  visible today on `origin/main`.
+- **`/products/face-elixir`** — does **not** render `faceElixirData` on this
+  base (it uses a separate accordion fed by `data/products/*.json`, which
+  was checked and contains zero percent values). The face concentrations
+  were source-only exposure; pre-fix build-artifact search found no 15%/
+  5.21% in text output. Removed regardless — the feature branch's rebuilt
+  product pages consume content differently, and source-level removal is
+  the only future-proof state.
+- **`/data/inci/*.json`** — direct-URL exposure only (nothing fetches them).
+
+### Conflicting values between data sources — recorded, NOT reconciled
+
+The same ingredients carry **different concentration figures in different
+files**, e.g. THD Ascorbate: **15%** (`face-elixir.ts`) vs. **5.21%**
+(formulas/INCI JSON); Niacinamide: **5%** (`face-elixir.ts`) vs. **2–5%**
+(formulas JSON); Hyaluronic Acid: **2%** vs. a range elsewhere. Which figure
+(if either) matches the actual formula is unknowable from this repository.
+**No reconciliation was attempted** — every value was removed, none was
+corrected, replaced with a range, or inferred. The data-integrity question
+(which source was ever right) is a founder matter and is moot for the
+public site now that no concentration renders anywhere.
+
+### Verification results (three-commit state, `847faec`)
+
+- `npx tsc --noEmit`: passed. `npm run build` (webpack): succeeded.
+  `npx opennextjs-cloudflare build`: succeeded.
+- Distinctive-value sweep (15%, 5.21%, 2–5%, 0.05%, 0.1–0.5%, 0.5–1%) across
+  `.next` and `.open-next` text output: **zero matches**. A
+  formulation-context regex (`concentration`/`percentageRange` near any
+  percent) across both artifacts: **zero matches**. Remaining generic
+  percent strings were classified: UI stats (95% satisfaction / 40%
+  improvement marketing claims — not formulation data), CSS layout values
+  (`max-width:75%`, font-size percentages), analytics/library code inside
+  `node_modules`, and random byte sequences inside binary font/image files.
+  **Zero unresolved product-formulation percentages.**
+- Rendered validation on a real production build: `/products/body-elixir`
+  shows all six ingredient names with Source/Benefits intact, no
+  "Concentration:" label in visible text or raw HTML, no empty containers,
+  no dangling punctuation, no layout overflow (desktop and 375px mobile),
+  zero console errors, zero hydration warnings. `/products/face-elixir` and
+  `/inci`: same result. All three JSON endpoints fetched directly: no real
+  `percentageRange` values.
+- Garamond: zero files in `.open-next`; no page requests any Garamond URL.
+
+### Minor residue for founder ruling (not fixed — outside the three-commit scope)
+
+Two cosmetic leftovers in `IngredientList.tsx` now reference a feature that
+no longer exists: the section intro copy "Every ingredient in {product},
+with **concentrations**, benefits, and safety information" (line ~72), and
+the now-inert "Concentration" sort button (clicking it is a harmless no-op —
+verified, no error). Fixing either is a one-line UI copy/control edit;
+neither exposes any value. Held for explicit approval rather than expanding
+the closed third commit.
+
+## 17. Founder Decisions Required
 
 1. **Coherent Founder Access state:** State A (included, production-ready —
    needs the unverifiable-from-code confirmations already on record) or
