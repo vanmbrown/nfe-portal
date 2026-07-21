@@ -1518,6 +1518,15 @@ defect (migrate to managed secrets + rotate), **not** a public/browser leak.
 founder-approved live test resolved it — the form works end to end. This
 supersedes the earlier "likely nonfunctional" reading.
 
+**Agreed final wording (per direction):** *"Founder Access is operational in
+production. The Supabase service-role credential is embedded only in the
+server-side Worker through OpenNext `next-env.mjs`. No browser-delivered
+credential exposure was found. Migration to managed Cloudflare secrets is
+required before credential rotation."* Migration is proven to need **no code
+change** and to leave **zero embedded credential** when Supabase values are
+kept out of the build `.env` (§28); managed bindings take runtime precedence
+over any residual embedded value.
+
 **No further release work depends on this** except the Founder Access
 incident response itself. (The asset/font hygiene items — §23.4/§23.5 — are
 independent and still awaiting their own authorization; the confidentiality
@@ -1703,6 +1712,131 @@ test showed a genuine submission also carries no referrer, so the
 zero-attribution signal does not distinguish test from real; provenance is
 not established.) Do not delete or inspect these rows without separate
 direction.
+
+## 28. Env Precedence + Managed-Secret Migration Proof (2026-07-21)
+
+Report-only, isolated preview worktree at `2eede3b` (since removed). No
+deploy, no production binding change, no rotation, all fake markers.
+
+### 28.1 Environment precedence — from the actual `init.js` code, then confirmed empirically
+
+`worker.js` imports `./cloudflare/init.js`, whose `populateProcessEnv(url, env)`
+does, in order:
+
+```js
+// 1) Cloudflare bindings/secrets (env) FIRST — direct assignment (OVERWRITES)
+for (const [key, value] of Object.entries(env))
+  if (typeof value === "string") process.env[key] = value;
+// 2) build-time next-env.mjs SECOND — nullish assignment (ONLY IF MISSING)
+for (const key in nextEnvVars[mode]) process.env[key] ??= nextEnvVars[mode][key];
+```
+
+Answers to the precedence questions (not inferred from naming — read from code):
+- **Overwrites existing runtime bindings?** No.
+- **Assigns only missing values?** Yes — `??=`.
+- **Merge behavior?** Bindings applied first with `=`; `next-env.mjs` fills
+  only the gaps with `??=`.
+- **Before or after Cloudflare secret injection?** The Cloudflare `env`
+  (secrets/vars) is written into `process.env` **first**; `next-env.mjs` runs
+  **after** and defers to it.
+
+**Therefore a managed Cloudflare binding WINS over the build-inlined
+`next-env.mjs` value.**
+
+**Empirical confirmation:** built with `.env.production` carrying an ENVFILE
+marker (baked into `next-env.mjs`) AND `.dev.vars` carrying a *different*
+BINDING marker for the same variable, then ran the built worker under
+`wrangler dev` and probed `process.env`:
+`{"service_role_source":"binding","url_source":"binding"}` — **the binding
+wins.**
+
+### 28.2 Sanitized managed-secret proof (no code change needed)
+
+Rebuilt with **no Supabase in `.env.production`** (deleted it) and dummy
+managed bindings via `.dev.vars`:
+- `next-env.mjs` production block = **`{}`** (empty) — nothing embedded.
+- Fake service-role VALUE marker: **absent** from `worker.js`, the entire
+  `cloudflare/` import chain, and all browser assets (`.open-next/assets`,
+  `.next/static`). (Two hits existed only in the test **probe route's own
+  source** — comparison-string literals — not present in a real build.)
+- The `SUPABASE_SERVICE_ROLE_KEY` **property name** still appears in compiled
+  server code (a `process.env` read) — expected and correct.
+- Preview **with** managed binding: probe reads `binding`; a Founder Access
+  POST reaches the Supabase init path and returns
+  `{"error":"Unable to save your request right now."}` (500 — the dummy creds
+  cannot actually connect; real creds would succeed).
+- Preview **without** any binding: probe reads `absent`; a Founder Access POST
+  returns the controlled `{"error":"Server error"}` (500 — `createAdminSupabase`
+  throws on the missing key, caught by the outer handler).
+- Worker started successfully in both cases.
+
+**Conclusion:** migrating Supabase creds to managed Worker bindings requires
+**no code change** — the code already reads `process.env.SUPABASE_*`, which
+`init.js` populates from the Cloudflare binding (and the binding overrides any
+residual `next-env.mjs` value). A build with Supabase absent from `.env`
+produces a Worker with **zero embedded Supabase credential.**
+
+### 28.3 Production migration plan (runbook) — not executed
+
+**Managed binding names / types (operator sets these; this audit does not):**
+- `SUPABASE_SERVICE_ROLE_KEY` → **secret** (`wrangler secret put`) — required,
+  privileged.
+- `SUPABASE_URL` → **plain Worker var** is sufficient (the project URL is not
+  sensitive — it is also shipped publicly as `NEXT_PUBLIC_SUPABASE_URL`); a
+  secret is fine too but not necessary. Set via `wrangler.jsonc` `vars` or the
+  dashboard.
+- `SUPABASE_ANON_KEY` → **only if a server path needs it.** Founder Access
+  uses the **service-role** admin client, not the anon client. The anon key is
+  public by design (already inlined as `NEXT_PUBLIC_SUPABASE_ANON_KEY`), so a
+  separate managed `SUPABASE_ANON_KEY` secret is optional; add it only if a
+  server route that calls `createServerSupabase` needs it and the
+  `NEXT_PUBLIC_` fallback is insufficient.
+
+**Sanitized production candidate:** build from `2eede3b` with **all Supabase
+values absent from every `.env*` file loaded at build**. Before deploying,
+scan and require **zero** occurrences of the real service-role value in:
+`.next/**`, `.open-next/**`, `.open-next/cloudflare/next-env.mjs` (must be
+`{}` or Supabase-free), the Worker bundle, and all client/static assets.
+(The `SUPABASE_SERVICE_ROLE_KEY` property *name* in server code is expected;
+it is the *value* that must be absent.)
+
+### 28.4 Rollback-safe rotation sequence (do not execute yet)
+
+Ordered, matching the requested sequence:
+1. Build the **sanitized** Worker from `2eede3b` (no Supabase in `.env`).
+2. Add managed production bindings (`SUPABASE_SERVICE_ROLE_KEY` secret,
+   `SUPABASE_URL` var, `SUPABASE_ANON_KEY` if needed) — **with the current
+   (old) key value** for now.
+3. Deploy the sanitized Worker.
+4. Run **one approved** synthetic Founder Access submission.
+5. Confirm Supabase insert (row increment).
+6. Confirm Beehiiv sync.
+7. Confirm Resend delivery (dashboard).
+8. Confirm Upstash behavior (dashboard).
+9. Remove the test data (Supabase row + Beehiiv subscriber).
+10. **Rotate/revoke** the old service-role key in Supabase; update the managed
+    secret to the **new** key; redeploy (or the running Worker picks up the
+    new secret on next version).
+11. Re-test Founder Access with one approved submission; clean it up.
+12. Confirm rollback target.
+
+**Rollback tension (critical):** the **current** active Worker `f421ae6e`
+(and its predecessor `52d0f695`) rely on the **old, build-embedded** key. Once
+the old key is revoked (step 10), rolling back to `f421ae6e`/`52d0f695` would
+break Founder Access (they carry the now-dead key and no managed binding).
+**Mitigation:** the sanitized Worker from step 1–3 becomes the new rollback
+floor — it reads the managed binding, so it keeps working across a key
+rotation as long as the managed secret holds the current key. **Do not revoke
+the old key until the sanitized Worker is deployed and proven (steps 3–8).**
+Keep the sanitized build tagged as the emergency-recovery version.
+
+### 28.5 Beehiiv test-subscriber cleanup — still pending (no access)
+
+Unchanged from §27.2: this audit has **no Beehiiv access** and cannot remove
+the synthetic subscriber. It must be removed from the **Beehiiv dashboard** by
+the operator — search only for the unique synthetic marker, verify exactly one
+match, remove only that subscriber, confirm the audience count decrements.
+Resend emails already sent are completed, unrecallable test artifacts.
 
 ## 22. Founder Decisions Required
 
