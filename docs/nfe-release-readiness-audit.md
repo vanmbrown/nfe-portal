@@ -886,7 +886,81 @@ next step is identifying the exact deployed commit or obtaining Cloudflare
 deployment metadata that names it — from whoever has dashboard/wrangler
 access — before constructing any deploy candidate.
 
-### Build-provenance probe — proven-metadata avenues, all exhausted (2026-07-21)
+### UPDATE (2026-07-21): Cloudflare metadata RETRIEVED — wrangler is authenticated
+
+The "no access" conclusion below was wrong about one channel: `wrangler` in
+this environment is authenticated via an OAuth token for
+`vanessa.mccaleb@gmail.com` (Cloudflare account `938425ed…`). Read-only
+`wrangler` metadata was retrieved (no deploy, no config change). **Proven
+Cloudflare facts:**
+
+- **Active production deployment:** version
+  `f421ae6e-fefe-43f5-bd16-ad98c09e6b08`, serving 100% of traffic.
+- **Deployed:** 2026-07-12T16:34:07.560Z (version created
+  2026-07-12T16:34:05.937Z). Author: `vanessa.mccaleb@gmail.com`.
+- **Source: `Unknown (deployment)` / `Unknown (version_upload)`** — a direct
+  `wrangler deploy` (local `npm run deploy`), **not** CI. **No Git SHA or
+  tag is recorded** (`Tag: -`). Cloudflare therefore does not itself name the
+  source commit — this was the missing link all along.
+- **Compatibility:** date `2026-01-18`, flag `nodejs_compat` — matches the
+  repo's `wrangler.jsonc` exactly.
+- **Previous deployment (rollback target):** version
+  `52d0f695-de1f-47e3-b9dd-a0fa8100e099`, deployed 2026-07-12T16:25:27.096Z.
+- **Rollback capability:** available (`wrangler rollback` /
+  `wrangler versions deploy`; the token carries `workers (write)`). Not
+  exercised.
+- **Configured Worker bindings (secret NAMES only; no values obtainable or
+  printed):** `ADMIN_NOTIFICATION_EMAIL`, `BEEHIIV_API_KEY`,
+  `BEEHIIV_PUBLICATION_ID`, `NEXT_PUBLIC_SITE_URL`, `RESEND_API_KEY`,
+  `UPSTASH_REDIS_REST_TOKEN`, `UPSTASH_REDIS_REST_URL`. **No plaintext
+  `vars` section exists.**
+- **Absent bindings — load-bearing:** there is **no `SUPABASE_URL` /
+  `NEXT_PUBLIC_SUPABASE_URL`, no `SUPABASE_SERVICE_ROLE_KEY`, and no
+  `SUPABASE_ANON_KEY`** on the active production version. The Founder Access
+  API route's `createAdminSupabase()` reads `SUPABASE_SERVICE_ROLE_KEY` at
+  runtime (a non-`NEXT_PUBLIC_` server secret, which Next.js does **not**
+  inline at build time), and throws "Missing SUPABASE_SERVICE_ROLE_KEY" when
+  it is undefined — caught by the route's try/catch, returning HTTP 500.
+  **Therefore, on the code path + this confirmed binding state, a live
+  Founder Access form submission returns 500 and stores nothing — the form
+  is live but its backend cannot write.** This resolves the "is Founder
+  Access collecting real PII right now" worry: per binding evidence, it is
+  not (no Supabase configured). Stated as code+config inference, not
+  live-tested — no POST was sent to production, per the standing prohibition.
+
+**Source-commit correlation (timestamp method, NOT route-fingerprint
+inference).** The deploy at 2026-07-12T16:34:05Z falls **1 minute 49 seconds
+after** commit `2eede3b` was committed (2026-07-12T16:32:16Z UTC), and 5.5
+hours before the next commit `2474aff` (2026-07-12T22:13:01Z UTC). Commit
+timestamps (UTC) immediately preceding the deploy:
+`d82e3a9` 16:15:45 → `4d86fec` 16:22:47 → `8e3357c` 16:31:53 → `2eede3b`
+16:32:16 → **[deploy 16:34:05]** → `2474aff` 22:13:01. **`2eede3b` is the
+last commit before the deploy, by under two minutes**, and is consistent
+with every route fingerprint in Section 18 (Founder Access live; privacy
+disclosure present; before `4a1cc89`'s zero-byte-image removal and shop-copy
+fix; before the favicon/Our Story/hero commits). **Strongly indicated
+deployed source: `2eede3b`.**
+
+**What remains unproven:** because Cloudflare recorded no Git tag and the
+deploy was a local `wrangler deploy`, it cannot be *cryptographically* proven
+that the working tree was exactly `2eede3b` with zero uncommitted changes.
+The available confirmatory step (not yet run, would need authorization since
+it is a build): `opennextjs-cloudflare build` at `2eede3b` and compare the
+resulting worker/asset bundle against production's served assets. Absent
+that, `2eede3b` is a high-confidence identification, not a proof.
+
+**Custom-domain binding:** `wrangler.jsonc` declares no `routes`, so the
+`www.nfebeauty.com` → `nfe-portal` Worker binding is dashboard-managed.
+Functionally confirmed (production responses carry `x-opennext: 1` and match
+this Worker's expected output across every route checked); the exact
+route/custom-domain record is dashboard-only and was not read from a config
+file.
+
+The original "exhausted" probe below remains accurate for what it covered
+(no build SHA in the page, no manifest, no source maps) — it simply did not
+include authenticated `wrangler`, which is where the metadata actually lived.
+
+### Build-provenance probe — proven-metadata avenues from HTTP alone, exhausted (2026-07-21)
 
 Before concluding "provenance unobtainable," every source of *proven* build
 metadata (not route-fingerprint inference) reachable from this environment

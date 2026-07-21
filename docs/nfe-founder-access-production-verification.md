@@ -12,6 +12,38 @@ is actually accepting and storing signups, and whether its downstream
 integrations (Resend, Beehiiv, Upstash) are configured correctly in the
 production environment. This checklist is what to verify in each dashboard.
 
+---
+
+## UPDATE 2026-07-21 — partial verification already done from Worker bindings
+
+Read-only `wrangler versions view` on the **active production version**
+(`f421ae6e`) returned the configured binding names (no values). This
+resolves several items below **without any dashboard query or PII access**:
+
+- **Supabase is NOT configured on production.** No `SUPABASE_URL`, no
+  `SUPABASE_SERVICE_ROLE_KEY`, no `SUPABASE_ANON_KEY` binding exists on the
+  active version (and there is no plaintext-vars section). **Consequence:**
+  the Founder Access route's DB write throws at runtime and returns HTTP 500
+  — the live form cannot store signups. So the Supabase section below is
+  **not** "verify rows are being stored safely"; it is **"Supabase is not
+  wired up, so submissions are currently failing (500) and nothing is being
+  written."** That is the real state to act on.
+- **Configured and present:** `RESEND_API_KEY`, `ADMIN_NOTIFICATION_EMAIL`,
+  `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`, `UPSTASH_REDIS_REST_URL`,
+  `UPSTASH_REDIS_REST_TOKEN`, `NEXT_PUBLIC_SITE_URL`. So Resend, Beehiiv, and
+  Upstash bindings exist — but note the route only reaches Resend/Beehiiv
+  **after** a successful Supabase write, which currently fails. So no
+  confirmation/admin emails and no Beehiiv sync are firing for founder-access
+  submissions either, despite those keys being present.
+
+**Net:** Founder Access renders a live form that 500s on submit and collects
+nothing. The dashboard items below are still worth confirming (especially
+whether Supabase was *ever* configured on an earlier version and later
+dropped, and whether the intended design is for FA to write at all yet), but
+the headline is a broken-but-harmless form, not a live PII pipeline.
+
+---
+
 **Guardrails (do not violate during verification):**
 - Do **not** submit the live form to create a test signup without deciding
   first that a test record is acceptable — it writes real data and may
