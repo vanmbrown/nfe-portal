@@ -1353,6 +1353,154 @@ the two small code commits (A + B) onto a `2eede3b`-based branch **when you
 authorize it**, handle Founder Access hygiene in the dashboards, and deploy
 once — with the rollback path in §23.9 ready. No emergency deploy warranted.
 
+## 24. Supabase Credential-Path Audit (2026-07-21) — and a second correction
+
+Report-only, no secret values printed, no branch, no deploy, no config change.
+This pass **again corrects** the Founder Access operational status (§23 swung
+too far the other way).
+
+### 24.1 Credential delivery — what was proven
+
+- **`createAdminSupabase`** (`src/lib/supabase/server.ts`) reads
+  `process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL` and
+  `process.env.SUPABASE_SERVICE_ROLE_KEY` as plain **runtime lookups** (no
+  `getCloudflareContext`, no config inlining).
+- **`next.config.mjs`**: no `env:`/`define`/runtime-config inlining.
+  **`open-next.config.ts`**: empty (`defineCloudflareConfig({})`).
+  **`wrangler.jsonc`**: no `vars`/`secrets`. **`.env*` gitignored**; only
+  `.env.local.example` tracked.
+- **`wrangler secret list` (authoritative):** exactly 7 secrets —
+  `ADMIN_NOTIFICATION_EMAIL`, `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`,
+  `NEXT_PUBLIC_SITE_URL`, `RESEND_API_KEY`, `UPSTASH_REDIS_REST_TOKEN`,
+  `UPSTASH_REDIS_REST_URL`. **No Supabase secret of any kind.**
+- **Dummy-credential build test** (built `2eede3b` with obviously-fake probe
+  values for all five Supabase vars, then scanned `.next` and `.open-next`):
+  - `SUPABASE_SERVICE_ROLE_KEY` probe: **found NOWHERE** — not in the Worker
+    server bundle, not in client assets. **Not build-inlined.**
+  - `SUPABASE_ANON_KEY` (non-public) and `SUPABASE_URL` (non-public) probes:
+    **found nowhere** either.
+  - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` probes:
+    inlined into **both** server and client bundles — expected `NEXT_PUBLIC_`
+    behaviour, and a reminder those two are public by design.
+  - Control: the string `process.env.SUPABASE_SERVICE_ROLE_KEY` **is** present
+    in the server bundle → confirms a runtime lookup, not an inlined value.
+
+### 24.2 Artifact secret-exposure classification
+
+| Question | Answer | Risk |
+|---|---|---|
+| Service-role JWT in any browser-delivered/client asset? | **No** (probe absent from all client static) | — (the critical scenario is **ruled out**) |
+| Service-role JWT embedded in the Worker server bundle? | **No** (probe absent; runtime lookup instead) | — |
+| Service-role JWT in any tracked/deployed artifact? | **No** (`.env*` gitignored; not inlined) | — |
+| Service-role key location | Local developer `.env` only (gitignored) | Low |
+
+**The audit's original premise — "service-role key likely embedded in a
+deployed artifact, requiring rotation" — is DISPROVEN.** There is no embedded
+credential to rotate, and nothing exposed to the browser.
+
+### 24.3 The contradiction, and the resolution — 15 rows are almost certainly TEST data
+
+Proven facts appear to conflict: the active Worker `f421ae6e` (the newest and
+only active version) has **no** Supabase binding and the key is **not**
+inlined, yet 15 rows exist in `founder_access_signups`. Aggregate signals
+(counts only, no identities) resolve it:
+
+- **All 15 rows share ONE email domain** (`distinct_email_domains = 1`).
+- **Zero attribution across all 15:** `has_referrer = 0`, `has_landing_page =
+  0`, `has_utm_source = 0`. A real browser submission through
+  `FounderAccessForm` captures referrer/landing-page/UTM; **none** of these do.
+- All 15 landed on **2026-07-12**, exactly during the "founder access
+  closeout tests" commit cluster (`2eede3b` is literally *"chore: support
+  staged founder access closeout tests"*; siblings `2474aff`/`8e3357c` are
+  closeout-verification commits).
+- Beehiiv: **7 synced / 8 non-synced** (not the clean 15/15 a healthy live
+  pipeline would show).
+
+**Conclusion (strongly indicated, not row-level-proven):** the 15 rows are
+**test/closeout records written by the local verification scripts**
+(`closeout-founder-access-production.mjs`, `verify-founder-access-*.mjs`)
+using a **local** `.env` service-role key — **not organic signups from the
+live form.** This resolves the contradiction: the production Worker never
+needed Supabase creds for these rows; a developer's local machine wrote them.
+
+### 24.4 Second correction to Founder Access status
+
+§23 concluded "Founder Access is live and operational." **That over-corrected.**
+The evidence-backed status is:
+
+- The **live production form has no Supabase credentials** (no binding, not
+  inlined) → `createAdminSupabase()` throws → the route returns **HTTP 500**
+  and stores nothing. This matches the original local synthetic test. **The
+  live form is almost certainly non-functional.**
+- The 15 stored rows are **strongly indicated test data**, not real
+  customers — so there is little/no real customer PII, and no working live
+  signup pipeline.
+- **Not proven:** current live behaviour was **not** tested with a production
+  POST (prohibited without approval). The 500 conclusion is code+config
+  inference; the test-data conclusion is aggregate inference. Both are strong
+  but not row-level-certain.
+
+Net: neither "broken with no data" (my first take) nor "operational" (§23)
+was fully right. Accurate: **live form likely 500s; the only rows present are
+likely closeout test data.**
+
+### 24.5 Cloudflare secret-migration readiness
+
+- **Code already reads runtime bindings correctly** under OpenNext
+  (`process.env.SUPABASE_*` runtime lookups; OpenNext maps Worker
+  vars/secrets to `process.env`). **No code changes are required** to consume
+  managed secrets — adding the three secrets to the Worker is sufficient.
+- Proposed managed secret names (to be added by the operator, not by this
+  audit): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and — only if the
+  server anon path is used — `SUPABASE_ANON_KEY`. (`NEXT_PUBLIC_SUPABASE_URL`
+  / `NEXT_PUBLIC_SUPABASE_ANON_KEY` are build-time public values, set at
+  build, not runtime secrets.)
+- **But there is nothing to *migrate*** — no production Supabase secret exists
+  today. Enabling Founder Access means **adding** secrets fresh, which is a
+  product/ops decision (should the form collect signups yet?), not a
+  credential migration.
+
+### 24.6 Rotation plan — conditional
+
+Because **no service-role key is embedded in any deployed artifact** (§24.2),
+there is **no exposure-driven rotation requirement**. Rotation is only prudent
+if the service-role key that a developer used locally is considered
+compromised for another reason. If rotation is desired, the safe sequence is:
+1. Add the new managed Worker secret(s). 2. Deploy a version that reads them
+(no code change needed). 3. Confirm one **approved** synthetic submission
+writes a row + Beehiiv sync + Resend behaves. 4. Rotate/revoke the old key in
+Supabase. 5. Re-validate. **Rollback tension:** rolling back to any prior
+Worker version does **not** re-introduce the key (it was never in the bundle),
+so a post-rotation rollback would leave the form 500-ing until secrets are
+re-added — keep an "add-secrets" runbook ready as the recovery path rather
+than relying on Worker rollback to restore Founder Access.
+
+### 24.7 Founder Access aggregate operational status (no PII)
+
+- Total rows: **15**; earliest **2026-07-12 16:12:06Z**, latest **2026-07-12
+  22:12:44Z**; consent-accepted: **15/15**; Beehiiv synced: **7**, non-synced:
+  **8**; distinct email domains: **1**; rows with referrer/landing/UTM: **0**.
+- RLS: **enabled**. Policy: one — "Service role can do everything" (ALL,
+  `service_role`). Anon visible rows: **0** (public read blocked). No
+  customer names/emails/phones/notes/UTM identities were read or emitted.
+
+### 24.8 Recommendation
+
+**B. HOLD — SECRET DELIVERY MECHANISM NOT YET FULLY CONFIRMED.**
+
+Rationale: the *exposure* question is resolved (no key in any deployed or
+client artifact — the rotation premise is disproven), but the *operational*
+picture inverted twice and the two load-bearing conclusions (live form 500s;
+the 15 rows are test data) rest on inference, not a live POST or row-level
+read. Before any secret is added or rotated, confirm two things: (1) the live
+form's **current** behaviour via **one founder-approved** synthetic
+production submission, and (2) whether Founder Access is *intended* to collect
+signups now at all (if yes → add managed Supabase secrets, no code change; if
+no → the live 500 is a latent defect to gate behind a maintenance state). Do
+not add, migrate, or rotate secrets until that decision is made. The 15 test
+rows should also get a cleanup decision (they are consented test records in a
+production table).
+
 ## 22. Founder Decisions Required
 
 **New, highest-priority item given Section 18:**
