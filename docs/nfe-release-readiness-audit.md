@@ -1501,16 +1501,21 @@ not add, migrate, or rotate secrets until that decision is made. The 15 test
 rows should also get a cleanup decision (they are consented test records in a
 production table).
 
-## 25. Disposition After Credential-Path Audit — Founder Decision Pending
+## 25. Disposition After Credential-Path Audit
 
-**Secret-exposure concern: CLOSED.** No service-role key is embedded in the
-Worker bundle or any browser-delivered asset; no tracked/deployed credential
-exposure exists. **No exposure-driven credential rotation is required.**
+**Secret-exposure concern: CLOSED with one qualification.** No service-role
+key was found in the Worker bundle or any browser-delivered asset via the
+dummy **shell-env** build test. **Qualification added after §26:** because the
+live form provably works, the service-role key *does* reach the Worker
+runtime — and the delivery mechanism is still not explained by any visible
+binding. The dummy test only ruled out **shell-env** inlining; a build that
+loads a `.env`/`.env.production` **file** was not tested and could inline the
+key into the deployed bundle. So "no key in the bundle" is **not fully
+established** — see §26.4. No browser-side exposure in any case.
 
-**Founder Access operational behavior: UNCONFIRMED.** Not to be described as
-operational or definitively broken until resolved by one **founder-approved**
-synthetic production submission — the definitive test. Evidence indicates it
-is likely nonfunctional in production, but that is not proven.
+**Founder Access operational behavior: CONFIRMED OPERATIONAL (§26).** The
+founder-approved live test resolved it — the form works end to end. This
+supersedes the earlier "likely nonfunctional" reading.
 
 **No further release work depends on this** except the Founder Access
 incident response itself. (The asset/font hygiene items — §23.4/§23.5 — are
@@ -1534,7 +1539,8 @@ matrix is settled: only Garamond applies.)
   unavailable, no false confirmation, no urgency, no redirect into another
   conversion form, preserve NFE restraint.
 
-This audit does not choose the path. It is a founder decision.
+**Decision made: Path A (should be live). The live test was run — see §26.
+Result: the form is operational.**
 
 ### The 15 existing rows — held classification (do not act yet)
 
@@ -1544,6 +1550,73 @@ inspect names/emails/phones/notes/identity-linked attribution. A **later**
 cleanup decision is required, covering: (a) retain as audit/test records, or
 (b) delete from Supabase, and if deleted (c) remove the corresponding Beehiiv
 records, then (d) document the action. No cleanup until separately approved.
+
+## 26. Founder Access — Live Production Test (2026-07-21) — OPERATIONAL
+
+Founder-approved Path A test: exactly **one** controlled synthetic submission
+through the live form at `https://www.nfebeauty.com/founder-access`, browser
+UI, real end-to-end. No secrets added beforehand; no config changed.
+
+### 26.1 Test identity (synthetic)
+Name "NFE Production Test", email
+`vanessa+nfeprodtest-20260721T121014Z@nfebeauty.com` (NFE-controlled alias,
+unique timestamp marker), no phone, no topic note, **privacy consent checked**
+(required) and **newsletter opt-in checked** (to exercise the Beehiiv path).
+
+### 26.2 Baseline before submission
+Active Worker version `f421ae6e` (unchanged); 7 Worker secrets, no Supabase
+(unchanged); Supabase rows **15**; Beehiiv-synced **7**; prior latest row
+2026-07-12 22:12Z.
+
+### 26.3 Result — form is OPERATIONAL
+| Capture | Result |
+|---|---|
+| HTTP status | **200** |
+| API response shape | **`{"success":true}`** |
+| Visible browser result | **"Request received. You're on the Founder Access list…"** (clear success, form replaced) |
+| Console errors | **None** |
+| Network | `POST /api/founder-access → 200` (plus normal page/chunk/RSC GETs) |
+| Supabase row count | **incremented 15 → 16** |
+| Uniquely-marked test row exists | **Yes** — created 2026-07-21T12:14:53Z, `source_page=/founder-access` (email stored lowercased, so an exact-case lookup missed it; found case-insensitively) |
+| Beehiiv sync | **Yes** — row `beehiiv_status='synced'`; synced count **7 → 8** |
+| Resend | **Inferred sent** — the route reaches its Resend calls only after a successful DB write, and the row's final `beehiiv_status` update (which runs *after* the Resend calls) is present, so the code path completed through the Resend steps; `RESEND_API_KEY` is configured. Delivery not independently verified (no Resend access) — the confirmation email would land at the alias / admin notice at `ADMIN_NOTIFICATION_EMAIL`. |
+| Upstash rate limiting | **Inferred recorded** — the limiter runs first (before the DB write); `UPSTASH_*` configured; request was allowed (first in window). Not independently verified. |
+| Partial third-party call before a failure | **N/A — there was no failure** |
+
+**Conclusion: Founder Access is operational in production** — it accepts a
+submission, writes the row, syncs Beehiiv, returns success, and shows a clear
+confirmation. This is now **proven**, not inferred, and corrects the earlier
+"likely nonfunctional" reading in §24/§25.
+
+### 26.4 Two open items raised by the working test
+
+1. **Credential-delivery mechanism still unexplained — and the exposure
+   question is re-opened, not closed.** The form works, so
+   `SUPABASE_SERVICE_ROLE_KEY` reaches the Worker at runtime — yet it is not a
+   Worker secret (authoritative `wrangler secret list`) and the dummy
+   **shell-env** build did not inline it. The untested path is a build that
+   loads a **`.env`/`.env.production` file** (which is how the local
+   `npm run deploy` most plausibly supplied it); Next.js/OpenNext may treat
+   file-loaded env differently from shell env. **If the production build
+   inlined the key from a `.env` file, the service-role JWT is baked into the
+   deployed Worker bundle** — a real credential-management defect. Recommended
+   next check (safe, dummy values): rebuild `2eede3b` with a
+   `.env.production` **file** carrying a fake service-role marker and scan the
+   `.open-next` bundle. Until then, "no key in the bundle" (§24.2) stands only
+   for the shell-env path.
+2. **The 15-row "test data" reading is weaker than stated.** This live,
+   genuine submission also produced **no referrer** (`has_referrer='no'`),
+   because it was a direct visit with no UTM and cookies declined. So "zero
+   attribution" does **not** reliably distinguish test from organic
+   submissions. The **single-email-domain** signal for the original 15 rows
+   still points toward test/closeout data, but with lower confidence. Their
+   provenance remains **not proven**.
+
+### 26.5 Cleanup held
+The synthetic 16th row and its Beehiiv subscriber (and any Resend emails) are
+**retained** pending separate founder cleanup approval, per instruction. A
+confirmation email may have arrived at `vanessa@nfebeauty.com` (via the
+plus-alias) — its presence would independently confirm the Resend path.
 
 ## 22. Founder Decisions Required
 
