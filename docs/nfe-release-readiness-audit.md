@@ -1838,6 +1838,95 @@ the operator — search only for the unique synthetic marker, verify exactly one
 match, remove only that subscriber, confirm the audience count decrements.
 Resend emails already sent are completed, unrecallable test artifacts.
 
+## 29. Supabase Migration Phase 1 — Prepared; Blocked at Two Gates (2026-07-21)
+
+Authorized: managed-secret migration + sanitized production deploy of
+`2eede3b`; rotation NOT authorized. Completed the safe prep; stopped at two
+gates below.
+
+### 29.1 Steps 1–3 done
+- **Clean checkout** `.claude/worktrees/wt-migration`, detached at **`2eede3b`**
+  (HEAD `2eede3bee743ed1…`), tree clean, no stray `.env` (only the tracked
+  `.env.local.example` template, which Next.js does not load).
+- **Pre-change production state:** active Worker `f421ae6e-fefe-43f5-bd16-
+  ad98c09e6b08` (deployed 2026-07-12T16:34:07Z); previous/rollback
+  `52d0f695-de1f-47e3-b9dd-a0fa8100e099`; 7 secrets (no Supabase);
+  custom-domain dashboard-managed (serves `www.nfebeauty.com`); Founder Access
+  rows **15**, Beehiiv-synced **7**; production route smoke: `/` 200,
+  `/founder-access` 200, `/subscribe` 307→/founder-access, `/shop` 200,
+  `/inci` 200, both product pages 200, `sitemap.xml` 200, all three redirects
+  correct.
+
+### 29.2 Step 2 — sanitized build VERIFIED clean
+Fresh `2eede3b`, no Supabase env; `npm ci`/`tsc`/`next build`/`opennext build`
+all passed.
+- `next-env.mjs` production block = **`{}`** (empty).
+- Real Supabase project ref: **0** occurrences anywhere in `.next`/`.open-next`.
+- `.supabase.co` hits are only **error-message help text** (`"e.g., https://
+  xxxxx.supabase.co"` in `client.ts`); `eyJ` hits are only **image-file binary
+  coincidences** — no hardcoded URL, no JWT/key in source or bundle.
+- No dummy markers, no probe route, no `.dev.vars`. Property name
+  `SUPABASE_SERVICE_ROLE_KEY` remains in server code (expected runtime lookup).
+
+**The sanitized artifact embeds zero Supabase credential and is deploy-ready.**
+
+### 29.3 GATE 1 (hard) — I cannot add the managed secret (Step 4)
+Adding `SUPABASE_SERVICE_ROLE_KEY` (and `SUPABASE_URL`) as Cloudflare secrets
+requires **entering an API key/token value** into `wrangler secret put`.
+Handling/entering secret credentials is on the **prohibited** list for this
+agent **regardless of authorization**, and I do not possess the value.
+**Vanessa must perform Step 4.** Exact steps (she runs, values not seen by
+this agent):
+```
+npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --name nfe-portal   # paste current prod service-role key
+npx wrangler secret put SUPABASE_URL --name nfe-portal                # paste current prod URL (kept out of wrangler.jsonc)
+```
+The deploy (Step 5) is gated on this — deploying the sanitized Worker before
+the bindings exist would immediately 500 Founder Access.
+
+### 29.4 GATE 2 (scope) — sanitization blast radius is wider than Founder Access
+The sanitized build removes **all** Supabase build-env values, but Supabase is
+used by more than Founder Access:
+- **`createAdminSupabase`** (needs `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`):
+  `/api/founder-access`, `/api/subscribe`, `/api/community-input`,
+  `/api/waitlist`.
+- **`createServerSupabase`** (needs `SUPABASE_URL` + **`SUPABASE_ANON_KEY`**):
+  the entire **focus-group** system — `/api/focus-group/*`,
+  `/api/enclave/message`, `/api/uploads/record`, and the `focus-group`
+  server layouts.
+
+Implications for a safe migration:
+1. **`SUPABASE_ANON_KEY` has a proven need** (focus-group server routes). To
+   avoid regressing focus-group, it must ALSO be a managed binding — so the
+   set is **three** bindings: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+   `SUPABASE_ANON_KEY` (anon is public/non-sensitive). This revises §28.3's
+   "anon optional."
+2. **Client-side focus-group** uses `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY`, which
+   are **build-inlined** (not runtime bindings). The sanitized build inlines
+   neither. Whether current production inlined them (i.e., whether client-side
+   focus-group works today) is **unverified** — §20's byte-identical proof
+   covered marketing/Founder-Access chunks, not the separate focus-group
+   client chunks. If production did inline them, the sanitized build would
+   regress focus-group's client pages.
+3. The Step 6 smoke list does **not** include focus-group routes, so it would
+   not catch such a regression.
+
+**Recommendation before deploy:** decide the intended scope — (a) add all
+three server bindings AND confirm the focus-group client-side path (inline the
+two `NEXT_PUBLIC_` values at build if focus-group must keep working, which
+re-introduces a controlled, **non-sensitive** build-env for public values
+only), or (b) confirm focus-group is out of scope / not in active use, or
+(c) narrow this migration to the Founder Access admin path and treat
+focus-group separately. Deploying the current "strip everything" sanitized
+build without this decision risks a silent focus-group regression.
+
+### 29.5 Not done, awaiting the two gates
+Steps 5–8 (deploy, smoke, one controlled Founder Access test, cleanup) are
+**not executed** — they require Gate 1 (Vanessa adds the bindings) and Gate 2
+(scope decision) resolved first. Rollback floor remains `f421ae6e` until a
+sanitized Worker is deployed and proven. Rotation remains a separate,
+un-started gate.
+
 ## 22. Founder Decisions Required
 
 **New, highest-priority item given Section 18:**
