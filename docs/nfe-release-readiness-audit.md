@@ -1134,8 +1134,20 @@ Cloudflare-native path to the prior Worker version
 
 ## 21. INCIDENT — Founder Access Live Form, No Supabase Backend
 
-**Status:** OPEN. **Severity:** customer-trust risk; no data-loss/PII
-exposure. **Opened:** 2026-07-21.
+> **CORRECTED 2026-07-21 — THIS SECTION'S PREMISE WAS WRONG. See Section 23.**
+> Direct read-only inspection of the production Supabase project proves
+> Founder Access is **live and operational**, not broken: the table holds
+> **15 real consented signups**, the most recent written **2026-07-12
+> 22:12 UTC — 5.5 hours after the current Worker version deployed**, so the
+> active version *does* write to Supabase. The "returns 500, stores nothing"
+> conclusion below came from a local empty-env build and does **not** reflect
+> production. There **is** stored customer PII (15 rows), but it is
+> RLS-protected and confirmed **not** publicly readable (anon sees 0 rows).
+> The rest of this section is retained struck-through-in-spirit as the record
+> of the earlier, incorrect inference.
+
+**Status:** ~~OPEN~~ **CORRECTED — form operational (Section 23).**
+**Severity:** ~~customer-trust risk~~ hygiene only. **Opened:** 2026-07-21.
 
 **What:** the Founder Access form is live and rendered on production
 (`/founder-access`), but the active Worker version (`f421ae6e`) has **no
@@ -1181,6 +1193,165 @@ deployed source `2eede3b`**.
 base (`2eede3b`, confirmed Section 20) is used to construct it. This incident
 and the zero-byte-image incident can share a single minimal branch based at
 `2eede3b`, or be handled separately — a founder decision.
+
+## 23. Incident-Response Analysis on Base `2eede3b` (2026-07-21)
+
+Report-only pass on the confirmed production base `2eede3b`. **No branch was
+created, no code changed, nothing deployed.** All checks read-only.
+
+### 23.1 Supabase production readiness — VERIFIED via read-only MCP
+
+Project identified: **`kdglwtxcatjjzvixtvjq`** (name "vanessa@nfebeauty.com").
+A second project "VM_CC" (`qabhifptqatmgggnmfhm`) exists and is unrelated.
+
+| Check | Result |
+|---|---|
+| `founder_access_signups` table exists | **Yes** |
+| Migration applied | Schema present and correct, but **not via tracked migrations** (`list_migrations` empty) — applied ad-hoc/manually. Hygiene note, not a functional gap. |
+| RLS enabled | **Yes** |
+| Access policy present | **Yes** — one policy, "Service role can do everything" (ALL, `service_role`, `true`/`true`). |
+| Public read blocked | **Yes — empirically confirmed:** as the `anon` role, `count(*)` returns **0** rows. RLS filters all rows from anon. |
+| Service-role usage server-only | **Yes** — only the `service_role` policy grants row access; anon/authenticated get nothing. |
+| Consent fields exist | **Yes** — `privacy_policy_accepted`, `consent_text_version`, `consented_at`, `newsletter_opt_in`. |
+| Timestamps exist | **Yes** — `created_at`, `updated_at`, `consented_at`. |
+| Schema matches API payload | **Yes** — every field written by `api/founder-access/route.ts`'s `signupRecord` maps to a column (email, first/last name, phone, age_range, primary_skin_interests, product_interest, topic_request, opt-in/consent, source_page, all utm_*, referrer, landing_page, high_intent, beehiiv_status/reason, timestamps). |
+| Data present | **15 rows**, collected 2026-07-12 16:12:06–22:12:44 UTC; **15/15 consented**, **15/15 Beehiiv-synced**, 1 consent-text version. |
+
+**Security-advisor notes (read-only):** `founder_access_signups` (and other
+tables) are flagged `pg_graphql_anon_table_exposed` — the `anon` role holds a
+table-level `SELECT` grant, so the table is *discoverable* in the PostgREST/
+GraphQL schema. This is **not** a data leak (RLS returns 0 rows to anon,
+confirmed above), but revoking `anon`/`authenticated` `SELECT` on this table
+is recommended hygiene. Broader, pre-existing advisories unrelated to Founder
+Access: several focus-group `SECURITY DEFINER` admin RPCs are anon-executable,
+function `search_path` mutability warnings, and Auth leaked-password
+protection disabled — all out of scope here, worth a separate security pass.
+
+### 23.2 Worker bindings vs. observed behavior — reconciled
+
+Active version `f421ae6e` managed secrets (names only): `RESEND_API_KEY`,
+`ADMIN_NOTIFICATION_EMAIL`, `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`,
+`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `NEXT_PUBLIC_SITE_URL`.
+**No Supabase secret binding.** Yet a signup was written under this exact
+version at 22:12. Reconciliation: the Supabase URL + service-role key reach
+the Worker by a means other than a managed secret — **most likely inlined
+into the OpenNext server bundle at build time** (the deploy was a local
+`npm run deploy`; a local `.env` with Supabase creds would be baked in). This
+is an **inference** (the functional fact — writes succeed — is proven; the
+mechanism is not). **Hygiene recommendation:** move Supabase URL +
+service-role key to managed Worker secrets, so they are not baked into the
+deployed bundle and are consistent with the other integrations.
+
+### 23.3 Founder Access — recommended incident response: **A (backend ready)**
+
+The backend is not merely ready, it is **operational**. Option B (temporary
+non-submittable hold state) is **rejected** — it would take down a working
+form that has collected real, consented signups. Recommended actions, **all
+operational/dashboard, none requiring a code commit:**
+1. (Optional) confirm the form still works *today* with one controlled test
+   submission — **only with your explicit approval** (no production POST was
+   sent by this audit).
+2. Hygiene: migrate Supabase URL + service-role key to managed Worker secrets.
+3. Hygiene: revoke `anon`/`authenticated` `SELECT` on `founder_access_signups`
+   (RLS already blocks rows; this removes schema discoverability).
+
+**No "Commit 1" (Founder Access repair/hold) is needed.**
+
+### 23.4 Zero-byte product images — severity corrected; removal recommended
+
+Corrects Section 18 finding 4 ("broken imagery on the live product pages").
+Against `2eede3b` (= production):
+- The 4 files exist as **zero-byte** blobs (git empty-blob `e69de29`).
+- They are referenced **only** in `faceElixirData.images` / `bodyElixirData.
+  images` (`src/content/products/*.ts`), which are **dead code** — imported by
+  nothing in `src/` (confirmed via `git grep`).
+- The live product pages render the **real** `.png` heroes from the registry
+  (`NFE_face_elixir_30_50_proportions_fixed.png` 958 KB;
+  `radiant-body-elixir-white.png` 417 KB, both HTTP 200 non-zero). The
+  zero-byte `.jpg` names appear **0 times** in the rendered product HTML.
+- **So there is no broken `<img>` on any page** — the zero-byte files are
+  orphans, reachable only by direct URL (200 / 0 bytes). Severity: hygiene,
+  not customer-facing.
+- **Recommendation: removal, not replacement.** No approved replacement is
+  needed because nothing renders them. Plan: `git rm` the four files and
+  clear the dead `images: []` references in the two `.ts` files (mirrors what
+  `4a1cc89` did on the feature-branch lineage, rebuilt fresh on `2eede3b`).
+  No placeholders, no stock, no generated imagery.
+
+### 23.5 Confidentiality patch replay applicability matrix (vs `2eede3b`)
+
+| Commit | Verdict | Reason | Exact files |
+|---|---|---|---|
+| **bf9ba21** (formulas JSON percentages) | **DOES NOT APPLY** | `public/data/formulas/faceElixir.json` at `2eede3b` has **0** non-empty `percentageRange` (b70dab5's 2026-06-22 restructure already stripped them). No exposure to fix; verified all 8 public data files carry 0 real percentages. | — |
+| **9cc2e0a** (public Garamond binaries) | **APPLIES** (pending licensing) | All three files present at `2eede3b` (`.otf` 428,520 B, `.woff` 273,412 B, `.woff2` 206,616 B), publicly served (prod HTTP 200), unreferenced by any `@font-face`, licensing unresolved. | `public/fonts/garamondpremrpro.{otf,woff,woff2}` |
+| **847faec** (product-content + INCI JSON) | **DOES NOT APPLY** | `src/content/products/{face,body}-elixir.ts` at `2eede3b` have **no `concentration` field at all**; public INCI JSON is the corrupted `.NET` form with **0** `percentageRange`; `IngredientList`/`faceElixirData`/`bodyElixirData` are **dead code**; nothing renders. Exposure neither exists nor renders. | — |
+| **498f8c4** (IngredientList UI cleanup) | **DOES NOT APPLY** | `IngredientList` is imported by nothing (dead code); the product pages use `ElixirEditorialPage`/accordion. No public concentration UI exists. | — |
+
+**Only `9cc2e0a` (Garamond) applies.** The two confidentiality-percentage
+commits and the IngredientList UI commit are no-ops against the real
+production base — vindicating the per-commit check; a blind replay would have
+added three dead-code/no-op commits. **Conflict risk: none** — the one
+applicable change (`git rm` three binaries) does not touch source.
+
+### 23.6 Proposed release structure (for a future, separately-authorized branch)
+
+Given the above, the envisioned four-commit structure collapses to **at most
+two code commits**, plus operational (non-code) Founder Access work:
+
+- ~~Commit 1 — Founder Access repair/hold~~ → **not needed** (operational only;
+  §23.3).
+- **Commit A — zero-byte product image removal** (§23.4): `git rm` 4 files +
+  clear dead `images: []` refs in the two `.ts` files.
+- **Commit B — public Garamond removal** (§23.5), **only if** you confirm the
+  fonts remain unlicensed; skip if licensed.
+- ~~Commit — confidentiality removal~~ → **not needed** (no exposure exists on
+  `2eede3b`; §23.5).
+
+Proposed branch (create only when authorized): `hotfix/production-incidents-
+2026-07-20`, based at `2eede3b`.
+
+### 23.7 Required secret changes
+
+None required for the code commits above. Founder Access hygiene (§23.2/23.3)
+involves **secret and grant changes you perform**, not code: add Supabase URL
++ service-role key as managed Worker secrets; revoke anon/authenticated
+`SELECT` on the signups table. This audit does not perform secret operations.
+
+### 23.8 Validation plan (for the future candidate tree)
+
+`npm ci` · `npx tsc --noEmit` · `npm run build` · `npx opennextjs-cloudflare
+build`; then serve locally and validate `/founder-access`, `/subscribe`,
+`/shop`, `/products/face-elixir`, `/products/body-elixir`, `/inci`,
+`sitemap.xml`, redirects, favicon behavior, console/hydration, direct API
+behavior, missing-secret behavior, image requests (confirm the 4 zero-byte
+URLs now 404 and no new broken refs), a build-artifact confidentiality scan
+(expect zero — already zero at `2eede3b`), and a `.open-next` Garamond scan
+(expect zero after Commit B).
+
+### 23.9 Rollback command (documented, not executed)
+
+Pre-change reference (current active): version
+`f421ae6e-fefe-43f5-bd16-ad98c09e6b08`. Roll back to prior version
+`52d0f695-de1f-47e3-b9dd-a0fa8100e099` with:
+
+```
+npx wrangler rollback [deployment-id] --name nfe-portal
+# or, version-first:
+npx wrangler versions deploy 52d0f695-de1f-47e3-b9dd-a0fa8100e099@100% --name nfe-portal
+```
+
+Confirmed available (token has `workers (write)`); **not executed.**
+
+### 23.10 Deployment recommendation
+
+**Hold deployment; no urgent driver.** With the confidentiality exposure
+proven absent on production and Founder Access proven operational, the only
+real items are two hygiene fixes (orphan zero-byte files not rendered
+anywhere; unreferenced Garamond binaries) plus operational Founder Access
+secret/grant hygiene. None is customer-facing-urgent. Recommendation: bundle
+the two small code commits (A + B) onto a `2eede3b`-based branch **when you
+authorize it**, handle Founder Access hygiene in the dashboards, and deploy
+once — with the rollback path in §23.9 ready. No emergency deploy warranted.
 
 ## 22. Founder Decisions Required
 
