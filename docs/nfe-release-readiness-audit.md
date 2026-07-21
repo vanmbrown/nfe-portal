@@ -1429,20 +1429,20 @@ needed Supabase creds for these rows; a developer's local machine wrote them.
 The evidence-backed status is:
 
 - The **live production form has no Supabase credentials** (no binding, not
-  inlined) → `createAdminSupabase()` throws → the route returns **HTTP 500**
-  and stores nothing. This matches the original local synthetic test. **The
-  live form is almost certainly non-functional.**
-- The 15 stored rows are **strongly indicated test data**, not real
-  customers — so there is little/no real customer PII, and no working live
-  signup pipeline.
-- **Not proven:** current live behaviour was **not** tested with a production
-  POST (prohibited without approval). The 500 conclusion is code+config
-  inference; the test-data conclusion is aggregate inference. Both are strong
-  but not row-level-certain.
+  inlined). By the code path, an absent `SUPABASE_SERVICE_ROLE_KEY` makes
+  `createAdminSupabase()` throw → the route returns HTTP 500 and stores
+  nothing (matches the original local synthetic test).
+- The 15 stored rows are **likely** test/closeout data, not real customers.
+- **Per direction, current live behaviour is UNCONFIRMED and will not be
+  called "operational" or "definitively broken" until one controlled
+  production test resolves it.** The binding/code evidence *indicates* the
+  form is likely nonfunctional; the test-data reading is aggregate inference.
+  Neither is row-level-proven or POST-tested.
 
 Net: neither "broken with no data" (my first take) nor "operational" (§23)
-was fully right. Accurate: **live form likely 500s; the only rows present are
-likely closeout test data.**
+is established. **Accurate, held classification: live-form status
+unconfirmed (evidence indicates likely nonfunctional); the only rows present
+are likely closeout test records, provenance not proven.**
 
 ### 24.5 Cloudflare secret-migration readiness
 
@@ -1500,6 +1500,50 @@ no → the live 500 is a latent defect to gate behind a maintenance state). Do
 not add, migrate, or rotate secrets until that decision is made. The 15 test
 rows should also get a cleanup decision (they are consented test records in a
 production table).
+
+## 25. Disposition After Credential-Path Audit — Founder Decision Pending
+
+**Secret-exposure concern: CLOSED.** No service-role key is embedded in the
+Worker bundle or any browser-delivered asset; no tracked/deployed credential
+exposure exists. **No exposure-driven credential rotation is required.**
+
+**Founder Access operational behavior: UNCONFIRMED.** Not to be described as
+operational or definitively broken until resolved by one **founder-approved**
+synthetic production submission — the definitive test. Evidence indicates it
+is likely nonfunctional in production, but that is not proven.
+
+**No further release work depends on this** except the Founder Access
+incident response itself. (The asset/font hygiene items — §23.4/§23.5 — are
+independent and still awaiting their own authorization; the confidentiality
+matrix is settled: only Garamond applies.)
+
+### The pending founder decision: *should Founder Access accept real signups now?*
+
+- **Path A — should be live:** authorize exactly one controlled synthetic
+  production submission (NFE-controlled alias, synthetic name, unique
+  timestamp marker, no real customer data) to establish current behaviour.
+  **This is an outward-facing action** — a real Supabase row, a real Beehiiv
+  subscriber, and a real Resend email may result — so it proceeds only on
+  explicit approval. No Supabase secrets are added before the test (the point
+  is to observe current state). The synthetic record and any Beehiiv entry
+  are retained until a separate cleanup approval.
+- **Path B — should not be live:** no production POST; instead prepare (not
+  implement) a route-scoped temporary hold-state for `/founder-access` from
+  base `2eede3b` — preserve the page, disable/remove submission, collect no
+  personal data, state quietly that private access is temporarily
+  unavailable, no false confirmation, no urgency, no redirect into another
+  conversion form, preserve NFE restraint.
+
+This audit does not choose the path. It is a founder decision.
+
+### The 15 existing rows — held classification (do not act yet)
+
+**"Likely controlled test/closeout records based on timing and aggregate
+characteristics; provenance not proven."** Do **not** delete them; do **not**
+inspect names/emails/phones/notes/identity-linked attribution. A **later**
+cleanup decision is required, covering: (a) retain as audit/test records, or
+(b) delete from Supabase, and if deleted (c) remove the corresponding Beehiiv
+records, then (d) document the action. No cleanup until separately approved.
 
 ## 22. Founder Decisions Required
 
