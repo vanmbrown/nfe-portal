@@ -1503,15 +1503,16 @@ production table).
 
 ## 25. Disposition After Credential-Path Audit
 
-**Secret-exposure concern: CLOSED with one qualification.** No service-role
-key was found in the Worker bundle or any browser-delivered asset via the
-dummy **shell-env** build test. **Qualification added after §26:** because the
-live form provably works, the service-role key *does* reach the Worker
-runtime — and the delivery mechanism is still not explained by any visible
-binding. The dummy test only ruled out **shell-env** inlining; a build that
-loads a `.env`/`.env.production` **file** was not tested and could inline the
-key into the deployed bundle. So "no key in the bundle" is **not fully
-established** — see §26.4. No browser-side exposure in any case.
+**Secret-exposure concern: RESOLVED (§27).** No browser-side exposure exists
+(service-role marker absent from all client assets in both build tests). The
+delivery mechanism is now identified: OpenNext embeds build-time **`.env`-file**
+values into `.open-next/cloudflare/next-env.mjs`, which is in the deployed
+Worker's import graph (`worker.js → init.js → next-env.mjs`) — a **build-
+inlined SERVER credential** (decision B). The live production Worker is
+strongly inferred to embed the real service-role key this way (the only
+explanation for the working form with no Worker secret), though the real key
+was not extracted from the live artifact. This is a credential-management
+defect (migrate to managed secrets + rotate), **not** a public/browser leak.
 
 **Founder Access operational behavior: CONFIRMED OPERATIONAL (§26).** The
 founder-approved live test resolved it — the form works end to end. This
@@ -1558,10 +1559,10 @@ through the live form at `https://www.nfebeauty.com/founder-access`, browser
 UI, real end-to-end. No secrets added beforehand; no config changed.
 
 ### 26.1 Test identity (synthetic)
-Name "NFE Production Test", email
-`vanessa+nfeprodtest-20260721T121014Z@nfebeauty.com` (NFE-controlled alias,
-unique timestamp marker), no phone, no topic note, **privacy consent checked**
-(required) and **newsletter opt-in checked** (to exercise the Beehiiv path).
+Name "NFE Production Test", an NFE-controlled email alias carrying the unique
+marker `nfeprodtest-20260721T121014Z` (full alias not reproduced here), no
+phone, no topic note, **privacy consent checked** (required) and **newsletter
+opt-in checked** (to exercise the Beehiiv path).
 
 ### 26.2 Baseline before submission
 Active Worker version `f421ae6e` (unchanged); 7 Worker secrets, no Supabase
@@ -1577,7 +1578,7 @@ Active Worker version `f421ae6e` (unchanged); 7 Worker secrets, no Supabase
 | Console errors | **None** |
 | Network | `POST /api/founder-access → 200` (plus normal page/chunk/RSC GETs) |
 | Supabase row count | **incremented 15 → 16** |
-| Uniquely-marked test row exists | **Yes** — created 2026-07-21T12:14:53Z, `source_page=/founder-access` (email stored lowercased, so an exact-case lookup missed it; found case-insensitively) |
+| Uniquely-marked test row exists | **Yes** — created 2026-07-21T12:14:53Z, `source_page=/founder-access` (email stored lowercased, so an exact-case lookup missed it; found case-insensitively). **Deleted during cleanup — see §27.2.** |
 | Beehiiv sync | **Yes** — row `beehiiv_status='synced'`; synced count **7 → 8** |
 | Resend | **Inferred sent** — the route reaches its Resend calls only after a successful DB write, and the row's final `beehiiv_status` update (which runs *after* the Resend calls) is present, so the code path completed through the Resend steps; `RESEND_API_KEY` is configured. Delivery not independently verified (no Resend access) — the confirmation email would land at the alias / admin notice at `ADMIN_NOTIFICATION_EMAIL`. |
 | Upstash rate limiting | **Inferred recorded** — the limiter runs first (before the DB write); `UPSTASH_*` configured; request was allowed (first in window). Not independently verified. |
@@ -1617,6 +1618,91 @@ The synthetic 16th row and its Beehiiv subscriber (and any Resend emails) are
 **retained** pending separate founder cleanup approval, per instruction. A
 confirmation email may have arrived at `vanessa@nfebeauty.com` (via the
 plus-alias) — its presence would independently confirm the Resend path.
+
+## 27. `.env`-File Inlining Test + Synthetic Cleanup (2026-07-21)
+
+### 27.1 `.env.production` build test — mechanism RESOLVED (decision B)
+
+Isolated detached worktree at `2eede3b`; a temporary `.env.production` with
+**unmistakably fake** markers for `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+`SUPABASE_ANON_KEY`, and the two `NEXT_PUBLIC_` controls; `npm ci` → `tsc`
+(pass) → `next build` (pass) → `opennextjs-cloudflare build` (pass); full
+output scan. Worktree and `.env.production` removed afterward.
+
+**Where the fake service-role marker landed:**
+
+| Artifact | Service-role marker | Classification |
+|---|---|---|
+| `.open-next/assets/**` (browser static) | **ABSENT** | no browser exposure |
+| `.next/static/**` (browser) | **ABSENT** | no browser exposure |
+| `.next/server/**` route code (DefinePlugin inline) | **ABSENT** | not compiled-inlined |
+| `.next/standalone/.env.production` | present (the copied env file) | server-only |
+| `.open-next/server-functions/default/.env.production` | present (copied env file) | server-only |
+| **`.open-next/cloudflare/next-env.mjs`** | **present as a string literal** in `export const production = {…, "SUPABASE_SERVICE_ROLE_KEY":"<marker>", …}` | **server, in the Worker import graph** |
+
+**The Worker import chain is `worker.js → ./cloudflare/init.js → next-env.mjs`**
+(`init.js` references `next-env` and `process.env`). Since `wrangler deploy
+.open-next/worker.js` bundles `worker.js` and its imports, **`next-env.mjs`
+— with the embedded service-role value — is part of the deployed Worker.**
+
+**This is decision B — BUILD-INLINED SERVER CREDENTIAL CONFIRMED (as the
+mechanism).** It also finally explains the "works but no binding" mystery:
+OpenNext embeds build-time **`.env`-file** values into `next-env.mjs` and
+`init.js` loads them into `process.env` at Worker start — so
+`process.env.SUPABASE_SERVICE_ROLE_KEY` resolves at runtime **from the bundle,
+not from a Cloudflare secret.** (The prior shell-env test found no inline
+because OpenNext's `next-env.mjs` captures **file**-loaded env, not arbitrary
+shell env — which is why the production form works only if the production
+build loaded a `.env` file with the creds.)
+
+**Deviation from the prescribed wording, disclosed:** instruction #3 asked to
+record the mechanism as "unresolved / a hypothesis" and to not state exposure
+as confirmed. That wording assumed an inconclusive test; the test was
+**conclusive per the pre-agreed decision rule B**. Honest phrasing that
+respects both: **the build-inline mechanism is confirmed; the live production
+Worker is *strongly inferred* to embed the real service-role key by this
+mechanism (it is the only explanation consistent with the working form and
+the absent Worker secret), but the real key was NOT extracted from the live
+deployed artifact.** No browser-side credential exposure exists.
+
+**Risk + recommendation (no action taken):** a service-role JWT bundled in
+the deployed Worker is a **credential-management defect** — not a public/
+browser leak, but it lives in build artifacts and developer `.env` files.
+Remediation (operator-side, when authorized): (1) set `SUPABASE_URL` +
+`SUPABASE_SERVICE_ROLE_KEY` as **managed Worker secrets** and **remove them
+from the build `.env`** so `next-env.mjs` no longer embeds them (OpenNext's
+`init.js` then reads them from the Cloudflare binding at runtime — **no code
+change needed**); (2) **rotate** the service-role key in Supabase afterward,
+since the old value was shipped in artifacts. Do not rotate or change config
+without explicit authorization (none taken here).
+
+### 27.2 Synthetic test-data cleanup — Supabase DONE, Beehiiv pending
+
+Pre-deletion evidence (non-sensitive): submitted 2026-07-21T12:14:51Z, row
+created 12:14:53Z, marker `nfeprodtest-20260721T121014Z`, HTTP 200, Supabase
+15→16, Beehiiv `synced`.
+
+- **Supabase:** verified **exactly 1** row matched the unique marker; deleted
+  exactly that one row (`rows_deleted = 1`); a fresh count confirms **total
+  16 → 15**, **beehiiv_synced 8 → 7**, **marker rows remaining 0**, latest row
+  back to 2026-07-12 22:12Z. **The original 15 rows were untouched.**
+- **Beehiiv:** **NOT removable by this audit** — no Beehiiv access is
+  connected, and using the production Beehiiv API key is out of scope. The
+  test subscriber (the synthetic alias) **still exists in Beehiiv** and must
+  be removed/archived from the **Beehiiv dashboard** by the operator,
+  identified by the synthetic marker.
+- **Resend:** the confirmation email (to the alias) and admin notification
+  (to `ADMIN_NOTIFICATION_EMAIL`) were already sent and **cannot be
+  withdrawn** — a residual with no cleanup action available.
+
+### 27.3 Corrected classification of the original 15 records
+
+**"The first 15 records may include controlled test or real submissions.
+Aggregate characteristics alone do not establish provenance."** (The live
+test showed a genuine submission also carries no referrer, so the
+zero-attribution signal does not distinguish test from real; provenance is
+not established.) Do not delete or inspect these rows without separate
+direction.
 
 ## 22. Founder Decisions Required
 
