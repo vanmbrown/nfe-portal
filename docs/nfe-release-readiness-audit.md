@@ -4,7 +4,27 @@
 confidentiality-priority pass, and a live-production reconciliation pass
 that corrects this document's central working assumption.
 
-**Disposition: HOLD — CANDIDATE DOES NOT MATCH LIVE BASELINE**
+**Final disposition: HOLD ALL DEPLOYMENT UNTIL PRODUCTION PROVENANCE IS
+VERIFIED**
+
+No deployment, no merge, no new release branch, no Cloudflare configuration
+change until the exact deployed production commit is identified from
+verifiable metadata (Cloudflare dashboard / wrangler — see Section 18's
+provenance-probe results, which confirm it is **not** obtainable from this
+environment). Reason established below: the constructed hotfix would regress
+live functionality, and no candidate can be safely built against an unknown
+baseline. The four-commit hotfix series (`bf9ba21`, `9cc2e0a`, `847faec`,
+`498f8c4`) is retained intact as a tested, replayable patch series — not
+amended, not squashed, not deleted, and not deployable from `origin/main`.
+Two operational deliverables accompany this hold:
+`nfe-founder-access-production-verification.md` (dashboard checklist, since
+Founder Access appears live) and `nfe-incident-zero-byte-product-images.md`
+(a separate live customer-facing defect).
+
+(Prior working disposition, superseded: "HOLD — CANDIDATE DOES NOT MATCH
+LIVE BASELINE." Still true, but narrowed — the blocking issue is not merely
+that *this* candidate mismatches; it is that *no* candidate can be built
+until provenance is resolved.)
 
 **Correction, load-bearing:** every prior pass in this document reasoned
 about "the live confidentiality exposure" by reading `origin/main`'s file
@@ -866,10 +886,44 @@ next step is identifying the exact deployed commit or obtaining Cloudflare
 deployment metadata that names it — from whoever has dashboard/wrangler
 access — before constructing any deploy candidate.
 
+### Build-provenance probe — proven-metadata avenues, all exhausted (2026-07-21)
+
+Before concluding "provenance unobtainable," every source of *proven* build
+metadata (not route-fingerprint inference) reachable from this environment
+was probed against production:
+
+- **`NEXT_PUBLIC_BUILD_SHA` in the footer:** `Footer.tsx` renders
+  `process.env.NEXT_PUBLIC_BUILD_SHA` when set. Production's footer renders
+  **no** build SHA — the env var was not set at build time, so the value is
+  undefined and nothing renders. The only hex tokens in the footer region
+  are 16-char webpack asset-content hashes, not git SHAs (wrong length,
+  wrong location). **No git SHA is embedded in the live page.**
+- **Build manifests:** `/_next/build-manifest.json`, `/_next/static/BUILD_ID`,
+  `/_next/static/chunks/webpack.js` all `404`.
+- **Source maps:** the homepage's first JS chunk carries no
+  `sourceMappingURL`; production ships without source maps, so chunks cannot
+  be tied back to source commits.
+- **Response headers:** only `x-opennext: 1` — no version, deploy-id,
+  commit, release, or build header of any kind.
+- Incidental: production's `/robots.txt` is a Cloudflare-injected
+  content-signals file, **not** this app's `robots.ts` output — another sign
+  the edge layer overlays behavior the repo does not describe, and not itself
+  provenance-useful.
+
+**Conclusion, stated definitively:** the deployed commit cannot be
+identified from any artifact this environment can reach. It is obtainable
+only from Cloudflare Worker deployment metadata (version/deployment ID,
+timestamp, associated Git SHA/build tag) via dashboard or authenticated
+wrangler — which this environment does not have. This is not a limitation of
+effort; every available proven-metadata channel returned nothing. Route
+fingerprints (Section 18 findings 1–5) bound production to an after-`d82e3a9`,
+before-`4a1cc89` window but **cannot** name the exact commit, and no commit is
+asserted.
+
 ### Pre-deploy snapshot (what could be captured vs. what could not)
 
 - ~~Cloudflare Worker version/deployment ID~~ — not obtainable, no API
-  access.
+  access; not embedded in any live artifact (probe above).
 - ~~Deployment timestamp~~ — not obtainable.
 - ~~Environment binding names~~ — not obtainable.
 - ~~Custom-domain routing~~ — not obtainable from this repo (`wrangler.jsonc`
@@ -902,12 +956,27 @@ change; only the deploy source does.
    production right now — this document did not and should not test that
    with a live write.
 
+**No further release candidate is to be built until provenance is resolved.**
+Not the confidentiality hotfix (rebased or otherwise), not the controlled
+feature release, not the zero-byte image fix — every one of them requires a
+known base commit to be constructed safely. Building against an unknown
+baseline is exactly what produced the current mismatch.
+
+**Accompanying deliverables produced this pass:**
+- `nfe-founder-access-production-verification.md` — dashboard checklist for
+  the operational verification of the apparently-live Founder Access backend
+  (Supabase / Resend / Beehiiv / Upstash / Cloudflare bindings), read-only,
+  no data alteration.
+- `nfe-incident-zero-byte-product-images.md` — separate live customer-facing
+  defect record with its provenance-gated fix plan.
+
 Carried forward, materially affected by Section 18's findings:
 
 1. **Coherent Founder Access state:** may already be decided by facts on
    the ground (Section 18, finding 2) rather than a choice still open —
    confirm whether the live system is actively collecting signups before
-   treating this as a forward-looking decision.
+   treating this as a forward-looking decision. Use
+   `nfe-founder-access-production-verification.md`.
 2. **Confidentiality patch deployment: HOLD.** The four-commit hotfix
    (`bf9ba21`, `9cc2e0a`, `847faec`, `498f8c4`) is fully built, tested, and
    pushed to `origin/hotfix/inci-percentage-exposure`, but must not be
