@@ -1,22 +1,38 @@
 # NFE Maison — Release-Readiness Audit
 
-**Status:** Complete audit, release-candidate clarification pass, and
-confidentiality-priority pass.
+**Status:** Complete audit, release-candidate clarification pass,
+confidentiality-priority pass, and a live-production reconciliation pass
+that corrects this document's central working assumption.
 
-**Disposition: HOLD CONTROLLED RELEASE DEFINITION**
-**Separate, higher-priority recommendation: PREPARE MINIMAL CONFIDENTIALITY
-PATCH**
+**Disposition: HOLD — CANDIDATE DOES NOT MATCH LIVE BASELINE**
 
-Method B (revert) is approved as the preferred construction mechanism for a
-future non-Founder-Access candidate, but it is not by itself a valid release
-candidate: nine other approved commits still route every major CTA to
-`/founder-access`, and the route remains sitemapped. A release candidate
-must choose one coherent state — Founder Access included and
-production-ready, or Founder Access fully excluded — never a partial state
-where the backend is gone but the funnel still points at it. Separately, a
-live, currently-exposed confidentiality defect on `origin/main` (real
-formulation percentages rendered on `/inci`) does not depend on any of this
-and should ship first, on its own track.
+**Correction, load-bearing:** every prior pass in this document reasoned
+about "the live confidentiality exposure" by reading `origin/main`'s file
+content and assuming it represented, or safely approximated, what is
+running in production. That assumption was never checked against the
+actual production site until this pass. It does not hold. Direct fetches
+against `https://www.nfebeauty.com` (2026-07-21) prove production is
+running feature-branch content well past `origin/main` — including the
+full Founder Access build (`d82e3a9`) — while also predating the favicon,
+Our Story pilot, and homepage hero fidelity work, and predating `4a1cc89`'s
+fixes. **The hotfix branch built and validated in this document
+(`hotfix/inci-percentage-exposure`, based on `origin/main`) would cause a
+severe regression if deployed as-is** — it would revert production's
+current Atelier/accordion product pages back to an older component tree,
+among other rollbacks — **and, separately, the specific percentage values
+it removes are not actually rendering on production today.** Full detail
+in the new Section 18. The four-commit hotfix branch remains fully built,
+tested, and pushed; it is not deployed and must not be deployed in its
+current form.
+
+Method B (revert) remains approved as the preferred construction mechanism
+for a future non-Founder-Access *candidate*, but — as established before
+this pass — is not by itself a valid release candidate: nine other approved
+commits still route every major CTA to `/founder-access`, and the route
+remains sitemapped. That finding is unchanged. What changed is the
+deployment target itself: neither `origin/main` nor
+`feature/nfe-digital-maison-upgrade` can be assumed to represent, or safely
+supersede, what is currently live.
 
 **Audit HEAD:** feature branch @ `8d2b8f4`. **Compared against:**
 `origin/main` @ `4f2c411`. **Date completed:** 2026-07-20
@@ -646,35 +662,274 @@ public site now that no concentration renders anywhere.
   `percentageRange` values.
 - Garamond: zero files in `.open-next`; no page requests any Garamond URL.
 
-### Minor residue for founder ruling (not fixed — outside the three-commit scope)
+### Cosmetic residue — resolved (fourth commit, `498f8c4`)
 
-Two cosmetic leftovers in `IngredientList.tsx` now reference a feature that
-no longer exists: the section intro copy "Every ingredient in {product},
-with **concentrations**, benefits, and safety information" (line ~72), and
-the now-inert "Concentration" sort button (clicking it is a harmless no-op —
-verified, no error). Fixing either is a one-line UI copy/control edit;
-neither exposes any value. Held for explicit approval rather than expanding
-the closed third commit.
+The two leftovers noted above were approved and fixed as a fourth,
+independent commit: intro copy no longer says "with concentrations" (now
+"Explore every ingredient selected for {product.name}, complete with
+benefits and safety information"); the inert "Concentration" sort button is
+removed outright (not hidden) — A-Z and Safety remain, no empty control
+slot, no speculative replacement filter. Verified: `tsc`, webpack build, and
+OpenNext build all pass; `/products/body-elixir` renders with zero
+"Concentration" string anywhere, zero console errors, layout intact at
+desktop and mobile. Pushed to `origin/hotfix/inci-percentage-exposure`.
 
-## 17. Founder Decisions Required
+---
 
-1. **Coherent Founder Access state:** State A (included, production-ready —
-   needs the unverifiable-from-code confirmations already on record) or
-   State B (fully excluded — needs the Section 9 table actually patched,
-   including a content decision on the quiz's `founder_access` result
-   branch and the five paragraph-copy blocks that name Founder Access
-   directly).
-2. **Confidentiality patch authorization:** approve creating
-   `hotfix/inci-percentage-exposure` from `origin/main` with the exact
-   two-file diff in Section 15, and separately approve deploying it.
+## 18. Live-Production Reconciliation — Corrects This Document's Central Assumption
+
+Requested before any deployment: determine what is *actually* running on
+Cloudflare production, and whether the four-commit hotfix (based on
+`origin/main`) can be safely deployed onto it. This section's findings
+supersede the framing in Sections 1 and 15 wherever they conflict.
+
+### Method
+
+No Cloudflare API, dashboard, or wrangler-authenticated access is available
+in this environment — Worker version IDs, deployment timestamps, and build
+IDs are **not obtainable** and are not claimed below. What is available and
+was used instead: direct, unauthenticated HTTPS fetches against
+`https://www.nfebeauty.com` (the production domain, confirmed reachable;
+not itself declared anywhere in this repository — `wrangler.jsonc` defines
+no `routes`/custom-domain binding, consistent with the existing
+"deployment provenance" finding that binding configuration lives outside
+this repo), comparing response content, headers, and route existence
+against what each git ref actually produces.
+
+### Findings, each independently verified
+
+1. **Production is not `origin/main`.** `/founder-access`, `/concierge`,
+   `/discovery`, `/skin-ritual-quiz`, and `/journal` all return `200` on
+   production. None of these routes exist on `origin/main` at any commit —
+   they were added by the feature branch. This alone rules out `origin/
+   main` as the live source.
+2. **Production has the full Founder Access commerce build (`d82e3a9`).**
+   `/subscribe` transparently redirects to `/founder-access` (identical
+   response hash and length to `/founder-access` itself) — this exact
+   redirect was added by `d82e3a9`, and does not exist before it.
+   `/founder-access`'s rendered HTML contains the extended form's fields
+   (`ageRange`, `productInterest`, `privacyPolicyAccepted`) and does not
+   contain the pre-`d82e3a9` static-placeholder copy ("Full segmentation is
+   not active yet"). **The Founder Access data-collection system, which
+   earlier passes of this document treated as "not yet live, requires its
+   own go-live checklist," is either live now or was live at some point
+   this repository cannot date — its frontend and redirect behavior are
+   demonstrably live today.** Whether it is currently writing to Supabase
+   cannot be determined by GET requests alone, and no POST was sent to
+   production to test this, per this session's standing prohibition on
+   irreversible production actions.
+3. **Production predates the favicon, Our Story pilot, and homepage hero
+   fidelity work (`7f31a52`, `55c9f26`, `3c1817b`, `5f6303b` — all
+   2026-07-19/20).** `/icon.png`, `/favicon.ico`, and `/apple-icon.png` all
+   `404`. `/our-story`'s rendered HTML contains the old medical-language
+   copy ("melasma," "dermatologist") this session rewrote, and contains
+   none of the pilot's markers (no YouTube embed, no `founder-hero`/
+   `founder-portrait` asset references). The homepage's hero `<picture>`
+   element references the single legacy file
+   (`nfe-home-hero-product-vessel-desktop.webp`) through Next's runtime
+   `/_next/image` optimizer — not the five static Lanczos variants
+   `5f6303b` added. **This session's Our Story pilot and hero-fidelity fix,
+   both explicitly "approved and closed," have never been deployed.**
+4. **Production predates `4a1cc89`'s asset/copy fixes (2026-07-19).** The
+   shop page serves the pre-`4a1cc89` strings ("Pre-order pathway in
+   preparation," "In development") rather than the post-fix strings
+   ("Founder Access opens first," "A future NFE ritual"). More seriously:
+   **all four product images `4a1cc89` was written to remove are live on
+   production right now, still zero bytes** —
+   `/images/products/{face,body}-elixir-{hero,detail}.jpg` each return
+   `200` with `0` bytes. This is a real, current, customer-facing defect —
+   broken/blank product imagery on both live product pages — independent
+   of confidentiality, and not fixed by anything in the hotfix branch.
+5. **Production's live formulation-data paths show no real percentages —
+   but not because of anything this session did.** `/data/formulas/
+   faceElixir.json`, `/data/inci/faceElixir.json`, and `/data/inci/
+   bodyElixir.json` were all fetched directly from production: none
+   contain a non-empty `percentageRange` value. `/data/inci/bodyElixir.
+   json`'s raw content is byte-for-byte the same corrupted `.NET`-
+   serialization structure (`Count`, `Length`, `SyncRoot`, `IsFixedSize`,
+   etc.) identified in Section 7 as introduced by `b70dab5` — direct proof
+   `b70dab5` (2026-06-22) is live, and that its incidental stripping of the
+   `percentageRange` field (a side effect of the corruption, not a
+   deliberate fix) already closed this specific exposure on production,
+   weeks before this session's confidentiality-patch work began. **The
+   premise stated in Section 1 and Section 15 — "`origin/main`'s live,
+   indexed `/inci` page currently displays these percentages to any
+   visitor, today" — was true of `origin/main`'s file content and was
+   never checked against the actual production site until this pass. It
+   does not hold for production.** `/products/body-elixir` was also
+   checked directly: it does not use `IngredientList`/`BenefitsTable`/
+   `bodyElixirData` at all — it renders an accordion-based page (`ElixirEditorialPage` /
+   `ProductAccordion`, from `20ee75b`'s atelier rebuild) fed by `data/
+   products/*.json`, which was checked and contains no percentage or
+   concentration field of any kind, on either `origin/main` or the feature
+   branch. **`IngredientList.tsx`, `bodyElixirData`, and `faceElixirData` —
+   everything the hotfix's third and fourth commits patched — are confirmed
+   dead code on the feature branch** (`git grep` across
+   `feature/nfe-digital-maison-upgrade` finds no importer of `IngredientList`
+   or either data object outside their own definition files) **and are not
+   what production is running for its product pages either.**
+
+### What this means for the hotfix as constructed
+
+The hotfix branch is fully built, typechecks, builds under both pipelines,
+and does exactly what it was scoped to do — but its scope was set against
+the wrong baseline. Two independent problems, not one:
+
+- **Deploying it would cause a severe, unintended regression.** Because
+  the branch is rooted at `origin/main`, deploying it would take
+  production backward: the Atelier/accordion product pages would revert to
+  the older `IngredientList`/`BenefitsTable` tree; the full Founder Access
+  build (currently live) would be replaced by, at best, whatever partial
+  state exists between `origin/main` and wherever production actually sits;
+  the already-live `/subscribe` → `/founder-access` redirect, the atelier
+  shop copy, and other weeks-old live behavior would all be reverted to a
+  pre-`d82e3a9` state. This is a regression across nearly every route
+  checked, not a targeted fix.
+- **The specific percentages it removes are not the ones currently exposed
+  to the public**, because production's own accidental history (`b70dab5`'s
+  corruption) already closed that specific gap, and production's actual
+  product-page architecture never used the component tree the hotfix's
+  third and fourth commits patched.
+
+Neither problem is small enough to route around by adjusting the hotfix in
+place. The confidentiality intent behind the hotfix remains sound — the raw
+percentages still exist in the repository, `data/inci/faceElixir.json` and
+its public/private counterparts still carry them without corruption on
+`origin/main` and (unverified) possibly at whatever commit production
+actually runs, and a future deploy from a different base could
+reintroduce a real exposure. But **this specific branch, deployed as-is,
+does not solve a current problem and creates a severe one.**
+
+### Genuinely live, current risks (independent of the hotfix)
+
+1. **Broken product images** — zero-byte files served at four URLs on two
+   live product pages, today.
+2. **Deployment provenance remains unresolved and is now proven more
+   severe than previously stated.** Production cannot be mapped to any
+   single commit: it is provably after `d82e3a9` (2026-07-12) and provably
+   before `4a1cc89` (2026-07-19 morning) — a nine-day window containing six
+   commits (`4d86fec`, `8e3357c`, `2eede3b`, `2474aff`, `ed824bb`,
+   `a4b6f83`) — but none of those six change anything externally observable
+   this pass checked, so the exact commit cannot be pinpointed further from
+   outside evidence. **No git commit is asserted as "the" production
+   commit** — only this bounded window, per instruction.
+3. **The controlled-release Founder Access question (Section 9) may be
+   moot or already decided by facts on the ground** — if Founder Access's
+   backend is genuinely collecting signups against production Supabase
+   right now, "should Founder Access ship" is not the live question;
+   "is Founder Access's current production configuration correct and
+   monitored" is. This audit cannot determine which, without either
+   Cloudflare/Supabase dashboard access or an authorized live-write test,
+   neither of which this pass performed.
+
+### Candidate impact classification
+
+| Surface | Hotfix-vs-production classification |
+|---|---|
+| `/founder-access`, `/subscribe` redirect, Founder Access form fields | **Unintended regression** if the hotfix (origin/main-based) is deployed — production's live commerce build would be replaced by an inert placeholder |
+| `/products/face-elixir`, `/products/body-elixir` (Atelier/accordion structure) | **Unintended regression** — production's current architecture would revert to the older `IngredientList` tree the hotfix patched, which production is not even running |
+| Homepage hero, favicon, Our Story content | **Uncertain / already-live difference preserved** — these are already absent from production regardless of the hotfix (production predates them); the hotfix neither adds nor removes them since it's rooted below all three |
+| `/data/formulas/faceElixir.json`, `/data/inci/*.json` percentage values | **Already-live difference preserved, not an intended hotfix fix** — production already shows no real values, independent of and before this session's patch existed |
+| Zero-byte product images | **Uncertain because production provenance is unknown**, but confirmed as a real, current defect regardless of which release path is chosen — not addressed by the hotfix, not caused by it |
+| Garamond fonts | **Live on production today** (`200` for all three files) — the hotfix's removal, if deployed on a corrected base, would be an intended, safe fix with no observed counter-evidence |
+
+### Safe release-construction options — evaluated
+
+- **A. Deploy current hotfix branch from `origin/main`: rejected.** Proven
+  above to cause a severe regression across Founder Access and the product
+  pages. Does not meet "only acceptable if production comparison proves no
+  reversion" — the comparison proves the opposite.
+- **B. Apply the four hotfix commits onto the exact deployed source commit:
+  not currently executable.** The exact deployed commit cannot be
+  identified from available evidence (see the nine-day window above). This
+  remains the preferred path in principle once the exact commit — or
+  Cloudflare deployment metadata that names it — becomes available.
+- **C. Apply the confidentiality changes onto a branch proven to match
+  current production: not currently executable either**, for the same
+  reason — no branch in this repository has been proven, only narrowed to
+  a window. The feature branch tip is a closer *functional* match (it has
+  Founder Access, the atelier pages, and the routes production has) but is
+  proven to be *ahead* of production (it has the Our Story pilot, favicon,
+  and hero fix production doesn't have) — deploying the full feature
+  branch would not regress anything found live, but would not be "proven
+  equivalent" either, and was not authorized for deployment by this pass.
+- **D. Cloudflare-level rollback/version strategy: cannot be determined
+  from this environment.** No Cloudflare API or dashboard access is
+  available here. If Cloudflare's dashboard supports retaining or
+  restoring a specific Worker version independent of git history, that
+  capability was not verified and cannot be documented from code or public
+  HTTP responses alone. **Stated plainly, per instruction: this cannot be
+  confirmed one way or the other from this environment.**
+
+**No path is recommended for immediate execution.** The evidence-backed
+next step is identifying the exact deployed commit or obtaining Cloudflare
+deployment metadata that names it — from whoever has dashboard/wrangler
+access — before constructing any deploy candidate.
+
+### Pre-deploy snapshot (what could be captured vs. what could not)
+
+- ~~Cloudflare Worker version/deployment ID~~ — not obtainable, no API
+  access.
+- ~~Deployment timestamp~~ — not obtainable.
+- ~~Environment binding names~~ — not obtainable.
+- ~~Custom-domain routing~~ — not obtainable from this repo (`wrangler.jsonc`
+  defines no routes).
+- **Route smoke-test results** — captured above (Section 18 findings), full
+  detail preserved in this session's fingerprint output.
+- **Production asset/route content hashes for the routes checked** —
+  captured this pass (available on request; omitted here for length).
+- **No Git tag was created.** Per instruction, no tag claiming to represent
+  production was made, since the exact deployed commit is not proven.
+
+### Cache-purge plan — unchanged, still applies once a safe candidate exists
+
+The Section 15 purge target list (`/inci`, both product pages, the JSON
+paths, RSC payload variants) remains correct regardless of which base a
+future, corrected candidate is built from — the caching mechanism doesn't
+change; only the deploy source does.
+
+## 19. Founder Decisions Required
+
+**New, highest-priority item given Section 18:**
+
+0. **Identify the exact deployed production commit, or obtain Cloudflare
+   deployment metadata that names it**, from whoever has dashboard/wrangler
+   access. This blocks constructing any safe hotfix or release candidate —
+   without it, neither Method B (apply the hotfix commits onto the deployed
+   source) nor Method C (prove a branch matches production) is executable,
+   per Section 18. In parallel: confirm through Cloudflare/Supabase
+   dashboard access whether Founder Access is actually writing to
+   production right now — this document did not and should not test that
+   with a live write.
+
+Carried forward, materially affected by Section 18's findings:
+
+1. **Coherent Founder Access state:** may already be decided by facts on
+   the ground (Section 18, finding 2) rather than a choice still open —
+   confirm whether the live system is actively collecting signups before
+   treating this as a forward-looking decision.
+2. **Confidentiality patch deployment: HOLD.** The four-commit hotfix
+   (`bf9ba21`, `9cc2e0a`, `847faec`, `498f8c4`) is fully built, tested, and
+   pushed to `origin/hotfix/inci-percentage-exposure`, but must not be
+   deployed from its current base (Section 18). Once item 0 is resolved,
+   the same confidentiality intent should be re-applied onto whichever base
+   is proven safe.
 3. **Garamond licensing:** confirm self-hosted webfont redistribution
-   rights, or proceed with removal (verified safe this pass).
-4. **Malformed JSON:** confirm removal (verified safe this pass).
+   rights, or proceed with removal (verified safe this pass, and confirmed
+   still live on production today per Section 18).
+4. **Malformed JSON:** confirm removal (verified safe this pass on the
+   feature branch; also confirmed live on production today per Section 18,
+   finding 5, where it incidentally serves as evidence of `b70dab5`'s
+   deployment).
 5. **Cache purge ownership:** confirm who validates the Cloudflare cache
-   purge after the confidentiality patch deploys.
-6. **Face Elixir 30ml/50ml and Body Elixir 200ml/125ml/75ml:** still require
+   purge once a real deploy occurs.
+6. **Broken product images (Section 18, finding 4):** four zero-byte files
+   are live on two product pages today, independent of every other
+   question in this document — worth its own minimal fix once the
+   provenance question is resolved enough to build one safely.
+7. **Face Elixir 30ml/50ml and Body Elixir 200ml/125ml/75ml:** still require
    verification against physical packaging (Section 10).
-7. **Founder Access go-live** (if State A is chosen): Supabase
-   migration/RLS/env-var confirmation in production.
+8. **Founder Access go-live confirmation** — see item 0; this may already
+   have happened rather than being a future decision.
 
 **No deployment scope has been authorized by this document.**
