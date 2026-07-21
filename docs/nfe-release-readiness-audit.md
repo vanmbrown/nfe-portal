@@ -1927,6 +1927,130 @@ Steps 5–8 (deploy, smoke, one controlled Founder Access test, cleanup) are
 sanitized Worker is deployed and proven. Rotation remains a separate,
 un-started gate.
 
+## 30. Revised Sanitized Candidate — Public Values Preserved (2026-07-21)
+
+Gate 2 resolved: the migration is narrowed to remove **only**
+`SUPABASE_SERVICE_ROLE_KEY` from the build artifact, while the two public
+`NEXT_PUBLIC_SUPABASE_*` values (required by client-side focus-group/auth
+code) remain build-inlined, as they already are on live production. **The
+fully-stripped candidate from §29 (`wt-migration`) is retained only as
+investigation evidence and will not be deployed.** A new candidate was built
+at `wt-migration-v2`.
+
+### 30.1 Sourcing the two public values — real, not dummy
+
+`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are public by
+Supabase's own design (protected by RLS, not secrecy) and are already served
+to every visitor today. Extracted the **real, current** values directly from
+production's live client JS (`/focus-group/layout-*.js`), not synthesized:
+- URL: the project's `https://<ref>.supabase.co` host (ref matches the
+  project identified in §23.1).
+- Anon key: a JWT, decoded and verified — payload `"role":"anon"` (not
+  `service_role`). Confirmed genuinely public, not a credential handling
+  violation.
+
+**This also answers an open question from Gate 2 (§29.4-2):** production
+*does* currently inline these two values into client bundles — confirmed by
+finding them live. The revised candidate reproduces this exactly.
+
+### 30.2 Revised candidate build — `.env.production` scope
+
+Clean detached checkout at `2eede3b` (`wt-migration-v2`), HEAD confirmed
+exact, tree clean. `.env.production` written with **exactly two lines**:
+`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (real values).
+No `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, or `SUPABASE_ANON_KEY`
+(non-public) — those three are runtime-binding-only in this contract.
+
+Build: `npm ci` → `tsc --noEmit` (pass) → `next build` (pass) →
+`opennextjs-cloudflare build` (pass), cache-cleared for a pristine final
+pass.
+
+### 30.3 Artifact scan — required results, all met
+
+- **`next-env.mjs` production block:** exactly `{"NEXT_PUBLIC_SUPABASE_URL":
+  "…","NEXT_PUBLIC_SUPABASE_ANON_KEY":"…"}` — the `SUPABASE_SERVICE_ROLE_KEY`
+  key is **absent**.
+- **Service-role credential — zero occurrences everywhere:** a full JWT scan
+  (decode every `eyJ…` token found in `.next` and `.open-next`, classify by
+  `role` claim) found **every single embedded JWT, in every file, client and
+  server, is `role: anon`.** No `service_role` JWT anywhere.
+- **`NEXT_PUBLIC` values present where required:** the project ref appears in
+  9 client asset files and in server routes/handlers that need it (`waitlist`,
+  `subscribe`, `community-input`, `focus-group/*`, `enclave`, `uploads`,
+  `auth/callback`) — expected and correct, since these are public values.
+- **No probe route, no dummy markers, no `.dev.vars`** in the final pristine
+  build (verified after a cache-cleared rebuild; two earlier hits were only in
+  `.next/cache/webpack/**`, never part of the deployed `.open-next` artifact).
+- **Runtime `process.env` lookups intact** for all three server-only variable
+  names (16 server files each) — no code change.
+
+### 30.4 Runtime precedence — re-confirmed with all three bindings
+
+Built with dummy `.dev.vars` for the three runtime-only variables (values
+never real), ran under local `wrangler dev`:
+
+| Binding present | `SUPABASE_URL` | `SUPABASE_SERVICE_ROLE_KEY` | `SUPABASE_ANON_KEY` | `NEXT_PUBLIC_*` |
+|---|---|---|---|---|
+| Yes (all 3) | `binding` | `binding` | `binding` | present (build-inlined, unaffected) |
+| No (all 3 absent) | `absent` | `absent` | `absent` | present (build-inlined, unaffected) |
+
+Confirms exactly the predicted contract: server admin/anon clients read the
+three runtime bindings; the browser client reads the two build-time public
+values; `NEXT_PUBLIC_*` presence is independent of runtime-binding state (as
+expected — it's inlined, not read at request time). **No code change
+required.**
+
+### 30.5 Expanded pre-deploy validation — results
+
+**Admin-backed endpoints** (dummy bindings present — client construction must
+not throw on missing key; downstream behavior against a fake host is
+expected to differ per route and is not evidence of a credential problem):
+- `/api/founder-access`: 500, `"Unable to save your request right now"` — the
+  **DB-connection-failure** path (past credential init, correct).
+- `/api/waitlist`: 200 `{"success":true}`.
+- `/api/subscribe`: 200 `{"success":true}`.
+- `/api/community-input`: 500, `"Failed to submit feedback"`.
+
+All four reached **past** the credential-initialization step (none produced
+the missing-key `"Server error"`), confirming the binding is read correctly
+by every admin-backed route. The differing HTTP outcomes reflect each route's
+own handling of an unreachable dummy Supabase host, not the binding mechanism
+— **noted precisely rather than asserted uniform**, since dummy data cannot
+fully validate downstream behavior; real-credential confirmation is the
+Founder Access live test in Step 7 below.
+
+**Missing-secret control:** with all three bindings absent, Founder Access
+returned the same controlled `{"error":"Server error"}` seen throughout this
+audit — fail-closed behavior preserved.
+
+**Client/server-anon systems (browser-rendered, real browser check, not
+curl):** loaded `/focus-group/login` and `/founder-access` in an actual
+browser against the running preview (bindings present). Both: all asset
+requests 200, **zero console errors**, no hydration warnings, page content
+rendered correctly (Sign In form; Founder Access form). The focus-group
+client-side Supabase client initializes using the build-inlined
+`NEXT_PUBLIC_*` values — unaffected by runtime-binding state, as designed.
+
+### 30.6 Hygiene note (not acted on, no authorization to change)
+
+`.env.production` (without `.local`) is **not** covered by `.gitignore` —
+only `.env.production.local` is. Not a risk in this pass (nothing was
+committed; the file lives only in the disposable worktree), but worth fixing
+separately so a future local build can't accidentally leave `.env.production`
+trackable.
+
+### 30.7 Status — Gate 1 unchanged, deployment still blocked
+
+**The credential-add gate (§29.3) is unchanged and unresolved by this pass.**
+This agent still cannot and will not enter the real `SUPABASE_SERVICE_ROLE_KEY`
+(or `SUPABASE_URL`/`SUPABASE_ANON_KEY`) into Cloudflare. Per instruction,
+Vanessa adds the three runtime bindings directly (dashboard or her own
+terminal) and reports back **only the binding names present** — no values.
+**Deployment will not proceed until that confirmation is received.** The
+revised, artifact-scan-clean candidate is ready at `wt-migration-v2`,
+untouched, awaiting that confirmation and a final immediate-pre-deploy
+re-scan.
+
 ## 22. Founder Decisions Required
 
 **New, highest-priority item given Section 18:**
