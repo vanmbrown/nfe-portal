@@ -13,7 +13,7 @@ interface IngredientListProps {
 }
 
 export function IngredientList({ product, className = '' }: IngredientListProps) {
-  const [sortBy, setSortBy] = useState<'alphabetical' | 'concentration' | 'safety'>('alphabetical');
+  const [sortBy, setSortBy] = useState<'alphabetical' | 'safety'>('alphabetical');
   const [showAll, setShowAll] = useState(false);
 
   // Sort ingredients based on current sort option
@@ -21,10 +21,6 @@ export function IngredientList({ product, className = '' }: IngredientListProps)
     switch (sortBy) {
       case 'alphabetical':
         return a.inci.localeCompare(b.inci);
-      case 'concentration':
-        const aConc = parseFloat(a.concentration?.replace('%', '') || '0');
-        const bConc = parseFloat(b.concentration?.replace('%', '') || '0');
-        return bConc - aConc;
       case 'safety':
         const safetyOrder = { safe: 0, caution: 1, avoid: 2 };
         return safetyOrder[a.safety] - safetyOrder[b.safety];
@@ -69,7 +65,7 @@ export function IngredientList({ product, className = '' }: IngredientListProps)
             Complete Ingredient List (INCI)
           </h2>
           <p className="text-lg text-nfe-muted">
-            Every ingredient in {product.name}, with concentrations, benefits, and safety information.
+            Explore every ingredient selected for {product.name}, complete with benefits and safety information.
           </p>
         </div>
 
@@ -82,13 +78,6 @@ export function IngredientList({ product, className = '' }: IngredientListProps)
               onClick={() => setSortBy('alphabetical')}
             >
               A-Z
-            </Button>
-            <Button
-              variant={sortBy === 'concentration' ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => setSortBy('concentration')}
-            >
-              Concentration
             </Button>
             <Button
               variant={sortBy === 'safety' ? 'primary' : 'outline'}
