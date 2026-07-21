@@ -4,14 +4,30 @@
 confidentiality-priority pass, and a live-production reconciliation pass
 that corrects this document's central working assumption.
 
-**Final disposition: HOLD ALL DEPLOYMENT UNTIL PRODUCTION PROVENANCE IS
-VERIFIED**
+**Final disposition (updated 2026-07-21): PROVENANCE RESOLVED — RELEASE BASE
+IS `2eede3b`. Deployment remains on hold pending founder authorization of the
+specific change to ship.**
+
+Production source equivalence to commit `2eede3b` is **confirmed** by a
+build-and-compare pass (Section 20): all 12 routes exact-content match, 6/6
+shared static chunks byte-identical by SHA-256, and the three non-identical
+chunks proven to differ only in webpack build-plumbing. The provenance hold
+that gated all construction is therefore **cleared** — future patches (the
+retained confidentiality series; the zero-byte-image fix; a Founder Access
+backend decision) must be built on a branch based at `2eede3b`, not
+`origin/main` and not the feature branch. Rollback for any such deploy is the
+Cloudflare-native path to prior Worker version `52d0f695`. No deployment,
+merge, or new branch has been made — those await founder go-ahead on the
+specific change.
+
+*(Prior disposition, now superseded: "HOLD ALL DEPLOYMENT UNTIL PRODUCTION
+PROVENANCE IS VERIFIED." Provenance is now verified.)*
+
+The original hold rationale is retained below for the record.
 
 No deployment, no merge, no new release branch, no Cloudflare configuration
-change until the exact deployed production commit is identified from
-verifiable metadata (Cloudflare dashboard / wrangler — see Section 18's
-provenance-probe results, which confirm it is **not** obtainable from this
-environment). Reason established below: the constructed hotfix would regress
+change was made while provenance was unverified (Section 18's HTTP-only
+probe could not obtain it; authenticated `wrangler`, Section 20, did). Reason established below: the constructed hotfix would regress
 live functionality, and no candidate can be safely built against an unknown
 baseline. The four-commit hotfix series (`bf9ba21`, `9cc2e0a`, `847faec`,
 `498f8c4`) is retained intact as a tested, replayable patch series — not
@@ -1016,7 +1032,157 @@ paths, RSC payload variants) remains correct regardless of which base a
 future, corrected candidate is built from — the caching mechanism doesn't
 change; only the deploy source does.
 
-## 19. Founder Decisions Required
+## 20. Build-and-Compare — Production Source Equivalence CONFIRMED (2026-07-21)
+
+Authorized follow-up to Section 18/19: build the strongest candidate source
+commit in isolation and compare its output against live production to decide
+whether `2eede3b` can serve as the release base.
+
+### Cloudflare metadata of record (proven facts)
+
+- **Active Worker version:** `f421ae6e-fefe-43f5-bd16-ad98c09e6b08` (100%).
+- **Previous Worker version (rollback target):**
+  `52d0f695-de1f-47e3-b9dd-a0fa8100e099` (deployed 2026-07-12T16:25:27Z).
+- **Timestamps:** active deployed 2026-07-12T16:34:07.560Z (version created
+  16:34:05.937Z); previous 16:25:27Z.
+- **Author:** vanessa.mccaleb@gmail.com (Cloudflare account `938425ed…`).
+- **Source type:** `Unknown (deployment)` — a local `wrangler deploy`
+  (`npm run deploy`), not CI.
+- **Git tag/SHA:** **none recorded** by Cloudflare.
+- **Secret binding NAMES present** (values never obtainable/printed):
+  `ADMIN_NOTIFICATION_EMAIL`, `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`,
+  `NEXT_PUBLIC_SITE_URL`, `RESEND_API_KEY`, `UPSTASH_REDIS_REST_TOKEN`,
+  `UPSTASH_REDIS_REST_URL`.
+- **Supabase bindings: ABSENT** (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+  `SUPABASE_ANON_KEY` all missing; no plaintext-vars section).
+- **Rollback capability:** available (`wrangler rollback` /
+  `wrangler versions deploy` to version `52d0f695`); token has
+  `workers (write)`. Not exercised.
+
+Pre-comparison framing (retained): *"`2eede3b` is the strongest candidate
+source commit based on deployment timing and production fingerprints."* The
+comparison below upgrades this to a confirmed equivalence.
+
+### Build environment (isolated worktree, feature/hotfix branches untouched)
+
+- Worktree: `.claude/worktrees/wt-2eede3b` (detached at `2eede3b`), since
+  removed.
+- node v22.20.0 · npm 10.9.3 · Windows (MINGW64) · next ^16.1.3 ·
+  @opennextjs/cloudflare ^1.14.9 · wrangler ^4.59.2.
+- Clean `npm ci`, `npx tsc --noEmit` (pass), `npm run build`
+  (`next build --webpack`, pass), `npx opennextjs-cloudflare build` (pass).
+
+### Route comparison (local `2eede3b` build vs `www.nfebeauty.com`)
+
+All 12 required routes returned **EXACT-CONTENT** match — identical status
+code, identical `<h1>`/`<h2>` text, identical internal `href` set:
+
+`/`, `/our-story`, `/shop`, `/founder-access`, `/subscribe`, `/concierge`,
+`/discovery`, `/skin-ritual-quiz`, `/journal`, `/inci`,
+`/products/face-elixir`, `/products/body-elixir` — **all EXACT-CONTENT.**
+
+### Static-asset comparison (the decisive signal)
+
+- 11 chunks referenced by each; **8 chunk filenames identical** (same
+  name **and** content hash).
+- **6 of 6** shared chunks fetched from both origins are **byte-identical by
+  SHA-256** (`1992-…`, `3794-…`, `4bd1b696-…`, `6573-…`, `8409-…`,
+  `8437-…`). Content-hashed webpack chunks are derived from exact source +
+  dependency bytes, so byte-identity is near-cryptographic proof of source
+  equivalence for the application code.
+- The **3 non-identical chunks** were analyzed and proven to differ only in
+  webpack build-plumbing, not source:
+  - `5824-…`(local) vs `6636-…`(prod): **byte-length identical (13,677 B)**,
+    normalized-equal after masking chunk-ID integers — same modules, only the
+    chunk-group ID number differs.
+  - `main-app-…`: normalized-equal (2-byte raw delta = chunk-id reference).
+  - `webpack-…` runtime: identical length (3,808 B), differs only by one
+    minified variable name (`f` vs `d`) — a runtime-identifier artifact.
+
+  Classification: **differs due to known build behavior** (webpack chunk-ID
+  assignment / minified identifiers), not a source difference. Byte-identity
+  on these is not expected across build environments even for identical
+  source, and the architect's instruction not to require it applies.
+
+### Infrastructure comparison
+
+| Item | Result |
+|---|---|
+| Redirects (`/about`, `/founders-access`, `/products`) | **exact match** (all 3) |
+| `sitemap.xml` | **exact match** — 35 paths, identical set |
+| `robots.txt` | local = app `robots.ts` (139 B); prod = Cloudflare content-signals injection (1,975 B) — **differs due to known edge behavior**, not source |
+| favicon / icon | both **404** on local and prod (consistent — `2eede3b` predates the favicon commit) |
+| product images (zero-byte defect) | `face-elixir-hero.jpg`, `body-elixir-hero.jpg` both **200 / 0 bytes** on local **and** prod — the defect reproduces exactly |
+| Founder Access form fields | "Age Range", "Product Interest", "Privacy Policy" present in both; camelCase field names live in the client bundle (not server HTML) identically in both |
+
+### Comparison verdict
+
+No unexplained route mismatch. No unexplained asset mismatch (every
+difference is webpack plumbing, Cloudflare robots injection, or a defect that
+*reproduces identically*). Founder Access structure matches. Redirects match.
+Zero-byte product-image behavior matches. All build differences are
+explainable.
+
+**DECISION: A — PRODUCTION SOURCE EQUIVALENCE CONFIRMED — USE `2eede3b` AS
+RELEASE BASE.**
+
+The confidentiality patch series and the zero-byte-image fix should be
+constructed on a branch based at **`2eede3b`** (not `origin/main`, not the
+feature branch). Rollback for any deploy from that base is the
+Cloudflare-native path to the prior Worker version
+`52d0f695-de1f-47e3-b9dd-a0fa8100e099`.
+
+## 21. INCIDENT — Founder Access Live Form, No Supabase Backend
+
+**Status:** OPEN. **Severity:** customer-trust risk; no data-loss/PII
+exposure. **Opened:** 2026-07-21.
+
+**What:** the Founder Access form is live and rendered on production
+(`/founder-access`), but the active Worker version (`f421ae6e`) has **no
+Supabase bindings** (Section 20). The submission route requires
+`SUPABASE_SERVICE_ROLE_KEY` (a server-only secret Next.js does not inline at
+build time) and a Supabase URL.
+
+**Local reproduction (exact `2eede3b` build, synthetic request, no production
+POST):**
+- A valid synthetic submission (`privacyPolicyAccepted: true`) →
+  **HTTP 500**, body `{"error":"Server error"}`.
+- A submission missing consent → **HTTP 400**,
+  `{"error":"Please acknowledge the Privacy Policy to continue."}` — proving
+  validation runs first.
+- **Failure point:** `createAdminSupabase()` throws (missing Supabase
+  URL/service key) **before** the DB write, and **before** any Resend or
+  Beehiiv call — those are gated behind a successful DB write (`if
+  (dbSuccess)`). The generic `{"error":"Server error"}` is the route's
+  outer-catch response, not the friendlier "Unable to save your request"
+  message (which is the inner DB-catch, never reached).
+
+**Answers to the required questions:**
+- **Endpoint status:** 500 (valid payload) / 400 (missing consent).
+- **Returned error shape:** `{"error":"Server error"}` — generic, not a
+  clear/actionable message to the user.
+- **Email or Beehiiv call before failure:** **none** — the throw precedes
+  both.
+- **User-facing form error:** the client receives a non-OK response and shows
+  a generic failure; the message is not specific or reassuring.
+- **Partial data to any third party:** **none** — no data leaves the Worker;
+  Supabase creation fails before any outbound integration call.
+- **Rate limiting:** runs first. On production (Upstash configured) it
+  enforces the 3/hour window before the Supabase failure; on the local build
+  (Upstash absent) it fails open (`allow`). Either way it executes before the
+  failure.
+
+**Classification:** likely live submission failure · customer-trust risk ·
+**no evidence of stored PII** (backend cannot write) · production POST not
+tested · code/config inference **now reproduced locally against the exact
+deployed source `2eede3b`**.
+
+**Do not** enable Supabase, add secrets, or deploy a fix until the release
+base (`2eede3b`, confirmed Section 20) is used to construct it. This incident
+and the zero-byte-image incident can share a single minimal branch based at
+`2eede3b`, or be handled separately — a founder decision.
+
+## 22. Founder Decisions Required
 
 **New, highest-priority item given Section 18:**
 
