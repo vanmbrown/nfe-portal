@@ -2051,6 +2051,102 @@ revised, artifact-scan-clean candidate is ready at `wt-migration-v2`,
 untouched, awaiting that confirmation and a final immediate-pre-deploy
 re-scan.
 
+## 31. CORRECTION — Two Separate Cloudflare Deployment Targets Share the Name `nfe-portal`
+
+**Discovered 2026-07-21/22, from a screenshot Vanessa provided after adding
+the three Supabase bindings.** Her bindings were added correctly, in good
+faith, to a real Cloudflare project — but not the one serving production.
+
+### 31.1 What exists
+
+Two entirely separate Cloudflare products, both named **`nfe-portal`**,
+both connected to the same GitHub repo:
+
+1. **Cloudflare Worker `nfe-portal`** — deployed manually via `npm run
+   deploy` (`opennextjs-cloudflare build && wrangler deploy .open-next/
+   worker.js`). This is what every prior section of this document (§18–§30)
+   investigated: `wrangler deployments status`, `wrangler secret list`,
+   `wrangler versions list`, the `2eede3b` provenance match, the sanitized
+   candidate. **`wrangler secret list --name nfe-portal` still shows exactly
+   7 secrets, no Supabase — unchanged.**
+2. **Cloudflare Pages project `nfe-portal`** — a GitHub-integration-based
+   auto-deploy project (visible in Vanessa's screenshot: Build command
+   `npm run build`, output `.next`, **Production branch `week-4-complete`**,
+   Automatic deployments Enabled). Vanessa added
+   `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` here, as
+   encrypted secrets, correctly, on this project.
+
+### 31.2 Which one is actually live — determined empirically, not assumed
+
+- **`https://nfe-portal.pages.dev` (the Pages project's own domain) returns
+  HTTP 522** — Cloudflare's "the origin never responded" error. **The Pages
+  project has never successfully served anything, at any point.**
+- **`wrangler pages deployment list --project-name=nfe-portal`** shows 25
+  recent deployments, **all Environment=Preview, all Status=Failure**,
+  spanning commits `7f31a52` (2026-07-19) through `af54b21` (this session,
+  today) — every single build attempt on `feature/nfe-digital-maison-
+  upgrade` and `hotfix/inci-percentage-exposure` failed. **No
+  Production-environment deployment appears in the visible history.**
+  `week-4-complete`, the project's configured production branch, **does not
+  exist** in this repository (local or `origin`) — deleted or renamed at
+  some point after the Pages project was configured against it.
+- **The `x-opennext: 1` header found on every production response
+  throughout this audit is confirmed, by direct source inspection, to be
+  emitted specifically by `@opennextjs/aws`'s own routing code**
+  (`node_modules/@opennextjs/aws/dist/core/routing/cacheInterceptor.js`,
+  `routingHandler.js`) — a header Cloudflare Pages' native Next.js runtime
+  has no knowledge of and cannot produce. Production carries this header on
+  every response.
+
+**Conclusion: `www.nfebeauty.com` is served by the Cloudflare Worker, not
+the Pages project.** This is consistent with every finding in §18–§30 — the
+provenance match to `2eede3b`, the byte-identical webpack chunks, the
+deployment-metadata correlation — none of it changes. It confirms *why*
+Founder Access has been working (§26) despite no Worker secret existing:
+the credential reaches the Worker via the build-inlined `next-env.mjs`
+mechanism proven in §27–§28, not via any binding on either platform, until
+now.
+
+### 31.3 Disclosed side effect of this session's own git pushes
+
+Cloudflare's GitHub integration for the Pages project auto-builds a Preview
+deployment on **every push to any branch**, not just `main`. This session's
+routine, explicitly-authorized `git push origin <branch>` calls (34+ commits
+across `feature/nfe-digital-maison-upgrade` and `hotfix/inci-percentage-
+exposure`) each triggered one of the 25 failed Preview builds above, as an
+invisible side effect neither this agent nor, apparently, Vanessa was aware
+of before this pass. No production impact (all Preview, all failed, no
+Production environment touched) — disclosed for completeness, not flagged
+as a defect requiring immediate action.
+
+### 31.4 Corrected next action
+
+**Gate 1 remains open — the three secrets need to be added again, to the
+correct target: the Worker `nfe-portal`, not the Pages project.** Exact
+commands (Vanessa runs; this agent still does not see or enter the values):
+```
+npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --name nfe-portal
+npx wrangler secret put SUPABASE_URL --name nfe-portal
+npx wrangler secret put SUPABASE_ANON_KEY --name nfe-portal
+```
+(Not the Cloudflare dashboard's Pages → Settings → Variables and secrets
+page — that is the Pages project. The Worker's equivalent is Workers &
+Pages → **`nfe-portal` (Worker, not the Pages project of the same name)** →
+Settings → Variables and Secrets, or the CLI above.)
+
+Everything else prepared in §29–§30 (the sanitized `2eede3b` candidate at
+`wt-migration-v2`, the artifact scan, the runtime-precedence proof, the
+`.env.production` local exclusion) remains valid and unaffected — it targets
+the Worker correctly. Only the binding-confirmation step needs to be
+redone, on the right platform.
+
+**Separate, lower-priority item for a founder decision, not urgent:** what
+to do with the dormant Pages project — leave it (harmless, never live,
+though it now holds three unused Supabase secrets and will keep
+auto-generating failed Preview builds on every future push), reconfigure it
+as a real deployment target, or disconnect/delete it. Not evaluated further
+in this pass.
+
 ## 22. Founder Decisions Required
 
 **New, highest-priority item given Section 18:**
