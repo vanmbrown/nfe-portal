@@ -7,5 +7,12 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
-  }
+  },
+  "routes": [
+    {
+      "pattern": "www.nfebeauty.com",
+      "zone_name": "nfebeauty.com",
+      "custom_domain": true
+    }
+  ]
 }
