@@ -2580,3 +2580,138 @@ No binding change. No DNS change. No Pages-project change. No
 application-code change. The only completed repository action this pass is
 the documentation redaction already recorded (Section 32 addendum, commit
 `4ca0588`) plus this section's own recording commit.
+
+## 34. Custom-Domain Durability Deploy — FAILED, ROLLED BACK (2026-07-22)
+
+**Outcome: the deploy attempt regressed a live route and was rolled back
+immediately.** The underlying `wrangler.jsonc` patch (Section 33.2, branch
+`hotfix/preserve-worker-custom-domain`, commit `1989e7b`) remains valid and
+unmerged into production — the failure was in how this pass built the
+deploy candidate, not in the patch content itself.
+
+### 34.1 Pre-deploy state
+
+- Pre-change Worker version: `1c53b433-231d-4a96-b41d-f6eeefce24ea`, 100%
+  traffic.
+- Branch confirmed to contain exactly one change vs `2eede3b`: the
+  `wrangler.jsonc` routes/custom-domain block. `git diff HEAD --stat`
+  clean, HEAD exactly `1989e7bd009dbbdcf846a65889002b22fee41101`.
+- Fresh artifact scan (re-run against the existing build, not rebuilt):
+  no service-role credential value, no JWT anywhere, no dummy marker, no
+  probe route, no `.dev.vars`.
+- `www.nfebeauty.com/` and `/founder-access` both 200 pre-deploy.
+
+### 34.2 Deploy — route behavior observed
+
+Deployed `2026-07-22T04:48:00Z` via
+`npx wrangler deploy .open-next/worker.js --name nfe-portal`. **The
+destructive route-removal warning did not appear this time.** Instead,
+wrangler's own output explicitly confirmed the route as an active,
+recognized trigger:
+
+```
+Deployed nfe-portal triggers (0.86 sec)
+  www.nfebeauty.com (custom domain - zone name: nfebeauty.com)
+Current Version ID: 087ae467-e154-4b1a-8666-18473e555ae7
+```
+
+This is the first real, deploy-time confirmation (not schema validation,
+not a dry-run, an actual deploy) that the patch's syntax correctly
+preserves the custom domain. Two new, unrelated, non-destructive warnings
+appeared — `workers_dev` and `preview_urls` are now disabled by default
+because a route/custom-domain is now explicitly declared. Neither affects
+`www.nfebeauty.com` or any required customer-facing route; not evaluated
+further.
+
+### 34.3 Regression found — `/focus-group/login` client-side crash
+
+Post-deploy smoke test (status-code level) passed on all 9 required routes
+and both known redirects — identical to pre-deploy baseline. Browser
+validation caught what the status-code check could not: **`/focus-group/
+login` returned HTTP 200 but crashed client-side**, throwing `Error:
+Missing or invalid NEXT_PUBLIC_SUPABASE_URL` and rendering the app's
+generic error boundary ("Something went wrong!") instead of the login
+form.
+
+**Root cause:** this build (`wt-domain-patch` worktree) was built with
+*zero* environment values — no `.env.production` was ever created there,
+because this task was scoped as a pure `wrangler.jsonc` config patch, and
+it was not anticipated that any live route depends on build-time-inlined
+values. `/focus-group/login` is a genuinely client-side page using the
+browser Supabase client (`src/lib/supabase/client.ts`), which requires
+`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` to be inlined
+at build time — the same two public, safe values Section 30's sanitized
+migration candidate deliberately preserved. This build never had them.
+**This is a process gap in how this pass constructed the deploy candidate,
+not a defect in the `wrangler.jsonc` patch itself** — the patch touches
+only routing config and has no relationship to Supabase env values.
+
+### 34.4 Rollback — executed, verified
+
+Per the standing rollback rule, rolled back immediately:
+
+```
+npx wrangler rollback 1c53b433-231d-4a96-b41d-f6eeefce24ea --name nfe-portal
+```
+
+Confirmed: 100% traffic restored to `1c53b433`; `www.nfebeauty.com/` and
+`/focus-group/login` both 200.
+
+**A verification wrinkle worth recording precisely, since it nearly
+produced a wrong conclusion:** the first post-rollback check of `/focus-
+group/login`, done in the same browser tab used throughout this session,
+still showed the identical crash and the identical JS chunk filename as
+before the rollback — which read, at first, like the rollback hadn't
+fixed anything. It was browser-side HTTP caching of an immutable-hashed JS
+chunk from the failed version, not a real post-rollback failure: a
+brand-new, never-used browser tab, navigated fresh to the same URL,
+loaded a **different** chunk filename, logged zero console errors, and
+rendered the actual login form correctly. **The rollback is confirmed
+genuinely successful** — this false alarm is recorded so the same
+caching artifact isn't mistaken for a real regression in a future pass.
+
+### 34.5 Post-rollback confirmation
+
+- All 10 Worker secret binding names unchanged and present (names only,
+  no values): `ADMIN_NOTIFICATION_EMAIL`, `BEEHIIV_API_KEY`,
+  `BEEHIIV_PUBLICATION_ID`, `NEXT_PUBLIC_SITE_URL`, `RESEND_API_KEY`,
+  `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`,
+  `UPSTASH_REDIS_REST_TOKEN`, `UPSTASH_REDIS_REST_URL`.
+- Dormant Pages project: unchanged, no new modification from this pass.
+- No credential rotation, no secret value change, no DNS change, no
+  application-code change occurred at any point in this attempt.
+
+### 34.6 Open question this pass did not resolve
+
+Whether the custom-domain trigger association Cloudflare recorded during
+the successful `087ae467` deploy (34.2) persists at the control-plane
+level now that traffic has been rolled back to a version (`1c53b433`)
+that predates that association, **is not verified either way.** A
+`wrangler rollback` only switches which uploaded version serves traffic
+and, based on its own output, does not touch trigger/route configuration
+— but this is inference from the command's behavior, not a directly
+confirmed fact, and this document does not assert it as one. The live
+domain is confirmed working right now (34.4); whether a *future*
+route-less deploy would once again threaten to remove
+`www.nfebeauty.com` is unresolved until the patch is redeployed
+successfully and observed to hold.
+
+### 34.7 Disposition
+
+- The `wrangler.jsonc` patch on `hotfix/preserve-worker-custom-domain`
+  (commit `1989e7b`) is unchanged, still schema-valid, still not merged
+  into what's currently serving production.
+- **Not redeployed without new explicit authorization.** A corrected
+  retry would need the deploy candidate built with the two public
+  `NEXT_PUBLIC_SUPABASE_*` values present (Section 30's method), and
+  should add `/focus-group/login` — along with any other client-side
+  Supabase-backed page (`/focus-group/enclave/*`, `/focus-group/admin/*`,
+  `/focus-group/profile*`, `/focus-group/messages`, `/focus-group/
+  feedback`, `/focus-group/upload`) — to the required browser-validation
+  route list, since this pass's status-code-only smoke test did not catch
+  the regression; only the browser check did.
+- Current production state: `1c53b433-231d-4a96-b41d-f6eeefce24ea`, 100%
+  traffic, functioning normally, confirmed via a cache-clean browser
+  check. No credential rotation, no secret change, no DNS change, no
+  Pages change, no application-code change, no Founder Access submission
+  occurred at any point in this pass.
