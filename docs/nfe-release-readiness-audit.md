@@ -4,9 +4,12 @@
 confidentiality-priority pass, and a live-production reconciliation pass
 that corrects this document's central working assumption.
 
-**Final disposition (updated 2026-07-21): PROVENANCE RESOLVED — RELEASE BASE
-IS `2eede3b`. Deployment remains on hold pending founder authorization of the
-specific change to ship.**
+**Final disposition (updated 2026-07-22): PROVENANCE RESOLVED — RELEASE BASE
+IS `2eede3b`. One authorized deployment has since shipped: the Supabase
+credential-migration Worker (Section 32). No other change has been deployed
+— the confidentiality hotfix, zero-byte-image fix, and any Maison/content
+work remain on hold pending founder authorization of the specific change to
+ship.**
 
 Production source equivalence to commit `2eede3b` is **confirmed** by a
 build-and-compare pass (Section 20): all 12 routes exact-content match, 6/6
@@ -2207,3 +2210,186 @@ Carried forward, materially affected by Section 18's findings:
    have happened rather than being a future decision.
 
 **No deployment scope has been authorized by this document.**
+
+## 32. Supabase Credential-Migration Deployment — EXECUTED (2026-07-22)
+
+**Authorized scope only:** remove the build-inlined `SUPABASE_SERVICE_ROLE_KEY`
+from the Worker artifact and replace it with a Cloudflare managed secret,
+while preserving the public `NEXT_PUBLIC_SUPABASE_URL` /
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` values already build-inlined on live
+production (Section 30). No application code, content, or unrelated
+configuration changed. No key rotation performed.
+
+### 32.1 Pre-deploy state (captured before deploy)
+
+- Active Worker version before this deploy: `f421ae6e-fefe-43f5-bd16-ad98c09e6b08`
+  (this is the rollback floor referenced in Section 29–30; the deeper
+  pre-migration fallback remains `52d0f695-de1f-47e3-b9dd-a0fa8100e099`).
+- `wrangler secret list --name nfe-portal` confirmed 10 secrets present,
+  including `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+  — added by Vanessa directly to the correct target (the Worker), correcting
+  the Pages/Worker mix-up in Section 31.
+- Candidate at `.claude/worktrees/wt-migration-v2`, HEAD
+  `2eede3bee743ed133440a9f26be59b41cd4e8aa8` (unchanged), re-verified
+  immediately before deploy: `.env.production` exactly 2 lines
+  (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`); no
+  `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_ANON_KEY` in the
+  build environment; `next-env.mjs` production block contains only the 2
+  `NEXT_PUBLIC_*` keys; no probe route; no dummy markers; no `.dev.vars`;
+  `git status --short` clean.
+- Pre-test Supabase baseline: `founder_access_signups` = 15,
+  `subscribers` = 51 (both unchanged from the counts established in Section
+  26 — confirms no drift since the last controlled test).
+
+### 32.2 Deployment
+
+Executed from `wt-migration-v2`, deploying the exact already-built, already-
+scanned artifact (no intervening rebuild, so what was scanned is precisely
+what shipped):
+
+```
+npx wrangler deploy .open-next/worker.js --name nfe-portal
+```
+
+Result: **new Worker version `1c53b433-231d-4a96-b41d-f6eeefce24ea`, 100% of
+traffic, uploaded successfully.**
+
+**A regression risk surfaced in the deploy output and required immediate
+verification before anything else:** wrangler printed a warning that the
+local config (this repo's `wrangler.jsonc`, which declares no `routes`
+block — confirmed in Section prior work) differed from the Worker's remote
+config, which had `routes: [{pattern: "www.nfebeauty.com", zone_name:
+"nfebeauty.com", custom_domain: true}]`, and that deploying would **remove**
+that route. Running non-interactively, wrangler auto-answered "yes" to the
+continue prompt. This is exactly the class of unexpected regression the
+Section 29 rollback rule exists to catch, so it was checked immediately,
+empirically, before any further step:
+
+- `curl -I https://www.nfebeauty.com/` — repeated, cache-busted requests —
+  returned `HTTP/1.1 200`, `x-opennext: 1`, `x-nextjs-cache: MISS` on every
+  call, each with a distinct `CF-RAY` ID and no `Age` / `CF-Cache-Status`
+  header, ruling out a stale edge-cached response. This is direct proof the
+  domain is being actively served by a live Worker execution, not a cached
+  artifact from before the route change.
+- `wrangler deployments status --name nfe-portal` confirmed 100% of traffic
+  is on the new version `1c53b433-231d-4a96-b41d-f6eeefce24ea`.
+- **Conclusion: the custom-domain route to `www.nfebeauty.com` survived the
+  deploy intact.** The wrangler warning reflected a diff-comparison
+  mechanism, not an actual removal in this case. No regression occurred, no
+  rollback was needed. This should still be treated as a standing risk for
+  any *future* deploy from this repo's `wrangler.jsonc` (which still
+  declares no `routes` block) — the same warning will reappear every time,
+  and this verification step should be repeated, not assumed, on every
+  future deploy until the route is either added to `wrangler.jsonc` or the
+  dashboard-managed route is otherwise made durable.
+
+### 32.3 Post-deploy smoke test — PASSED
+
+Status-code check against production, all matching expected pre-deploy
+behavior (same source commit, sanitized env only):
+
+| Route | Result |
+|---|---|
+| `/` | 200 |
+| `/founder-access` | 200 |
+| `/subscribe` | 307 → `/founder-access` (expected redirect) |
+| `/shop` | 200 |
+| `/inci` | 200 |
+| `/products/face-elixir` | 200 |
+| `/products/body-elixir` | 200 |
+| `/sitemap.xml` | 200 |
+| `/founder-access/` | 308 → `/founder-access` (expected trailing-slash redirect) |
+| `/shop/` | 308 → `/shop` (expected) |
+
+Browser-based check on `/founder-access` and `/`: zero console errors, all
+script/style/font assets 200, no failed network requests, no hydration
+warnings. Full form field set rendered correctly (name, email, phone, age
+range, skin-interest checkboxes, product-interest radios, topic request,
+required consent checkbox, newsletter opt-in, submit button) — structurally
+identical to the pre-migration form.
+
+### 32.4 One controlled Founder Access test — SUCCESS (with a self-corrected false start)
+
+Synthetic identity used: email
+`vanessa.mccaleb+nfemigration20260722025638@gmail.com` (Vanessa-controlled
+Gmail alias), name "NFE MigrationPhase1Test", topic-request field carrying
+the marker `MIGRATION-PHASE1-TEST-20260722T025638Z`, required consent
+checked, newsletter opt-in checked. No real customer data used.
+
+**First attempt returned a controlled `400`, not a false positive:** the
+consent and newsletter checkboxes are React-controlled; setting their DOM
+`checked` property directly (via the automation tool's generic form-fill
+path) did not update React's internal state, so the actual submit read
+`false` for consent and the API correctly rejected it —
+`{"error":"Please acknowledge the Privacy Policy to continue."}` — **before
+any database write.** Confirmed via Supabase count immediately after: still
+15, exactly baseline, zero rows created by the rejected attempt. This was a
+test-tooling artifact, not a production defect, and it incidentally
+re-confirms the route's server-side validation runs before the Supabase
+client is ever invoked.
+
+Corrected by using real clicks (not property assignment) on both
+checkboxes, re-verified their checked state via direct DOM inspection, then
+submitted once:
+
+- **HTTP 200**, response body `{"success":true}`.
+- Visible success state rendered: *"Request received. You're on the
+  Founder Access list..."*
+- Zero console errors on submit.
+- `founder_access_signups`: 15 → 16 (exactly +1, one marked row,
+  `privacy_policy_accepted = true`, `created_at` timestamped
+  `2026-07-22 02:59:19 UTC`).
+- `subscribers`: 51 → 52 (exactly +1, one marked row) — confirms the
+  newsletter-opt-in sync path also executed successfully against the new
+  managed-secret credential.
+- **This proves the sanitized Worker's Cloudflare-managed
+  `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_URL` bindings are live, correctly
+  wired, and functionally equivalent to the previous build-inlined
+  credential** — Founder Access remains fully operational after the
+  migration.
+- Beehiiv sync and Resend delivery: **not independently verifiable in this
+  environment**, consistent with every prior pass in this document (no
+  Beehiiv or Resend dashboard/API access available here). Not confirmed,
+  not contradicted.
+
+### 32.5 Cleanup — Supabase confirmed, Beehiiv pending
+
+- Deleted exactly the two marked rows (`founder_access_signups` id
+  `d76d32d2-ff1f-49e9-9c1d-1e7235e9e813`; `subscribers` id
+  `63ebfefc-7e0e-48ce-b20b-30d0c0af092c`), by id, after capturing
+  non-sensitive evidence of each.
+- Re-counted immediately after: `founder_access_signups` = 15,
+  `subscribers` = 51 — **exact return to pre-test baseline**, zero marked
+  rows remaining in either table.
+- **Beehiiv test-subscriber cleanup: not performed — this environment has
+  no Beehiiv access, same limitation noted in Section 26.** If the
+  newsletter sync succeeded, one Beehiiv subscriber record for the alias
+  above remains and requires manual removal via the Beehiiv dashboard.
+  **Pending operator action**, not resolved by this pass.
+- Any Resend email sent to the test alias cannot be withdrawn; the alias is
+  Vanessa-controlled, so this carries no external exposure.
+
+### 32.6 Disposition after this deployment
+
+- **Sanitized Supabase credential migration: COMPLETE.** No service-role
+  credential remains build-inlined in the Worker artifact (verified by
+  artifact scan before deploy, Section 30); the Worker now reads
+  `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_URL` from Cloudflare-managed
+  secret bindings at runtime, proven by the live write in 32.4.
+- **New rollback floor: `1c53b433-231d-4a96-b41d-f6eeefce24ea`** (this
+  deployment). `f421ae6e-fefe-43f5-bd16-ad98c09e6b08` remains the
+  pre-migration fallback if a regression is found later; `52d0f695` remains
+  the deeper historical fallback.
+- **Key rotation of the old service-role credential remains a separate,
+  unauthorized gate**, per Section 29 item 10. Not performed. Not
+  scheduled. Requires explicit founder authorization, to be sought only
+  after this deployment has had time to be observed as stable.
+- **Beehiiv cleanup for the 2026-07-22 test subscriber is outstanding** —
+  see 32.5.
+- **The Cloudflare Pages `nfe-portal` project remains dormant and
+  unaddressed** (Section 31.4) — still a founder decision, not evaluated
+  further here.
+- No other change shipped. The confidentiality hotfix
+  (`hotfix/inci-percentage-exposure`), the zero-byte-image fix, and all
+  Maison/content work remain exactly where Section 22 and Section 31 left
+  them: prepared or pending, not deployed.
