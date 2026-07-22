@@ -2715,3 +2715,127 @@ successfully and observed to hold.
   check. No credential rotation, no secret change, no DNS change, no
   Pages change, no application-code change, no Founder Access submission
   occurred at any point in this pass.
+
+## 35. Custom-Domain Durability Deploy — CORRECTED RETRY, SUCCEEDED (2026-07-22)
+
+**Outcome: the corrected deploy succeeded on every check, including the
+one the prior attempt (Section 34) missed.** `www.nfebeauty.com` is now
+served by a Worker version built from `hotfix/preserve-worker-custom-
+domain` (commit `1989e7b`), with the custom domain confirmed intact and
+`/focus-group/login` — the route that broke last time — confirmed working
+via a genuinely fresh, never-cached browser context.
+
+### 35.1 What was corrected
+
+Prior failed version: `087ae467-e154-4b1a-8666-18473e555ae7` — never
+restored to traffic, remains an inert uploaded version.
+
+Root cause of the prior failure (Section 34.3): that build was made with
+zero environment values. This retry used a fresh isolated checkout at
+`1989e7b` (worktree `wt-domain-patch-v2`, not a reuse of the prior failed
+build output) with exactly the two public values Section 30's sanitized
+migration candidate validated —
+`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — placed only
+in a local `.env.production`, confirmed git-ignored via the existing
+common `.git/info/exclude` rule, never staged, never committed, never
+printed. No server-only value (`SUPABASE_URL`, `SUPABASE_ANON_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY`, any legacy JWT, any `sb_secret_` value) was
+ever placed in this build environment — those remain exclusively
+Cloudflare-managed runtime bindings, unchanged.
+
+### 35.2 Clean rebuild and artifact verification
+
+Removed `.next`, `.open-next`, and `tsconfig.tsbuildinfo` before
+rebuilding (fresh checkout had none of the first two anyway).
+`npm ci` / `npx tsc --noEmit` / `npm run build` /
+`npx opennextjs-cloudflare build` all exit 0.
+
+- `next-env.mjs` production block: exactly
+  `['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY']` — nothing
+  else.
+- The two public values present in client assets (9 files, expected/safe).
+- `SUPABASE_URL` / `SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` all
+  confirmed still read via `process.env.*` in 16 server files each —
+  runtime lookups, not build-inlined.
+- Full JWT scan: 93 JWT-shaped strings found across `.open-next`/`.next`;
+  all identified roles are `anon` (the public key — expected, safe,
+  public-by-design); zero `service_role`.
+- Zero `sb_secret_` occurrences anywhere.
+- Zero dummy markers, zero probe route, no `.dev.vars`.
+- Tracked diff versus commit `1989e7b`: confirmed empty (the incidental
+  `tsconfig.tsbuildinfo` touch from `tsc --noEmit` was explicitly
+  discarded via `git checkout --`, not left dangling as in Section 34).
+- `.env.production` created before the build; `.open-next/worker.js`
+  built after — confirmed by file timestamps, not assumed.
+
+### 35.3 Local browser validation before deploy
+
+Ran the corrected artifact through `wrangler dev --local` (no `.dev.vars`
+— not needed, since these checks only exercise the browser Supabase
+client, which reads only the build-inlined public values, not any
+runtime binding). Checked, in a fresh browser tab, with zero console
+errors on every single one: `/`, `/founder-access`, `/focus-group/login`,
+`/focus-group/enclave`, `/focus-group/upload`, `/focus-group/messages`,
+`/focus-group/feedback`, `/focus-group/profile`,
+`/focus-group/profile/summary`, `/focus-group/admin`,
+`/focus-group/admin/uploads`, `/focus-group/admin/participant/[userId]`,
+`/focus-group/enclave/consent`, `/focus-group/enclave/message`,
+`/focus-group/enclave/resources`, `/focus-group/enclave/thank-you`,
+`/focus-group/enclave/upload` — the full route tree identified in Section
+34.7 as needing coverage. Unauthenticated auth-gated pages correctly
+redirected to the login form (expected behavior, not an error). No form
+submitted, no record created, no customer authentication attempted.
+
+### 35.4 Production deploy
+
+Deployed `2026-07-22T12:52:51Z`. Wrangler's output:
+
+```
+Deployed nfe-portal triggers (1.63 sec)
+  www.nfebeauty.com (custom domain - zone name: nfebeauty.com)
+Current Version ID: 26e4197b-0bd0-4325-bd90-1adaca72bd2d
+```
+
+**No removal warning.** No unexpected binding, compatibility, or
+Pages-project change in the output. New version:
+`26e4197b-0bd0-4325-bd90-1adaca72bd2d`, confirmed at 100% traffic.
+
+### 35.5 Post-deploy verification
+
+- Cache-busted requests: three calls, three distinct `CF-RAY` values,
+  fresh `x-nextjs-cache: MISS` each time, `x-opennext: 1` present, no
+  `Age`/`CF-Cache-Status` staleness markers.
+- Expanded smoke test — every route from Section 34.7's list plus the
+  full `/focus-group/*` tree: all 200 (or expected redirect: `/subscribe`
+  → 307 → `/founder-access`; `/founder-access/` and `/shop/` → 308).
+- **Fresh-browser validation (new browser tab, never used by the prior
+  failed deployment or the local preview):** homepage and Founder Access
+  load with matching new-deploy chunk hashes and zero console errors.
+  **`/focus-group/login` — the route that broke in Section 34 — now
+  loads a genuinely new chunk (`page-cfe9ab5ac586348f.js`, matching this
+  deploy's own upload manifest), logs zero console errors, and renders
+  the actual login form** ("Sign In / Email / Password / Sign In / Don't
+  have an account? Sign up"), not the error boundary. Spot-checked
+  `/focus-group/enclave` and `/focus-group/upload` in the same tab —
+  both clean.
+- All 10 Worker secret binding names unchanged and present (names only).
+- Dormant Pages project unchanged (last-modified timestamp reflects the
+  earlier docs push, not this deploy).
+- No credential rotation, no secret value change, no DNS change, no
+  application-code change, no Founder Access submission, no database or
+  Beehiiv record created at any point in this pass.
+
+### 35.6 Disposition
+
+**Custom-domain durability patch is now live and confirmed working.**
+`www.nfebeauty.com` is served by version `26e4197b-0bd0-4325-bd90-
+1adaca72bd2d`, built from `hotfix/preserve-worker-custom-domain` (commit
+`1989e7b`), with the custom domain declared explicitly in `wrangler.jsonc`
+and confirmed by wrangler's own deploy-time output as an active trigger
+with no removal warning. The open question from Section 34.6 — whether
+the trigger association survives a version rollback — remains untested
+(no rollback occurred this pass), but is no longer the live path forward;
+the durable, declared configuration is what's serving traffic now.
+`1c53b433-231d-4a96-b41d-f6eeefce24ea` and `087ae467-e154-4b1a-8666-
+18473e555ae7` remain available as historical versions, not currently
+serving traffic.
