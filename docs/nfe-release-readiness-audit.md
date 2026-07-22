@@ -2310,11 +2310,13 @@ identical to the pre-migration form.
 
 ### 32.4 One controlled Founder Access test — SUCCESS (with a self-corrected false start)
 
-Synthetic identity used: email
-`vanessa.mccaleb+nfemigration20260722025638@gmail.com` (Vanessa-controlled
-Gmail alias), name "NFE MigrationPhase1Test", topic-request field carrying
-the marker `MIGRATION-PHASE1-TEST-20260722T025638Z`, required consent
-checked, newsletter opt-in checked. No real customer data used.
+Synthetic identity used: email `vanessa.mccaleb+[REDACTED-SYNTHETIC-MARKER]@
+gmail.com` (Vanessa-controlled Gmail alias, full address redacted from this
+document; the unique marker below is sufficient to locate this test in
+Supabase/Beehiiv logs if ever needed), name "NFE MigrationPhase1Test",
+topic-request field carrying the marker
+`MIGRATION-PHASE1-TEST-20260722T025638Z`, required consent checked,
+newsletter opt-in checked. No real customer data used.
 
 **First attempt returned a controlled `400`, not a false positive:** the
 consent and newsletter checkboxes are React-controlled; setting their DOM
