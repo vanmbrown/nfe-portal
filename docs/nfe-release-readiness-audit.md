@@ -2395,3 +2395,188 @@ submitted once:
   (`hotfix/inci-percentage-exposure`), the zero-byte-image fix, and all
   Maison/content work remain exactly where Section 22 and Section 31 left
   them: prepared or pending, not deployed.
+
+## 33. Post-Deployment Hardening — Investigated, Planned, Not Executed (2026-07-22)
+
+Follow-on to Section 32. Scope this pass: read-only reconnaissance, planning,
+and one narrowly authorized documentation redaction only. No deployment, no
+credential rotation or revocation, no binding change, no DNS change, no
+Pages-project change, no application-code change.
+
+### 33.1 Corrected classification — `1c53b433` is not a presumed-safe rollback target
+
+**Ruling, accepted:** `1c53b433-231d-4a96-b41d-f6eeefce24ea` is reclassified
+from "rollback floor" to **PRE-ROTATION REFERENCE VERSION**. It is not
+assumed safe to roll back to once the old Supabase service-role credential
+is revoked.
+
+Basis: Cloudflare's own documentation confirms (a) a Worker version's
+snapshot captures its bindings, (b) `wrangler secret put` (or the dashboard
+equivalent) creates and immediately deploys a new version, and (c) a
+rollback immediately shifts 100% of traffic to the target version. Whether
+`1c53b433` would, if rolled back to post-revocation, run against a frozen
+binding snapshot (broken) or the live current binding (fine) is **not
+resolved by Cloudflare's documentation** — this was surfaced as an open
+question in the prior pass, together with a proposal to test it empirically
+via a live rollback. **That proposed test is withdrawn.** No production
+rollback will be executed as an experiment to determine secret-version
+behavior. `1c53b433` is treated as unverified-and-untrusted post-revocation
+until the real rotation sequence (33.4) reaches the point where it can be
+tested safely as an actual failure-recovery step, not a standalone
+experiment.
+
+The two pre-migration versions, `f421ae6e-fefe-43f5-bd16-ad98c09e6b08` and
+`52d0f695-de1f-47e3-b9dd-a0fa8100e099`, remain independently unsafe post-
+revocation for a different, well-established reason: both have the *old*
+service-role credential build-inlined directly in their own bundled code
+(the `next-env.mjs` mechanism proven in Section 27–28), not read from a
+runtime binding at all. Revoking the underlying key breaks them regardless
+of Worker secret state.
+
+**All three existing versions — `1c53b433`, `f421ae6e`, `52d0f695` — are
+marked DO NOT ROLL BACK TO AFTER CREDENTIAL REVOCATION.**
+
+### 33.2 Custom-domain `wrangler.jsonc` patch — accepted for review, not applied
+
+Exact insertion location in the current 11-line `wrangler.jsonc` (unchanged
+since Section 32): line 10 (`  }`, closing the `assets` object) gains a
+trailing comma; the `routes` block is inserted immediately after it, before
+the file's closing `}` (currently line 11).
+
+```jsonc
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "routes": [
+    {
+      "pattern": "www.nfebeauty.com",
+      "zone_name": "nfebeauty.com",
+      "custom_domain": true
+    }
+  ]
+}
+```
+
+Verified programmatically (`JSON.parse`, not by eye) that the patched file
+parses cleanly. Confirmed: no other key changes; no binding change (`assets`
+binding untouched, `routes` is a distinct config surface); no
+`compatibility_date`/`compatibility_flags` change; no Pages-project
+change (this file has no relationship to the separate Pages project).
+`wrangler.jsonc` itself was not modified — this patch exists only in this
+document and in an in-memory verification, pending a separate future commit
+and a separate future deployment, both requiring explicit authorization.
+
+### 33.3 Server-credential rotation — decided, not executed
+
+Decision: rotate using a modern Supabase **`sb_secret_...`** server key,
+retaining the existing Worker binding name `SUPABASE_SERVICE_ROLE_KEY`. No
+application-code change required (Section 32's reconnaissance already
+established `createClient()` treats either key format as an opaque
+credential; confirmed against Supabase's own current documentation, not
+assumed). Explicitly out of scope: the Supabase JWT signing secret, the
+anon/publishable key, `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` — none of these are touched by this
+rotation.
+
+### 33.4 Revised rotation sequence — prepared for later explicit authorization
+
+1. Record current production state: active Worker version, Founder Access
+   aggregate count, subscriber aggregate count, current binding names,
+   production route smoke status.
+2. Vanessa creates a new Supabase `sb_secret_...` key (this agent does not
+   see or enter the value).
+3. Vanessa updates only the Cloudflare Worker secret
+   `SUPABASE_SERVICE_ROLE_KEY`.
+4. Record the new Worker version created by the secret update (per 33.1,
+   this update itself mints and immediately deploys a new version).
+5. Confirm: `www.nfebeauty.com` remains attached; active traffic is 100% on
+   the new version; all required binding names remain present; no
+   application route regression (repeat the Section 32.2/32.3 method).
+6. Run one controlled synthetic Founder Access submission (fresh marker,
+   fresh timestamp, Vanessa-controlled alias; use real clicks, not
+   property-set, on the consent/opt-in checkboxes — the Section 32.4
+   lesson).
+7. Confirm: HTTP 200, visible success state, Supabase insert, subscriber
+   insert, Beehiiv sync where observable, Resend where observable, Upstash
+   where observable.
+8. Delete only the synthetic Supabase records from this test.
+9. Remove only the synthetic Beehiiv subscriber from this test.
+10. Revoke the old Supabase server credential.
+11. Run a second controlled synthetic Founder Access submission.
+12. Confirm the second submission succeeds using the new credential, after
+    old-key revocation.
+13. Clean up the second synthetic Supabase and Beehiiv records.
+14. Record the active post-revocation Worker version as the new rollback
+    floor — superseding `1c53b433`'s PRE-ROTATION REFERENCE VERSION status.
+15. Mark every Worker version that may reference the old credential —
+    `1c53b433`, `f421ae6e`, `52d0f695`, and any version created between
+    steps 3 and 10 — as **DO NOT ROLL BACK AFTER CREDENTIAL REVOCATION**.
+
+None of these steps have been executed. This sequence supersedes the
+draft runbook in this document's prior pass (which included the now-
+withdrawn live-rollback experiment).
+
+### 33.5 Failure recovery
+
+**If the new credential fails before the old credential is revoked:**
+restore the previous working Cloudflare secret value; confirm the
+resulting Worker version becomes active; re-test Founder Access; do not
+revoke anything.
+
+**If the new credential fails after the old credential is revoked:** do not
+roll back to `f421ae6e`; do not roll back to `52d0f695`; do not assume
+`1c53b433` is safe; correct the managed Worker secret with a valid active
+Supabase server key; allow Cloudflare to create a new Worker version;
+validate Founder Access again. Recovery must occur through the managed
+secret, not through an older build-embedded credential.
+
+### 33.6 Dormant Cloudflare Pages project — disposition
+
+**Ruling: B. SAFE TO DISCONNECT FROM GITHUB BUT RETAIN TEMPORARILY.**
+Supersedes this document's prior-pass recommendation (A, delete after
+export). Retain the project as-is for now. Do not disconnect, rename, or
+delete until: credential rotation (33.4) is complete; custom-domain
+durability (33.2, committed and deployed) is complete; and no
+custom-domain dependency is separately confirmed absent in the dashboard.
+Findings supporting eventual disconnection remain as recorded in Section
+32/prior pass: 100% of the Pages project's visible deployment history is
+Preview/Failure, its configured production branch (`week-4-complete`)
+does not exist in this repository, its own domain has never successfully
+served a response, and neither `www.nfebeauty.com` (served by the Worker)
+nor the apex `nfebeauty.com` (served by Vercel, confirmed by `Server:
+Vercel` / `X-Vercel-Id` response headers — a third infrastructure surface,
+noted for awareness, not evaluated further) depend on it.
+
+### 33.7 Env-file hygiene patch — prepared, not committed
+
+```gitignore
+# Environment variables
+.env
+.env.local
+.env.production
+.env.production.local
+.env.development.local
+.env.test.local
+
+# Wrangler local dev secrets
+.dev.vars
+.dev.vars.*
+
+# Preserve tracked templates
+!.env.example
+!.env.local.example
+```
+
+Not applied to the tracked `.gitignore`. `.env.example` /
+`.env.local.example` remain tracked either way (none of the ignore patterns
+are wildcards), the explicit `!` negations are included per instruction as
+defensive documentation.
+
+### 33.8 State at end of this pass
+
+No production deployment. No credential rotation. No credential revocation.
+No binding change. No DNS change. No Pages-project change. No
+application-code change. The only completed repository action this pass is
+the documentation redaction already recorded (Section 32 addendum, commit
+`4ca0588`) plus this section's own recording commit.
