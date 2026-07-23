@@ -3266,3 +3266,34 @@ complete.
   unused Supabase credentials, but its GitHub integration remains active
   and will continue producing failed Preview builds on every push until
   Vanessa completes 41.3 manually.
+
+### 41.6 GitHub auto-deploy — completed by Vanessa (2026-07-23)
+
+Vanessa completed 41.3 directly in the dashboard and reported the
+resulting state:
+
+- Automatic production deployments: **disabled**
+- Preview deployments: **None**
+- Git repository connection: **may remain connected** (the repo link
+  itself doesn't need to be severed — disabling both deployment triggers
+  is sufficient to stop the failed-build side effect, which was always
+  the actual problem, not the mere existence of the connection)
+
+**Independent verification limitation, stated plainly:** this agent
+still has no CLI or dashboard read path to confirm deployment-trigger
+settings directly (the capability gap identified in 41.3 — `wrangler
+pages download config` was re-attempted and, as before, surfaces only
+`pages_build_output_dir` / `compatibility_date` / plain build vars, not
+branch or preview-trigger configuration). This is recorded as reported by
+Vanessa, the same standing treatment given to every Beehiiv cleanup
+confirmation in this document, not as independently verified. The
+concrete, checkable confirmation is behavioral: no new Preview deployment
+entry should appear in `wrangler pages deployment list --project-name=nfe-portal`
+after the next routine push to this repository. Worth a quick check after
+the next commit lands, not urgent enough to force a push solely to test
+it.
+
+**Disposition revised:** dormant Pages project cleanup is now complete as
+authorized — unused Supabase variables removed (41.2), automatic
+deployments disabled (41.6, as reported). Project remains retained, not
+deleted, not renamed, per standing instruction.
