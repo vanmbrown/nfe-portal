@@ -3972,3 +3972,202 @@ console or hydration failure; binding loss.
 **Rollback target: `e881dde9-b248-4bc1-b698-0e0b1fdc0fcb`.** Per
 instruction, older versions are not assumed safe — this is the sole
 designated floor for any Wave 1 deploy.
+
+## 46. Wave 1 Cherry-Pick Sequence — Empirically Verified, One Correction Found (2026-07-23)
+
+**Re-verification pass, analysis only.** Actually attempted the proposed
+10-commit Wave 1 sequence in a disposable scratch branch (created from
+`8a3ce33`, deleted after use, never pushed) rather than assuming it would
+apply cleanly.
+
+### 46.1 The proposed order does not apply cleanly as given
+
+Cherry-picking `27b7e51 → 4a1cc89 → ad393fd → a847e60 → 8d1ca9f → 7f31a52`
+in that order produces a real conflict at `7f31a52`: a content conflict in
+`docs/nfe-contrast-token-candidates.md` and a modify/delete conflict in
+`docs/nfe-founder-decisions-2026-07-19.md` ("deleted in HEAD and modified
+in 7f31a52"). Root cause, traced precisely: `7f31a52` modifies
+`docs/nfe-founder-decisions-2026-07-19.md`, but that file is only ever
+*created* by two commits this pass's prior classification had labeled
+"documentation-only" and excluded — `824a315` and `33d11ed`. Checked
+directly: both touch `docs/nfe-founder-decisions-2026-07-19.md`,
+`docs/nfe-contrast-token-candidates.md`, and (for `824a315` only)
+`docs/nfe-product-size-inventory.md` — a correction to this document's
+own earlier classification, which had characterized the 33 "docs-only"
+commits as touching only `docs/nfe-release-readiness-audit.md`. That
+characterization was accurate for most of them but not these two.
+
+### 46.2 Corrected sequence — applies cleanly end to end
+
+```
+27b7e51
+4a1cc89
+824a315   <- inserted, required
+33d11ed   <- inserted, required
+ad393fd
+a847e60
+8d1ca9f
+7f31a52
+0751900
+55c9f26
+3c1817b
+5f6303b
+```
+
+All 12 commits applied with zero conflicts in that order, verified by
+actually running the sequence, not by inference. Both `824a315` and
+`33d11ed` are pure `docs/` changes (zero `src/`/`public/` content),
+carry zero runtime or build effect, and their inclusion is what makes
+`7f31a52` apply cleanly.
+
+### 46.3 The `4a1cc89` / production-lineage overlap resolves correctly, confirmed not assumed
+
+`4a1cc89` deletes the same four zero-byte image files the production
+lineage (`4bd7cd6`) already deleted independently. Cherry-picking
+`4a1cc89` onto `8a3ce33` applies as a **7-file commit instead of the
+original 11** — git silently and correctly treats the four
+already-satisfied file-deletion hunks as no-ops, applying only the
+still-needed changes (the three `docs/` additions, `shop/page.tsx`,
+`elixir-editorial.ts`, and the `images: []` cleanup in
+`body-elixir.ts`/`face-elixir.ts`). Verified the resulting tree
+directly: `images: []` present in both content files with `4a1cc89`'s
+explanatory comment intact, all four zero-byte files remain absent (not
+resurrected), and the banned-copy fix (`"Founder Access opens first"`)
+present with zero remaining `"Pre-order pathway"` occurrences.
+
+### 46.4 Final diff confirmed clean
+
+`git diff --stat 8a3ce33..HEAD` on the verified 12-commit scratch branch:
+37 files changed, matching intended Wave 1 scope exactly — `.gitignore`,
+6 internal working docs, homepage hero images (5), Our Story images (2)
++ page + 7 Maison components, token-specimen page, favicon.ico + icon.png,
+`robots.ts`, the `shop/page.tsx` copy fix, `elixir-editorial.ts`,
+`body-elixir.ts`/`face-elixir.ts`, `copy-governance.ts`, the three
+style/token files, `tailwind.config.js`. **`wrangler.jsonc` untouched.**
+No `package.json`, `package-lock.json`, `next.config.*`, `tsconfig.json`,
+`middleware.*`, or `.env*` file appears anywhere in the diff.
+
+**Corrected Wave 1 recommendation: 12 commits, not 10** — insert
+`824a315` and `33d11ed` at the position shown in 46.2. This supersedes
+the 10-commit list in Section 45.16.
+
+## 47. Wave 1 Candidate — Full Build, Live Behavioral, and Accessibility Re-Verification (2026-07-23)
+
+Fresh isolated build of the verified 12-commit candidate (not reused from
+memory): `npm ci` / `tsc --noEmit` / `next build` / `opennextjs-cloudflare
+build` all exit 0, 63 routes generated. Two build warnings, both
+confirmed pre-existing and unrelated to this candidate: the standing
+Next.js workspace-root inference notice, and a Sass `@import` deprecation
+warning whose line-number citation (`globals.scss:1`, `@import
+'./tokens.scss'`) points to code untouched by any Wave 1 commit — an
+earlier partial-log comparison suggested this might be newly introduced;
+resolved with certainty by reading the warning's own location, not by
+re-trusting the original commit message uncritically.
+
+**Full route matrix** (`/`, `/shop`, `/our-story`, `/science`, `/inci`,
+`/ritual`, `/journal`, `/concierge`, `/products/face-elixir`,
+`/products/body-elixir`, `/founder-access`, `/dev/token-specimen`,
+`/subscribe`, `/discovery`, `/skin-ritual-quiz`, `/focus-group/login`,
+`sitemap.xml`): correct HTTP status on every route, zero console errors
+on every one checked in a fresh browser. `/philosophy` as a literal path
+does not exist — the site's "Philosophy" nav item resolves to
+`/our-story`, already covered.
+
+**Our Story dialog — tested live, not just read from source:** clicked
+"Play the film," confirmed via direct DOM inspection that focus moved to
+the Close button, `document.body.style.overflow` became `"hidden"`,
+`role="dialog"`/`aria-modal="true"` present; pressed Escape, confirmed
+the dialog unmounted, `document.body.style.overflow` was restored to
+`""`, and focus returned to the exact trigger button
+(`"Play the film→"`). Full behavioral confirmation, not inference.
+
+**Body Elixir re-checked for a Face-Elixir-style size contradiction:**
+none found. Its FAQ ("Can Body Elixir replace body lotion?", "Will it
+feel greasy...", "When should I apply it?", "Is Body Elixir available to
+order yet?", "Can I use it with Face Elixir?") contains no size question
+at all, confirmed by direct render on this exact candidate.
+
+### 47.1 Fresh Lighthouse
+
+| Route | Perf | A11y | Best Practices | SEO | LCP | Console errors |
+|---|---|---|---|---|---|---|
+| `/` | 94 | 96 | 100 | 100 | 3.1s | 0 |
+| `/our-story` | 96 | 100 | 100 | 100 | 2.8s | 0 |
+| `/science` | 97 | **92** | 100 | 100 | 2.6s | 0 |
+
+**Two specific, real accessibility findings on `/science`, neither
+introduced by any Wave 1 commit (science page is untouched by all 12):**
+
+1. `aria-controls="science-panel"` on the tab button
+   (`ScienceIntelligence.tsx`) references an element ID that does not
+   exist anywhere in the component — confirmed by direct source search,
+   zero matches for `id="science-panel"`.
+2. Color-contrast failure: a small-caps eyebrow label
+   (`text-nfe-gold` on white) measures 2.32:1, against a 4.5:1 AA
+   requirement. This is the same known `--nfe-gold`-on-light-ground
+   failure mode that motivated the ratified `--maison-*` state-color
+   tokens in `0751900`/`7f31a52` — those fixes were scoped to the
+   Maison-token surfaces (Our Story, the specimen) and were never applied
+   to this pre-existing science-page instance.
+
+Neither blocks Wave 1. Both are genuine Wave 2 findings, recorded for
+whenever the science page is scheduled.
+
+### 47.2 Asset, secret, and confidentiality scan — two findings outside Wave 1's own diff
+
+Required scans run against the verified candidate:
+
+- Zero-byte files across `public/`, `src/`, `app/`, `components/`,
+  `content/`, `data/`: **one found — `src/components/ui/Dropdown.tsx`.**
+  Confirmed already zero-byte on current production (`8a3ce33`) itself,
+  not introduced by anything in this pass. Its only reference anywhere
+  in the tree is a commented-out import in `ScienceTab.tsx` — genuinely
+  unused, matching the pattern of several other dead product-page
+  components already documented in this audit (`IngredientList.tsx`,
+  `FaceElixirSections.tsx`, `BenefitsTable.tsx`, `UsageGuide.tsx`, and
+  now also `ShopCard.tsx`, confirmed unimported by anything — this
+  "Coming Soon" copy the search below surfaced is not currently rendered
+  anywhere live).
+- No font binary tracked anywhere in the candidate (`git ls-files | grep
+  -Ei '\.(ttf|otf|woff|woff2)$'` returns nothing).
+- Secrets/API-key grep: every hit is a legitimate `apiKey` local
+  variable sourced from `process.env.RESEND_API_KEY` inside the Resend
+  client constructors — no literal secret value present anywhere.
+- `.gitignore` confirmed protecting `.env.production`,
+  `.env.production.local`, `.dev.vars`, `.dev.vars.*`, and
+  `NFE_Developer_Handoff/` — the last verified active via
+  `git check-ignore -v`, not just by reading the pattern.
+- Expanded banned/urgency-language search (`pre-order`, `coming soon`,
+  `waitlist`, `reserve now`, `limited time`, `hurry`, `selling fast`)
+  across customer-facing `src/`: zero live "pre-order" occurrences
+  (confirms the fix holds); "waitlist" hits are all internal
+  route/table/rate-limiter identifiers, not customer copy; "coming soon"
+  appears twice — once in the confirmed-dead `FaceElixirSections.tsx`,
+  once in `ShopCard.tsx` (also confirmed unimported by anything under
+  `src/app/**` — dead code, not currently rendered). Neither is
+  live-customer-visible today. No "reserve now," "limited time,"
+  "hurry," or "selling fast" found anywhere.
+- **One genuine confidentiality finding, outside Wave 1's own diff,
+  reported without reproducing the value:** a source-code comment in
+  `src/components/nfe/NFESkinLayersMap.tsx` names a specific
+  formulation percentage for a named active ingredient. Confirmed
+  already present on current production (`8a3ce33`) — not introduced by
+  any Wave 1 commit. Confirmed the component **is live**, rendered by
+  `/skin-strategy` (not dead code, unlike the other component findings
+  in this section). The value sits in a source comment, not in rendered
+  page output, so it does not reach a site visitor — but it is
+  committed, tracked, and readable by anyone with repository access,
+  which is exactly what the standing project rule against committing
+  ingredient percentages exists to prevent. **Remediation needed:**
+  redact the specific percentage from the comment. Not part of Wave 1;
+  recorded here as a pre-existing production-repository finding for
+  separate, narrow remediation.
+
+### 47.3 Disposition
+
+No file was modified, no commit was made to any real branch, no branch
+was pushed, and no deployment occurred during this verification pass.
+The scratch branch used to test the cherry-pick sequence was deleted
+after use. The corrected 12-commit Wave 1 sequence (46.2) is the
+verified recommendation going forward, superseding the 10-commit list
+in Section 45.16.
