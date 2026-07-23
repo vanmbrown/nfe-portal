@@ -3490,3 +3490,485 @@ No Founder Access submission, no Supabase/Beehiiv/Resend record created,
 no credential change, no Worker secret change, no DNS change, no
 Pages-project action, no application-code change beyond the two
 authorized hygiene commits.
+
+## 45. Maison Release-Readiness Plan (2026-07-23)
+
+**Analysis, lineage, and planning only — nothing in this section was
+executed.** No release branch created, no merge, no deploy, no secret or
+Supabase change, no form submission, no data write. Documentation-only
+commit.
+
+### 45.1 Repository state and lineage map
+
+- Current branch: `feature/nfe-digital-maison-upgrade`, HEAD `0513e03`,
+  clean.
+- Local branches: `audit/production-readiness`, `chore/remove-dead-assets-and-fonts`,
+  `feature/nfe-digital-maison-upgrade`, `hotfix/inci-percentage-exposure`,
+  `hotfix/preserve-worker-custom-domain`, `main`,
+  `release/production-hygiene-assets-fonts`, and **`wip/our-story-maison`
+  — local-only, no remote counterpart, not otherwise referenced in this
+  audit. Not investigated further this pass; flagged for awareness.**
+- Merge base, `feature/nfe-digital-maison-upgrade` ↔
+  `release/production-hygiene-assets-fonts`: **`2eede3b`**.
+- 45 commits unique to the feature branch; 3 unique to the release branch
+  (`1989e7b`, `4bd7cd6`, `8a3ce33` — the durability patch and its two
+  hygiene cherry-picks, none of which touch the feature branch at all).
+  Zero merge commits on either side since the merge base.
+- Tree/patch equivalence, not just messages: `44c75ab`/`4bd7cd6` and
+  `84963d1`/`8a3ce33` confirmed content-identical pairs (Section 44.1).
+  No other cherry-pick-equivalent commits found between the two branches.
+
+### 45.2 Production source commit
+
+**Production source branch/HEAD: `release/production-hygiene-assets-fonts`
+@ `8a3ce33`.** Tree relationship, confirmed by direct ancestry check (not
+inferred from the Worker version): `2eede3b` → `1989e7b` (adds only the
+custom-domain routes block, diff confirmed 1 file/8-1 lines) → `4bd7cd6`
+(cherry-pick of `44c75ab`) → `8a3ce33` (cherry-pick of `84963d1`). This is
+the exact lineage the live Worker `e881dde9`/currently `2422efbc`
+(post-rotation, code unchanged) was built from.
+
+### 45.3 Commit inventory — all 45 unique feature-branch commits
+
+**33 of 45 are documentation-only** (`docs/nfe-release-readiness-audit.md`
+exclusively) — this session's entire audit trail. Zero customer-facing or
+infrastructure impact; production-safe by construction; not itemized
+individually here (see the document's own section-by-section history for
+each).
+
+**12 touch actual source.** Classification and disposition:
+
+| Commit | Touches | Area | Disposition |
+|---|---|---|---|
+| `2474aff` | `scripts/closeout-founder-access-production.mjs` | internal tooling, not app code | EXCLUDE (irrelevant to a release — not deployed either way) |
+| `fc5454f` | `CLAUDE.md`, archived handoff doc | agent orientation / docs | INCLUDE (harmless, non-functional) |
+| `4a1cc89` | product images + content, shop copy, elixir-editorial | **fixes a currently-live production defect** | INCLUDE — high priority, see 45.3.1 |
+| `ad393fd` | `globals.scss`, `nfe-tokens.css` | Maison token bridge, visually inert | INCLUDE |
+| `a847e60` | `copy-governance.ts`, `tokens.scss`, `tailwind.config.js` | tailwind bridge + copy scanner, additive only | INCLUDE |
+| `8d1ca9f` | token-specimen page, `robots.ts` | internal review surface | INCLUDE |
+| `7f31a52` | token-specimen, `icon.png`, shop, tokens, tailwind | favicon + muted token + status copy | INCLUDE |
+| `0751900` | `nfe-tokens.css` | state-color ratification, unconsumed | INCLUDE |
+| `55c9f26` | `favicon.ico` | 16px optical correction | INCLUDE |
+| `3c1817b` | Our Story page + Maison components + images | editorial pilot | INCLUDE (2 minor copy notes, 45.6) |
+| `5f6303b` | homepage hero images + `page.tsx` | hero fidelity fix | INCLUDE |
+| `27b7e51` | `.gitignore` | env-file hygiene | **INCLUDE — must be explicit; release base predates it (45.11)** |
+
+No commit in this list depends on another outside this same list; no
+commit changes build or Cloudflare infrastructure behavior except
+`27b7e51` (git-tracking only, no runtime effect) and the already-shipped
+`1989e7b`/hygiene pair (already in production); none touches
+forms/data-flow/commerce except `4a1cc89` (copy only, no logic change);
+none includes unlicensed assets (the opposite — `3c1817b`/`5f6303b` add
+real, licensed, optimized photography; no font binary was added by any of
+these 12).
+
+#### 45.3.1 `4a1cc89` — a currently-live finding, not a hypothetical
+
+This commit, dated 2026-07-19, independently fixed the exact zero-byte
+product-image problem this audit later rediscovered and fixed separately
+in Section 39/43/44 (`44c75ab`) — **more thoroughly**, since it also
+empties the now-dangling `images: []` arrays in
+`body-elixir.ts`/`face-elixir.ts` with an explanatory comment, where the
+production-side fix left the string references in place (Section 44's
+own disposition explicitly deferred this as out of scope).
+
+**More importantly, it fixed a banned copy phrase** (F-Copy-01):
+`"Pre-order pathway in preparation"` → `"Founder Access opens first"`, in
+`src/app/shop/page.tsx` and `src/content/atelier/elixir-editorial.ts`.
+**Checked directly against live production: the banned phrase is still
+there right now** —
+```
+curl -s https://www.nfebeauty.com/shop | grep -o "Pre-order pathway in preparation"
+```
+returns a match. This is a real, live, currently-active issue,
+independent of any Maison release decision, sitting unfixed on
+production purely because the fix landed on the feature branch instead
+of being deployed. Confirmed via the brand/copy review agent (Section
+45.6) that the fix holds cleanly on the feature branch, with zero
+remaining "pre-order"/"preorder" occurrences anywhere in `src/`.
+
+### 45.4 Approved-work re-verification
+
+All four previously-approved items reconfirmed independently
+releasable, fresh this pass, not carried forward from memory:
+
+**A. Our Story pilot (`3c1817b`).** Hero/founder imagery real (2000×2000
+and 666×841 WebP, not placeholders). `StoryHero.tsx` read in full:
+autoplay confirmed absent (video only mounts on click, no autoplay query
+param); dialog implementation correct — `role="dialog"` /
+`aria-modal="true"`, focus moves to the Close button on open, Escape
+handler wired, focus returns to the trigger button on close, body-scroll
+lock applied and restored on cleanup. No named diagnosis, prescription
+drug, tretinoin, or chemical peel anywhere in the page or its Maison
+component dependencies (confirmed by the brand/copy agent, full-text
+review). Two minor copy notes only (45.6), neither blocking.
+
+**B. Homepage hero fidelity fix (`5f6303b`).** All 5 static responsive
+variants present and sized as documented (960w/1600w/2200w desktop,
+828w/1920w mobile). Route-scoped by the commit's own account
+("`next.config.mjs` untouched, Cloudflare/OpenNext untouched, no other
+image on the site affected") — confirmed no other route's image handling
+was touched. No runtime-optimizer regression: this fix specifically
+bypasses the runtime optimizer for this one image, and Lighthouse
+(45.13) shows no regression. No unrelated homepage redesign bundled —
+diff confined to the hero markup.
+
+**C. Favicon fix (`55c9f26`).** `favicon.ico` (7.4KB) and `icon.png`
+(29.9KB, unchanged high-res source) both present. No unrelated metadata
+change in either commit's diff.
+
+**D. Token specimen / Phase 1 infrastructure (`8d1ca9f` + `ad393fd` +
+`a847e60` + `7f31a52` + `0751900`).** Directly verified at HEAD, not
+assumed: `/dev/token-specimen` has an explicit
+`if (process.env.NODE_ENV === 'production') { notFound() }` guard;
+confirmed 404 in an actual production build of this branch, not just in
+source; `noindex`/`nofollow` metadata present; absent from
+`sitemap.ts`; `robots.ts` disallows `/dev/`; not referenced by any
+component (Header/Footer/nav). `--nfe-gold` confirmed unchanged at
+`#C6A664`. `--maison-*` consumption confirmed scoped to exactly: the
+token-specimen page, the Our Story page and its Maison component family,
+and the (non-rendering) copy-governance scanner — **zero other
+production component consumes any Maison token.**
+**Recommendation: this infrastructure should ship now, alongside Our
+Story** — it exists specifically to support that one approved pilot
+surface, is proven inert everywhere else, and holding it back would mean
+holding back Our Story too, since Our Story depends on it.
+
+### 45.5 Page-by-page readiness matrix
+
+All required routes built fresh (feature-branch HEAD, clean isolated
+checkout, public Supabase values only) and validated via `wrangler dev`
+local preview plus a fresh browser context — HTTP status, console
+errors, and hydration warnings checked on every one:
+
+| Route | HTTP | Console | Recommendation |
+|---|---|---|---|
+| `/` | 200 | clean | READY |
+| `/our-story` | 200 | clean | READY |
+| `/founder-access` | 200 | clean | READY (unchanged from production, 45.8) |
+| `/subscribe` | 307→`/founder-access` | clean | READY |
+| `/shop` | 200 | clean | READY |
+| `/science` | 200 | clean | READY (45.7 — contrary to an initial agent concern, see below) |
+| `/inci` | 200 | clean | READY (page metadata title is generic "NFE Beauty" — cosmetic nitpick, not blocking) |
+| `/journal` | 200 | clean | READY |
+| `/concierge` | 200 | clean | READY |
+| `/discovery` | 200 | clean | READY |
+| `/skin-ritual-quiz` | 200 | clean | READY |
+| `/products/face-elixir` | 200 | clean | READY WITH NARROW FIX — size-copy contradiction, 45.9 |
+| `/products/body-elixir` | 200 | clean | READY |
+| `/focus-group/login` | 200 | clean | READY |
+| `/focus-group/enclave` | 200 (redirects to login, unauthenticated) | clean | READY |
+| `/focus-group/upload` | 200 (redirects to login, unauthenticated) | clean | READY |
+| `sitemap.xml` | 200 | — | READY |
+| `/dev/token-specimen` | 404 (by design) | — | READY |
+| `/founder-access/`, `/shop/` | 308 redirect | — | READY |
+
+No route was marked READY on build success alone — every route above
+was checked in a real browser for console errors and hydration warnings
+specifically, per instruction.
+
+### 45.6 Brand and copy review
+
+Full findings from a dedicated grep-and-read pass across every
+customer-facing file touched by the 12 code commits, plus a targeted
+red-flag-term sweep across all of `src/`. **Zero FLAG-level (confirmed)
+doctrine violations.** Two MINOR CONCERN items, both on
+`src/app/our-story/page.tsx`:
+
+- Line 86: "treat when needed with your dermatologist" — sits inside the
+  emotional founder narrative rather than a disclaimer block. Does not
+  claim NFE treats anything, but the word choice is worth a second
+  editorial look given how central this page is.
+- The five-paragraph founder narrative (lines 42–89) is dense with
+  personal history — appropriate for a dedicated "Our Story" page, but
+  worth confirming against "founder intimacy without overexposure." The
+  founder pull-quote itself (`MaisonFounderNote`) is short and restrained
+  (35 words) and raises no concern.
+
+F-Copy-01 (banned "pre-order" language) confirmed fixed cleanly on the
+feature branch, with zero "pre-order"/"preorder" occurrences anywhere in
+`src/` outside the governance scanner's own banned-term list — **and
+confirmed still live on production right now** (45.3.1). "Well-aging,
+not anti-aging" and the required "does not diagnose, treat, cure, or
+prevent disease" cosmetic disclaimer are used consistently and
+correctly throughout. No anti-aging claim, no medical/diagnostic
+language, no urgency/discount language, no unsupported ingredient claim
+found in any of the 12 commits' customer-facing output.
+
+### 45.7 Science page review
+
+`/science` → `ScienceIntelligence.tsx`, a 1,609-line client component.
+Fully interactive (real `useState`-driven quiz: skin type + concerns →
+weighted scoring → one of 6 named profiles → matched actives → ritual
+guidance) — logic-complete, not stubbed. Disclaimers present three
+times, including "does not diagnose, treat, cure, or prevent any medical
+condition." Ingredient claims consistently hedged ("may notice,"
+"supports," never "eliminates"/"reverses"/"guaranteed"). Zero
+percentage/concentration values anywhere on the page. Zero
+Supabase/fetch/POST calls — page explicitly states selections are
+"interpreted locally on this page only." No `<form>` element anywhere.
+No custom modal, so no keyboard-trap risk.
+
+**An initial investigation pass flagged this page as blocked because
+"the whole feature branch currently fails production builds," citing
+older narrative elsewhere in this document.** That claim was checked
+directly rather than accepted: `npx tsc --noEmit` and `npm run build`
+were both run fresh against the current feature-branch HEAD in an
+isolated checkout and **both exit 0, cleanly, with all routes
+generated.** The claim was based on stale historical text in this
+document describing a since-resolved past state, not current reality.
+
+**Recommendation: SHIP NOW.** The page itself needs no content or logic
+change; the one cited blocker does not exist at current HEAD.
+
+### 45.8 Founder Access review
+
+`git diff 1989e7b..HEAD -- src/app/founder-access src/app/api/founder-access`
+returns **zero lines.** Founder Access — page, API route, form fields,
+consent language, newsletter opt-in, validation, redirects, styling — is
+byte-identical to what is already live in production. No feature-branch
+change touches it at all. Commercial/payment phase confirmed still
+paused: no Stripe dependency in `package.json`, no
+checkout/payment/purchase route anywhere in `src/app/api`, every
+"checkout"-adjacent string found is explicit inactive-copy ("Checkout is
+inactive," "not a checkout aisle," "not a live refill checkout flow").
+
+**There is nothing to include or exclude — Founder Access is not a
+release decision for this branch.** It carries zero incremental risk
+because it carries zero incremental change.
+
+### 45.9 Product page review
+
+Face Elixir and Body Elixir both render correctly, real assets, correct
+brand voice, "PRE-COMMERCE / Ordering is not live yet" clearly stated,
+no payment activation. **One real, live, customer-visible contradiction,
+confirmed by direct browser render, not just grep:** the Face Elixir
+page's own FAQ asks *"How long will a 30 ml or 50 ml bottle last?"*
+while the product's own data (`face-elixir.ts`) declares a single 30ml
+SKU. This exact text is visible to any visitor today. **This is not new
+work introduced by the Maison branch — it exists identically on current
+production right now** (`FaceElixirFAQ.tsx` is unchanged by any of the
+12 code commits). `docs/nfe-product-size-inventory.md` (added by
+`4a1cc89`) documents the conflict precisely and marks both products'
+final sizes **UNCONFIRMED**, explicitly stating no size copy was changed
+pending a founder decision — it also separately flags Body Elixir's
+125ml/75ml figures as originating from an external design-package
+reference, not from anything in this repository's source (Body Elixir's
+in-repo content is internally consistent at 200ml). A parallel dead-code
+file, `FaceElixirSections.tsx`, carries a third, different longevity
+claim for the same 50ml size and is confirmed unimported anywhere — safe
+to leave untouched or delete, not customer-facing either way. No formula
+percentage is exposed anywhere in product content. No dead
+IngredientList/concentration UI was revived by anything on this branch.
+
+**Recommendation: READY EXCEPT SIZE COPY.** Do not ship any change to
+product-page copy until sizes are founder-confirmed. This does not block
+a release that excludes product-page content — it is isolated to
+`/products/face-elixir` and `/products/body-elixir` only.
+
+### 45.10 Asset and license review
+
+No Garamond binary reintroduced anywhere on the feature branch (confirmed
+absent, same as production). No removed orphan JPG reintroduced — `4a1cc89`
+deleted the same four files at the git level (not merely emptied to
+0 bytes), confirmed via `git ls-tree` showing no blob at all post-commit,
+consistent with production's later, separate removal. No unlicensed font
+publicly served. No confidential formula percentage present anywhere
+(`/inci`, product content, science page all independently confirmed
+clean this pass). No synthetic test identity found in tracked source. No
+`NFE_Developer_Handoff/` directory tracked (remains `.gitignore`d, matches
+existing rule, untouched by this branch). No founder/customer PII found
+in any file reviewed this pass.
+
+### 45.11 Infrastructure preservation review
+
+Confirmed directly against `release/production-hygiene-assets-fonts`
+(the actual production lineage), not assumed: `wrangler.jsonc`'s
+custom-domain routes block, Worker name, compatibility date/flags, and
+`ASSETS` binding are all present and were not touched by any of the 12
+feature-branch code commits (none of them touches `wrangler.jsonc` at
+all). Server-only Supabase values remain `process.env.*` runtime reads
+in every file reviewed; no build-time service-role value found anywhere
+in the feature branch's own source (this is a source-code property, not
+build-output-dependent, and was already independently reconfirmed via
+the fresh build's artifact behavior in 45.12). No Pages configuration,
+no DNS reference, no Worker-secret reference, no dormant-Pages
+reactivation, and no GitHub-Pages-auto-build reactivation exists in any
+of the 12 commits.
+
+**One real gap requiring explicit action, not assumption:** `27b7e51`
+(the `.gitignore` hygiene commit) is **not** present in the
+`release/production-hygiene-assets-fonts` lineage — that branch was cut
+from `1989e7b`, which predates `27b7e51` entirely. Any new release branch
+built from the current production release HEAD must **explicitly
+cherry-pick `27b7e51` in**, or it will silently regress the `.env.production`
+gitignore coverage this session spent real effort establishing. Recorded
+here precisely so it is not missed in 45.16.
+
+### 45.12 Build and test matrix
+
+Fresh isolated checkout (`.claude/worktrees/wt-maison-review`,
+feature-branch HEAD `0513e03`), `.env.production` with only the two
+validated public Supabase values, confirmed git-ignored. `npm ci` /
+`npx tsc --noEmit` / `npm run build` / `npx opennextjs-cloudflare build`
+— all four exit 0. All 17 required routes plus `sitemap.xml`,
+`/dev/token-specimen`, and both known redirects checked via
+`wrangler dev --local` and a fresh browser context: correct HTTP status
+on every route, zero console errors, zero hydration warnings, zero
+missing-asset requests, product pages confirmed loading real PNG assets
+with no request for any removed file. No form was submitted, no record
+was created, anywhere in this pass.
+
+### 45.13 Performance review
+
+Fresh Lighthouse runs against the local build (not relying on the
+possibly-stale `lighthouse-reports/` directory already in the repo):
+
+| Route | Perf | A11y | Best Practices | SEO | LCP | Console errors |
+|---|---|---|---|---|---|---|
+| `/` (cold) | 91 | 96 | 100 | 100 | 3.4s | 0 |
+| `/` (warm rerun) | 95 | — | — | — | 2.9s | — |
+| `/our-story` | 95 | 100 | 100 | 100 | 2.9s | 0 |
+| `/focus-group/login` | 95 | 96 | 100 | 100 | 3.0s | 0 |
+
+**Caveat stated plainly:** these Performance scores and LCP figures are
+measurably lower than the 99–100 / sub-2.3s figures documented in the
+`5f6303b`/`7f31a52` commit messages. The commit-documented figures were
+measured against a proper production-mode build context; these figures
+come from `wrangler dev --local`'s `workerd` emulation layer on this
+machine, which carries real overhead and a confirmed cold-start effect
+(the homepage's own re-run improved 91→95 with no code change between
+runs). **Read these as a sanity check — zero console errors, no major
+structural regression, Accessibility/Best Practices/SEO all strong —
+not as a like-for-like replacement for the commit-documented production
+figures, which remain the more trustworthy performance baseline.** No
+large hidden image, no duplicate hero request, no font-binary download,
+and no request for any removed JPG was observed on any of the three
+routes.
+
+### 45.14 Release-package options
+
+**Option A — Minimal approved visual release.**
+Commits: `55c9f26`, `5f6303b`, `3c1817b`, `ad393fd`, `a847e60`,
+`8d1ca9f`, `7f31a52`, `0751900` (the token-bridge stack Our Story
+depends on), `4a1cc89` (fixes the live banned-copy issue), `27b7e51`
+(gitignore, required per 45.11). `2474aff`/`fc5454f` optional, zero
+functional effect either way.
+Excludes: science page, product-page content, Founder Access (moot,
+unchanged).
+Build risk: LOW — this exact set builds and validates clean, proven this
+pass. Brand risk: LOW. Compliance risk: **negative** — actively fixes a
+live violation rather than introducing one. Data-flow risk: NONE.
+Deployment complexity: LOW — identical proven pattern to Section 44.
+Rollback complexity: LOW — single Worker version rollback.
+
+**Option B — Editorial Maison release.**
+As literally scoped (no science page, no Founder Access logic, no
+product-page expansion unless fully clean, "selected homepage/editorial
+changes" and "token infrastructure where safe"), **there is no
+additional reviewed content on this branch beyond what Option A already
+contains** — no Journal- or Concierge-specific commits exist among the
+12 code commits (both routes render correctly but are untouched by this
+branch). Constructing a materially larger Option B would require new
+visual work, which is explicitly out of scope for this phase. **Option B
+therefore collapses to Option A** given what currently exists on this
+branch; recorded as a finding, not forced into an artificial
+distinction.
+
+**Option C — Full feature release.**
+Everything in Option A, plus the science page (found genuinely ready,
+45.7) and Founder Access (included at zero risk, since unchanged).
+Product-page content held out per 45.9's unresolved size question — or,
+if the founder resolves sizes before this ships, included too.
+Build risk: LOW (all pieces independently proven this pass). Brand risk:
+LOW (2 minor Our Story notes carry over; science page adds none). Compliance
+risk: LOW, contingent on holding product-page size copy. Data-flow risk:
+NONE. Deployment complexity: LOW-MODERATE (more routes to smoke-test,
+same underlying pattern). Rollback complexity: LOW (still a single
+Worker-version rollback).
+
+### 45.15 Recommendation
+
+**D. SPLIT INTO MULTIPLE RELEASES.**
+
+Reasoning: this branch is materially cleaner than an initial pass
+suggested — build is clean, brand doctrine holds with only two minor
+notes, infrastructure is fully preserved and well-documented by its own
+authors, and one item (`4a1cc89`) fixes a currently-live production
+compliance issue that has no reason to wait. None of that argues for
+holding everything back. But the product-page size contradiction is a
+real, founder-decision-gated blocker specific to two routes, and the
+instruction's own standing rule is explicit: do not bundle the science
+page automatically with the visual release, and do not ship
+contradictory size copy. Splitting lets the clean, high-value,
+zero-open-question work (Option A, plus the live-bug fix) ship on its
+own proven timeline, while the science page and product pages — genuinely
+ready code, but gated by a founder decision the code can't resolve —
+follow as Wave 2 once that decision is made.
+
+- **Wave 1 (ready now, pending your authorization):** Option A exactly
+  as scoped in 45.14.
+- **Wave 2 (ready in code, gated on your size decision):** science page
+  (`45.7`, no code blocker) + product pages (pending size confirmation).
+
+### 45.16 Release-branch plan — NOT EXECUTED
+
+Prepared for `release/maison-wave-1`, starting from the current
+production release HEAD (`release/production-hygiene-assets-fonts` @
+`8a3ce33`), not from the feature branch base:
+
+```
+git worktree add -b release/maison-wave-1 .claude/worktrees/wt-maison-wave1 8a3ce33
+cd .claude/worktrees/wt-maison-wave1
+git cherry-pick 27b7e51    # .gitignore — required, release base predates it
+git cherry-pick 4a1cc89    # live banned-copy + zero-byte cleanup fix
+git cherry-pick ad393fd    # maison token bridge (inert)
+git cherry-pick a847e60    # tailwind bridge + copy governance
+git cherry-pick 8d1ca9f    # token specimen
+git cherry-pick 7f31a52    # favicon + muted token + status copy
+git cherry-pick 0751900    # state-color ratification
+git cherry-pick 55c9f26    # favicon 16px fix
+git cherry-pick 3c1817b    # our story pilot
+git cherry-pick 5f6303b    # homepage hero fidelity
+```
+
+Cherry-pick in this exact order (dependency order: tokens before the
+components/pages that consume them; favicon commits in their original
+sequence since `7f31a52` and `55c9f26` both touch favicon-adjacent
+files). Prefer cherry-pick over reconstruction — none of these 10
+commits mixes unrelated changes that would require narrowing. Preserve
+each as its own commit; do not squash. Not executed — commands only.
+
+### 45.17 Deployment plan — NOT EXECUTED
+
+Mirrors the proven Section 44 pattern exactly:
+
+1. Pre-deploy baseline: active Worker version (currently
+   `2422efbc-9537-4323-8e54-019b9ff44246`), all 10 binding names, route
+   status, `founder_access_signups`/`subscribers` aggregate counts.
+2. Fresh isolated checkout of `release/maison-wave-1`, `.env.production`
+   with only the two public Supabase values, confirmed git-ignored.
+3. Clean rebuild, artifact scan (zero service-role value, zero JWT
+   beyond `role:anon`, zero `sb_secret_`, custom-domain routes block
+   present, no reference to any removed asset).
+4. Local `wrangler dev` validation, fresh browser context, full route
+   matrix including the newly-included Our Story / token-specimen
+   routes.
+5. Deploy: `npx wrangler deploy .open-next/worker.js --name nfe-portal`
+   from the built candidate.
+6. Confirm: no route-removal warning, `www.nfebeauty.com` remains an
+   active custom-domain trigger, new Worker version at 100% traffic.
+7. Cache-busted production verification (distinct `CF-RAY` values, fresh
+   `x-nextjs-cache: MISS`, `x-opennext: 1` present).
+8. Full route smoke matrix + fresh-browser validation (new tab, never
+   used by a prior deployment).
+9. No form submissions, no records created, at any point.
+
+**Rollback trigger list:** custom-domain failure; any client-side crash
+on a Supabase-backed route; missing public Supabase config; broken
+product images; unexpected font/layout regression; any route error;
+console or hydration failure; binding loss.
+
+**Rollback target: `e881dde9-b248-4bc1-b698-0e0b1fdc0fcb`.** Per
+instruction, older versions are not assumed safe — this is the sole
+designated floor for any Wave 1 deploy.
