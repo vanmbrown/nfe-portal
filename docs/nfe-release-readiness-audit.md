@@ -3364,3 +3364,129 @@ expected routes generated, no errors.
 deployed** — this branch exists for review; merging and deploying remain
 separate, future authorizations, same as every other branch in this
 document.
+
+## 44. Asset and Font Hygiene — Controlled Production Deploy (2026-07-23)
+
+**Outcome: deployed successfully. Custom-domain durability, public
+Supabase browser configuration, and managed server credentials all
+preserved. No regression found; no rollback needed.**
+
+### 44.1 Lineage decision
+
+**Path B confirmed required, not assumed.** `2eede3b`'s own
+`wrangler.jsonc` was checked directly — it has no `routes` block.
+Deploying `chore/remove-dead-assets-and-fonts` (based on `2eede3b`)
+directly would have reverted the custom-domain durability patch.
+`1989e7b` was checked and confirmed to be exactly the required release
+base: its parent is `2eede3b` precisely, and its diff versus `2eede3b`
+is the routes block alone (1 file, 8/1 lines) — nothing else. No
+separate commit needed to be located or created.
+
+**Release branch:** `release/production-hygiene-assets-fonts`, created
+from `1989e7b`. Cherry-picked, in order: `44c75ab` → `4bd7cd6` (identical
+content, confirmed via `git diff 44c75ab 4bd7cd6` showing only the
+expected inherited `wrangler.jsonc` difference, zero asset-content
+difference), then `84963d1` → `8a3ce33` (same confirmation). Neither
+original commit was amended — cherry-pick creates new commit objects by
+design. Exact changed-file list versus `2eede3b`: the 7 hygiene removals
+plus `wrangler.jsonc` — nothing else, confirmed as the final diff gate.
+
+### 44.2 Verification before build
+
+- Both removed-image references confirmed still confined to the
+  dead-code `bodyElixirData`/`faceElixirData` objects (only their
+  `ProductData` *type*, not the value, is imported elsewhere — by three
+  components that are themselves not imported by any `src/app` route).
+  No CSS, sitemap, or metadata reference. **Left untouched, as
+  instructed** — no active build or runtime issue exists to justify
+  touching them; the risk is a passive, future-maintenance one only, out
+  of scope for this narrow deploy.
+- Garamond removal reconfirmed: no `@font-face`, no `next/font/local`,
+  no CSS `url()`, no static HTML/metadata reference anywhere. Only the
+  `"Garamond Premier Pro"` fallback-stack *name* remains in
+  `tokens.scss`, left untouched per explicit scope. Exactly 3 font files
+  in the commit, no others.
+
+### 44.3 Build, artifact scan, local validation
+
+Fresh isolated checkout, `.env.production` with only the two validated
+public Supabase values (same mechanism as Section 35), confirmed
+git-ignored, not staged. Clean rebuild (`.next`, `.open-next`,
+`tsconfig.tsbuildinfo` removed first). `npm ci` / `tsc --noEmit` /
+`next build` / `opennextjs-cloudflare build` all exit 0. Only build
+warning: an unrelated, pre-existing Next.js workspace-root inference
+notice — zero warnings mention any removed file.
+
+Artifact scan: `next-env.mjs` production block exactly the 2
+`NEXT_PUBLIC_*` keys; zero `SUPABASE_SERVICE_ROLE_KEY` value; 93
+JWT-shaped strings, all `role: anon`, zero `service_role`; zero
+`sb_secret_`; zero references anywhere in `.open-next`/`.next` to any of
+the 7 removed filenames; no probe route, dummy marker, or `.dev.vars`;
+custom-domain routes block confirmed present in `wrangler.jsonc`.
+
+Local `wrangler dev` validation, fresh browser tab: `/`,
+`/products/face-elixir`, `/products/body-elixir`, `/founder-access`,
+`/focus-group/login`, `/focus-group/enclave`, `/focus-group/upload`,
+`/shop`, `/inci`, `/subscribe` (→ redirect), `sitemap.xml` — all clean,
+zero console errors. Product pages confirmed loading their real working
+PNG assets, zero requests for any removed file. All 7 removed-file direct
+URLs returned 404 locally.
+
+### 44.4 Deploy
+
+Pre-deploy baseline: `2422efbc-9537-4323-8e54-019b9ff44246`, 100%
+traffic, all 10 bindings present, all routes 200, `founder_access_signups`
+= 15, `subscribers` = 51.
+
+```
+Deployed nfe-portal triggers (1.60 sec)
+  www.nfebeauty.com (custom domain - zone name: nfebeauty.com)
+Current Version ID: e881dde9-b248-4bc1-b698-0e0b1fdc0fcb
+```
+
+**No removal warning.** No unexpected binding, compatibility, or
+Pages-project action. New version confirmed at 100% traffic.
+
+### 44.5 Post-deploy validation — one transient finding, resolved, documented plainly
+
+Cache-busted homepage checks: three distinct `CF-RAY` values, fresh
+`x-nextjs-cache: MISS` each time. Full route smoke test (11 routes +
+2 redirects): all expected codes.
+
+**A real, if minor, inconsistency was found and is recorded honestly
+rather than smoothed over.** The first pass at checking the 7
+removed-asset direct URLs returned a mix of `200` and `404` — not the
+uniform `404` local testing had shown. Investigated immediately rather
+than accepted: the `200` responses carried `Cache-Control: private,
+no-cache, no-store` (not a static-asset caching pattern), and re-fetching
+the same exact URL moments later returned a proper Next.js 404 page.
+Three full rounds of re-checking all 7 URLs (21 checks total, each
+hitting a distinct `CF-RAY`/edge node) then returned consistent `404`
+across every single check. **Read as a brief Cloudflare edge
+cache-propagation window immediately following the asset-manifest
+change, not a deployment defect** — self-resolved within roughly two
+minutes of the deploy completing, and did not affect any rendered page at
+any point (confirmed separately via the fresh-browser checks below,
+which ran after this had already stabilized).
+
+**Fresh-browser validation** (new tab, never used by any prior
+deployment): `/`, `/products/face-elixir`, `/products/body-elixir`,
+`/founder-access`, `/focus-group/login`, `/focus-group/upload` — all
+zero console errors. Both product pages confirmed loading their real
+working PNG hero assets on live production
+(`NFE_face_elixir_30_50_proportions_fixed.png`,
+`radiant-body-elixir-white.png`); zero requests made for any removed
+JPG or Garamond file. All 10 Worker binding names reconfirmed present
+after deploy.
+
+**No rollback triggered.** No custom-domain failure, no focus-group
+crash, no missing public Supabase config, no broken product images, no
+font/layout regression, no route error, no console/hydration failure, no
+binding loss.
+
+### 44.6 Confirmed unchanged
+
+No Founder Access submission, no Supabase/Beehiiv/Resend record created,
+no credential change, no Worker secret change, no DNS change, no
+Pages-project action, no application-code change beyond the two
+authorized hygiene commits.
