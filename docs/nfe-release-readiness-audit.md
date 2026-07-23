@@ -3297,3 +3297,23 @@ it.
 authorized — unused Supabase variables removed (41.2), automatic
 deployments disabled (41.6, as reported). Project remains retained, not
 deleted, not renamed, per standing instruction.
+
+### 41.7 Behavioral verification — confirmed by the next routine push
+
+The commit that recorded 41.6 (`e5c4523`) itself became the first
+real-world test. `wrangler pages deployment list` afterward shows:
+
+| Commit | Status |
+|---|---|
+| `08b67a9` (pushed before Vanessa's dashboard change) | Failure |
+| `e5c4523` (pushed after) | **Idle** |
+
+Every prior push in this document's history — dozens, across weeks —
+produced a `Preview` / `Failure` entry. `e5c4523` produced a `Preview` /
+**`Idle`** entry instead: a deployment record still gets created (the
+repo connection remains linked, as Vanessa reported), but the build is no
+longer being attempted and failing — it isn't running. This is concrete,
+independently-observed behavioral confirmation, not just Vanessa's
+report, that the automatic-deployment disable took effect. **Section 41
+is fully closed**, both authorized items (variable removal, auto-deploy
+disable) now independently verified.
