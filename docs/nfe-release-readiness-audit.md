@@ -3317,3 +3317,50 @@ independently-observed behavioral confirmation, not just Vanessa's
 report, that the automatic-deployment disable took effect. **Section 41
 is fully closed**, both authorized items (variable removal, auto-deploy
 disable) now independently verified.
+
+## 42. Environment-File Hygiene Patch — APPLIED (2026-07-23)
+
+The exact diff prepared in Section 38 was applied to `.gitignore` on
+`feature/nfe-digital-maison-upgrade`, as-is, with one cosmetic reordering
+(`.env.production.local` sits directly after `.env.production` rather
+than at the section's end — same net set of ignored patterns).
+
+Verified before commit: staged diff touches only `.gitignore`; no other
+tracked file changed status; `.env.local.example` confirmed still tracked
+and NOT matched by the new patterns (`git check-ignore` returns nothing
+for it); the new `.env.production` pattern confirmed active via
+`git check-ignore -v` (matches line 15 of the updated file).
+
+**Commit `27b7e51`** — "chore: close env-file gitignore gap" — pushed to
+`origin/feature/nfe-digital-maison-upgrade`. No deploy.
+
+## 43. Two-Commit Hygiene Branch — Orphan Assets and Garamond — CREATED (2026-07-23)
+
+Branch `chore/remove-dead-assets-and-fonts`, created from `2eede3b`
+(confirmed exact HEAD before editing). Both items from Section 39.D
+executed exactly as scoped, each independently re-verified fresh on this
+checkout immediately before removal (not assumed from the prior pass):
+
+**Commit `44c75ab`** — "chore: remove orphan zero-byte product images" —
+removes the four zero-byte files from Section 39.B. Re-confirmed
+immediately before removal: all four still exactly 0 bytes; string
+references still confined to the dead-code data objects in
+`body-elixir.ts` / `face-elixir.ts`. No placeholder substitution.
+`npx tsc --noEmit` clean afterward.
+
+**Commit `84963d1`** — "chore: remove unused public Garamond binaries" —
+removes the three files from Section 39.A. Re-confirmed immediately
+before removal: no `@font-face` rule, no `next/font` `localFont()` call,
+no path reference anywhere in tracked source — only the font-family
+*name* remains in the `tokens.scss` fallback stack, left untouched per
+the narrow scope (removing the dead name from the stack is a separate,
+optional follow-on, not bundled here). `npx tsc --noEmit` clean
+afterward.
+
+Full `npm run build` run against both commits combined: clean, all
+expected routes generated, no errors.
+
+**Pushed** to `origin/chore/remove-dead-assets-and-fonts`. **Not
+deployed** — this branch exists for review; merging and deploying remain
+separate, future authorizations, same as every other branch in this
+document.
