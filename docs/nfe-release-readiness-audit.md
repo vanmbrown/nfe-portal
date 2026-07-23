@@ -2839,3 +2839,346 @@ the durable, declared configuration is what's serving traffic now.
 `1c53b433-231d-4a96-b41d-f6eeefce24ea` and `087ae467-e154-4b1a-8666-
 18473e555ae7` remain available as historical versions, not currently
 serving traffic.
+
+## 36. Supabase Credential Rotation — CLOSED (2026-07-23)
+
+**Final classification: Supabase managed-secret migration and server-key
+rotation complete. Production is operating through the new managed server
+credential. The old named server key has been deleted. Post-deletion
+production validation passed.**
+
+### 36.1 Timeline
+
+1. **Migration to managed bindings** (Section 32): sanitized Worker
+   deployed with `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` /
+   `SUPABASE_ANON_KEY` as Cloudflare-managed runtime secrets, replacing
+   the build-inlined credential. No key rotation at that stage.
+2. **Server-key rotation:** Vanessa created a new server-only Supabase
+   credential and updated the Cloudflare Worker secret
+   `SUPABASE_SERVICE_ROLE_KEY` directly (dashboard or CLI, outside this
+   agent's visibility by design — the agent never saw or entered the
+   value). This action itself created and immediately deployed **Worker
+   version `2422efbc-9537-4323-8e54-019b9ff44246`** — confirmed via
+   `wrangler versions view`, whose own message field reads *"Updated
+   secret: SUPABASE_SERVICE_ROLE_KEY."*
+3. **Pre-deletion validation:** one controlled synthetic Founder Access
+   submission against `2422efbc`. Result: HTTP 200, `{"success":true}`,
+   visible success state, zero console errors. `founder_access_signups`
+   15→16, `subscribers` 51→52, exactly one marked row in each, confirmed
+   then deleted, counts returned to exact baseline (15/51). **This proved
+   the new key operational before the old one was touched.**
+4. **Old key deletion:** Vanessa deleted the old named "default" Supabase
+   server secret key.
+5. **Post-deletion validation:** one further controlled synthetic Founder
+   Access submission against the same version (`2422efbc`, unchanged —
+   deleting a Supabase-side key does not itself create a new Cloudflare
+   Worker version). Result: HTTP 200, `{"success":true}`, visible success
+   state, zero console errors. `founder_access_signups` 15→16→15,
+   `subscribers` 51→52→51, exactly one marked row in each, confirmed then
+   deleted. **This proved production works with the old key entirely
+   gone — the strongest available confirmation, since there was no
+   fallback credential left to mask a partial failure.**
+
+### 36.2 Cleanup
+
+- Supabase: both synthetic test rows (one per validation pass) confirmed
+  created, then deleted; aggregate counts confirmed returned to exact
+  baseline (15 / 51) after each.
+- Beehiiv: Vanessa confirmed the synthetic subscriber(s) removed on her
+  end. This agent has no Beehiiv access at any point in this engagement
+  and could not independently verify.
+- No full synthetic email address is recorded in this document, per
+  standing redaction practice (Section 32 addendum).
+
+### 36.3 Unchanged, by design
+
+- JWT signing secret: not touched.
+- Legacy anon/service-role API-key system: not touched — Supabase's own
+  documentation (Section 33.3 reconnaissance) confirms legacy keys remain
+  fully supported regardless; this rotation did not require or trigger
+  any change to that system.
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`: unchanged
+  throughout.
+- Application code: unchanged throughout — the rotation required zero
+  code changes, exactly as predicted in Section 33.3.
+
+### 36.4 Final state
+
+- **Active Worker version:** `2422efbc-9537-4323-8e54-019b9ff44246`, 100%
+  traffic.
+- All 10 secret binding names present and unchanged in name (only the
+  `SUPABASE_SERVICE_ROLE_KEY` *value* changed): `ADMIN_NOTIFICATION_EMAIL`,
+  `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`, `NEXT_PUBLIC_SITE_URL`,
+  `RESEND_API_KEY`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
+  `SUPABASE_URL`, `UPSTASH_REDIS_REST_TOKEN`, `UPSTASH_REDIS_REST_URL`.
+- `www.nfebeauty.com`, `/founder-access`, `/focus-group/login` all
+  confirmed 200 with the custom-domain durability patch (Section 35)
+  intact.
+- `founder_access_signups` = 15, `subscribers` = 51 — exact baseline, no
+  residual test data.
+
+**Credential-rotation disposition: CLOSED.** No further Supabase
+credential action is authorized. Any future rotation is a new, separately
+authorized cycle.
+
+## 37. Dormant Cloudflare Pages Project — Final Audit (2026-07-23)
+
+Re-audited, read-only, now that both preconditions from Section 33.6 are
+met (credential rotation closed, custom-domain durability deployed).
+
+### 37.1 Findings
+
+- **No custom domain attached** — confirmed two independent ways: the
+  project list table shows only `nfe-portal.pages.dev`, and
+  `wrangler pages download config` (an authoritative pull of the
+  project's own settings, not the routes-diff inference used for the
+  Worker) returned no domain/route section at all — just
+  `pages_build_output_dir`, `compatibility_date`, and one plain build var
+  (`NEXT_PRIVATE_SKIP_TURBO=1`). The downloaded file was inspected,
+  confirmed to contain no secret values or domain config, and deleted —
+  it is not part of this repository.
+- **`www.nfebeauty.com` is not dependent on it** — reconfirmed throughout
+  Sections 31, 32, 34, 35: the domain is served by the Worker.
+- **`nfe-portal.pages.dev` remains non-serving:** HTTP 522, unchanged
+  since first discovered.
+- **GitHub integration is still triggering failed Preview builds on every
+  push** — two more failed builds appeared this pass alone, for commits
+  `1374cbb` and `029fe24`, both routine, explicitly-authorized documentation
+  pushes to `feature/nfe-digital-maison-upgrade`.
+- **Zero successful deployments, ever:** the full deployment history was
+  checked specifically for any `Production` environment or `Success`
+  status entry — none found, at any point.
+- **The three unused Supabase secret names remain present** on the Pages
+  project's production environment: `SUPABASE_ANON_KEY`,
+  `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL` (names confirmed via
+  `wrangler pages secret list`; values encrypted, not inspected).
+- **Production branch:** not re-verified via CLI this pass (no wrangler
+  read path surfaces it — confirmed absent from both the project list
+  table and the downloaded config). Carried forward from the dashboard
+  screenshot evidence in Section 31 (`week-4-complete`, a branch that
+  does not exist in this repository).
+- **External dependency (webhook, monitoring, third-party reference to
+  the `pages.dev` URL): still not fully ruled out from within this
+  environment** — same caveat as every prior pass. This is the one item
+  genuinely outside what read-only Cloudflare tooling can confirm.
+
+### 37.2 Recommendation
+
+**A. DISCONNECT GITHUB AND REMOVE UNUSED VARIABLES; RETAIN PROJECT
+TEMPORARILY.**
+
+Both conditions Section 33.6 set for moving past "retain, do nothing" are
+now met (credential rotation closed; custom-domain durability deployed
+and confirmed). The one residual unknown — an external dependency this
+environment cannot see — argues against full deletion (option B) but not
+against disconnecting the GitHub integration, which is the direct fix for
+the one concrete, ongoing side effect (failed Preview builds on every
+push) and requires no destructive action.
+
+### 37.3 Pages Cleanup Runbook — prepared, not executed
+
+Exact dashboard steps, for Vanessa:
+
+1. Open **Workers & Pages → `nfe-portal`**, the **Pages** project — not
+   the Worker of the same name. (Confirm by checking for a "Preview
+   deployments" / "Production branch" settings section; the Worker has
+   no such section.)
+2. Settings → Environment variables/secrets → remove:
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+3. Settings → Builds & deployments → disconnect the GitHub repository, or
+   disable automatic Preview deployments (whichever this Cloudflare
+   dashboard version offers — either stops the failed-build side effect).
+4. Do not delete the project yet — retain it.
+5. After the next routine `git push`, confirm no new failed Preview
+   deployment appears for this project.
+6. At a later, separate point: consider renaming the Pages project to
+   remove the `nfe-portal` naming collision with the Worker, to prevent
+   this exact confusion (Section 31) from recurring for any future
+   operator.
+
+## 38. Environment-File Hygiene Patch — Exact Diff (2026-07-23)
+
+Prepared, **not applied**. Current tracked `.gitignore`'s "Environment
+variables" section (lines 12–17):
+
+```
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+```
+
+Proposed replacement:
+
+```
+# Environment variables
+.env
+.env.local
+.env.production
+.env.production.local
+.env.development.local
+.env.test.local
+
+# Wrangler local dev secrets
+.dev.vars
+.dev.vars.*
+
+# Preserve tracked templates (do not ignore these even if a broader pattern above would match)
+!.env.example
+!.env.local.example
+```
+
+Net effect: adds bare `.env.production` (the actual gap this whole
+engagement worked around via a local, uncommitted `.git/info/exclude`
+entry — Section 29/30), adds `.dev.vars` / `.dev.vars.*` (used repeatedly
+this engagement for local wrangler dev testing, never should land in
+git), adds explicit negations for the two tracked template files.
+
+**Repo search for other tracked example/template files that might need a
+negation:** only one exists — `.env.local.example`. There is currently no
+tracked `.env.example` in this repository; the `!.env.example` line is
+included defensively per your instruction, is presently inert (nothing to
+protect yet), and becomes active automatically if one is ever added.
+
+**Confirmed:**
+- Removes no tracked file — none of the added patterns match anything
+  currently tracked (`git ls-files` has no `.env.production`, `.dev.vars`,
+  or `.dev.vars.*` entries).
+- No runtime behavior change — `.gitignore` has no effect on what Next.js
+  reads at build/runtime, only on what git tracks.
+- No effect on Cloudflare bindings — entirely separate mechanisms.
+- Directly prevents the exact accidental-commit risk this engagement
+  worked around manually, worktree by worktree, throughout Sections
+  29–35.
+- Preserves both onboarding templates.
+
+Not committed. Awaiting separate authorization to apply.
+
+## 39. Low-Priority Production Hygiene — Reassessed on `2eede3b` (2026-07-23)
+
+Fresh, independent reassessment (not carried forward from memory) against
+the current production source base.
+
+### 39.A Public Garamond font binaries
+
+Tracked, exact paths and sizes:
+
+| Path | Size |
+|---|---|
+| `public/fonts/garamondpremrpro.otf` | 428,520 bytes |
+| `public/fonts/garamondpremrpro.woff` | 273,412 bytes |
+| `public/fonts/garamondpremrpro.woff2` | 206,616 bytes |
+
+**Still unused, confirmed by exhaustive grep, not assumption:** `git grep`
+for `garamond` hits only `tailwind.config.js` and `src/styles/tokens.scss`
+as a font-family *name* in a fallback stack (`"Garamond Premier Pro",
+Georgia, serif`). No `@font-face` rule, no `next/font` `localFont()` call,
+and no code path referencing these file paths exist anywhere in tracked
+source. `src/app/layout.tsx` loads `Inter` via `next/font/google` — Garamond
+is not the site's actual font; the CSS fallback silently resolves to
+Georgia today since "Garamond Premier Pro" isn't installed on client
+machines and nothing loads the local file. **These three files remain
+genuinely dead weight, byte-identical situation to every prior pass.**
+
+**Licensing remains undocumented** — no LICENSE/NOTICE/README addresses
+font redistribution rights anywhere in the repo; the project's own
+top-level license notice ("Proprietary — Not For Everyone (NFE) Research
+Project") is unrelated to third-party font rights. Not resolved, not
+guessed at.
+
+**Removal remains safe based on repo evidence.** Confirmed hotfix
+`9cc2e0a` is not an ancestor of `2eede3b` — never applied to this base.
+
+### 39.B Four zero-byte orphan product images
+
+Exact paths, confirmed 0 bytes both in the working tree and as the
+committed git blob (not just a local filesystem artifact):
+
+- `public/images/products/body-elixir-hero.jpg`
+- `public/images/products/body-elixir-detail.jpg`
+- `public/images/products/face-elixir-hero.jpg`
+- `public/images/products/face-elixir-detail.jpg`
+
+**Confirmed orphaned, traced precisely:** these paths are referenced only
+inside `src/content/products/body-elixir.ts` / `face-elixir.ts`, in
+exported data objects that are **never imported by value anywhere** in
+the app — only their TypeScript *interface* is imported elsewhere (for
+type annotations in `BenefitsTable.tsx`, `IngredientList.tsx`,
+`UsageGuide.tsx`, all three themselves dead code per Section 39's
+predecessor findings). The live product-rendering path
+(`src/content/products/registry.ts` →
+`data/products/{body,face}-elixir.json`, consumed by
+`src/app/products/[slug]/page.tsx` and `/shop`) references entirely
+different, non-zero-byte images
+(`radiant-body-elixir-white.png`, `NFE_face_elixir_30_50_proportions_fixed.png`).
+**Confirmed still zero bytes as committed blobs — direct URLs to these
+paths would still return empty responses today.**
+
+### 39.C Confidentiality commits — reconfirmed unnecessary
+
+Reconfirmed fresh on `2eede3b` this pass (not carried forward):
+
+- `bf9ba21` (face elixir percentages): the `percentageRange` field string
+  doesn't appear at all in either `data/formulas/faceElixir.json` or
+  `public/data/formulas/faceElixir.json` on this base — cleaner than
+  "present but blank." Fully unnecessary.
+- `847faec` (concentration fields): `grep -n concentration
+  src/content/products/face-elixir.ts` returns nothing on this base.
+  Fully unnecessary.
+- `498f8c4` (ingredient interface wording): `IngredientList.tsx` has
+  neither the "with concentrations" copy nor a Concentration sort control
+  on this base, and remains confirmed dead code — not imported by any
+  route under `src/app`. Fully unnecessary.
+
+**None of the three should be replayed onto `2eede3b`.**
+
+### 39.D Proposed future hygiene commits — not created
+
+**Commit A — remove orphan zero-byte assets and dead references:**
+- Delete the four zero-byte files listed in 39.B.
+- No placeholder substitution (per instruction — these are orphaned, not
+  rendered anywhere, so nothing needs a replacement image).
+- Scope note: the `body-elixir.ts` / `face-elixir.ts` data objects and
+  the three components that only consume their *type* are themselves
+  unreferenced dead code (confirmed above) — out of scope for this
+  narrow commit unless separately authorized; flagged for awareness only.
+
+**Commit B — remove unused public Garamond binaries if licensing remains
+unconfirmed:**
+- Delete the three files listed in 39.A.
+- Update the `"Garamond Premier Pro", Georgia, serif` fallback-stack
+  references in `tailwind.config.js` / `src/styles/tokens.scss` only if
+  removing the dead font-family name from the stack is desired — the
+  binaries' removal alone doesn't require this, since the name was never
+  functionally loading anything; flagged as an optional follow-on, not
+  bundled into Commit B by default.
+- Conditional on licensing remaining unconfirmed by the time this is
+  authorized — if licensing is resolved affirmatively before then, this
+  commit is unnecessary.
+
+**No branch created.** Both remain proposals pending separate
+authorization, per every other item in this document.
+
+## 40. Broader Release Status — Recorded Separation
+
+The Maison/feature release track remains entirely separate from
+production hygiene work and from the credential/infrastructure work
+closed out in Sections 32–39. **None of the following are merged or
+deployed, and none are authorized by this document:** the Our Story
+pilot, homepage hero optimization, favicon changes, Maison token work,
+visual redesign work, Founder Access UI changes, product-content changes.
+All remain on `feature/nfe-digital-maison-upgrade`, unmerged into any
+production-facing base, exactly where they were before this pass.
+
+**Current recommended order:**
+1. Pages cleanup (Section 37.3)
+2. `.gitignore` hygiene (Section 38)
+3. Orphan asset / Garamond hygiene (Section 39.D)
+4. Broader Maison release planning
+
+Each remains a separate, future authorization — this document records the
+order, not a decision to proceed.
