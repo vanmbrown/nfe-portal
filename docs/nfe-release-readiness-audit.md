@@ -3182,3 +3182,87 @@ production-facing base, exactly where they were before this pass.
 
 Each remains a separate, future authorization — this document records the
 order, not a decision to proceed.
+
+## 41. Dormant Pages Project Cleanup — Variables Removed; GitHub Disconnect Not Completed (2026-07-23)
+
+**Partial execution — one authorized item could not be completed with the
+tooling available in this environment, and is not claimed as done.**
+
+### 41.1 Pre-change verification
+
+- Project: `nfe-portal` (Pages), default domain `nfe-portal.pages.dev`,
+  Git Provider: connected ("Yes").
+- No custom domain attached (unchanged from Section 37.1).
+- Zero successful production deployments in history (unchanged).
+- Failed-Preview-build pattern continuing — the latest entry at the time
+  of this check was for this document's own prior commit (`168623a`),
+  Preview, Failure.
+- Three unused secret names confirmed present: `SUPABASE_SERVICE_ROLE_KEY`,
+  `SUPABASE_URL`, `SUPABASE_ANON_KEY` (values encrypted, never inspected).
+
+### 41.2 Variables removed — COMPLETE
+
+```
+npx wrangler pages secret delete SUPABASE_SERVICE_ROLE_KEY --project-name=nfe-portal
+npx wrangler pages secret delete SUPABASE_URL --project-name=nfe-portal
+npx wrangler pages secret delete SUPABASE_ANON_KEY --project-name=nfe-portal
+```
+
+All three succeeded. `wrangler pages secret list --project-name=nfe-portal`
+immediately after shows an empty secret list for the production
+environment — confirmed by name-only listing, no values ever seen or
+printed. No other Pages variable was touched. No Worker binding was
+touched — the Worker's own `wrangler secret list` was checked
+independently before and after and shows the same 10 names throughout.
+
+### 41.3 GitHub auto-deploy disconnect — NOT COMPLETED, capability gap
+
+**This step could not be executed.** Checked exhaustively: `wrangler
+pages project --help` exposes only `list` / `create` / `delete` — no
+update, connect, or disconnect subcommand. `wrangler pages --help`'s full
+command list has no repository-integration management surface at all.
+Managing a Pages project's GitHub connection and automatic-deployment
+settings is exclusively a Cloudflare **dashboard** capability with no
+`wrangler` CLI or programmatic equivalent available to this agent.
+Confirmed post-check: the project still shows Git Provider "Yes."
+
+**This is not silently left undone — it needs Vanessa's direct dashboard
+action.** Exact steps:
+
+1. Cloudflare dashboard → Workers & Pages → **`nfe-portal`, the Pages
+   project** (not the Worker of the same name — check for a "Preview
+   deployments" / "Production branch" section to confirm you're in the
+   right one).
+2. Settings → Builds & deployments.
+3. Either disconnect the GitHub repository entirely, or (if a lighter
+   option is preferred) disable automatic Preview deployments /
+   automatic Production deployments there.
+4. After the next routine `git push` to this repo, confirm no new
+   deployment entry appears for this Pages project.
+
+**Pending operator action**, same standing pattern as every Beehiiv
+cleanup item in this document — flagged clearly rather than assumed
+complete.
+
+### 41.4 Post-change validation
+
+- `www.nfebeauty.com/` → HTTP 200, `x-opennext: 1` present, fresh
+  (cache-busted) request.
+- Active Worker version unchanged: `2422efbc-9537-4323-8e54-019b9ff44246`,
+  100% traffic.
+- All 10 Worker binding names unchanged and present.
+- Pages project still exists, still no custom domain.
+- Pages project no longer holds the three Supabase variables (confirmed
+  empty list).
+- GitHub connection: **still connected — not disabled** (41.3).
+
+### 41.5 Disposition
+
+- Live Worker: untouched throughout.
+- Production domain: unaffected throughout.
+- No DNS change, no Supabase change, no Worker-secret change, no
+  application-code change.
+- Pages project: retained, not deleted, not renamed — now holds no
+  unused Supabase credentials, but its GitHub integration remains active
+  and will continue producing failed Preview builds on every push until
+  Vanessa completes 41.3 manually.
