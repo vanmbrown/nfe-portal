@@ -576,7 +576,7 @@ const SKIN_LAYER_MAP = [
     layer: 'Texture and visible refinement',
     colorName: 'Texture softness',
     colorClass: 'bg-[#a66f45]',
-    accentClass: 'border-[#c99a74] text-[#fff8ee]',
+    accentClass: 'border-[#c99a74] text-[#4b3517]',
     concern:
       'Crepey-looking texture, fine line appearance, loss of suppleness, less conditioned feel.',
     support:
@@ -1449,7 +1449,7 @@ export default function ScienceIntelligence() {
                           aria-hidden="true"
                         />
                         <div>
-                          <p className="text-xs uppercase tracking-[0.22em] text-nfe-paper/50">
+                          <p className="text-xs uppercase tracking-[0.22em] text-nfe-paper/60">
                             {String(index + 1).padStart(2, '0')} · {item.colorName}
                           </p>
                           <h4 className="mt-2 font-serif text-xl leading-tight text-nfe-gold">
@@ -1582,7 +1582,7 @@ export default function ScienceIntelligence() {
           <h2 className="font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
             Mature melanated skin should not be treated as an afterthought.
           </h2>
-          <p className="mx-auto mt-6 max-w-3xl leading-8 text-nfe-muted">
+          <p className="mx-auto mt-6 max-w-3xl leading-8 text-[#5c5c5c]">
             NFE Face Elixir was not built around one hero ingredient. It was
             built as a layered support system: barrier comfort, hydration, tone
             support, antioxidant care, and visible well-aging support working
