@@ -25,7 +25,6 @@ const NFESkinLayersMap = dynamic(() => import('./NFESkinLayersMap'), {
   ),
   ssr: false, // Client-side only - these are interactive components
 });
-// import { Dropdown } from '@/components/ui/Dropdown';
 import { fetchFilteredIngredients } from '@/lib/api';
 import { filterActivesBySelection, initializeActives } from '@/lib/actives';
 
