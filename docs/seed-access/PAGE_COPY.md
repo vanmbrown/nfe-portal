@@ -12,9 +12,8 @@ Eyebrow: `A Private NFE Invitation`
 
 Headline: `This link isn't active.`
 
-Body: `The NFE Study Circle is by private invitation only. If you
-believe you received this link in error, or your invitation has expired,
-reach out to Vanessa directly and she'll help.`
+Body: `The NFE Study Circle is by private invitation only. If this link
+isn't working for you, reach out to Vanessa directly and she'll help.`
 
 No email address or contact form is hardcoded here in Phase 1 — this
 state intentionally does not expose *why* a token failed (not found vs.
@@ -99,8 +98,12 @@ Section heading: `Your Private Intake`
 - Fragrance sensitivity (checkbox)
 - Preferred contact method (select: Email / Phone / Text)
 - Anything else NFE should know (textarea)
-- How did you hear about this? (select — reuse the source list in §15
-  of the architecture doc)
+
+"How did you hear about this?" was removed from the participant-facing
+form during founder review (see `FOUNDER_REVIEW.md`) — for an
+invitation-only cohort, source is already captured on
+`seed_invitations.source` at the point of issuance, so asking the
+participant to self-report it a second time was redundant.
 
 ### Consent — Group A, Participation Agreement (all required)
 
@@ -125,7 +128,7 @@ Founder Access `role="status" aria-live="polite"` pattern).
 
 Eyebrow: `The NFE Study Circle`
 
-Headline: `Your place in the circle is noted.`
+Headline: `Your place in the circle is confirmed.`
 
 Body: `Thank you for accepting this invitation. NFE will follow with
 product timing, ritual guidance, and the details of your first
@@ -146,8 +149,10 @@ operationally confirmed.
 - **Required field missing** — native HTML5 `required` + browser
   validation UI, consistent with Founder Access; no custom inline
   validation library introduced.
-- **Token expired between page load and submit** (edge case: participant
-  leaves the tab open past `expires_at`) — the intake endpoint
-  re-validates the token server-side at submission time independent of
-  the page-load check, and returns a distinct error message: `"This
-  invitation link has expired. Reach out to Vanessa for a new one."`
+- **Token expired or redeemed between page load and submit** (edge case:
+  participant leaves the tab open past `expires_at`, or double-submits
+  from two tabs) — the intake endpoint re-validates the token
+  server-side at submission time independent of the page-load check.
+  Matching `BACKEND_PROPOSAL.md` §2's failure-state table, the message
+  stays deliberately non-specific between the two cases: `"This
+  invitation link has expired or has already been used."`
