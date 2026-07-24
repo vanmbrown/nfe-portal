@@ -40,6 +40,11 @@ WITH CHECK (true);
 -- policy, anon and authenticated roles have zero access by default. Only
 -- the server-side admin (service_role) client — the same pattern already
 -- used by founder_access_signups — can read or write this table.
+--
+-- Redemption (see BACKEND_PROPOSAL.md §2) must use a single conditional
+-- UPDATE (`WHERE status = 'issued' AND expires_at > now()`), never a
+-- read-then-write from application code — that is what makes single-use
+-- safe under concurrent requests.
 
 
 CREATE TABLE IF NOT EXISTS public.seed_participants (
@@ -57,8 +62,8 @@ CREATE TABLE IF NOT EXISTS public.seed_participants (
     fragrance_sensitive BOOLEAN NOT NULL DEFAULT false,
     preferred_contact_method TEXT,
     additional_context TEXT,
-    product_assignment TEXT,
-    referral_source TEXT,
+    product_assignment TEXT
+        CHECK (product_assignment IN ('face_elixir', 'body_elixir')),
     willing_to_use_as_directed BOOLEAN NOT NULL DEFAULT false,
     willing_to_complete_checkins BOOLEAN NOT NULL DEFAULT false,
     participation_status TEXT NOT NULL DEFAULT 'intake_complete'
@@ -147,6 +152,9 @@ CREATE TABLE IF NOT EXISTS public.seed_checkins (
 
 CREATE INDEX IF NOT EXISTS seed_checkins_participant_idx
 ON public.seed_checkins (participant_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS seed_checkins_participant_type_unique
+ON public.seed_checkins (participant_id, checkin_type);
 
 ALTER TABLE public.seed_checkins ENABLE ROW LEVEL SECURITY;
 
