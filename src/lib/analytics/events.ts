@@ -18,6 +18,13 @@ export const NFE_EVENT_NAMES = {
   replenishmentInterestCaptured: 'nfe.replenishment.interest_captured',
   wholesaleInterestCaptured: 'nfe.wholesale.interest_captured',
   pressInterestCaptured: 'nfe.press.interest_captured',
+  seedAccessViewed: 'nfe.seed_access.viewed',
+  seedAccessInviteValid: 'nfe.seed_access.invite_valid',
+  seedAccessInviteInvalid: 'nfe.seed_access.invite_invalid',
+  seedAccessIntakeStarted: 'nfe.seed_access.intake_started',
+  seedAccessConsentCompleted: 'nfe.seed_access.consent_completed',
+  seedAccessConfirmationViewed: 'nfe.seed_access.confirmation_viewed',
+  seedAccessJoined: 'nfe.seed_access.joined',
 } as const
 
 export type NfeEventName =
@@ -37,6 +44,7 @@ export type NfeEventArea =
   | 'science'
   | 'journal'
   | 'subscribe'
+  | 'seed_access'
 
 export interface NfeEventPayload {
   name: NfeEventName
@@ -70,4 +78,11 @@ export const NFE_EVENT_TAXONOMY: Record<NfeEventName, string> = {
   [NFE_EVENT_NAMES.replenishmentInterestCaptured]: 'Replenishment interest was captured.',
   [NFE_EVENT_NAMES.wholesaleInterestCaptured]: 'Wholesale interest was captured.',
   [NFE_EVENT_NAMES.pressInterestCaptured]: 'Press interest was captured.',
+  [NFE_EVENT_NAMES.seedAccessViewed]: 'The Study Circle private landing page was viewed.',
+  [NFE_EVENT_NAMES.seedAccessInviteValid]: 'A Study Circle invitation token verified successfully.',
+  [NFE_EVENT_NAMES.seedAccessInviteInvalid]: 'A Study Circle invitation token failed verification (missing, expired, or already used).',
+  [NFE_EVENT_NAMES.seedAccessIntakeStarted]: 'A participant began the Study Circle intake form.',
+  [NFE_EVENT_NAMES.seedAccessConsentCompleted]: 'A participant completed the required participation consent group.',
+  [NFE_EVENT_NAMES.seedAccessConfirmationViewed]: 'The Study Circle confirmation state was shown after intake submission.',
+  [NFE_EVENT_NAMES.seedAccessJoined]: 'A participant completed Study Circle intake through a supported opt-in path.',
 }
