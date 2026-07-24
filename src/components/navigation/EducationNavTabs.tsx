@@ -36,7 +36,6 @@ export default function EducationNavTabs() {
                 onClick={() => handleTabClick(tab.href)}
                 role="tab"
                 aria-selected={isActive}
-                aria-controls={tab.id === 'science' ? 'science-panel' : 'inci-panel'}
                 className={`flex-none px-6 py-4 font-medium text-sm transition-colors relative ${
                   isActive
                     ? 'text-[#E7C686]'

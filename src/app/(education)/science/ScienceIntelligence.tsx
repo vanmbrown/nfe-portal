@@ -950,7 +950,12 @@ export default function ScienceIntelligence() {
                 key={step.title}
                 className="rounded-3xl border border-nfe-green-100 bg-white p-6 shadow-sm"
               >
-                <p className="mb-4 text-xs uppercase tracking-[0.25em] text-nfe-gold">
+                {/* text-nfe-gold (#C6A664) fails AA (2.32:1) on this card's white
+                    background. #77633C is the same accent-family hue darkened for
+                    light grounds, verified 5.78:1 against #FFFFFF. Scoped to this
+                    light-background instance only -- --nfe-gold itself is
+                    unchanged and remains correct on the page's dark-green sections. */}
+                <p className="mb-4 text-xs uppercase tracking-[0.25em] text-[#77633C]">
                   Step {index + 1}
                 </p>
                 <h3 className="font-serif text-2xl text-nfe-green-900">
@@ -1111,7 +1116,9 @@ export default function ScienceIntelligence() {
                   key={priority.id}
                   className="rounded-3xl border border-nfe-green-100 bg-white p-6 shadow-sm"
                 >
-                  <p className="mb-4 text-xs uppercase tracking-[0.25em] text-nfe-gold">
+                  {/* See the matching Step-card comment above -- same white-card
+                      contrast fix, same verified value. */}
+                  <p className="mb-4 text-xs uppercase tracking-[0.25em] text-[#77633C]">
                     Priority {index + 1}
                   </p>
                   <h3 className="font-serif text-2xl text-nfe-green-900">
