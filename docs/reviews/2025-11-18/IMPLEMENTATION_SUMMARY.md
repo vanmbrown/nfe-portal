@@ -34,7 +34,8 @@ Successfully implemented and deployed 7 critical security, privacy, and function
 
 ### Fix #1: Environment Variables ✅
 **File:** `.env.local`  
-**Change:** Added `RESEND_API_KEY=re_F6juxdMp_5W62XEMZAKJyZS7svTVNiPcZ`  
+**Change:** Added `RESEND_API_KEY=[REDACTED — rotate credential in Resend]`  
+**Security note:** A real credential was previously committed here in plaintext. Never commit real API credentials. Store deployment secrets in the approved environment-secret system.  
 **Impact:** Enables email notifications for subscribe/waitlist  
 **Testing:** Submit forms, verify emails sent
 
@@ -156,7 +157,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000 ✅
 FORWARD_TO_AI_URL=https://nfe-agent.onrender.com/api/ingest ✅
 
 # Email
-RESEND_API_KEY=re_F6juxdMp_5W62XEMZAKJyZS7svTVNiPcZ ✅
+RESEND_API_KEY=[REDACTED — rotate credential in Resend] ✅
 FROM_EMAIL=vanessa@nfebeauty@nfebeauty.com ⚠️ (typo, not used)
 
 # Rate Limiting

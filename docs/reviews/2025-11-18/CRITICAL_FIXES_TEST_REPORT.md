@@ -38,7 +38,8 @@ This report documents the testing and verification of 7 critical security and fu
 **Priority:** 🔴 CRITICAL BLOCKER
 
 **What Was Fixed:**
-- Added `RESEND_API_KEY=re_F6juxdMp_5W62XEMZAKJyZS7svTVNiPcZ` to `.env.local`
+- Added `RESEND_API_KEY=[REDACTED — rotate credential in Resend]` to `.env.local`
+- Security note: a real credential was previously committed here in plaintext. Never commit real API credentials. Store deployment secrets in the approved environment-secret system.
 - Enables email notifications for newsletter/waitlist submissions
 
 **Files Modified:**
