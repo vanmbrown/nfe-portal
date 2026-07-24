@@ -8,7 +8,10 @@
  * do not ship this file's token list as-is.
  */
 
-const MOCK_VALID_TOKENS = new Set(['PROTOTYPE-VALID-TEST-TOKEN'])
+const MOCK_VALID_TOKENS = new Set([
+  'PROTOTYPE-VALID-TEST-TOKEN',
+  'nfe-study-circle-demo',
+])
 
 export type MockInviteState = 'checking' | 'valid' | 'invalid'
 

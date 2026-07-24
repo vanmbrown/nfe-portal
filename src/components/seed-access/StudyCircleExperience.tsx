@@ -12,7 +12,6 @@ import {
   STUDY_CIRCLE_PRODUCTS,
   STUDY_CIRCLE_SKIN_CONCERNS,
   STUDY_CIRCLE_SKIN_TYPES,
-  STUDY_CIRCLE_SOURCES,
   STUDY_CIRCLE_SUCCESS_MESSAGE,
   type StudyCircleProduct,
   type StudyCircleSkinConcern,
@@ -55,7 +54,6 @@ export function StudyCircleExperience() {
   const [fragranceSensitive, setFragranceSensitive] = useState(false)
   const [contactMethod, setContactMethod] = useState('')
   const [additionalContext, setAdditionalContext] = useState('')
-  const [source, setSource] = useState('')
 
   // Group A — required participation consent
   const [ackExpectations, setAckExpectations] = useState(false)
@@ -196,9 +194,9 @@ export function StudyCircleExperience() {
             This link isn&apos;t active.
           </h1>
           <p className="mx-auto mt-8 max-w-xl text-lg leading-8 text-nfe-ink/72">
-            The NFE Study Circle is by private invitation only. If you
-            believe you received this link in error, or your invitation has
-            expired, reach out to Vanessa directly and she&apos;ll help.
+            The NFE Study Circle is by private invitation only. If this
+            link isn&apos;t working for you, reach out to Vanessa directly
+            and she&apos;ll help.
           </p>
         </section>
       </div>
@@ -218,7 +216,7 @@ export function StudyCircleExperience() {
               The NFE Study Circle
             </p>
             <h1 className="mt-4 font-serif text-3xl text-nfe-green-900 md:text-4xl">
-              Your place in the circle is noted.
+              Your place in the circle is confirmed.
             </h1>
             <p className="mt-6 leading-8 text-nfe-ink/72">
               {STUDY_CIRCLE_SUCCESS_MESSAGE}
@@ -535,24 +533,6 @@ export function StudyCircleExperience() {
                   {STUDY_CIRCLE_CONTACT_METHODS.map((m) => (
                     <option key={m} value={m}>
                       {m}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="sc-source" className={labelClass}>
-                  How did you hear about this?
-                </label>
-                <select
-                  id="sc-source"
-                  value={source}
-                  onChange={(e) => setSource(e.target.value)}
-                  className={fieldClass}
-                >
-                  <option value="">Select an option</option>
-                  {STUDY_CIRCLE_SOURCES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
                     </option>
                   ))}
                 </select>
