@@ -15,7 +15,9 @@ import {
 
 
 /**
- * UPDATED to reflect NFE Face Elixir — Master Formula v8.5‑KD (Kojic Dipalmitate 2.0%) and removal of Palmitoyl Tripeptide‑5.
+ * UPDATED to reflect NFE Face Elixir — Master Formula v8.5‑KD (kojic
+ * dipalmitate added as a tone-support active) and removal of Palmitoyl
+ * Tripeptide‑5.
  * Sources: client master formula v8.5‑KD 2025‑11‑03.
  */
 
