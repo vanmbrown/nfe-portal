@@ -1,21 +1,38 @@
 /**
- * Phase 1 prototype only. No real invitations, no real participant data,
- * no network call. This exists so the frontend experience (invalid state,
- * valid state, intake, consent, confirmation) can be built and tested
- * before the backend proposal in docs/seed-access/BACKEND_PROPOSAL.md is
- * authorized and its migration applied. Replace with a real call to a
- * server-verified invitation-check endpoint once that backend exists —
- * do not ship this file's token list as-is.
+ * Development-only invitation stub.
+ *
+ * This exists so `/study-circle` can be exercised locally without a database.
+ * It is hard-gated: `isMockModeEnabled()` returns false whenever
+ * NODE_ENV === 'production', so a production build cannot validate a demo
+ * token no matter what is passed in the URL.
+ *
+ * Real verification goes through POST /api/seed-access/verify-invite.
  */
 
-const MOCK_VALID_TOKENS = new Set([
-  'PROTOTYPE-VALID-TEST-TOKEN',
-  'nfe-study-circle-demo',
-])
+export interface MockInvitationView {
+  firstName: string | null
+  maskedEmail: string
+  productAssignment: 'face_elixir' | 'body_elixir'
+}
 
-export type MockInviteState = 'checking' | 'valid' | 'invalid'
+const MOCK_INVITATIONS: Record<string, MockInvitationView> = {
+  'nfe-study-circle-demo': {
+    firstName: 'Demo',
+    maskedEmail: 'd***@example.invalid',
+    productAssignment: 'face_elixir',
+  },
+  'nfe-study-circle-demo-body': {
+    firstName: 'Demo',
+    maskedEmail: 'd***@example.invalid',
+    productAssignment: 'body_elixir',
+  },
+}
 
-export function checkMockInvitation(token: string | null): MockInviteState {
-  if (!token) return 'invalid'
-  return MOCK_VALID_TOKENS.has(token) ? 'valid' : 'invalid'
+export function isMockModeEnabled(): boolean {
+  return process.env.NODE_ENV !== 'production'
+}
+
+export function lookupMockInvitation(token: string): MockInvitationView | null {
+  if (!isMockModeEnabled()) return null
+  return MOCK_INVITATIONS[token] ?? null
 }

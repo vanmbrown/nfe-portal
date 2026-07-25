@@ -1,23 +1,29 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { NFE_EVENT_NAMES } from '@/lib/analytics/events'
 import { trackNfeEvent } from '@/lib/analytics/track'
-import { checkMockInvitation, type MockInviteState } from '@/lib/seed-access/mockInvitations'
+import { lookupMockInvitation } from '@/lib/seed-access/mockInvitations'
 import {
   STUDY_CIRCLE_AGE_RANGES,
   STUDY_CIRCLE_CONTACT_METHODS,
-  STUDY_CIRCLE_PRODUCTS,
   STUDY_CIRCLE_SKIN_CONCERNS,
   STUDY_CIRCLE_SKIN_TYPES,
   STUDY_CIRCLE_SUCCESS_MESSAGE,
-  type StudyCircleProduct,
+  studyCircleProductLabel,
   type StudyCircleSkinConcern,
 } from '@/content/seed-access/options'
 
+type InviteState = 'checking' | 'valid' | 'invalid'
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error'
+
+interface InvitationView {
+  firstName: string | null
+  maskedEmail: string
+  productAssignment: string
+}
 
 const cardClass =
   'rounded-[1.75rem] border border-nfe-green-900/10 bg-white p-8 md:p-10'
@@ -29,24 +35,31 @@ const checkboxRowClass =
 
 export function StudyCircleExperience() {
   const searchParams = useSearchParams()
-  const token = searchParams.get('invite')
+  const urlToken = searchParams.get('invite')
 
-  const [inviteState, setInviteState] = useState<MockInviteState>('checking')
+  /**
+   * The token lives in a ref, not in state and not in storage. It is never
+   * written to localStorage, a cookie, analytics, or the console. It is read
+   * once from the URL, held in memory for the eventual submission, and the URL
+   * is then cleaned so it does not linger in the address bar or in a
+   * screenshot.
+   */
+  const tokenRef = useRef<string | null>(null)
+  if (tokenRef.current === null && urlToken) tokenRef.current = urlToken
+
+  const [inviteState, setInviteState] = useState<InviteState>('checking')
+  const [invitation, setInvitation] = useState<InvitationView | null>(null)
   const [status, setStatus] = useState<FormStatus>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
   const [hasStarted, setHasStarted] = useState(false)
 
-  // Required fields
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [ageRange, setAgeRange] = useState('')
   const [skinType, setSkinType] = useState('')
   const [skinConcerns, setSkinConcerns] = useState<StudyCircleSkinConcern[]>([])
-  const [product, setProduct] = useState<StudyCircleProduct | ''>('')
-  const [willingToUse, setWillingToUse] = useState(false)
-  const [willingCheckins, setWillingCheckins] = useState(false)
 
-  // Optional fields
   const [phone, setPhone] = useState('')
   const [location, setLocation] = useState('')
   const [routine, setRoutine] = useState('')
@@ -55,16 +68,18 @@ export function StudyCircleExperience() {
   const [contactMethod, setContactMethod] = useState('')
   const [additionalContext, setAdditionalContext] = useState('')
 
-  // Group A — required participation consent
+  const [willingToUse, setWillingToUse] = useState(false)
+  const [willingCheckins, setWillingCheckins] = useState(false)
+
   const [ackExpectations, setAckExpectations] = useState(false)
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [contactAboutStudy, setContactAboutStudy] = useState(false)
   const [ackHonestFeedback, setAckHonestFeedback] = useState(false)
   const [internalUseConsent, setInternalUseConsent] = useState(false)
+  const [confidentiality, setConfidentiality] = useState(false)
 
-  // Group B — optional permissions
   const [quotePermission, setQuotePermission] = useState(false)
-  const [quoteEditPermission, setQuoteEditPermission] = useState(false)
+  const [quoteLengthEditPermission, setQuoteLengthEditPermission] = useState(false)
   const [firstNamePermission, setFirstNamePermission] = useState(false)
   const [fullNamePermission, setFullNamePermission] = useState(false)
   const [photoPermission, setPhotoPermission] = useState(false)
@@ -74,7 +89,7 @@ export function StudyCircleExperience() {
   const [organicSocialPermission, setOrganicSocialPermission] = useState(false)
   const [paidMediaPermission, setPaidMediaPermission] = useState(false)
   const [futureContactPermission, setFutureContactPermission] = useState(false)
-  const [marketingOptIn, setMarketingOptIn] = useState(false)
+  const [marketingPermission, setMarketingPermission] = useState(false)
 
   useEffect(() => {
     trackNfeEvent({
@@ -86,30 +101,87 @@ export function StudyCircleExperience() {
   }, [])
 
   useEffect(() => {
-    const result = checkMockInvitation(token)
-    setInviteState(result)
+    let cancelled = false
+    const token = tokenRef.current
+
+    async function verify() {
+      if (!token) {
+        if (!cancelled) setInviteState('invalid')
+        return
+      }
+
+      // Local development convenience only; never reachable in a production
+      // build (see isMockModeEnabled).
+      const mock = lookupMockInvitation(token)
+      if (mock) {
+        if (!cancelled) {
+          setInvitation(mock)
+          setInviteState('valid')
+        }
+        return
+      }
+
+      try {
+        const response = await fetch('/api/seed-access/verify-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        })
+        const data = await response.json().catch(() => ({ valid: false }))
+        if (cancelled) return
+        if (data?.valid === true && data.invitation) {
+          setInvitation(data.invitation as InvitationView)
+          setInviteState('valid')
+        } else {
+          setInviteState('invalid')
+        }
+      } catch {
+        if (!cancelled) setInviteState('invalid')
+      }
+    }
+
+    void verify()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Remove the token from the visible URL once it has been read into memory.
+  // The submission still uses tokenRef, so this cannot destroy the only copy.
+  useEffect(() => {
+    if (!urlToken || typeof window === 'undefined') return
+    const url = new URL(window.location.href)
+    url.searchParams.delete('invite')
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`)
+  }, [urlToken])
+
+  useEffect(() => {
+    if (inviteState === 'checking') return
     trackNfeEvent({
       name:
-        result === 'valid'
+        inviteState === 'valid'
           ? NFE_EVENT_NAMES.seedAccessInviteValid
           : NFE_EVENT_NAMES.seedAccessInviteInvalid,
       area: 'seed_access',
       pagePath: '/study-circle',
       source: 'seed_access',
+      // Enum only. The token is never an analytics property.
+      metadata: invitation ? { product: invitation.productAssignment } : {},
     })
-  }, [token])
+  }, [inviteState, invitation])
 
-  function markStarted() {
-    if (!hasStarted) {
-      setHasStarted(true)
+  const markStarted = useCallback(() => {
+    setHasStarted((already) => {
+      if (already) return already
       trackNfeEvent({
         name: NFE_EVENT_NAMES.seedAccessIntakeStarted,
         area: 'seed_access',
         pagePath: '/study-circle',
         source: 'seed_access',
       })
-    }
-  }
+      return true
+    })
+  }, [])
 
   function toggleSkinConcern(concern: StudyCircleSkinConcern) {
     markStarted()
@@ -126,62 +198,121 @@ export function StudyCircleExperience() {
       privacyAccepted &&
       contactAboutStudy &&
       ackHonestFeedback &&
-      internalUseConsent,
+      internalUseConsent &&
+      confidentiality,
     [
       ackExpectations,
       privacyAccepted,
       contactAboutStudy,
       ackHonestFeedback,
       internalUseConsent,
+      confidentiality,
     ]
   )
 
   useEffect(() => {
-    if (requiredConsentComplete) {
-      trackNfeEvent({
-        name: NFE_EVENT_NAMES.seedAccessConsentCompleted,
-        area: 'seed_access',
-        pagePath: '/study-circle',
-        source: 'seed_access',
-      })
-    }
+    if (!requiredConsentComplete) return
+    trackNfeEvent({
+      name: NFE_EVENT_NAMES.seedAccessConsentCompleted,
+      area: 'seed_access',
+      pagePath: '/study-circle',
+      source: 'seed_access',
+    })
   }, [requiredConsentComplete])
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
     setStatus('submitting')
+    setErrorMessage('')
 
-    // Phase 1 prototype: no network submission. See
-    // docs/seed-access/BACKEND_PROPOSAL.md for the real intake contract
-    // this will call once backend work is authorized and its migration
-    // applied. Nothing here is sent anywhere or persisted.
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    const permissions = {
+      quotePermission,
+      quoteLengthEditPermission,
+      firstNamePermission,
+      fullNamePermission,
+      photoPermission,
+      videoPermission,
+      websitePermission,
+      emailPermission,
+      organicSocialPermission,
+      paidMediaPermission,
+      futureContactPermission,
+      marketingPermission,
+    }
 
-    setStatus('success')
-    trackNfeEvent({
-      name: NFE_EVENT_NAMES.seedAccessJoined,
-      area: 'seed_access',
-      pagePath: '/study-circle',
-      source: 'seed_access',
-      consentGranted: internalUseConsent,
-      metadata: {
-        product: product || 'none',
-        skinConcernCount: skinConcerns.length,
-        quotePermission,
-        photoPermission,
-      },
-    })
-    trackNfeEvent({
-      name: NFE_EVENT_NAMES.seedAccessConfirmationViewed,
-      area: 'seed_access',
-      pagePath: '/study-circle',
-      source: 'seed_access',
-    })
+    try {
+      const response = await fetch('/api/seed-access/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: tokenRef.current,
+          firstName,
+          lastName,
+          email,
+          ageRange,
+          skinType,
+          primaryConcerns: skinConcerns,
+          phone,
+          location,
+          currentRoutine: routine,
+          sensitivities,
+          fragranceSensitive,
+          preferredContactMethod: contactMethod,
+          additionalContext,
+          willingToUseAsDirected: willingToUse,
+          willingToCompleteCheckins: willingCheckins,
+          // No product field is sent. The server derives it from the
+          // invitation and ignores anything a client might supply.
+          consent: {
+            understandsExpectations: ackExpectations,
+            privacyPolicy: privacyAccepted,
+            studyContact: contactAboutStudy,
+            honestFeedback: ackHonestFeedback,
+            internalLearning: internalUseConsent,
+            confidentiality,
+          },
+          permissions,
+        }),
+      })
+
+      if (response.ok) {
+        setStatus('success')
+        trackNfeEvent({
+          name: NFE_EVENT_NAMES.seedAccessJoined,
+          area: 'seed_access',
+          pagePath: '/study-circle',
+          source: 'seed_access',
+          consentGranted: internalUseConsent,
+          metadata: {
+            product: invitation?.productAssignment ?? 'unknown',
+            concernCount: skinConcerns.length,
+            optionalPermissionsGranted:
+              Object.values(permissions).filter(Boolean).length,
+          },
+        })
+        trackNfeEvent({
+          name: NFE_EVENT_NAMES.seedAccessConfirmationViewed,
+          area: 'seed_access',
+          pagePath: '/study-circle',
+          source: 'seed_access',
+        })
+        return
+      }
+
+      const data = await response.json().catch(() => ({}))
+      setStatus('error')
+      setErrorMessage(
+        typeof data?.error === 'string'
+          ? data.error
+          : 'Something went wrong. Please try again, or reach out directly if it keeps happening.'
+      )
+    } catch {
+      setStatus('error')
+      setErrorMessage('Unable to connect. Please try again.')
+    }
   }
 
-  if (inviteState === 'checking') {
-    return null
-  }
+  if (inviteState === 'checking') return null
 
   if (inviteState === 'invalid') {
     return (
@@ -191,12 +322,11 @@ export function StudyCircleExperience() {
             A Private NFE Invitation
           </p>
           <h1 className="mx-auto max-w-2xl font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
-            This link isn&apos;t active.
+            This private invitation could not be confirmed.
           </h1>
           <p className="mx-auto mt-8 max-w-xl text-lg leading-8 text-nfe-ink/72">
-            The NFE Study Circle is by private invitation only. If this
-            link isn&apos;t working for you, reach out to Vanessa directly
-            and she&apos;ll help.
+            Please return to the invitation NFE sent you, or contact the person
+            who invited you and they will help.
           </p>
         </section>
       </div>
@@ -227,6 +357,10 @@ export function StudyCircleExperience() {
     )
   }
 
+  const productLabel = invitation
+    ? (studyCircleProductLabel(invitation.productAssignment) ?? 'Your NFE ritual')
+    : 'Your NFE ritual'
+
   return (
     <div className="bg-nfe-paper text-nfe-ink">
       <section className="bg-[#efe4d5] px-6 py-24 text-center md:py-32">
@@ -237,8 +371,9 @@ export function StudyCircleExperience() {
           The NFE Study Circle
         </h1>
         <p className="mx-auto mt-8 max-w-3xl text-lg leading-8 text-nfe-ink/72 md:text-xl">
-          You&apos;ve been invited to experience NFE thoughtfully, use the
-          ritual consistently, and share honest observations over time.
+          You&apos;ve been invited to experience NFE thoughtfully over four
+          weeks, use the ritual consistently, and share honest observations
+          along the way.
         </p>
         <div className="mt-10">
           <Link
@@ -257,14 +392,14 @@ export function StudyCircleExperience() {
           </h2>
           <p className="leading-8 text-nfe-ink/72">
             This circle is intentionally small. You were invited for your
-            perspective and relevance to who NFE is made for — not selected
-            at random and not open for general sign-up.
+            perspective and relevance to who NFE is made for — not selected at
+            random and not open for general sign-up.
           </p>
           <p className="leading-8 text-nfe-ink/72">
-            The purpose is honest feedback. Positive feedback is not
-            required, and your participation does not depend on it. What
-            you share helps NFE refine ritual guidance, education, and care
-            for the people who come after you.
+            The purpose is honest feedback. Positive feedback is not required,
+            and your participation does not depend on it. What you share helps
+            NFE refine ritual guidance, education, and care for the people who
+            come after you.
           </p>
         </div>
       </section>
@@ -276,11 +411,11 @@ export function StudyCircleExperience() {
               What participation includes.
             </h2>
             <ul className="mt-6 space-y-3 leading-7 text-nfe-ink/72">
-              <li>Using the assigned product as directed, over the study period</li>
-              <li>Sharing your initial impressions</li>
+              <li>Four weeks with your assigned NFE ritual, used as directed</li>
+              <li>A first-use impression</li>
               <li>A check-in 7–10 days in</li>
-              <li>A check-in 3–4 weeks in</li>
-              <li>Honest observations at each step</li>
+              <li>A check-in at week 3–4</li>
+              <li>Your product is a gift; participation is unpaid</li>
               <li>An optional conversation about a testimonial, only if you&apos;re open to it</li>
             </ul>
           </div>
@@ -289,11 +424,16 @@ export function StudyCircleExperience() {
               What NFE asks.
             </h2>
             <ul className="mt-6 space-y-3 leading-7 text-nfe-ink/72">
-              <li>Consistent use, as directed</li>
+              <li>Consistent use across the four weeks</li>
               <li>Thoughtful, candid feedback — including what isn&apos;t working</li>
-              <li>Completing the check-ins above</li>
-              <li>Telling NFE promptly if anything feels uncomfortable or irritating</li>
+              <li>Completing the three check-ins above</li>
+              <li>
+                Stopping use and telling NFE promptly if anything feels
+                uncomfortable, and seeking professional guidance where
+                appropriate
+              </li>
               <li>No obligation to post publicly, ever</li>
+              <li>You may step away at any time, without penalty and without returning the product</li>
             </ul>
           </div>
         </div>
@@ -308,8 +448,8 @@ export function StudyCircleExperience() {
             Everything you share as part of this study is private. NFE will
             never use your name, your image, or your words without your
             separate, explicit permission — granted (or not) below, item by
-            item. Saying no to any or all of it does not affect your place
-            in the study.
+            item. Saying no to any or all of it does not affect your place in
+            the study.
           </p>
         </div>
       </section>
@@ -324,7 +464,24 @@ export function StudyCircleExperience() {
               Your Private Intake
             </h2>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <div className="mt-8 rounded-xl border border-nfe-green-900/10 bg-nfe-paper px-5 py-4">
+              <p className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
+                Your NFE Ritual
+              </p>
+              <p className="mt-2 font-serif text-2xl text-nfe-green-900">
+                {productLabel}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-nfe-ink/60">
+                Chosen for you by NFE as part of this invitation.
+              </p>
+              {invitation?.maskedEmail ? (
+                <p className="mt-3 text-sm leading-6 text-nfe-ink/60">
+                  Invitation sent to {invitation.maskedEmail}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
               <div>
                 <label htmlFor="sc-first-name" className={labelClass}>
                   First Name <span className="text-nfe-green-700">*</span>
@@ -372,6 +529,9 @@ export function StudyCircleExperience() {
                   }}
                   className={fieldClass}
                 />
+                <p className="mt-2 text-sm leading-6 text-nfe-ink/60">
+                  Please use the address your invitation was sent to.
+                </p>
               </div>
               <div>
                 <label htmlFor="sc-age-range" className={labelClass}>
@@ -425,10 +585,7 @@ export function StudyCircleExperience() {
                   id="sc-phone"
                   type="tel"
                   value={phone}
-                  onChange={(e) => {
-                    markStarted()
-                    setPhone(e.target.value)
-                  }}
+                  onChange={(e) => setPhone(e.target.value)}
                   className={fieldClass}
                 />
               </div>
@@ -456,33 +613,6 @@ export function StudyCircleExperience() {
               </div>
             </fieldset>
 
-            <fieldset className="mt-8">
-              <legend className="mb-4 text-sm font-medium text-nfe-ink/80">
-                Product Being Used <span className="text-nfe-green-700">*</span>
-              </legend>
-              <div className="flex flex-wrap gap-4">
-                {STUDY_CIRCLE_PRODUCTS.map((option) => (
-                  <label
-                    key={option.value}
-                    className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-nfe-green-900/15 px-4 py-2 text-sm"
-                  >
-                    <input
-                      type="radio"
-                      name="sc-product"
-                      required
-                      value={option.value}
-                      checked={product === option.value}
-                      onChange={() => {
-                        markStarted()
-                        setProduct(option.value)
-                      }}
-                    />
-                    <span>{option.label}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
             <div className="mt-8 space-y-3">
               <label className={checkboxRowClass}>
                 <input
@@ -492,7 +622,7 @@ export function StudyCircleExperience() {
                   onChange={(e) => setWillingToUse(e.target.checked)}
                   className="mt-1"
                 />
-                <span>I&apos;m willing to use this as directed for the full study period.</span>
+                <span>I&apos;m willing to use this as directed for the four-week study period.</span>
               </label>
               <label className={checkboxRowClass}>
                 <input
@@ -502,7 +632,7 @@ export function StudyCircleExperience() {
                   onChange={(e) => setWillingCheckins(e.target.checked)}
                   className="mt-1"
                 />
-                <span>I&apos;m willing to complete the check-ins above.</span>
+                <span>I&apos;m willing to complete the three check-ins above.</span>
               </label>
             </div>
 
@@ -518,6 +648,9 @@ export function StudyCircleExperience() {
                   onChange={(e) => setLocation(e.target.value)}
                   className={fieldClass}
                 />
+                <p className="mt-2 text-sm leading-6 text-nfe-ink/60">
+                  The first cohort ships within the United States only.
+                </p>
               </div>
               <div>
                 <label htmlFor="sc-contact-method" className={labelClass}>
@@ -537,16 +670,17 @@ export function StudyCircleExperience() {
                   ))}
                 </select>
               </div>
-              <label className="flex items-start gap-3 self-end text-sm leading-6 text-nfe-ink/72">
-                <input
-                  type="checkbox"
-                  checked={fragranceSensitive}
-                  onChange={(e) => setFragranceSensitive(e.target.checked)}
-                  className="mt-1"
-                />
-                <span>I have fragrance sensitivity.</span>
-              </label>
             </div>
+
+            <label className={`${checkboxRowClass} mt-6`}>
+              <input
+                type="checkbox"
+                checked={fragranceSensitive}
+                onChange={(e) => setFragranceSensitive(e.target.checked)}
+                className="mt-1"
+              />
+              <span>I have fragrance sensitivity.</span>
+            </label>
 
             <div className="mt-8">
               <label htmlFor="sc-routine" className={labelClass}>
@@ -566,8 +700,9 @@ export function StudyCircleExperience() {
                 Known sensitivities
               </label>
               <p className="mb-3 text-sm leading-6 text-nfe-ink/60">
-                Self-reported, for context only. This is not a medical
-                intake and NFE does not review medical history.
+                Please share only what may help NFE understand your
+                cosmetic-use context. Do not include medical records or
+                diagnostic information.
               </p>
               <textarea
                 id="sc-sensitivities"
@@ -596,7 +731,7 @@ export function StudyCircleExperience() {
                 Participation Agreement
               </p>
               <p className="mt-3 text-sm leading-6 text-nfe-ink/60">
-                All five are required to take part.
+                All six are required to take part.
               </p>
               <div className="mt-6 space-y-3">
                 <label className={checkboxRowClass}>
@@ -608,9 +743,9 @@ export function StudyCircleExperience() {
                     className="mt-1"
                   />
                   <span>
-                    I understand what this study asks of me (product use
-                    over the stated period, my honest impressions, and
-                    completing the check-ins above).
+                    I understand what this study asks of me: four weeks of use
+                    as directed, my honest impressions, and the three check-ins
+                    above.
                   </span>
                 </label>
                 <label className={checkboxRowClass}>
@@ -648,9 +783,9 @@ export function StudyCircleExperience() {
                     className="mt-1"
                   />
                   <span>
-                    I understand honest feedback is what&apos;s being
-                    asked for — positive feedback is not required, and my
-                    participation does not depend on it.
+                    I understand honest feedback is what&apos;s being asked for
+                    — positive feedback is not required, and my participation
+                    does not depend on it.
                   </span>
                 </label>
                 <label className={checkboxRowClass}>
@@ -663,6 +798,21 @@ export function StudyCircleExperience() {
                   />
                   <span>NFE may use what I submit internally to inform product and education decisions.</span>
                 </label>
+                <label className={checkboxRowClass}>
+                  <input
+                    type="checkbox"
+                    required
+                    checked={confidentiality}
+                    onChange={(e) => setConfidentiality(e.target.checked)}
+                    className="mt-1"
+                  />
+                  <span>
+                    I may discuss my experience privately. I understand I
+                    should not publicly share unreleased packaging, pricing,
+                    launch timing, or other unreleased product details without
+                    NFE&apos;s written approval.
+                  </span>
+                </label>
               </div>
             </div>
 
@@ -671,9 +821,9 @@ export function StudyCircleExperience() {
                 Sharing My Story
               </p>
               <p className="mt-3 text-sm leading-6 text-nfe-ink/72">
-                Everything below is optional. You can say yes to none of
-                these, some of these, or all of these — nothing here is
-                required to take part.
+                Everything below is optional. You can say yes to none of these,
+                some of these, or all of these — nothing here is required to
+                take part, and you can ask NFE to stop any of it later.
               </p>
 
               <div className="mt-6 space-y-3">
@@ -690,11 +840,15 @@ export function StudyCircleExperience() {
                   <label className={checkboxRowClass}>
                     <input
                       type="checkbox"
-                      checked={quoteEditPermission}
-                      onChange={(e) => setQuoteEditPermission(e.target.checked)}
+                      checked={quoteLengthEditPermission}
+                      onChange={(e) => setQuoteLengthEditPermission(e.target.checked)}
                       className="mt-1"
                     />
-                    <span>NFE may lightly edit quotes for length, without changing their meaning.</span>
+                    <span>
+                      NFE may shorten quotes for length without changing their
+                      meaning. Any materially edited quote comes back to me for
+                      approval first.
+                    </span>
                   </label>
                 ) : null}
               </div>
@@ -722,6 +876,9 @@ export function StudyCircleExperience() {
               </div>
 
               <p className="mb-3 mt-6 text-sm font-medium text-nfe-ink/80">Media</p>
+              <p className="mb-3 text-sm leading-6 text-nfe-ink/60">
+                Photographs are always optional and never required to take part.
+              </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className={checkboxRowClass}>
                   <input
@@ -797,11 +954,15 @@ export function StudyCircleExperience() {
                 <label className={checkboxRowClass}>
                   <input
                     type="checkbox"
-                    checked={marketingOptIn}
-                    onChange={(e) => setMarketingOptIn(e.target.checked)}
+                    checked={marketingPermission}
+                    onChange={(e) => setMarketingPermission(e.target.checked)}
                     className="mt-1"
                   />
-                  <span>I&apos;d like to receive general NFE marketing emails.</span>
+                  <span>
+                    I&apos;d like to receive general NFE marketing emails. This
+                    is separate from the study and declining does not affect my
+                    participation.
+                  </span>
                 </label>
               </div>
             </div>
@@ -816,10 +977,9 @@ export function StudyCircleExperience() {
               </button>
             </div>
 
-            {status === 'error' ? (
+            {status === 'error' && errorMessage ? (
               <div role="alert" className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                Something went wrong. Please try again, or reach out
-                directly if it keeps happening.
+                {errorMessage}
               </div>
             ) : null}
           </form>
