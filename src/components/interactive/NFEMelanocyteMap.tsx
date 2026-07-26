@@ -196,9 +196,11 @@ export default function NFEMelanocyteMap({
   const mutedTextColor = themeDark ? 'text-nfe-paper/70' : 'text-nfe-muted';
   const cardBg = themeDark ? 'bg-nfe-green/10 border-nfe-gold/20' : 'bg-nfe-paper border-nfe-green/20';
   const inputBg = themeDark ? 'bg-nfe-green/10 border-nfe-gold/20 text-nfe-paper' : 'bg-white border-gray-300 text-nfe-ink';
+  // Outline buttons must follow the surface, like every other colour here.
+  const outlineVariant = themeDark ? 'outlineOnDark' as const : 'outline' as const;
 
   return (
-    <section aria-labelledby="melanocyte-map-title" className={`my-8 ${bgColor} ${textColor} min-h-screen`} data-testid="melanocyte-map">
+    <section aria-labelledby="melanocyte-map-title" className={`relative isolate my-8 overflow-hidden ${bgColor} ${textColor} min-h-screen`} data-testid="melanocyte-map">
       {/* Accessibility: Remove default focus outlines, use glow instead */}
       <style dangerouslySetInnerHTML={{__html: sanitizeStyle(`
         g[role="button"]:focus-visible {
@@ -208,8 +210,10 @@ export default function NFEMelanocyteMap({
           filter: url(#glowActive) !important;
         }
       `)}} />
-      {/* Neon gradient scene */}
-      <div className="fixed inset-0 -z-10">
+      {/* Decorative scene background — contained to this section. It was
+          `fixed inset-0`, which escaped the component and sat behind the
+          page's own background rather than behind this map. */}
+      <div className="absolute inset-0 -z-10" aria-hidden="true">
         <div className={`absolute inset-0 opacity-70 ${themeDark ? 'bg-nfe-green-900' : 'bg-nfe-paper'}`} style={{
           background: themeDark
             ? 'radial-gradient(60% 60% at 70% 20%, rgba(16,59,42,0.35) 0%, rgba(198,166,100,0.25) 40%, rgba(16,59,42,0.2) 70%, rgba(11,41,30,0.9) 100%)'
@@ -221,7 +225,10 @@ export default function NFEMelanocyteMap({
       <div className="mx-auto max-w-7xl p-4 md:p-8 w-full">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 w-full">
           <div className="flex-1">
-            <motion.h1
+            {/* h3, not h1: this sits inside the page's "Melanocyte Map" h2
+                section. The id is unchanged, so the section's
+                aria-labelledby still resolves. Visual treatment unchanged. */}
+            <motion.h3
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
@@ -229,7 +236,7 @@ export default function NFEMelanocyteMap({
               className="text-[clamp(2rem,4vw,4.5rem)] leading-[1.05] tracking-tight break-normal [word-break:normal] [overflow-wrap:normal] [hyphens:none] font-primary font-semibold text-nfe-gold lg:bg-gradient-to-r lg:from-nfe-gold lg:to-nfe-gold/70 lg:bg-clip-text lg:text-transparent"
             >
               Melanocyte Interaction Map
-            </motion.h1>
+            </motion.h3>
             <p className={`mt-1 text-sm md:text-base ${mutedTextColor}`}>
               Interactive cross‑section with real histology texture underlay.
             </p>
@@ -262,12 +269,12 @@ export default function NFEMelanocyteMap({
               />
             </div>
             <div className="flex shrink-0 gap-2">
-              <Button variant="outline" size="sm" onClick={() => setQuery('')} aria-label="Clear search" className="flex-shrink-0">
+              <Button variant={outlineVariant} size="sm" onClick={() => setQuery('')} aria-label="Clear search" className="flex-shrink-0">
                 Clear
               </Button>
               <Button
                 size="icon"
-                variant="outline"
+                variant={outlineVariant}
                 onClick={() => setThemeDark(d => !d)}
                 aria-label={themeDark ? 'Switch to light theme' : 'Switch to dark theme'}
                 className="flex-shrink-0"
@@ -329,7 +336,7 @@ export default function NFEMelanocyteMap({
                   <div className="absolute top-3 right-3 z-10 flex gap-2">
                     <Button
                       size="icon"
-                      variant="outline"
+                      variant={outlineVariant}
                       onClick={() => dispatch({ type: 'ZOOM_IN' })}
                       aria-label="Zoom in"
                       className={cardBg}
@@ -338,7 +345,7 @@ export default function NFEMelanocyteMap({
                     </Button>
                     <Button
                       size="icon"
-                      variant="outline"
+                      variant={outlineVariant}
                       onClick={() => dispatch({ type: 'ZOOM_OUT' })}
                       aria-label="Zoom out"
                       className={cardBg}
@@ -347,7 +354,7 @@ export default function NFEMelanocyteMap({
                     </Button>
                     <Button
                       size="icon"
-                      variant="outline"
+                      variant={outlineVariant}
                       onClick={() => dispatch({ type: 'RESET' })}
                       aria-label="Reset view"
                       className={cardBg}
@@ -356,7 +363,7 @@ export default function NFEMelanocyteMap({
                     </Button>
                     <Button
                       size="icon"
-                      variant="outline"
+                      variant={outlineVariant}
                       onClick={() => setShowHistology(v => !v)}
                       aria-label={showHistology ? 'Hide histology' : 'Show histology'}
                       className={cardBg}
@@ -691,21 +698,19 @@ export default function NFEMelanocyteMap({
               {filtered.map((a) => (
                 <div
                   key={a.id}
-                  className={`rounded-xl border ${themeDark ? 'border-nfe-gold/20' : 'border-nfe-green/20'} p-3 ${cardBg} transition-all duration-150 ease-in-out cursor-pointer ${
+                  // Presentational card. This was role="button" + tabIndex +
+                  // onClick wrapping the "Locate" button, which (a) nested one
+                  // control inside another, (b) created a second tab stop
+                  // firing the identical action, and (c) carried an aria-label
+                  // that did not contain the card's visible text. The "Locate"
+                  // button below is now the single control for this card: it is
+                  // properly named, keyboard-reachable, and already calls
+                  // setActiveId with the same id.
+                  className={`rounded-xl border ${themeDark ? 'border-nfe-gold/20' : 'border-nfe-green/20'} p-3 ${cardBg} transition-all duration-150 ease-in-out ${
                     activeId === a.id
                       ? 'ring-2 ring-nfe-gold shadow-lg shadow-nfe-gold/40'
-                      : 'hover:bg-nfe-green/10'
+                      : ''
                   }`}
-                  onClick={() => setActiveId(a.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setActiveId(a.id);
-                    }
-                  }}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`View details for ${a.name}`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -716,7 +721,7 @@ export default function NFEMelanocyteMap({
                     </div>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant={outlineVariant}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveId(a.id);
@@ -732,10 +737,10 @@ export default function NFEMelanocyteMap({
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" aria-label="Export as PNG">
+              <Button variant={outlineVariant} size="sm">
                 Export PNG
               </Button>
-              <Button variant="outline" size="sm" aria-label="Export as PDF">
+              <Button variant={outlineVariant} size="sm">
                 Export PDF
               </Button>
             </div>

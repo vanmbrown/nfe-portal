@@ -2,7 +2,7 @@ import { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'default'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'outlineOnDark' | 'default'
   size?: 'sm' | 'md' | 'lg' | 'icon'
   asChild?: boolean
 }
@@ -16,6 +16,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       secondary: 'bg-nfe-gold text-nfe-ink hover:bg-nfe-gold/90',
       ghost: 'text-nfe-green hover:bg-nfe-green/10',
       outline: 'border border-nfe-green text-nfe-green hover:bg-nfe-green hover:text-nfe-paper',
+      // Same outline treatment for dark surfaces. `outline` uses nfe-green
+      // (#103B2A), which measured ~1.2:1 against the dark-green map panels.
+      // nfe-gold is the ratified accent for dark surfaces (~6.3:1 here).
+      outlineOnDark: 'border border-nfe-gold/60 text-nfe-gold hover:bg-nfe-gold hover:text-nfe-green-900',
       default: 'bg-nfe-green text-nfe-paper hover:bg-nfe-green-700',
     }
     
