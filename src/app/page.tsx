@@ -401,7 +401,11 @@ export default function NFEHomePage() {
                 key={item.title}
                 className="rounded-3xl border border-nfe-green-100 bg-nfe-paper p-6"
               >
-                <p className="text-xs uppercase tracking-[0.25em] text-nfe-gold">
+                {/* Light-surface accent. nfe-gold (#C6A664) is the ratified
+                    accent for DARK surfaces and measured 2.22:1 here on
+                    bg-nfe-paper. #77633C is the ratified light-surface pair
+                    (~5.6:1) — same accent role, correct surface. */}
+                <p className="text-xs uppercase tracking-[0.25em] text-[#77633C]">
                   {item.status}
                 </p>
                 <h3 className="mt-3 font-serif text-2xl text-nfe-green-900">
@@ -510,7 +514,12 @@ export default function NFEHomePage() {
           <h2 className="font-serif text-4xl text-nfe-green-900 md:text-5xl">
             Private notes before the full ritual opens.
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl leading-7 text-nfe-muted">
+          {/* text-nfe-muted (#6B6B6B) passes on white but measured 4.24:1 on
+              this warm #efe4d5 panel. Deepened locally rather than darkening
+              the shared token, which is correct everywhere else it is used.
+              Same correction already applied to the equivalent panel on
+              /science. */}
+          <p className="mx-auto mt-6 max-w-2xl leading-7 text-[#5c5c5c]">
             Founder Access is the primary path while checkout remains inactive:
             private notes, early ritual guidance, and the supported email
             capture for launch access when ordering opens.
