@@ -121,18 +121,72 @@ occurrences.
 | `src/app/shop/ShopCard.tsx` | Product status badge | **Dead code** — zero references anywhere in `src` | Remove the component, or fix copy if revived | **Deferred** |
 | `src/components/products/ProductCard.tsx` | Product status badge | **Dead code** — zero references (the `ProductCard` imports elsewhere resolve to different components in `ui/Card.tsx` and `articles/MDXComponents.tsx`) | Same | **Deferred** |
 | `src/components/products/FaceElixirSections.tsx` | CMS fallback strings ("Product details coming soon.") | **Dead code** — zero references | Same | **Deferred** |
-| `src/components/products/RitualPairing.tsx` | Customer-facing status badge | **Live component**, but the "Coming Soon" branch is unreachable in practice — only the Body Elixir "IN DEVELOPMENT" branch renders | Replace with NFE-aligned status wording | **Deferred — founder decision** |
+| `src/components/products/RitualPairing.tsx` | Product status button | **Unreachable** — see routing note below. Originally classified "live"; that was wrong | Replace with NFE-aligned status wording | **Applied** — see ruling below |
 
-Recommended replacements, for founder selection:
+Replacements offered for founder selection were: *Founder Access opens first*,
+*Available through Founder Access*, *The first release will be shared privately*.
 
-- *Founder Access opens first*
-- *Available through Founder Access*
-- *The first release will be shared privately*
+### Correction — `RitualPairing` is unreachable, not live
 
-Nothing was changed. All four occurrences hinge on the same positioning
-decision about how Face Elixir's pre-launch state is described, and §12 of the
-brief reserves that for founder approval. Because none of it currently
-reaches a customer, there is no urgency — this can be decided calmly.
+The first audit classified `RitualPairing.tsx` as a live component because it
+is imported by `products/[slug]/ProductPageClient.tsx`. Re-checked against the
+build output, that is not sufficient — the import chain is real but no URL
+reaches it:
+
+- `/products/face-elixir` and `/products/body-elixir` have **dedicated static
+  page files** (`src/app/products/face-elixir/page.tsx`,
+  `…/body-elixir/page.tsx`). A static App Router segment outranks a dynamic
+  `[slug]` segment, so those two URLs are served by the dedicated pages, which
+  do not import `RitualPairing`.
+- The product registry (`src/content/products/registry.ts`) declares exactly
+  those two slugs. Every other slug hits `notFound()`.
+- Therefore `/products/[slug]` — and everything inside `ProductPageClient` —
+  renders on no URL.
+
+Confirmed in the build: "Ritual Pairing" appears only in the compiled
+`[slug]` bundle and in **no** prerendered HTML.
+
+Two consequences worth recording:
+
+1. **The approved wording was already shipping.** "Founder Access opens first"
+   is present at the production baseline `80353aa` in `src/app/shop/page.tsx`
+   (the `/shop` status label) and `src/content/atelier/elixir-editorial.ts`
+   (`statusLabel`, used by the dedicated `/products/face-elixir` page). The
+   ruling therefore **ratifies live wording** rather than introducing new copy,
+   and this change simply brings the one inconsistent component into line.
+   Net customer-visible change from this ruling: **none**.
+2. **A "Join Waitlist" CTA sits in the same unreachable file.**
+   `ProductPageClient.tsx` renders a "Join Waitlist" button when
+   `product.status === 'coming_soon'`. It reaches no customer for the same
+   routing reason, and it is **not** in this pass's diff — it predates the
+   baseline. Flagged for founder attention because the phrase is off-brand,
+   but removing it is an editorial and purchasing-flow decision, not a
+   wording fix, so it is **not** actioned here. See §8.
+
+### Founder ruling — applied
+
+Vanessa approved the wording. Applied narrowly:
+
+| | |
+|---|---|
+| Primary product-status wording | **"Founder Access opens first"** |
+| Editorial supporting wording | **"The first release will be shared privately."** — approved as a future narrative option. **Not added anywhere**, since no existing sentence required it and the ruling does not call for new copy. |
+| Dead components | **Left unchanged**, per the ruling: remove in a later cleanup pass rather than editing unused placeholder copy. |
+
+**Only `RitualPairing.tsx` was changed.** Its disabled-state button now reads
+"Founder Access opens first", and its `aria-label` was updated in step so the
+accessible name still contains the visible label verbatim (WCAG 2.5.3);
+leaving the old "…coming soon" label would have reintroduced the exact
+mismatch this pass just fixed elsewhere.
+
+Product availability, purchasing logic, Founder Access routing, product
+records, and the `coming_soon` / `future_release` status *values* in product
+data are all untouched — the change is wording only.
+
+The three dead components (`ShopCard.tsx`, `products/ProductCard.tsx`,
+`FaceElixirSections.tsx`) still contain the old string. That is intentional
+and carries no customer-facing risk: none of them is referenced anywhere, and
+"Coming Soon" renders nowhere on the site. Their removal is deferred.
 
 ---
 
@@ -214,11 +268,18 @@ added or removed.
 - **`/skin-strategy` Performance (~71).** Pre-existing; the route ships two
   heavy interactive maps. Untouched here because it is a performance-architecture
   question, not accessibility debt, and the brief scoped this pass to the latter.
-- **"Coming Soon" replacement wording** — founder decision (see §3).
 - **Three dead components** (`ShopCard.tsx`, `products/ProductCard.tsx`,
-  `FaceElixirSections.tsx`) — recommend removal, deferred because deleting
-  components is broader than this pass's narrow-diff remit and their fate is
-  tied to the same copy decision.
+  `FaceElixirSections.tsx`) — removal deferred to a later cleanup pass by
+  founder ruling (see §3), rather than editing copy that reaches no one.
+- **The unreachable `/products/[slug]` route** (`page.tsx`,
+  `ProductPageClient.tsx`, `RitualPairing.tsx`) — shadowed by the two
+  dedicated product pages (§3). Belongs in the same cleanup pass. Deciding
+  between deleting it and making it the single product template is an
+  architecture question, out of scope here.
+- **"Join Waitlist" CTA** in `ProductPageClient.tsx` — off-brand phrasing,
+  currently unreachable, predates this baseline. **Founder decision:** delete
+  with the route above, or restate (e.g. "Founder Access opens first") if the
+  route is ever revived. Not actioned in this pass.
 - **Study Circle** — staging, legal review, production migration, first
   invitations. Frozen at `feature/nfe-seed-access` @ `1f05512`.
 - Founder dashboard; formula and ingredient updates; Face Elixir size decision.
