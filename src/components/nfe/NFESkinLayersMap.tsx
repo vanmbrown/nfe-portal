@@ -66,12 +66,18 @@ export default function NFESkinLayersMap({ ingredients }: { ingredients?: any[] 
   );
 
   return (
-    <div className="min-h-screen w-full font-sans dark text-slate-100">
-        
-        {/* Neon gradient scene background */}
-        <div className="fixed inset-0 -z-10 bg-slate-900">
-          <div 
-            className="absolute inset-0 opacity-70" 
+    // `isolate` + `relative` + a base dark fill keep the scene background
+    // INSIDE this component. It was previously `fixed inset-0 -z-10`, which
+    // placed it behind the page's own light background, so the dark theme
+    // never actually rendered and this component's light text (text-slate-100,
+    // cyan accents) sat on near-white paper at ~1.0:1. Containing it restores
+    // the intended treatment and resolves the contrast failures.
+    <div className="relative isolate min-h-screen w-full overflow-hidden bg-slate-900 font-sans dark text-slate-100">
+
+        {/* Decorative scene background — no semantic content */}
+        <div className="absolute inset-0 -z-10 bg-slate-900" aria-hidden="true">
+          <div
+            className="absolute inset-0 opacity-70"
             style={{
               background: "radial-gradient(60% 60% at 70% 20%, rgba(34,211,238,0.35) 0%, rgba(59,130,246,0.25) 40%, rgba(236,72,153,0.2) 70%, rgba(2,6,23,0.9) 100%)"
             }}
@@ -83,14 +89,18 @@ export default function NFESkinLayersMap({ ingredients }: { ingredients?: any[] 
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
-              <motion.h1 
-                initial={{opacity:0,y:8}} 
-                animate={{opacity:1,y:0}} 
-                transition={{duration:0.5}} 
+              {/* h3, not h1: this sits inside the page's "Skin Layers Map"
+                  h2 section. A second h1 here broke the document outline and
+                  made the cards below it appear to skip a level. Visual
+                  treatment is unchanged. */}
+              <motion.h3
+                initial={{opacity:0,y:8}}
+                animate={{opacity:1,y:0}}
+                transition={{duration:0.5}}
                 className="text-3xl md:text-5xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-blue-300 to-pink-300"
               >
                 NFE Active Ingredient Index
-              </motion.h1>
+              </motion.h3>
             </div>
             <div className="flex flex-col items-start md:items-end gap-3">
               <div className="flex items-center gap-3">
@@ -117,7 +127,7 @@ export default function NFESkinLayersMap({ ingredients }: { ingredients?: any[] 
             {/* Layered Diagram - Full Width */}
             <Card className="rounded-3xl w-full overflow-hidden bg-white/5 border-white/10 backdrop-blur-xl shadow-[0_0_1px_1px_rgba(255,255,255,0.05)] p-0">
               <CardHeader className="px-6 pt-6 pb-4">
-                <CardTitle className="flex items-center gap-2 text-slate-100"><Shield className="h-5 w-5"/> Biological Cross‑Section</CardTitle>
+                <CardTitle as="h4" className="flex items-center gap-2 text-slate-100"><Shield className="h-5 w-5"/> Biological Cross‑Section</CardTitle>
                 <CardDescription className="text-slate-300">Placement is conceptual for educational visualization—actual penetration varies by molecule, vehicle, and routine.</CardDescription>
               </CardHeader>
               <CardContent className="px-6 pt-0 pb-6">
@@ -127,7 +137,7 @@ export default function NFESkinLayersMap({ ingredients }: { ingredients?: any[] 
                     <div key={layer} className={`relative rounded-xl p-4 md:p-5 border border-white/10 bg-black/30`}>
                       <div className="flex items-center justify-between">
                         <div className="font-semibold text-cyan-300">{layer}</div>
-                        <Tooltip content="Educational visualization only; cosmetic mechanisms (hydration, barrier, antioxidant, tone‑support).">
+                        <Tooltip aria-label={`About the ${layer} layer`} content="Educational visualization only; cosmetic mechanisms (hydration, barrier, antioxidant, tone‑support).">
                           <Info className="h-4 w-4 text-slate-400 cursor-help"/>
                         </Tooltip>
                       </div>
@@ -141,7 +151,7 @@ export default function NFESkinLayersMap({ ingredients }: { ingredients?: any[] 
                             </div>
                           );
                           return (
-                            <Tooltip 
+                            <Tooltip
                               key={a.name+"-"+i}
                               content={tooltipContent}
                             >
@@ -156,7 +166,7 @@ export default function NFESkinLayersMap({ ingredients }: { ingredients?: any[] 
                           );
                         })}
                         {filtered.filter(a => a.layer === layer).length === 0 && (
-                          <div className="text-xs text-slate-500 italic">No matching actives in this layer.</div>
+                          <div className="text-xs text-slate-400 italic">No matching actives in this layer.</div>
                         )}
                       </div>
                     </div>
@@ -169,7 +179,7 @@ export default function NFESkinLayersMap({ ingredients }: { ingredients?: any[] 
           {/* Table of Actives (filtered) */}
           <Card className="rounded-3xl mt-6 bg-white/5 border-white/10 backdrop-blur-xl shadow-[0_0_1px_1px_rgba(255,255,255,0.05)] p-0">
             <CardHeader className="px-6 pt-6 pb-4">
-              <CardTitle className="text-slate-100">Actives Data Table</CardTitle>
+              <CardTitle as="h4" className="text-slate-100">Actives Data Table</CardTitle>
               <CardDescription className="text-slate-300">Search, filter, and share with clinicians/retail buyers.</CardDescription>
             </CardHeader>
             <CardContent className="px-6 pt-0 pb-6">

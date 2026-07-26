@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 
@@ -42,6 +42,9 @@ export function Tooltip({
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  // Stable, unique id so aria-describedby points at a real element. It
+  // previously referenced a hard-coded "tooltip" id that was never rendered.
+  const tooltipId = useId();
 
   const showTooltip = () => {
     if (disabled) return;
@@ -114,8 +117,8 @@ export function Tooltip({
         top: position.top,
         left: position.left,
       }}
+      id={tooltipId}
       role="tooltip"
-      aria-hidden="false"
     >
       {content}
       <div
@@ -138,8 +141,13 @@ export function Tooltip({
       onFocus={showTooltip}
       onBlur={hideTooltip}
       onKeyDown={handleKeyDown}
+      // Only set when the caller supplies one. Triggers that wrap visible text
+      // take their accessible name from that text, which keeps the name and
+      // the visible label identical (WCAG 2.5.3). Triggers wrapping an
+      // icon-only child have no text to borrow, so those callers pass an
+      // explicit label — without it the trigger would be an unnamed button.
       aria-label={ariaLabel}
-      aria-describedby={isVisible ? 'tooltip' : undefined}
+      aria-describedby={isVisible ? tooltipId : undefined}
     >
       {children}
       {typeof window !== 'undefined' && createPortal(tooltipContent, document.body)}
