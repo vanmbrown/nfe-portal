@@ -123,7 +123,7 @@ export default function AtelierPage() {
             Face and body as one editorial house.
           </h2>
           <p className="mt-6 max-w-3xl leading-8 text-nfe-ink/72">
-            The Founder's Set is a future ritual pairing, not a live bundle.
+            The Founder&apos;s Set is a future ritual pairing, not a live bundle.
             Explore each elixir on its own first, then use the Skin Ritual Quiz
             or Discovery Ritual pathway when you want guidance on where to begin.
           </p>
