@@ -117,6 +117,39 @@ a matching `src/app/products/<slug>/page.tsx`, its `/shop` card would link to
 a 404 (there is no dynamic route to catch it anymore). Worth a lint/test rule
 if the product catalog ever grows past two.
 
+### Deployment confirmation for the resolved architecture entries
+
+All `RESOLVED` entries in this section shipped to production in the exact
+deployed source `c81b7c25bff7f4c774721d9bcd2f4f2eacd14627`
+(Worker `1ba7471d-53f8-42f8-aa71-299657b7bf42`, 2026-07-26). The
+implementing-commit hashes cited above (`bc3c028`, `c8b7ccc`) name where each
+change was made; `c81b7c2` is the commit that was actually deployed. Later
+documentation commits on the canonical branch are **not** deployed. See
+`docs/releases/PRODUCT_ARCHITECTURE_CLEANUP_RELEASE_CLOSEOUT.md`.
+
+Covered by that deployment: `/products/[slug]` removed · `ProductPageClient`
+removed · `RitualPairing` removed · `ProductHero` removed · `ShopCard` removed
+· `ProductCard` removed · `FaceElixirSections` removed.
+
+---
+
+## Accessibility maintenance
+
+**Product accordion `aria-controls` references.** The product-accordion
+controls carry `aria-controls` pointing at panel IDs that do not exist while
+the panels are collapsed, because the panel content is not rendered until the
+control is expanded.
+
+- Behavior is correct when expanded: the referenced panel ID exists and
+  carries content, `aria-expanded` toggles correctly, focus remains on the
+  control, and the panel closes cleanly.
+- The same behavior existed before the cleanup release — the identical four
+  references were confirmed present in the pre-release baseline.
+- Lighthouse accessibility remains 100 with zero weighted findings.
+
+This is deferred accessibility maintenance, **not a release regression**. Do
+not treat it as a rollback trigger.
+
 ---
 
 ## Performance
