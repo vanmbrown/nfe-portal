@@ -23,43 +23,93 @@ editorial supporting wording during the Founder Access copy ruling, but not
 added anywhere — no existing sentence required it, and the ruling did not call
 for new copy. Available if a narrative surface later needs it.
 
-**Final treatment of unreachable "Join Waitlist" language.** See the
+**Final treatment of unreachable "Join Waitlist" language.** ~~See the
 architecture entry below; the wording and the route's fate are the same
-decision.
+decision.~~ **RESOLVED in part — `bc3c028` / `c8b7ccc` (2026-07-26).** The
+reachable copies inside `ProductPageClient.tsx` and `ShopCard.tsx` /
+`ProductCard.tsx` were removed along with those files. Two unreachable copies
+remain, in `FaceElixirHero.tsx` and `WaitlistModal.tsx` — see the new backend
+entry below; these are tied to the live `/api/waitlist` integration, not a
+simple wording fix.
 
 ---
 
 ## Architecture and cleanup
 
-**Remove dead `src/app/shop/ShopCard.tsx`.** Zero references anywhere in `src`.
-Still contains the old "Coming Soon" string. Left unedited by founder ruling:
-remove in a cleanup pass rather than editing copy that reaches no one.
+**Remove dead `src/app/shop/ShopCard.tsx`.** ~~Zero references anywhere in
+`src`. Still contains the old "Coming Soon" string. Left unedited by founder
+ruling: remove in a cleanup pass rather than editing copy that reaches no
+one.~~ **RESOLVED — `c8b7ccc` (2026-07-26).** Removed. See
+`docs/upgrades/PRODUCT_ARCHITECTURE_AUDIT.md`.
 
-**Remove dead `src/components/products/ProductCard.tsx`.** Zero references —
+**Remove dead `src/components/products/ProductCard.tsx`.** ~~Zero references —
 the `ProductCard` imports elsewhere resolve to different components in
 `ui/Card.tsx` and `articles/MDXComponents.tsx`. Same "Coming Soon" string, same
-ruling.
+ruling.~~ **RESOLVED — `c8b7ccc` (2026-07-26).** Removed.
 
-**Remove dead `src/components/products/FaceElixirSections.tsx`.** Zero
-references. Contains CMS fallback strings ("Product details coming soon.").
+**Remove dead `src/components/products/FaceElixirSections.tsx`.** ~~Zero
+references. Contains CMS fallback strings ("Product details coming soon.").~~
+**RESOLVED — `c8b7ccc` (2026-07-26).** Removed.
 
-**Decide whether to remove or revive `/products/[slug]`.** The route is
+**Decide whether to remove or revive `/products/[slug]`.** ~~The route is
 unreachable: `/products/face-elixir` and `/products/body-elixir` have dedicated
 static page files that outrank the dynamic `[slug]` segment, and the product
 registry declares only those two slugs, so every other slug hits `notFound()`.
 Confirmed against the build — "Ritual Pairing" appears only in the compiled
-`[slug]` bundle and in no prerendered HTML.
+`[slug]` bundle and in no prerendered HTML.~~ **RESOLVED — removed, `bc3c028`
+(2026-07-26).** Along with its `layout.tsx` (route-scoped `generateMetadata`,
+discovered during implementation — see `PRODUCT_ARCHITECTURE_AUDIT.md`).
 
-**Decide whether `ProductPageClient` remains necessary.** It is reached only
+**Decide whether `ProductPageClient` remains necessary.** ~~It is reached only
 through the unreachable `[slug]` route. It also holds the off-brand "Join
 Waitlist" CTA, which renders when `product.status === 'coming_soon'` and
 therefore reaches no customer today. Either delete it with the route, or
 restate the CTA (for example "Founder Access opens first") if the route is
-revived. This is a purchasing-flow decision, not a wording fix.
+revived. This is a purchasing-flow decision, not a wording fix.~~ **RESOLVED —
+removed, `bc3c028` (2026-07-26).**
 
 **Remove unreachable `RitualPairing` flow if architecture confirms it is
-obsolete.** It carries the approved "Founder Access opens first" wording in
-source but renders on no URL. Its fate follows the `[slug]` decision above.
+obsolete.** ~~It carries the approved "Founder Access opens first" wording in
+source but renders on no URL. Its fate follows the `[slug]` decision above.~~
+**RESOLVED — removed, `bc3c028` (2026-07-26).**
+
+**New, from the 2026-07-26 architecture audit — orphaned components not named
+in that pass's scope, left in place:** `src/components/products/ProductHero.tsx`
+was also route-only support for the removed `[slug]` route and **was** removed
+in `bc3c028` (along with its dangling re-export in
+`src/components/products/index.ts`). Still orphaned and **not removed**,
+because they were not named candidates:
+`src/components/products/IngredientList.tsx`, `BenefitsTable.tsx`,
+`UsageGuide.tsx`, `ProductFAQ.tsx` (the rest of that same barrel — zero
+importers, not even from the removed route), `FaceElixirHero.tsx`, and
+`ProductTabs.tsx` / `ProductExperience.tsx`.
+
+**New — `/api/waitlist` is a live backend integration with no reachable
+caller.** Discovered during the same audit. `src/app/api/waitlist/route.ts`
+writes to a Supabase `waitlist` table and sends a real notification email to
+`vanessa@nfebeauty.com` via Resend on every POST. Its only caller,
+`src/components/shared/WaitlistModal.tsx`, is never imported by any live page
+— the modal that would trigger the endpoint is never mounted. `useWaitlistStore`
+(the zustand store gating the modal) is in the same position: every remaining
+consumer (`FaceElixirHero.tsx`, `WaitlistModal.tsx`) is itself unreachable.
+Founder decision needed: retire the endpoint and its store/modal together, or
+keep them wired for a future revival of waitlist behavior. Not touched in the
+2026-07-26 cleanup pass — removing a wired database + email integration was
+judged a bigger decision than dead-component cleanup.
+
+**New — orphaned `ProductMetadata` type.** `src/types/products.ts` exports a
+`ProductMetadata` type whose only consumer was the removed `layout.tsx`. Left
+in place rather than editing a shared, actively-used types file for one
+orphaned export.
+
+**New — `/shop` → `/products/${slug}` link depends on product-index data
+shape.** `src/app/shop/page.tsx` generates `href={\`/products/${product.slug}\`}`.
+This is currently always safe because `data/products/index.json` contains
+exactly the two slugs with matching static pages, but nothing in code enforces
+that going forward. If a third product is ever added to that JSON file without
+a matching `src/app/products/<slug>/page.tsx`, its `/shop` card would link to
+a 404 (there is no dynamic route to catch it anymore). Worth a lint/test rule
+if the product catalog ever grows past two.
 
 ---
 

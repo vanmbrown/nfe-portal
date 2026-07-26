@@ -126,3 +126,112 @@ Proceed with removal of the five named candidates and the `/products/[slug]`
 route together with its route-only support modules (`ProductHero.tsx` and
 `layout.tsx`), per the decision rules in the governing instructions. All
 UNKNOWN/DEFERRED items above are left untouched.
+
+---
+
+## Final architecture
+
+Product surfaces are now exactly two files deep for rendering:
+
+- `/products/face-elixir` → `src/app/products/face-elixir/page.tsx` → `ElixirEditorialPage`
+- `/products/body-elixir` → `src/app/products/body-elixir/page.tsx` → `ElixirEditorialPage`
+
+No dynamic product route exists. No component in `src/components/products/`
+is reachable except through `ElixirEditorialPage`'s own import graph
+(`ProductAccordion`, and the data-only `faceElixirFaqItems` export from
+`face-elixir/FaceElixirFAQ.tsx`). The `src/components/products/index.ts`
+barrel no longer re-exports anything unreachable from the removed route.
+
+## Files removed
+
+| File | Classification | Evidence | Commit |
+|---|---|---|---|
+| `src/app/products/[slug]/page.tsx` | UNREACHABLE | Sole route entry point; both registered slugs intercepted by static pages | `bc3c028` |
+| `src/app/products/[slug]/layout.tsx` | UNREACHABLE | Route-scoped `generateMetadata`, no bearing on canonical pages' own metadata | `bc3c028` |
+| `src/app/products/[slug]/ProductPageClient.tsx` | UNREACHABLE | Sole importer was the removed `page.tsx` | `bc3c028` |
+| `src/components/products/RitualPairing.tsx` | UNREACHABLE | Sole importer was `ProductPageClient` | `bc3c028` |
+| `src/components/products/ProductHero.tsx` | UNREACHABLE | Sole real importer was `ProductPageClient`; dangling barrel re-export removed in the same commit | `bc3c028` |
+| `src/app/shop/ShopCard.tsx` | DEAD | Zero importers anywhere | `c8b7ccc` |
+| `src/components/products/ProductCard.tsx` | DEAD | Zero importers; distinct from same-named components in `MDXComponents.tsx` and `ui/Card.tsx` | `c8b7ccc` |
+| `src/components/products/FaceElixirSections.tsx` | DEAD | Zero importers anywhere | `c8b7ccc` |
+
+8 files removed, 864 lines deleted. 1 line edited (`src/components/products/index.ts`, dangling `ProductHero` re-export). Zero files added except the audit and the new protective test.
+
+## Files preserved
+
+| File | Reason | Classification |
+|---|---|---|
+| `src/components/products/ProductAccordion.tsx` | Imported by `ElixirEditorialPage` — the active canonical page component | ACTIVE / SHARED |
+| `src/components/products/face-elixir/FaceElixirFAQ.tsx` | Its `faceElixirFaqItems` data export is imported by `ElixirEditorialPage`; deleting the file would break the canonical page | ACTIVE / SHARED |
+| `src/components/products/IngredientList.tsx`, `BenefitsTable.tsx`, `UsageGuide.tsx`, `ProductFAQ.tsx` | Zero importers, but not named candidates — orphaned independent of the `[slug]` decision | DEFERRED |
+| `src/components/products/FaceElixirHero.tsx`, `ProductTabs.tsx`, `ProductExperience.tsx` | Zero importers, not named candidates | DEFERRED |
+| `src/components/shared/WaitlistModal.tsx` | Zero importers, not named candidate; only caller of `/api/waitlist` | DEFERRED — see below |
+| `src/store/useWaitlistStore.ts` | Every consumer is dead, but it is not itself a named candidate and remains referenced by `FaceElixirHero.tsx` (untouched) | DEFERRED |
+| `src/app/api/waitlist/route.ts` | Live Supabase + Resend integration with no reachable caller. Removing a wired backend integration is a bigger decision than component cleanup | DEFERRED — founder decision |
+| `src/types/products.ts` (`ProductMetadata` type) | Its sole consumer (`layout.tsx`) was removed, leaving this one exported type unused. Left in place — editing a shared, actively-used types file for a single orphaned export was judged out of this pass's scope | DEFERRED (minor) |
+
+## Route changes
+
+| Route | Baseline | After | Expected | Status |
+|---|---|---|---|---|
+| `/products/[slug]` | present (66-route manifest) | absent (65-route manifest) | removed | PASS |
+| `/products/face-elixir` | 200 | 200 | 200 | PASS |
+| `/products/body-elixir` | 200 | 200 | 200 | PASS |
+| `/products/test` | 404 (via `notFound()`) | 404 (no matching segment) | 404 | PASS |
+| `/products/unknown` | 404 | 404 | 404 | PASS |
+| `/products/face` | 404 | 404 | 404 | PASS |
+| `/products/body` | 404 | 404 | 404 | PASS |
+| `/study-circle` | 404 | 404 | 404 | PASS (unaffected) |
+| `/dev/token-specimen` | 404 | 404 | 404 | PASS (unaffected) |
+
+Full manifest diff: exactly one line removed (`/products/[slug]`), zero added.
+
+## Customer-visible impact
+
+**None, intentional or otherwise.** Verified two ways:
+
+1. **By construction** — `git diff` across both removal commits touches no
+   file in the canonical rendering path (`face-elixir/page.tsx`,
+   `body-elixir/page.tsx`, `ElixirEditorialPage.tsx`, `shop/page.tsx`).
+2. **Empirically** — a true before/after comparison was run: the parent
+   commit (`34785ca`, untouched) was built and served on a separate port
+   alongside the cleaned-up branch, and title, meta description, `<h1>`, and
+   full visible text were byte-identical on `/`, `/shop`, `/our-story`,
+   `/science`, `/skin-strategy`, `/products/face-elixir`,
+   `/products/body-elixir`, and `/founder-access`.
+
+## Copy cleanup
+
+| Phrase | Before | After | Where it was |
+|---|---|---|---|
+| "Coming Soon" | 6 occurrences | 0 | `ShopCard.tsx`, `ProductCard.tsx` (status badge, ×2), `FaceElixirSections.tsx` (×4 CMS-fallback strings, counted once here) — all removed files. None ever rendered on a live route |
+| "Join Waitlist" (reachable) | 1 occurrence (`ProductPageClient.tsx`, inside the unreachable route) | 0 | Removed with the route |
+| "Join Waitlist" (unreachable, out of scope) | 2 occurrences | 2 remain | `FaceElixirHero.tsx` and `WaitlistModal.tsx` — neither a named candidate; both unreachable independent of this pass |
+| Urgency/scarcity language | 0 | 0 | None found before or after |
+| Replacement copy added | — | none | No new copy was written; dead copy was deleted, not rephrased |
+
+No customer-facing route ever rendered "Coming Soon" or "Join Waitlist" before this pass (confirmed in the prior accessibility-quality-pass audit and reconfirmed here); this cleanup removes the source lines, not a live defect.
+
+## Validation
+
+| Command | Baseline | After cleanup |
+|---|---|---|
+| `npm ci` | pass | pass |
+| `npx tsc --noEmit` | pass | pass |
+| `npm run lint` | pass | pass |
+| `npm test` | pass — 17/17 | pass — 26/26 (9 new) |
+| `npm run build` | pass — 66 routes | pass — 65 routes |
+| `npx opennextjs-cloudflare build` | pass | pass |
+| Local route matrix (18 routes incl. unknown slugs) | — | 18/18 match expected |
+| Canonical-page content diff vs true pre-cleanup build | — | byte-identical on all 8 pages checked |
+| Lighthouse (`/`, `/shop`, `/products/face-elixir`, `/products/body-elixir`, `/skin-strategy`) | — | accessibility 100 on all five, zero weighted findings |
+| Manual a11y spot check (`/products/face-elixir`) | — | 1 `h1`, valid heading order, 0 missing alt text, 0 unnamed CTAs, keyboard focus reaches named control with visible ring, no mobile overflow, 0 console errors |
+
+## Deferred decisions
+
+Retained for `docs/upgrades/DEFERRED_WORK_REGISTER.md`:
+
+- `/api/waitlist` + `WaitlistModal` + `useWaitlistStore` + `FaceElixirHero` — a live backend integration with no reachable caller; a founder/architecture decision, not a component-cleanup one.
+- `IngredientList`, `BenefitsTable`, `UsageGuide`, `ProductFAQ`, `ProductTabs`, `ProductExperience`, and the now-smaller `components/products/index.ts` barrel — orphaned, not named candidates.
+- The `/shop` → `/products/${slug}` link's safety depends on `data/products/index.json` never gaining a slug without a matching static page — a data/process convention, not enforceable by this pass without adding a new abstraction.
+- `ProductMetadata` type in `src/types/products.ts` is now unused — left in place rather than editing a shared, actively-used types file for one orphaned export.
