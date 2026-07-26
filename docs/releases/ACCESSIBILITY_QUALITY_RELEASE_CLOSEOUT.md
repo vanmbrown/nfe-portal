@@ -134,18 +134,24 @@ deployed source record.
 
 ## Release tag
 
-No tag was created in this closeout. The repository has two tags, both from
-Maison Wave 1 (`nfe-production-pre-maison-wave-1` → `8a3ce33`,
-`nfe-maison-wave-1-2026-07-24` → `f5a54fa`) — a single precedent rather than an
-established, authorized convention.
+Authorized by the founder and created:
 
-Recommended, pending founder authorization:
+nfe-accessibility-quality-2026-07-26
 
-- `nfe-accessibility-quality-2026-07-26` → `07ac5fd451e61736f4831f8bd4bdb377a9d0aa05`
-- `nfe-production-pre-accessibility-quality` → `80353aae9824f9de9451855eb81f0a91b03dbec3`
+Points at:
 
-A release tag must point at the exact deployed source, not at this
-documentation-only commit.
+07ac5fd451e61736f4831f8bd4bdb377a9d0aa05
+
+Annotated, matching the convention set by Maison Wave 1
+(`nfe-maison-wave-1-2026-07-24` → `f5a54fa`).
+
+The tag points at the exact deployed source, **not** at the documentation-only
+closeout commits.
+
+No retrospective pre-release tag was created — explicitly declined by the
+founder. The pre-release rollback point is recorded in this document as
+`80353aae9824f9de9451855eb81f0a91b03dbec3` and remains reachable through the
+release branch history.
 
 ## Deferred work
 
