@@ -84,18 +84,24 @@ because they were not named candidates:
 importers, not even from the removed route), `FaceElixirHero.tsx`, and
 `ProductTabs.tsx` / `ProductExperience.tsx`.
 
-**New — `/api/waitlist` is a live backend integration with no reachable
-caller.** Discovered during the same audit. `src/app/api/waitlist/route.ts`
-writes to a Supabase `waitlist` table and sends a real notification email to
-`vanessa@nfebeauty.com` via Resend on every POST. Its only caller,
-`src/components/shared/WaitlistModal.tsx`, is never imported by any live page
-— the modal that would trigger the endpoint is never mounted. `useWaitlistStore`
-(the zustand store gating the modal) is in the same position: every remaining
-consumer (`FaceElixirHero.tsx`, `WaitlistModal.tsx`) is itself unreachable.
-Founder decision needed: retire the endpoint and its store/modal together, or
-keep them wired for a future revival of waitlist behavior. Not touched in the
-2026-07-26 cleanup pass — removing a wired database + email integration was
-judged a bigger decision than dead-component cleanup.
+**`/api/waitlist` is a live backend integration with no reachable caller.**
+Discovered during the 2026-07-26 architecture audit.
+`src/app/api/waitlist/route.ts` writes to a Supabase `waitlist` table and
+sends a real notification email to `vanessa@nfebeauty.com` via Resend on every
+POST. Its only caller, `src/components/shared/WaitlistModal.tsx`, is never
+imported by any live page — the modal that would trigger the endpoint is
+never mounted. `useWaitlistStore` (the zustand store gating the modal) is in
+the same position: every remaining consumer (`FaceElixirHero.tsx`,
+`WaitlistModal.tsx`) is itself unreachable.
+
+**DECIDED — 2026-07-26: keep it wired.** Founder ruling: do not retire the
+endpoint, store, or modal. They remain in the codebase, unremoved and
+unreachable, pending a future revival of waitlist behavior. No architecture
+change follows from this — it converts an open question into a standing
+decision. Revisit only if a future pass proposes wiring a live trigger to
+this endpoint (in which case the existing Supabase table and Resend
+notification are already in place) or proposes removing it (in which case
+this entry is the record of why it was kept).
 
 **New — orphaned `ProductMetadata` type.** `src/types/products.ts` exports a
 `ProductMetadata` type whose only consumer was the removed `layout.tsx`. Left
