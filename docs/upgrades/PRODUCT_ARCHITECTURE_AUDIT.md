@@ -58,6 +58,7 @@ independent rendering path from `ProductPageClient`'s.
 | `src/app/products/[slug]/ProductPageClient.tsx` | 1 (`page.tsx` only) | No (importer is unreachable) | No | None | `useWaitlistStore` (unreachable subsystem, see below) | None | UNREACHABLE | Remove | Sole importer is the unreachable `page.tsx` |
 | `src/components/products/RitualPairing.tsx` | 1 (`ProductPageClient.tsx` only) | No | No | None | None | None | UNREACHABLE | Remove | Sole importer is unreachable |
 | `src/components/products/ProductHero.tsx` | 1 direct (`ProductPageClient.tsx`); re-exported by dead barrel `src/components/products/index.ts` (itself unimported) | No | No | None | None | None | UNREACHABLE | Remove (route-only supporting module) | Sole real importer is unreachable |
+| `src/app/products/[slug]/layout.tsx` | 0 (Next.js App Router layout — applies automatically to the `[slug]` segment and its children, not imported by name) | No | No | None | None | None | UNREACHABLE | Remove | Contains `generateMetadata`, but it is scoped exclusively to `/products/[slug]` — both canonical static pages have their own independent `metadata` export in their own `page.tsx` files (confirmed above), so this layout's metadata generation has no bearing on canonical SEO. Reads `data/products/index.json` directly via `fs` at request time, duplicating logic already in `registry.ts`, exclusively for the unreachable route |
 | `src/app/shop/ShopCard.tsx` | 0 | No | No | None | `useWaitlistStore` (unreachable subsystem) | None | DEAD | Remove | `git grep ShopCard` finds only self-definition + documentation mentions; `src/app/shop/page.tsx` does not import it |
 | `src/components/products/ProductCard.tsx` | 0 | No | No | None | `useWaitlistStore` (unreachable subsystem) | None | DEAD | Remove | Zero importers anywhere; the `ProductCard` used by MDX articles is a distinct component in `src/components/articles/MDXComponents.tsx`, and the `ProductCard` in `src/components/ui/Card.tsx` is also distinct — neither imports this file |
 | `src/components/products/FaceElixirSections.tsx` | 0 | No | No | None | None | None | DEAD | Remove | Zero importers anywhere |
@@ -89,7 +90,7 @@ None of these are touched in this pass. All are added to the deferred register w
 | Actual route path | `src/app/products/[slug]/page.tsx` → `/products/:slug` |
 | Registered slugs | Exactly two: `face-elixir`, `body-elixir` (`src/content/products/registry.ts`, `productData` map) |
 | Static-route precedence | Confirmed: `src/app/products/face-elixir/page.tsx` and `src/app/products/body-elixir/page.tsx` exist as literal static segments. Next.js App Router resolves a literal segment before a dynamic `[slug]` segment for the same path, and this was independently confirmed against the build output in the prior accessibility-pass task (search for "Ritual Pairing" — the string unique to the `[slug]` render tree — across `.next/server/app` found it only inside the compiled `[slug]` bundle, never in any prerendered HTML) |
-| Metadata behavior | `page.tsx` exports no `metadata` and no `generateMetadata` — nothing depends on it for SEO |
+| Metadata behavior | `page.tsx` exports no `metadata`. The segment's `layout.tsx` does export `generateMetadata`, but it is scoped only to `/products/[slug]` — the canonical static pages carry their own independent `metadata` exports, so removing this layout has no effect on canonical SEO |
 | Unknown-slug behavior | `getProduct()` returns `null` for any slug not in the registry → `notFound()` → Next.js 404 |
 | CMS dependency | None. No CMS integration exists in this repository (no Sanity, no headless CMS client) |
 | Commerce dependency | None. No Shopify or commerce SDK in `package.json` |
@@ -122,6 +123,6 @@ The `/shop` → `/products/${slug}` link's safety depends on `data/products/inde
 ## Preliminary recommendation
 
 Proceed with removal of the five named candidates and the `/products/[slug]`
-route and its route-only support module (`ProductHero.tsx`), per the decision
-rules in the governing instructions. All UNKNOWN/DEFERRED items above are
-left untouched.
+route together with its route-only support modules (`ProductHero.tsx` and
+`layout.tsx`), per the decision rules in the governing instructions. All
+UNKNOWN/DEFERRED items above are left untouched.
