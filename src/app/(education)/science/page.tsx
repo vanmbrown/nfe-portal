@@ -147,7 +147,9 @@ export default function SciencePage() {
                 </dt>
                 <dd className="mt-3 leading-7 text-nfe-ink/72">
                   {family.role}
-                  <span className="mt-3 block text-sm text-nfe-ink/55">
+                  {/* /55 composited to #7c7c7c on this white ground — 4.17:1,
+                      short of AA. /70 clears it. */}
+                  <span className="mt-3 block text-sm text-nfe-ink/70">
                     Such as {family.representativeExamples.join(', ')}.
                   </span>
                 </dd>
