@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import {
+  CONCERN_FORMULA_MATRIX,
   INGREDIENT_FAMILIES,
   LAYER_BY_ID,
   LAYER_CONTEXT_PANELS,
@@ -15,6 +16,7 @@ import {
   type PathwayId,
 } from '@/content/science'
 
+import { ConcernFormulaMatrix } from './ConcernFormulaMatrix'
 import { LayerContextPanels } from './LayerContextPanels'
 import { SkinLayerSchematic } from './SkinLayerSchematic'
 
@@ -275,6 +277,38 @@ export function ScienceMapExperience() {
           emphasized={selected}
           headingId="nfe-layer-context-heading"
         />
+      </section>
+
+      {/* The same relationships, compressed for scanning. */}
+      <section aria-labelledby="nfe-formula-matrix-heading" className="mt-24 md:mt-28">
+        <div className="max-w-3xl">
+          <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
+            {SCIENCE_PAGE.formulaMatrix.eyebrow}
+          </p>
+          <h3
+            id="nfe-formula-matrix-heading"
+            className="mt-5 font-serif text-3xl leading-tight text-nfe-paper md:text-4xl"
+          >
+            {SCIENCE_PAGE.formulaMatrix.heading}
+          </h3>
+          <p className="mt-6 leading-8 text-nfe-paper/72">
+            {SCIENCE_PAGE.formulaMatrix.body}
+          </p>
+        </div>
+
+        <ConcernFormulaMatrix rows={CONCERN_FORMULA_MATRIX} emphasized={selected} />
+
+        <p className="mt-10 max-w-3xl text-sm leading-6 text-nfe-paper/60">
+          Ingredient families describe how NFE formulates. What is in a given
+          formula is listed on{' '}
+          <Link
+            href="/inci"
+            className="underline decoration-nfe-gold/50 underline-offset-4 hover:text-nfe-paper"
+          >
+            Ingredients
+          </Link>
+          .
+        </p>
       </section>
     </div>
   )
