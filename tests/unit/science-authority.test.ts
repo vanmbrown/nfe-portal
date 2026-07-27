@@ -331,6 +331,11 @@ const matrixSource = () =>
   readFileSync(src('components/science/ConcernFormulaMatrix.tsx'), 'utf8')
 const experienceSource = () =>
   readFileSync(src('components/science/ScienceMapExperience.tsx'), 'utf8')
+const schematicSource = () =>
+  readFileSync(src('components/science/SkinLayerSchematic.tsx'), 'utf8')
+const LAYER_BY_ID_FOR_TEST = Object.fromEntries(
+  SKIN_LAYERS.map((layer) => [layer.id, layer])
+) as Record<string, (typeof SKIN_LAYERS)[number]>
 
 describe('layer context structure', () => {
   it('renders the approved heading and subheading', () => {
@@ -752,5 +757,241 @@ describe('refinement privacy', () => {
     for (const token of ['email', 'userid', 'user_id', 'session', 'visitorid']) {
       assert.ok(!serialised.includes(token))
     }
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * Visual refinement — Layer Context as the schematic's companion
+ * ------------------------------------------------------------------ */
+
+const TAILWIND_OPACITY_STEPS = new Set(
+  [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100].map(String)
+)
+
+describe('layer context presentation', () => {
+  it('wraps the module in a framed plate that shares the schematic radius', () => {
+    const source = layerContextSource()
+    assert.match(source, /rounded-\[1\.75rem\]/, 'frame must share the schematic radius')
+    assert.match(source, /border border-nfe-gold\/25/, 'frame needs its restrained border')
+    // The schematic container uses the same radius, so the two read as one plate.
+    const schematic = experienceSource()
+    assert.match(schematic, /rounded-\[1\.75rem\]/)
+  })
+
+  it('keeps the eyebrow, heading and support-zone label inside the frame', () => {
+    const source = layerContextSource()
+    assert.match(source, /\{eyebrow\}/)
+    assert.match(source, /\{heading\}/)
+    assert.match(source, /\{zonesLabel\}/)
+    assert.equal(SCIENCE_PAGE.layerContext.eyebrow, 'Layer Context')
+    assert.equal(
+      SCIENCE_PAGE.layerContext.heading,
+      'Where visible concerns begin. How NFE supports them.'
+    )
+    assert.equal(SCIENCE_PAGE.layerContext.zonesLabel, 'Cosmetic support zones')
+  })
+
+  it('numbers every panel 01 to 05, zero padded', () => {
+    assert.match(layerContextSource(), /padStart\(2, '0'\)/)
+    assert.deepEqual(
+      LAYER_CONTEXT_PANELS.map((p) => String(p.order).padStart(2, '0')),
+      ['01', '02', '03', '04', '05']
+    )
+  })
+
+  it('names each panel after the schematic band it explains', () => {
+    // The eyebrow reads "01 · Surface hydration" — the layer's own zone name,
+    // so the panel and the band above it cannot drift apart.
+    assert.match(layerContextSource(), /\{zone\.zone\}/)
+    for (const panel of LAYER_CONTEXT_PANELS) {
+      const zone = LAYER_BY_ID_FOR_TEST[panel.layerIds[0]]
+      assert.ok(zone, `${panel.id} has no primary layer`)
+      assert.ok(zone.zone.length > 0)
+    }
+  })
+
+  it('gives every panel a vertical zone-colour bar driven by the shared token', () => {
+    const source = layerContextSource()
+    assert.match(source, /backgroundColor: zone\.bandHex/)
+    assert.match(source, /aria-hidden="true"/, 'the bar is decorative')
+    assert.match(source, /w-3 shrink-0 rounded-full/)
+  })
+
+  it('reads zone colour from one token shared with the schematic', () => {
+    // Both the band and the bar use bandHex. A second colour source could drift.
+    assert.match(schematicSource(), /bandHex/)
+    assert.match(layerContextSource(), /bandHex/)
+    for (const layer of SKIN_LAYERS) {
+      assert.match(layer.bandHex, /^#[0-9a-f]{6}$/, `${layer.id} bandHex must be a plain hex`)
+    }
+  })
+
+  it('no longer carries the dead bandClass and labelClass fields', () => {
+    // They were populated but never read, and held Tailwind classes that could
+    // not be generated — src/content is outside the Tailwind content globs.
+    const layersSource = readFileSync(src('content/science/layers.ts'), 'utf8')
+    assert.ok(!layersSource.includes('bandClass'))
+    assert.ok(!layersSource.includes('labelClass'))
+  })
+
+  it('uses a two-column reading structure at the wide breakpoint', () => {
+    const source = layerContextSource()
+    const match = source.match(/lg:grid-cols-\[([\d.]+)fr_([\d.]+)fr\]/)
+    assert.ok(match, 'panels need an explicit two-column split')
+    const left = Number(match[1])
+    const right = Number(match[2])
+    const leftPct = (left / (left + right)) * 100
+    assert.ok(leftPct >= 38 && leftPct <= 45, `left column is ${leftPct}%, expected 38-45%`)
+  })
+
+  it('presents ingredient families as pills with dark text on a warm surface', () => {
+    const source = layerContextSource()
+    assert.match(source, /rounded-full bg-\[#f4eadb\][^"]*text-nfe-green-900/)
+    // No panel may carry more than four family pills.
+    for (const panel of LAYER_CONTEXT_PANELS) {
+      assert.ok(
+        panel.ingredientFamilyIds.length <= 4,
+        `${panel.id} has ${panel.ingredientFamilyIds.length} families, max 4`
+      )
+    }
+  })
+
+  it('labels the families section without implying a recommendation', () => {
+    const source = layerContextSource()
+    assert.match(source, /Ingredient families/)
+    for (const banned of ['Recommended ingredients', 'Best ingredients', 'Your ingredients']) {
+      assert.ok(!source.includes(banned), `panel labels must not say "${banned}"`)
+    }
+  })
+
+  it('says formulation support, never formula support', () => {
+    // "Formula support" beside ingredient names asserted product composition.
+    // Comments are stripped first: the file explains that removal by name, and
+    // scanning raw text would flag the explanation as the offence.
+    const source = stripComments(layerContextSource())
+    assert.match(source, /Formulation support/)
+    assert.ok(!/Formula support/.test(source))
+  })
+})
+
+describe('layer context emphasis presentation', () => {
+  it('shifts border, surface and title colour together when in focus', () => {
+    const source = layerContextSource()
+    assert.match(source, /border-nfe-gold\/55 bg-white\/\[0\.07\]/)
+    assert.match(source, /border-nfe-paper\/15 bg-white\/\[0\.035\]/)
+    assert.match(source, /active \? 'text-nfe-gold' : 'text-nfe-paper'/)
+  })
+
+  it('keeps a visible non-colour marker for the focused panel', () => {
+    assert.match(layerContextSource(), /In focus/)
+  })
+
+  it('keeps unemphasised panels at full text contrast', () => {
+    // Only the container and title shift. Body copy opacity is not conditional.
+    const source = stripComments(layerContextSource())
+    assert.ok(
+      !/active \?[^}]*text-nfe-paper\/\d+/.test(source),
+      'body text opacity must not depend on selection'
+    )
+  })
+
+  it('dims only the decorative bar, never text, on unselected panels', () => {
+    const source = layerContextSource()
+    assert.match(source, /opacity: active \|\| emphasized\.length === 0 \? 1 : 0\.55/)
+  })
+
+  it('transitions colour within the approved range', () => {
+    const source = layerContextSource()
+    assert.match(source, /transition-colors duration-200 ease-out/)
+    assert.ok(!/duration-(3|4|5|6|7|8|9)\d\d/.test(source), 'transition is too slow')
+  })
+
+  it('adds no interactive control inside a panel', () => {
+    const source = layerContextSource()
+    for (const tag of ['<button', '<a ', 'onClick', 'href=', 'tabIndex']) {
+      assert.ok(!source.includes(tag), `panels must not contain ${tag}`)
+    }
+  })
+
+  it('adds no second live region', () => {
+    const source = layerContextSource()
+    assert.ok(!/aria-live/.test(source))
+  })
+})
+
+describe('tailwind opacity steps actually generate', () => {
+  /**
+   * Tailwind's opacity scale runs in steps of 5. A utility such as
+   * `border-nfe-paper/12` parses fine and looks correct in review, but emits no
+   * CSS at all — the element silently falls back to Tailwind's default border
+   * colour or an inherited text colour. This guards the dark Science chapter
+   * against reintroducing that.
+   */
+  const darkChapterFiles = [
+    'components/science/LayerContextPanels.tsx',
+    'components/science/ConcernFormulaMatrix.tsx',
+    'components/science/ScienceMapExperience.tsx',
+    'components/science/SkinLayerSchematic.tsx',
+  ]
+
+  it('uses only opacity steps Tailwind can emit', () => {
+    const offenders: string[] = []
+    for (const path of darkChapterFiles) {
+      const source = readFileSync(src(path), 'utf8')
+      const matches =
+        source.match(/(?:hover:)?(?:border|text|bg|ring|decoration)-nfe-[a-z0-9-]+\/\d+/g) ?? []
+      for (const cls of matches) {
+        const step = cls.split('/')[1]
+        if (!TAILWIND_OPACITY_STEPS.has(step)) offenders.push(`${path}: ${cls}`)
+      }
+    }
+    assert.deepEqual(offenders, [], `these emit no CSS: ${offenders.join(', ')}`)
+  })
+})
+
+describe('visual refinement regression protection', () => {
+  it('leaves the rest of the Science page in place', () => {
+    const page = readFileSync(src('app/(education)/science/page.tsx'), 'utf8')
+    for (const marker of [
+      'formulationPrinciples',
+      'INGREDIENT_FAMILIES',
+      'proof',
+      'founderNote',
+      'productContext',
+      'concierge',
+      'closingDisclaimer',
+    ]) {
+      assert.ok(page.includes(marker), `${marker} section must remain`)
+    }
+  })
+
+  it('keeps the map, pathway controls and matrix in the chapter', () => {
+    const source = experienceSource()
+    assert.match(source, /<SkinLayerSchematic/)
+    assert.match(source, /aria-pressed=\{active\}/)
+    assert.match(source, /<ConcernFormulaMatrix/)
+    assert.match(source, /<LayerContextPanels/)
+  })
+
+  it('keeps Layer Context between the map and the matrix', () => {
+    const source = experienceSource()
+    const map = source.indexOf('<SkinLayerSchematic')
+    const layer = source.indexOf('<LayerContextPanels')
+    const matrix = source.indexOf('<ConcernFormulaMatrix')
+    assert.ok(map < layer, 'Layer Context must follow the map')
+    assert.ok(layer < matrix, 'the matrix must follow Layer Context')
+  })
+
+  it('does not restore the profiling component', () => {
+    assert.ok(!existsSync(src('app/(education)/science/ScienceIntelligence.tsx')))
+  })
+
+  it('adds no new client island', () => {
+    const clientFiles = [
+      'components/science/LayerContextPanels.tsx',
+      'components/science/ConcernFormulaMatrix.tsx',
+      'components/science/SkinLayerSchematic.tsx',
+    ].filter((path) => readFileSync(src(path), 'utf8').includes('use client'))
+    assert.deepEqual(clientFiles, [])
   })
 })
