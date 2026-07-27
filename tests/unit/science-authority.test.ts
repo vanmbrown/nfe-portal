@@ -877,7 +877,7 @@ describe('layer context presentation', () => {
 describe('layer context emphasis presentation', () => {
   it('shifts border, surface and title colour together when in focus', () => {
     const source = layerContextSource()
-    assert.match(source, /border-nfe-gold\/55 bg-white\/\[0\.07\]/)
+    assert.match(source, /border-nfe-gold\/60 bg-\[rgba\(244,234,219,0\.14\)\]/)
     assert.match(source, /border-nfe-paper\/15 bg-white\/\[0\.035\]/)
     assert.match(source, /active \? 'text-nfe-gold' : 'text-nfe-paper'/)
   })
@@ -887,17 +887,23 @@ describe('layer context emphasis presentation', () => {
   })
 
   it('keeps unemphasised panels at full text contrast', () => {
-    // Only the container and title shift. Body copy opacity is not conditional.
+    // Emphasis may recolour the eyebrow and title. What must never change with
+    // selection is the body copy — visibleContext and formulationPrinciple —
+    // because that is what makes an unselected panel still readable.
     const source = stripComments(layerContextSource())
-    assert.ok(
-      !/active \?[^}]*text-nfe-paper\/\d+/.test(source),
-      'body text opacity must not depend on selection'
-    )
+    const bodyLines = source
+      .split('\n')
+      .filter((line) => /text-\[1\.0625rem\]/.test(line))
+    assert.ok(bodyLines.length >= 2, 'expected both body paragraphs')
+    for (const line of bodyLines) {
+      assert.ok(!/active/.test(line), `body copy styling depends on selection: ${line.trim()}`)
+      assert.match(line, /text-nfe-paper\/80/)
+    }
   })
 
   it('dims only the decorative bar, never text, on unselected panels', () => {
     const source = layerContextSource()
-    assert.match(source, /opacity: active \|\| emphasized\.length === 0 \? 1 : 0\.55/)
+    assert.match(source, /opacity: !hasSelection \|\| active \? 1 : 0\.5/)
   })
 
   it('transitions colour within the approved range', () => {
