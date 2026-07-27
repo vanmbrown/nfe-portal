@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react'
 import {
   INGREDIENT_FAMILIES,
   LAYER_BY_ID,
+  LAYER_CONTEXT_PANELS,
   PATHWAYS,
   SCIENCE_PAGE,
   SKIN_LAYERS,
@@ -14,11 +15,18 @@ import {
   type PathwayId,
 } from '@/content/science'
 
+import { LayerContextPanels } from './LayerContextPanels'
 import { SkinLayerSchematic } from './SkinLayerSchematic'
 
 /**
- * The Skin Layer Intelligence Map, and the only interactive element on the
+ * The interactive Science chapter, and the only interactive element on the
  * Science page.
+ *
+ * It owns one piece of state — the set of selected pathways — and three
+ * modules read from it: the Skin Layer Intelligence Map, Layer Context, and the
+ * Concern-to-Formula Matrix. They live in one island rather than three so there
+ * is a single authoritative selection; the rest of the page stays server-
+ * rendered. Each module is a pure child that renders the emphasis it is handed.
  *
  * What this deliberately does not do:
  *  - it does not build a profile, score, rank, or classify anything
@@ -242,6 +250,32 @@ export function ScienceMapExperience() {
       <p className="mt-12 max-w-3xl text-sm leading-6 text-nfe-paper/55">
         {SCIENCE_PAGE.mapIntro.cosmeticFrameworkNote}
       </p>
+
+      {/* Layer Context — reads the map above. Sits here, inside the same dark
+          chapter and the same client island, because it interprets the map and
+          responds to the same pathway state. */}
+      <section aria-labelledby="nfe-layer-context-heading" className="mt-24 md:mt-28">
+        <div className="max-w-3xl">
+          <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
+            {SCIENCE_PAGE.layerContext.eyebrow}
+          </p>
+          <h3
+            id="nfe-layer-context-heading"
+            className="mt-5 font-serif text-3xl leading-tight text-nfe-paper md:text-4xl"
+          >
+            {SCIENCE_PAGE.layerContext.heading}
+          </h3>
+          <p className="mt-6 leading-8 text-nfe-paper/72">
+            {SCIENCE_PAGE.layerContext.body}
+          </p>
+        </div>
+
+        <LayerContextPanels
+          panels={LAYER_CONTEXT_PANELS}
+          emphasized={selected}
+          headingId="nfe-layer-context-heading"
+        />
+      </section>
     </div>
   )
 }
