@@ -1095,3 +1095,226 @@ interaction.** No `gtag`. No `/api/*` calls.
 
 Before and after full interaction and reset: localStorage 0 · sessionStorage 0
 · cookies 0.
+
+---
+
+# Phase 1 implementation record
+
+Appended after implementation. The audit findings above are unchanged.
+
+## Branch
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-authority-phase-1` |
+| Branched from | `feature/nfe-science-authority-strategy` @ `66534b2384f42e4e167aa70e39804643e11766b0` |
+| Canonical production baseline | `4d779c8e21c343b119d243ce488ae2fb72250e6a` |
+| Deployed | No. Implementation and local validation only |
+
+## Founder decisions implemented
+
+All fifteen approved directions are implemented. Model D (hybrid editorial) is
+the delivered model: the page reads completely top to bottom without any
+selection, and pathways change emphasis only.
+
+## Final experience model
+
+Ten sections in the approved order: quiet hero, why this reads differently,
+pathways, the map, what the layers mean, formulation principles, ingredient
+families, proof discipline, founder note, and product context with one
+Concierge invitation.
+
+## Map architecture
+
+Full-width dark chapter. At 1440px the schematic and interpretation split
+measures **57% / 43%**, inside the intended 55-65 / 35-45 range. On mobile the
+pathway selector sits above the schematic, which occupies 82% of viewport
+width, and the interpretation stacks beneath.
+
+The schematic is a pure, stateless component, so the same code renders the
+server default and the interactive state. Emphasis is signalled three ways —
+opacity, a gold outline, and a visible "In focus" label — so it never depends
+on colour alone. Both anatomical labels (Epidermis, Dermis, Hypodermis) and
+cosmetic zone labels are retained, unchanged from the previous schematic. No
+biological mechanism was added and no penetration or dermal-action claim is
+made or implied.
+
+Two defects were found in my own implementation during mobile testing and
+fixed: labels rendering at roughly 8px, and the longest zone name being
+clipped at the SVG edge. The viewBox was widened to 566 units and label sizes
+raised; final measurement at 375px is 10.4px primary, 9.8px secondary, zero
+clipped labels. Every zone name also appears at full body size in the
+interpretation panel beneath, so the drawing's labels reinforce rather than
+carry the information.
+
+## Pathway model
+
+Five doorways: Barrier Comfort, Hydration, Tone Integrity, Texture and
+Suppleness, Visible Resilience.
+
+Toggle buttons with `aria-pressed` inside a labelled `role="group"`, plus a
+"Clear pathways" action that appears only when something is selected.
+Multi-selection is supported and deterministic: emphasis is the union of the
+selected layers, and interpretation renders in canonical `PATHWAYS` order
+rather than click order. Verified by selecting Tone, then Hydration, then
+Texture and observing output order Hydration, Tone Integrity, Texture and
+Suppleness. No combined label is ever generated.
+
+## Server and client boundary
+
+`page.tsx` is a server component. `ScienceMapExperience` is the only
+`'use client'` module. `SkinLayerSchematic` is pure and holds no state.
+
+## Content model
+
+`src/content/science/` — `types.ts`, `layers.ts`, `pathways.ts`,
+`ingredient-families.ts`, `page.ts`, `index.ts`. TypeScript only, no new
+dependency, no CMS, no runtime fetching.
+
+Two constraints are enforced by the shape of the types rather than by review:
+no entity can hold a score, severity, rank, or profile label; and there is no
+free-text field equivalent to the old `expectation`, which mixed customer copy
+with authoring instructions.
+
+## Removed profiling behaviour
+
+`ScienceIntelligence.tsx` (1,616 lines) deleted in commit `f059085`. With it:
+six named profiles and `assignProfile`; numeric `scorePriorities` and ranked
+"Priority N" cards; `matchActives` and the fourteen-card active index;
+`buildRitualGuidance`; the "View My NFE Skin Profile" submit step and
+result-generation state; smooth-scroll-to-result; the skin-type select and
+eight concern toggles; and the analytics payload carrying the visitor's
+literal skin type.
+
+`src/lib/analytics/track.ts` is deliberately untouched — Concierge, Discovery,
+Skin Ritual Quiz and Founder Access all still use it. Only Science's usage was
+removed.
+
+Verified: searching `src/` for `assignProfile`, `scorePriorities`,
+`matchActives`, `buildRitualGuidance`, `PROFILES` or `ProfileId` returns zero
+results.
+
+## Internal-note correction
+
+All fourteen `expectation` values were audited. Eight were internal authoring
+instructions or brand shorthand and are gone with the field:
+
+| Ingredient | Removed text | Classification |
+|---|---|---|
+| GHK-Cu | "Use careful cosmetic language: appearance, conditioning, and visible support." | Authoring instruction — **was rendering live in production** |
+| Argireline | "Do not compare this support to injectables; this is cosmetic appearance support." | Authoring instruction |
+| THD Ascorbate | "A premium active within the formula luxury-science story." | Brand shorthand |
+| CoQ10 + Tocopherols | "Part of the formula long-game support system." | Brand shorthand |
+| Bakuchiol | "Positioned as visible well-aging support, not as a structural claim." | Claims-strategy note |
+| Hyaluronic Acid 4D | "Best understood as surface hydration support, not a structural claim." | Claims-strategy note |
+| Alpha-Arbutin | "Best positioned as part of a layered tone-support system." | Internal framing |
+| Squalane and Emollients | "Emollient support is part of the sensory discipline of the ritual." | Brand shorthand |
+
+The remaining six were genuine customer education. None was replaced with a
+new efficacy claim; the per-ingredient presentation was replaced by ingredient
+families, which is where that education now lives at family level.
+
+## Ingredient families — data discrepancy flagged, not resolved
+
+`data/education/ingredientGlossary.json` (28 entries) and
+`data/products/face-elixir.json` (INCI) list different ingredient sets. The
+previous Science page presented fourteen "actives behind Face Elixir", most of
+which do not appear in that product's own INCI list.
+
+Rather than pick a side, families now name a family's *character* with
+representative examples and never assert the composition of a product.
+Ingredients (`/inci`) remains authoritative for per-product INCI.
+**Reconciling the two data sources is formulation work and remains open.**
+
+## Claims changes
+
+No claim was strengthened. Pathway content uses appearance and feel language
+throughout, and each pathway carries a `claimsBoundary` list of wording it must
+not drift into — retained in content so the governance test can assert against
+it. The cosmetic-framework caution, including the explicit no-dermal-structure
+statement, is preserved. Three prior disclaimers were consolidated to one
+closing disclaimer plus the map's framework note.
+
+## Privacy behaviour
+
+No localStorage, sessionStorage, cookie, API call, form submission, or
+analytics event. Verified in-browser before, during and after interaction:
+zero on all three storage mechanisms, and zero network requests on pathway
+selection.
+
+## Accessibility
+
+`/science` Accessibility **100**, zero weighted findings. One `h1`, valid
+heading order, zero duplicate IDs, zero broken ARIA references, zero unnamed
+controls, zero nested interactive controls, 70px touch targets, visible
+focus ring, labelled group, polite live region for interpretation changes
+only, labelled SVG with hidden decorative marks, no mobile overflow.
+
+One accessibility regression was introduced and caught by Lighthouse during
+validation: the ingredient-family "Such as..." line used `text-nfe-ink/55`,
+which composites to `#7c7c7c` on white — 4.17:1, below the 4.5:1 threshold —
+dropping the score to 96. Raised to `/70` and re-measured back to 100.
+
+Reduced motion is handled by the existing global `prefers-reduced-motion` block
+in `globals.scss`, which neutralises transitions and scroll behaviour. The
+framer-motion tab animation was removed with the old navigation.
+
+Without JavaScript the page is complete: all ten sections, the default map, all
+five zone labels and all five pathway controls render server-side.
+
+## Performance
+
+| Metric | Baseline | After |
+|---|---|---|
+| `/science` client chunk | 50,000 bytes | **17,341 bytes** (−65%) |
+| Lighthouse Performance | 97 | **99** |
+| Routes | 65 | 65 |
+| Dependencies | — | unchanged |
+
+## Navigation semantics
+
+`EducationNavTabs` moved from `role="tablist"` and `role="tab"` buttons calling
+`router.push` to a `nav` element containing links with `aria-current="page"`.
+Affects `/science` and `/inci`, which share the layout. Visual treatment
+unchanged.
+
+## Tests
+
+`tests/unit/science-authority.test.ts` — 22 tests, 6 suites. Suite total
+26 to **48**, all passing. Covers architecture, pathways, map, privacy, copy
+governance, and cross-linking.
+
+## Files
+
+**Added** — the six `src/content/science/` modules, the two
+`src/components/science/` components, and the test.
+
+**Changed** — `src/app/(education)/science/page.tsx` (rewritten as a server
+component), `src/components/navigation/EducationNavTabs.tsx`, and one stale
+comment reference in `src/app/skin-strategy/page.tsx`.
+
+**Removed** — `src/app/(education)/science/ScienceIntelligence.tsx`.
+
+## Intentional customer-visible changes
+
+The Science page is deliberately different: profiling is gone, the map is the
+centre of the page, card density is much lower, and product context is a single
+restrained section near the end. This is the approved redesign, not a
+regression. No other route changed.
+
+## Deferred
+
+Phase 2 pathway refinement; commissioned diagrams; expert scientific review of
+melanin and post-inflammatory content before it is written; Journal expansion;
+future CMS decision; reconciliation of the glossary and product INCI sources;
+product accordion `aria-controls`; `/skin-strategy` performance; Face Elixir
+size wording; Cloudflare-managed robots.txt; `/dev/token-specimen` metadata;
+Study Circle; founder dashboard; formula and ingredient updates.
+
+## Explicit non-actions
+
+No deployment, Worker version, traffic, DNS, Cloudflare, wrangler, Supabase,
+Shopify, Sanity, or CMS change. No product price, size, availability, formula,
+ingredient, or claims change. No Founder Access or Study Circle change. No
+waitlist activation and no `/api/waitlist` request. No release branch, tag, or
+merge. No new dependency and no lockfile change.
