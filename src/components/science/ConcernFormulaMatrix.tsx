@@ -21,19 +21,22 @@ const { columns, caption } = SCIENCE_PAGE.formulaMatrix
  *
  * Two representations, never both exposed at once:
  *
- *  - At md and above, a real semantic table. The content is genuinely tabular
+ *  - At lg and above, a real semantic table. The content is genuinely tabular
  *    -- the point of the module is scanning down a column -- so it gets
  *    <caption>, <thead>, <th scope="col"> and <th scope="row">.
- *  - Below md, a stacked list. Forcing the four-column table into a phone
- *    either shrinks the type past legibility or requires horizontal scrolling,
- *    both of which the brief rules out. The stacked form repeats each column
- *    name as a real element rather than as ::before content, so the labels are
- *    read reliably rather than depending on pseudo-element support.
+ *  - Below lg, a stacked list. The stacked form repeats each column name as a
+ *    real element rather than as ::before content, so the labels are read
+ *    reliably rather than depending on pseudo-element support.
+ *
+ * The table breaks at lg, not md, because it was measured rather than assumed:
+ * at 768px the four columns are ~160px each and every cell wraps to four to six
+ * lines, which is the dense spreadsheet feeling this module is meant to avoid.
+ * Tablets get the stacked layout instead.
  *
  * Each representation is `hidden` at the other's breakpoint. display:none
  * removes a subtree from the accessibility tree, so exactly one is exposed to
- * assistive technology at any viewport -- verified in the accessibility tree at
- * both 375px and 1440px rather than assumed.
+ * assistive technology at any viewport -- verified in the accessibility tree
+ * rather than assumed.
  */
 export function ConcernFormulaMatrix({ rows, emphasized }: ConcernFormulaMatrixProps) {
   const ordered = [...rows].sort((a, b) => a.order - b.order)
@@ -43,8 +46,8 @@ export function ConcernFormulaMatrix({ rows, emphasized }: ConcernFormulaMatrixP
 
   return (
     <>
-      {/* Desktop and up — semantic table. */}
-      <div className="mt-12 hidden md:block">
+      {/* lg and up — semantic table. */}
+      <div className="mt-12 hidden lg:block">
         <table className="w-full border-collapse text-left">
           <caption className="sr-only">{caption}</caption>
           <thead>
@@ -101,8 +104,8 @@ export function ConcernFormulaMatrix({ rows, emphasized }: ConcernFormulaMatrixP
         </table>
       </div>
 
-      {/* Below md — stacked. Same order, same content, no hidden columns. */}
-      <ul className="mt-10 space-y-4 md:hidden">
+      {/* Below lg — stacked. Same order, same content, no hidden columns. */}
+      <ul className="mt-10 space-y-4 lg:hidden">
         {ordered.map((row) => {
           const active = emphasized.includes(row.pathwayId)
           return (
