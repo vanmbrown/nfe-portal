@@ -1762,3 +1762,200 @@ waitlist activation and no `/api/waitlist` request. No matrix redesign, no
 redesign of any other Science section. No profiling, scoring, ranking or
 personalised recommendation. No release branch, tag or merge. No new dependency
 and no lockfile change.
+
+---
+
+# Final Phase 1 refinement — pathway synchronization and schematic scale
+
+Appended after the refinement. The strategy audit and the three earlier records
+above are unchanged.
+
+## Founder decision
+
+Two focused changes to the approved Science page. Make the Layer Context panel
+visibly highlight in synchronization with the map, the interpretation and the
+matrix. Make the Skin Layer Intelligence Map larger and easier to read. Change
+nothing else.
+
+## Branch
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-pathway-sync-schematic-scale` |
+| Branched from | `feature/nfe-science-layer-context-visual-refinement` @ `0953c15` |
+| Canonical production baseline | `4d779c8` |
+| Deployed | No. Implementation and local validation only |
+
+## The visual issue, measured
+
+The state and the styling were both correct. Measuring composited pixels rather
+than class names showed why it still could not be seen:
+
+| Cue | Delta | Verdict |
+|---|---|---|
+| Surface | RGB distance 14, luminance +0.0087 | Effectively invisible on dark ground |
+| Border | RGB distance 77, but 1px | A hairline |
+| Title | RGB distance 178 | Real, but a hue shift in the left column |
+| Zone bar | opacity 1 → 1 | **No change at all** |
+
+The bar was the clearest miss: the rule only dimmed the *other* panels, so
+nothing about the selected panel itself changed.
+
+## Selected-state treatment
+
+Six cues instead of two.
+
+| Property | Unselected | Selected |
+|---|---|---|
+| Border | `nfe-paper/15`, 2px | `nfe-gold/60`, 2px — RGB distance 88 |
+| Surface | white 3.5% | warm cream 14% — RGB distance 36, up from 14 |
+| Inset ring | none | gold 1px inset |
+| Zone bar | full, or 0.5 when another panel is selected | full plus a gold ring |
+| Eyebrow | `nfe-paper/70` | gold — RGB distance 178, previously unchanged |
+| Title | cream | gold |
+| Marker | none | filled gold "In focus" pill |
+
+Border weight is 2px in both states, so selection causes no layout shift. Body
+copy is untouched by selection: an unselected panel keeps full text contrast.
+
+This shares the matrix's language — same gold, same "In focus" wording, same
+200ms ease-out — and is deliberately a little stronger, because Layer Context
+is the richer explanatory module.
+
+## State architecture
+
+One owner, `ScienceMapExperience`, holding a single `useState`, feeding all
+four expressions. Verified: one `useState` call, no context, no global store,
+zero string-based pathway comparisons.
+
+Panels expose `data-pathway-id`, `data-active` and `data-has-selection`. No
+ARIA is invented for elements that are not controls.
+
+## Synchronization, verified in the browser
+
+Every pathway singly, five combinations, all five at once, and clear:
+
+| Pathway | Map | Panel | Matrix row |
+|---|---|---|---|
+| Hydration | Surface | 01 Surface hydration | Dryness and ashiness |
+| Barrier Comfort | Barrier | 02 Barrier comfort | Tightness and barrier comfort |
+| Tone Integrity | Tone | 03 Tone integrity | Uneven-looking tone |
+| Texture & Suppleness | Texture | 04 Texture and suppleness | Texture and fine-line appearance |
+| Visible Resilience | Radiance | 05 Visible resilience | Dull or tired-looking appearance |
+
+In every state the panel order stayed `hydration, barrier-comfort,
+tone-integrity, texture-suppleness, visible-resilience`, all five panels and
+all five rows stayed present, and clearing returned everything to default.
+
+## Schematic scale
+
+Measured at 1440px:
+
+| Metric | Before | After | Change |
+|---|---|---|---|
+| Block rendered | 266 × 216 | **339 × 289** | +27% / +34% |
+| SVG rendered | 526 × 271 | 552 × 318 | |
+| Card | 584 × 329 | 610 × 376 | |
+| viewBox | 566 × 292 | 520 × 300 | |
+| Block share of viewBox | 51% / 79% | 62% / 91% | |
+| Unused viewBox | 8% / 20% | 8% / 4% | |
+| Label units | 19 / 18 / 13 | 22 / 20 / 15 | |
+| Smallest label at 375px | ~10.4px | 13.1px | |
+| Smallest label at 320px | ~5.8px | 7.3px | |
+| Column ratio | 57 / 43 | **60 / 40** | inside the 58-65 target |
+
+Three changes made the room: a tighter viewBox, a wider schematic column, and
+wrapping long zone names onto a second line. The wrapping is what actually
+mattered — single-line labels were forcing the viewBox wide enough for "Texture
+and suppleness", and every unit of label width shrank the drawing at a fixed
+column width.
+
+Band proportions, ordering, colours, labels, caption and interactive emphasis
+are unchanged, and no biological detail was added. Geometry is now anchored to
+one `BLOCK` constant so the frame, clip path, bands, sheen and focus outlines
+cannot drift apart.
+
+**Above the stated range.** The brief asked for 20-35% larger diagram area.
+This is +27% and +34% per dimension, which compounds to roughly +70% by area.
+It is legible and unclipped at every width tested, but if the range meant area
+rather than dimensions it is about double. Straightforward to dial back.
+
+## Responsive
+
+| Viewport | SVG | Block | Smallest label | Overflow | Clipped |
+|---|---|---|---|---|---|
+| 1440 | 552 × 318 | 339 × 289 | 15.9px | none | 0 |
+| 1280 | 552 × 318 | 339 × 289 | 15.9px | none | 0 |
+| 1024 | 466 × 269 | 287 × 244 | 13.4px | none | 0 |
+| 768 | 599 × 346 | 369 × 313 | 17.3px | none | 0 |
+| 375 | 309 × 178 | 190 × 162 | 8.9px | none | 0 |
+| 320 | 254 × 147 | 156 × 133 | 7.3px | none | 0 |
+
+The schematic is larger than baseline at every width. At 768 and below it
+stacks full width, which makes it the largest of all.
+
+## Accessibility
+
+`/science` Accessibility **100**, zero failing audits. 62 contrast samples
+measured with all five pathways active — zero failures, lowest 5.7:1. Non-colour
+active marker retained, no new live region, no focus movement, no auto-scroll,
+SVG title and description intact, no duplicate IDs. All five panels with
+`data-active="false"` and zero "In focus" markers render server-side without
+JavaScript.
+
+## Performance
+
+Three interleaved Lighthouse runs per branch:
+
+| Metric | Parent | This branch |
+|---|---|---|
+| Performance | 100, 98, 98 — median 98 | 97, 98, 97 — median **97** |
+| Accessibility | 100 | **100** |
+| CLS | 0 | **0** |
+| `/science` client chunk | 24,432 B | **24,944 B** (+512) |
+| Routes | 62 | **62** |
+| Dependencies | — | **unchanged** |
+
+The 1-point median difference sits inside the run-to-run spread observed on
+identical code earlier in this work.
+
+## Copy changes
+
+None. No customer-facing string changed. "In focus" already existed.
+
+## Tests
+
+112 → **131**. All four required violation tests performed and caught: a broken
+panel mapping, a weakened active border, an inverted `data-active` value, and a
+schematic block shrunk back toward baseline.
+
+## Files
+
+**Changed** — `components/science/LayerContextPanels.tsx`,
+`components/science/SkinLayerSchematic.tsx`,
+`components/science/ScienceMapExperience.tsx`,
+`tests/unit/science-authority.test.ts`.
+
+**Added / removed** — none.
+
+## Customer-visible changes
+
+A selected pathway now clearly marks its Layer Context panel. The schematic is
+about a quarter larger in each dimension with larger labels. Nothing else on
+the page changes.
+
+## Founder review status
+
+Awaiting visual approval. The check that matters: select one pathway and
+confirm that the map band, the interpretation, the Layer Context panel and the
+matrix row all read as the same answer.
+
+## Explicit non-actions
+
+No deployment, Worker version, traffic, DNS, Cloudflare, wrangler, Supabase,
+Shopify, Sanity or CMS change. No product price, size, availability, formula,
+ingredient or claims change. No Founder Access or Study Circle change. No
+waitlist activation and no `/api/waitlist` request. No matrix redesign and no
+other Science section touched. No profiling, scoring, ranking or personalised
+recommendation. No release branch, tag or merge. No new dependency and no
+lockfile change.
