@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import {
   CONCERN_FORMULA_MATRIX,
@@ -46,6 +46,7 @@ import { SkinLayerSchematic } from './SkinLayerSchematic'
  */
 export function ScienceMapExperience() {
   const [selected, setSelected] = useState<PathwayId[]>([])
+  const firstPathwayRef = useRef<HTMLButtonElement>(null)
 
   const activePathways = useMemo(
     () => PATHWAYS.filter((pathway) => selected.includes(pathway.id)),
@@ -74,6 +75,15 @@ export function ScienceMapExperience() {
     setSelected((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
     )
+  }
+
+  function clearPathways() {
+    // "Clear pathways" only exists while something is selected, so activating
+    // it destroys the control the user is standing on. Without this, focus
+    // falls to <body> and a keyboard user loses their place entirely. Move
+    // focus to the start of the group first, while that node is still mounted.
+    firstPathwayRef.current?.focus()
+    setSelected([])
   }
 
   const hasSelection = activePathways.length > 0
@@ -105,11 +115,12 @@ export function ScienceMapExperience() {
         aria-labelledby="nfe-pathways-label"
         className="mt-8 flex flex-wrap gap-3"
       >
-        {PATHWAYS.map((pathway) => {
+        {PATHWAYS.map((pathway, index) => {
           const active = selected.includes(pathway.id)
           return (
             <button
               key={pathway.id}
+              ref={index === 0 ? firstPathwayRef : undefined}
               type="button"
               onClick={() => togglePathway(pathway.id)}
               aria-pressed={active}
@@ -136,7 +147,7 @@ export function ScienceMapExperience() {
         {hasSelection ? (
           <button
             type="button"
-            onClick={() => setSelected([])}
+            onClick={clearPathways}
             className="min-h-[44px] rounded-full border border-nfe-paper/25 px-5 py-3 text-sm uppercase tracking-[0.14em] text-nfe-paper/75 transition-colors hover:border-nfe-paper/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-gold focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-green-900"
           >
             Clear pathways
