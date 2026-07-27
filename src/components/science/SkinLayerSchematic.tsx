@@ -169,9 +169,9 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
             </text>
             <text
               x="334"
-              y={midY + 16}
-              className="text-[14px]"
-              fill={active ? 'rgba(230,202,140,0.88)' : 'rgba(253,252,248,0.55)'}
+              y={midY + 18}
+              className="text-[18px]"
+              fill={active ? 'rgba(230,202,140,0.9)' : 'rgba(253,252,248,0.6)'}
             >
               {active ? 'In focus' : layer.zone}
             </text>
