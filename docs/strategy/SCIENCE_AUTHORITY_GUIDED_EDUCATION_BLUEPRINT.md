@@ -1318,3 +1318,226 @@ Shopify, Sanity, or CMS change. No product price, size, availability, formula,
 ingredient, or claims change. No Founder Access or Study Circle change. No
 waitlist activation and no `/api/waitlist` request. No release branch, tag, or
 merge. No new dependency and no lockfile change.
+
+---
+
+# Phase 1 refinement — Layer Context and Concern-to-Formula Matrix
+
+Appended after the refinement. The strategy audit and the Phase 1
+implementation record above are unchanged.
+
+## Founder decision
+
+Restore two modules from the previous Science page — Layer Context and the
+Concern-to-Formula Matrix — as part of the new hybrid editorial system, placed
+directly beneath the expanded interactive map, fully visible in the default
+state, with pathway selection bringing the relevant panel and row forward. The
+map stays the centrepiece. Profiling, scoring, ranking and personalised results
+stay removed. Ingredient families remain the language until the glossary and
+product INCI sources are reconciled.
+
+This is a refinement of Phase 1, not a reversal.
+
+## Branch
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-layer-context-refinement` |
+| Branched from | `feature/nfe-science-authority-phase-1` @ `9a6b242` |
+| Canonical production baseline | `4d779c8` |
+| Deployed | No. Implementation and local validation only |
+
+## Why both modules were worth restoring
+
+Neither module depended on the profiling engine. Both read from plain arrays
+and rendered the same content for every visitor; only their placement inside
+the old client component tied them to the quiz. Removing them in Phase 1 lost
+genuine education for no architectural gain.
+
+## Placement
+
+Sections 5 and 6, immediately beneath the map, inside the same continuous dark
+chapter. They interpret the map, so they sit next to it rather than further
+down the page.
+
+## Content model
+
+`src/content/science/layer-context.ts` and `formula-matrix.ts`, with
+`LayerContextPanel` and `ConcernFormulaMatrixRow` added to `types.ts`.
+
+Panels and rows reference pathways, layers and ingredient families by id
+rather than restating their labels, so those stay single-sourced. Each module
+owns only its own prose. That separation is deliberate: Layer Context is
+written to reward slower reading, the matrix to be understood at a glance, so
+they share no sentences.
+
+Neither type can hold a score, rank, severity or profile field. Rows carry no
+`claimsBoundary` of their own — a row's boundary is its pathway's, reachable
+through `pathwayId`, and a second copy would be a second source of truth.
+
+`order` is explicit rather than implied by array position, so canonical
+ordering is an assertable property. Panels read surface downward, mirroring the
+schematic bands above them.
+
+## Layer Context
+
+Five panels: Skin surface and moisture context · Barrier comfort and lipid
+context · Epidermal appearance and tone integrity · Texture and visible
+refinement · Environmental context and visible radiance.
+
+All five always render. Selection never filters, hides, reorders or ranks them,
+and an unemphasised panel keeps full text contrast — only its border,
+background and title colour shift. Emphasis carries a visible "In focus"
+marker, so it never depends on colour alone.
+
+Visually this departs from the original on purpose: generous panels on a
+continuous surface with hairline divisions, rather than dense cards nested
+inside the map card. Ingredient families read as a plain interpunct-separated
+line instead of a chip cloud.
+
+## Concern-to-Formula Matrix
+
+Columns: What you are exploring · Layer context · NFE formulation principle ·
+Ingredient family.
+
+Seven rows became five, one per pathway. The old seven split texture from fine
+lines and radiance from sensitivity, implying a precision the content did not
+have and leaving two rows belonging to no pathway.
+
+The original was built from CSS-grid divs — no table, no headers, no caption.
+This is a real semantic table with `caption`, `thead`, `th scope="col"` and
+`th scope="row"`. Below `lg` it becomes a stacked list whose column names are
+real elements rather than `::before` content.
+
+The table breaks at `lg`, not `md`, because it was measured: at 768px the four
+columns come out around 160px each and every cell wraps to four to six lines.
+Tablets get the stacked layout instead.
+
+Selection emphasises rows. It never sorts, filters, hides, ranks or promotes
+them, and no row is ever marked recommended.
+
+## Shared state
+
+One owner: `ScienceMapExperience`. It holds a single `useState` and hands the
+same value to all three modules, each of which is a pure, stateless child. No
+second island, no context provider, no global store.
+
+Multi-selection is deterministic. Verified by clicking Visible Resilience and
+then Tone Integrity and observing Tone Integrity render first — canonical
+content order, not click order.
+
+## Ingredient sources
+
+Unchanged from Phase 1 and still unresolved: the glossary and
+`data/products/face-elixir.json` list different ingredient sets. Neither module
+names a specific ingredient or asserts what is in a product. The matrix closes
+with a line pointing at Ingredients, which owns per-product INCI.
+
+## Claims
+
+All new copy is appearance and feel language. Panels carry `claimsBoundary`
+lists retained in content so the governance tests assert against them. The
+approved "Well-aging, not anti-aging" contrast is used once.
+
+The whole of the new copy is new customer-facing writing and has not had a
+founder read.
+
+## Two defects fixed along the way
+
+**Focus loss on clearing pathways.** "Clear pathways" only exists while
+something is selected, so activating it by keyboard destroyed the control the
+user was standing on and dropped focus to `<body>`. Focus now moves to the
+start of the pathway group. This was a Phase 1 defect, confirmed against that
+build — Lighthouse does not detect focus loss on unmount, so it scored 100
+throughout.
+
+**Science content in the client bundle.** Restoring both modules took the
+`/science` client chunk from 16,579 to 28,964 bytes and cost about three
+Lighthouse Performance points at the median. Two causes: the island imported
+the content directly, and after that was moved to props the client components
+still imported from the `@/content/science` barrel, which re-exports the same
+content and is not tree-shaken back out. Per-module imports in the four client
+components dropped the chunk to 23,679 with the prose verifiably gone from it.
+
+## Accessibility
+
+`/science` Accessibility **100**, zero weighted findings, zero failing
+contrast audits. Fourteen contrast samples measured directly on the new dark
+ground, lowest 5.21:1 against a 4.5:1 threshold.
+
+Heading order h1 → h2 → h3 → h4 with no skips. Real table semantics. Exactly
+one matrix representation exposed to assistive technology at every viewport,
+verified at 320, 375, 768, 1024 and 1440px rather than assumed. No auto-scroll
+and no focus movement on selection; focus stays on the activated control.
+
+## Performance
+
+Measured with four interleaved Lighthouse runs against each branch, because a
+single run on this machine varies by up to six points on identical code.
+
+| Metric | Phase 1 | Refinement |
+|---|---|---|
+| Perf (4 runs) | 96, 98, 92, 97 — median **97** | 97, 97, 96, 97 — median **97** |
+| Accessibility | 100 | **100** |
+| TBT median | 130 ms | 137 ms |
+| CLS | 0 | **0** |
+| `/science` client chunk | 16,579 B | **23,679 B** (+7,100) |
+| Total referenced JS | 562,023 B | ~569,000 B (+1.3%) |
+| Routes | 62 | **62** |
+| Dependencies | — | **unchanged** |
+
+The remaining 7,100 bytes is the two new components' own code, which is
+unavoidable — they are interactive.
+
+Note on a Phase 1 reporting error: that record stated 65 routes and a 17,341
+byte chunk. The correct figures at `9a6b242` are **62** unique app routes and
+**16,579** bytes; the earlier numbers came from counting build-output lines and
+from an intermediate build. Both branches measure identically, so no regression
+is hidden by the correction.
+
+## Tests
+
+`tests/unit/science-authority.test.ts` — 40 tests added across 6 suites, taking
+the file from 48 to **88**, all passing.
+
+Three were verified by deliberately breaking the code rather than trusting a
+green run: naming a specific ingredient in a matrix row, filtering rows by
+selection, and adding a `localStorage` write to the panels. Each failed the
+suite; the suite returned to 88 green once reverted.
+
+## Files
+
+**Added** — `content/science/layer-context.ts`,
+`content/science/formula-matrix.ts`, `components/science/LayerContextPanels.tsx`,
+`components/science/ConcernFormulaMatrix.tsx`.
+
+**Changed** — `content/science/types.ts`, `content/science/page.ts`,
+`content/science/index.ts`, `components/science/ScienceMapExperience.tsx`,
+`components/science/SkinLayerSchematic.tsx`,
+`app/(education)/science/page.tsx`, `tests/unit/science-authority.test.ts`.
+
+**Removed** — nothing.
+
+## Intentional customer-visible changes
+
+`/science` gains two substantial modules beneath the map. No other route
+changed.
+
+## Deferred
+
+Reconciliation of the ingredient glossary and product INCI sources; founder
+claims read of all new copy; expert scientific review before melanin and
+post-inflammatory content is written; Phase 2 pathway refinement; commissioned
+diagrams; Journal expansion; future CMS decision; product accordion
+`aria-controls`; `/skin-strategy` performance; Face Elixir size wording;
+Cloudflare-managed robots.txt; `/dev/token-specimen` metadata; Study Circle;
+founder dashboard; formula and ingredient updates.
+
+## Explicit non-actions
+
+No deployment, Worker version, traffic, DNS, Cloudflare, wrangler, Supabase,
+Shopify, Sanity or CMS change. No product price, size, availability, formula,
+ingredient or claims change. No Founder Access or Study Circle change. No
+waitlist activation and no `/api/waitlist` request. No release branch, tag or
+merge. No new dependency and no lockfile change. No restoration of profiling,
+scoring, ranking or personalised recommendation.
