@@ -5,7 +5,9 @@ import { describe, it } from 'node:test'
 
 // Imported per-module rather than through the barrel: the node:test resolver
 // hook does not resolve directory imports, while Next.js does.
+import { CONCERN_FORMULA_MATRIX } from '@/content/science/formula-matrix'
 import { INGREDIENT_FAMILIES } from '@/content/science/ingredient-families'
+import { LAYER_CONTEXT_PANELS } from '@/content/science/layer-context'
 import { SKIN_LAYERS } from '@/content/science/layers'
 import { SCIENCE_PAGE } from '@/content/science/page'
 import { PATHWAYS } from '@/content/science/pathways'
@@ -26,10 +28,14 @@ const SCIENCE_SOURCE_FILES = [
   'app/(education)/science/page.tsx',
   'components/science/ScienceMapExperience.tsx',
   'components/science/SkinLayerSchematic.tsx',
+  'components/science/LayerContextPanels.tsx',
+  'components/science/ConcernFormulaMatrix.tsx',
   'content/science/page.ts',
   'content/science/pathways.ts',
   'content/science/layers.ts',
   'content/science/ingredient-families.ts',
+  'content/science/layer-context.ts',
+  'content/science/formula-matrix.ts',
   'content/science/types.ts',
 ]
 
@@ -60,9 +66,15 @@ const customerFacingStrings = (): string[] => {
   walk(SCIENCE_PAGE)
   walk(SKIN_LAYERS)
   walk(INGREDIENT_FAMILIES)
-  // Pathway claimsBoundary lists prohibited wording on purpose; exclude it.
+  walk(CONCERN_FORMULA_MATRIX)
+  // claimsBoundary lists prohibited wording on purpose; exclude it.
   PATHWAYS.forEach((pathway) => {
     const { claimsBoundary, ...rest } = pathway
+    void claimsBoundary
+    walk(rest)
+  })
+  LAYER_CONTEXT_PANELS.forEach((panel) => {
+    const { claimsBoundary, ...rest } = panel
     void claimsBoundary
     walk(rest)
   })
@@ -302,5 +314,443 @@ describe('cross-linking', () => {
     const page = readFileSync(src('app/(education)/science/page.tsx'), 'utf8')
     const occurrences = page.match(/concierge\.link\.href/g) ?? []
     assert.equal(occurrences.length, 1, 'exactly one Concierge link')
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * Phase 1 refinement — Layer Context and the Concern-to-Formula Matrix
+ * ------------------------------------------------------------------ */
+
+const PATHWAY_IDS = PATHWAYS.map((pathway) => pathway.id)
+const LAYER_IDS = SKIN_LAYERS.map((layer) => layer.id)
+const FAMILY_IDS = INGREDIENT_FAMILIES.map((family) => family.id)
+
+const layerContextSource = () =>
+  readFileSync(src('components/science/LayerContextPanels.tsx'), 'utf8')
+const matrixSource = () =>
+  readFileSync(src('components/science/ConcernFormulaMatrix.tsx'), 'utf8')
+const experienceSource = () =>
+  readFileSync(src('components/science/ScienceMapExperience.tsx'), 'utf8')
+
+describe('layer context structure', () => {
+  it('renders the approved heading and subheading', () => {
+    assert.equal(SCIENCE_PAGE.layerContext.eyebrow, 'Layer Context')
+    assert.equal(
+      SCIENCE_PAGE.layerContext.heading,
+      'Where visible concerns begin. How NFE supports them.'
+    )
+  })
+
+  it('has one panel per pathway, no more and no fewer', () => {
+    assert.equal(LAYER_CONTEXT_PANELS.length, PATHWAYS.length)
+    const covered = LAYER_CONTEXT_PANELS.map((panel) => panel.pathwayId).sort()
+    assert.deepEqual(covered, [...PATHWAY_IDS].sort())
+  })
+
+  it('gives every panel a stable unique id', () => {
+    const ids = LAYER_CONTEXT_PANELS.map((panel) => panel.id)
+    assert.equal(new Set(ids).size, ids.length)
+    ids.forEach((id) => assert.match(id, /^[a-z][a-z0-9-]*$/))
+  })
+
+  it('maps every panel to real layers and real ingredient families', () => {
+    for (const panel of LAYER_CONTEXT_PANELS) {
+      assert.ok(panel.layerIds.length > 0, `${panel.id} has no layer`)
+      assert.ok(panel.ingredientFamilyIds.length > 0, `${panel.id} has no family`)
+      panel.layerIds.forEach((id) => assert.ok(LAYER_IDS.includes(id)))
+      panel.ingredientFamilyIds.forEach((id) => assert.ok(FAMILY_IDS.includes(id)))
+    }
+  })
+
+  it('carries a claims boundary on every panel', () => {
+    for (const panel of LAYER_CONTEXT_PANELS) {
+      assert.ok(panel.claimsBoundary.length > 0, `${panel.id} has no boundary`)
+    }
+  })
+
+  it('holds no score, rank, severity or profile field', () => {
+    const banned = [
+      'score',
+      'rank',
+      'priority',
+      'severity',
+      'profile',
+      'weight',
+      'match',
+      'recommended',
+    ]
+    for (const panel of LAYER_CONTEXT_PANELS) {
+      for (const key of Object.keys(panel)) {
+        assert.ok(
+          !banned.some((word) => key.toLowerCase().includes(word)),
+          `${panel.id} exposes a "${key}" field`
+        )
+      }
+    }
+  })
+
+  it('orders panels deterministically, surface downward', () => {
+    const orders = LAYER_CONTEXT_PANELS.map((panel) => panel.order)
+    assert.deepEqual(orders, [1, 2, 3, 4, 5])
+    // The first panel reads the surface; the last reads radiance. This mirrors
+    // the schematic bands above it.
+    assert.ok(LAYER_CONTEXT_PANELS[0].layerIds.includes('surface'))
+    assert.ok(LAYER_CONTEXT_PANELS[4].layerIds.includes('radiance'))
+  })
+
+  it('does not duplicate pathway or family labels into panel content', () => {
+    // Labels are referenced by id at render time. A literal copy here would be
+    // a second source of truth that could silently drift.
+    const source = layerContextSource()
+    assert.match(source, /PATHWAY_BY_ID/)
+    assert.match(source, /FAMILY_BY_ID/)
+    const serialised = JSON.stringify(LAYER_CONTEXT_PANELS)
+    for (const family of INGREDIENT_FAMILIES) {
+      assert.ok(
+        !serialised.includes(`"${family.label}"`),
+        `panel content hardcodes the family label "${family.label}"`
+      )
+    }
+  })
+})
+
+describe('layer context behaviour', () => {
+  it('renders every panel regardless of selection', () => {
+    // The component maps the full array; nothing filters by emphasis.
+    const source = stripComments(layerContextSource())
+    assert.match(source, /ordered\.map\(/)
+    assert.ok(
+      !/\.filter\(\s*\(?\s*panel/.test(source),
+      'panels are filtered by selection somewhere'
+    )
+  })
+
+  it('drives emphasis from the pathway id, not from panel state', () => {
+    const source = stripComments(layerContextSource())
+    assert.match(source, /emphasized\.includes\(panel\.pathwayId\)/)
+    assert.ok(!/useState|useReducer/.test(source), 'panel component holds state')
+  })
+
+  it('signals emphasis by more than colour', () => {
+    assert.match(layerContextSource(), /In focus/)
+  })
+
+  it('sorts by canonical order rather than selection order', () => {
+    assert.match(layerContextSource(), /sort\(\(a, b\) => a\.order - b\.order\)/)
+  })
+
+  it('never scrolls or moves focus from the panels', () => {
+    const source = stripComments(layerContextSource())
+    assert.ok(!/scrollIntoView|scrollTo|\.focus\(\)/.test(source))
+  })
+})
+
+describe('formula matrix structure', () => {
+  it('renders the approved eyebrow and heading', () => {
+    assert.equal(SCIENCE_PAGE.formulaMatrix.eyebrow, 'Concern-to-Formula Matrix')
+    assert.equal(
+      SCIENCE_PAGE.formulaMatrix.heading,
+      'A simpler way to read the formula logic.'
+    )
+  })
+
+  it('uses the approved four columns', () => {
+    assert.deepEqual(SCIENCE_PAGE.formulaMatrix.columns, [
+      'What you are exploring',
+      'Layer context',
+      'NFE formulation principle',
+      'Ingredient family',
+    ])
+  })
+
+  it('does not label a column as diagnosis or recommendation', () => {
+    for (const column of SCIENCE_PAGE.formulaMatrix.columns) {
+      const lowered = column.toLowerCase()
+      assert.ok(!lowered.includes('diagnos'))
+      assert.ok(!lowered.includes('recommend'))
+      assert.ok(!lowered.includes('prescri'))
+    }
+  })
+
+  it('has one row per pathway', () => {
+    assert.equal(CONCERN_FORMULA_MATRIX.length, 5)
+    const covered = CONCERN_FORMULA_MATRIX.map((row) => row.pathwayId).sort()
+    assert.deepEqual(covered, [...PATHWAY_IDS].sort())
+  })
+
+  it('references ingredient families only, never a named ingredient', () => {
+    const namedIngredients = INGREDIENT_FAMILIES.flatMap(
+      (family) => family.representativeExamples
+    )
+    const serialised = JSON.stringify(CONCERN_FORMULA_MATRIX)
+    for (const ingredient of namedIngredients) {
+      assert.ok(
+        !serialised.includes(ingredient),
+        `a matrix row names the ingredient "${ingredient}"`
+      )
+    }
+    for (const row of CONCERN_FORMULA_MATRIX) {
+      row.ingredientFamilyIds.forEach((id) => assert.ok(FAMILY_IDS.includes(id)))
+    }
+  })
+
+  it('asserts nothing about the composition of a product', () => {
+    const serialised = JSON.stringify(CONCERN_FORMULA_MATRIX).toLowerCase()
+    for (const phrase of ['face elixir', 'body elixir', 'in the formula', 'contains']) {
+      assert.ok(!serialised.includes(phrase), `a row claims "${phrase}"`)
+    }
+  })
+
+  it('holds no score, rank or recommendation field', () => {
+    const banned = ['score', 'rank', 'priority', 'severity', 'profile', 'recommended']
+    for (const row of CONCERN_FORMULA_MATRIX) {
+      for (const key of Object.keys(row)) {
+        assert.ok(
+          !banned.some((word) => key.toLowerCase().includes(word)),
+          `${row.id} exposes a "${key}" field`
+        )
+      }
+    }
+  })
+
+  it('orders rows deterministically', () => {
+    assert.deepEqual(
+      CONCERN_FORMULA_MATRIX.map((row) => row.order),
+      [1, 2, 3, 4, 5]
+    )
+  })
+})
+
+describe('formula matrix behaviour and semantics', () => {
+  it('renders every row regardless of selection', () => {
+    const source = stripComments(matrixSource())
+    assert.ok(
+      !/\.filter\(\s*\(?\s*row/.test(source),
+      'rows are filtered by selection somewhere'
+    )
+  })
+
+  it('never sorts or reorders by selection', () => {
+    const source = stripComments(matrixSource())
+    const sorts = source.match(/\.sort\(/g) ?? []
+    assert.equal(sorts.length, 1, 'more than one sort in the matrix')
+    assert.match(source, /sort\(\(a, b\) => a\.order - b\.order\)/)
+  })
+
+  it('uses real table semantics on the wide layout', () => {
+    const source = matrixSource()
+    assert.match(source, /<table/)
+    assert.match(source, /<caption/)
+    assert.match(source, /<thead/)
+    assert.match(source, /<tbody/)
+    assert.match(source, /scope="col"/)
+    assert.match(source, /scope="row"/)
+  })
+
+  it('exposes exactly one representation at a time', () => {
+    // Both exist in the markup; each is display:none at the other's breakpoint,
+    // which removes it from the accessibility tree.
+    const source = matrixSource()
+    assert.match(source, /hidden lg:block/)
+    assert.match(source, /lg:hidden/)
+  })
+
+  it('labels the stacked layout with real elements, not pseudo-content', () => {
+    const source = matrixSource()
+    assert.match(source, /<dl/)
+    assert.match(source, /<dt/)
+    assert.match(source, /<dd/)
+    assert.ok(!/before:content/.test(source), 'labels depend on pseudo-element content')
+  })
+
+  it('signals emphasis by more than colour', () => {
+    assert.match(matrixSource(), /In focus/)
+  })
+
+  it('never scrolls or moves focus from the matrix', () => {
+    const source = stripComments(matrixSource())
+    assert.ok(!/scrollIntoView|scrollTo|\.focus\(\)/.test(source))
+  })
+})
+
+describe('shared pathway state', () => {
+  it('keeps one selection owner for all three modules', () => {
+    const source = stripComments(experienceSource())
+    // Match invocations, not the import line, which also contains the name.
+    const stateHooks = source.match(/useState[<(]/g) ?? []
+    assert.equal(stateHooks.length, 1, 'more than one state source in the chapter')
+    assert.match(source, /<SkinLayerSchematic/)
+    assert.match(source, /<LayerContextPanels/)
+    assert.match(source, /<ConcernFormulaMatrix/)
+  })
+
+  it('passes the same selection to layer context and the matrix', () => {
+    const source = stripComments(experienceSource())
+    assert.match(source, /<LayerContextPanels[\s\S]*?emphasized=\{selected\}/)
+    assert.match(source, /<ConcernFormulaMatrix[\s\S]*?emphasized=\{selected\}/)
+  })
+
+  it('keeps the child modules stateless', () => {
+    for (const source of [layerContextSource(), matrixSource()]) {
+      const stripped = stripComments(source)
+      assert.ok(!/useState|useReducer|useEffect/.test(stripped))
+    }
+  })
+
+  it('introduces no global state or context provider', () => {
+    const source = stripComments(experienceSource())
+    assert.ok(!/createContext|useContext|zustand|redux/.test(source))
+  })
+
+  it('keeps focus on a control when clearing', () => {
+    // Clearing unmounts the Clear button, which would otherwise drop focus to
+    // the document body. Focus moves to the start of the pathway group instead.
+    const source = stripComments(experienceSource())
+    assert.match(source, /firstPathwayRef/)
+    assert.match(source, /firstPathwayRef\.current\?\.focus\(\)/)
+  })
+
+  it('adds no second client boundary', () => {
+    for (const source of [layerContextSource(), matrixSource()]) {
+      assert.ok(!/use client/.test(source))
+    }
+  })
+})
+
+describe('refinement claims governance', () => {
+  it('keeps every prohibited claim out of the new copy', () => {
+    const prohibited = [
+      'treats melasma',
+      'cures hyperpigmentation',
+      'rebuilds collagen',
+      'repairs damaged skin',
+      'reverses aging',
+      'prevents sun damage',
+      'heals inflammation',
+      'stops melanin production',
+      'erases wrinkles',
+      'restores cellular function',
+      'treats sensitivity',
+      'repairs the barrier',
+      'penetrates the dermis',
+      'diagnos',
+    ]
+    const copy = [
+      ...LAYER_CONTEXT_PANELS.flatMap((panel) => [
+        panel.title,
+        panel.visibleContext,
+        panel.formulationPrinciple,
+      ]),
+      ...CONCERN_FORMULA_MATRIX.flatMap((row) => [
+        row.explorationLabel,
+        row.layerContext,
+        row.formulationPrinciple,
+      ]),
+      SCIENCE_PAGE.layerContext.heading,
+      SCIENCE_PAGE.layerContext.body,
+      SCIENCE_PAGE.formulaMatrix.heading,
+      SCIENCE_PAGE.formulaMatrix.body,
+    ]
+      .join(' ')
+      .toLowerCase()
+
+    for (const claim of prohibited) {
+      assert.ok(!copy.includes(claim), `new copy contains "${claim}"`)
+    }
+  })
+
+  it('keeps profiling, ranking and diagnosis language out of the new copy', () => {
+    const banned = [
+      'your skin type',
+      'your profile',
+      'top priority',
+      'priority 1',
+      'we recommend',
+      'recommended for you',
+      'your result',
+      'your score',
+    ]
+    const copy = [
+      ...LAYER_CONTEXT_PANELS.map(
+        (panel) => `${panel.visibleContext} ${panel.formulationPrinciple}`
+      ),
+      ...CONCERN_FORMULA_MATRIX.map(
+        (row) => `${row.layerContext} ${row.formulationPrinciple}`
+      ),
+    ]
+      .join(' ')
+      .toLowerCase()
+    for (const phrase of banned) {
+      assert.ok(!copy.includes(phrase), `new copy contains "${phrase}"`)
+    }
+  })
+
+  it('carries no authoring note or placeholder in the new content', () => {
+    const markers = [
+      'Expectation:',
+      'Note:',
+      'Internal:',
+      'TODO',
+      'Placeholder',
+      'Use careful',
+      'premium active',
+      'formula story',
+      'claims note',
+      'legal review',
+      'copy note',
+      'editor note',
+    ]
+    const copy = [
+      JSON.stringify(LAYER_CONTEXT_PANELS),
+      JSON.stringify(CONCERN_FORMULA_MATRIX),
+      JSON.stringify(SCIENCE_PAGE.layerContext),
+      JSON.stringify(SCIENCE_PAGE.formulaMatrix),
+    ].join(' ')
+    for (const marker of markers) {
+      assert.ok(!copy.includes(marker), `new content contains "${marker}"`)
+    }
+  })
+
+  it('keeps the well-aging contrast and never says anti-aging alone', () => {
+    const copy = LAYER_CONTEXT_PANELS.map((p) => p.formulationPrinciple).join(' ')
+    assert.match(copy, /Well-aging, not anti-aging/)
+    const withoutApproved = copy.replace(/Well-aging, not anti-aging/g, '')
+    assert.ok(!/anti-aging/.test(withoutApproved))
+  })
+})
+
+describe('refinement privacy', () => {
+  it('persists nothing and sends nothing from the new modules', () => {
+    const banned = [
+      'localStorage',
+      'sessionStorage',
+      'document.cookie',
+      'fetch(',
+      'XMLHttpRequest',
+      'sendBeacon',
+      'navigator.',
+      'track(',
+      '<form',
+    ]
+    for (const path of [
+      'components/science/LayerContextPanels.tsx',
+      'components/science/ConcernFormulaMatrix.tsx',
+      'content/science/layer-context.ts',
+      'content/science/formula-matrix.ts',
+    ]) {
+      const source = stripComments(readFileSync(src(path), 'utf8'))
+      for (const token of banned) {
+        assert.ok(!source.includes(token), `${path} uses ${token}`)
+      }
+    }
+  })
+
+  it('keeps the new content free of anything visitor-specific', () => {
+    const serialised = (
+      JSON.stringify(LAYER_CONTEXT_PANELS) + JSON.stringify(CONCERN_FORMULA_MATRIX)
+    ).toLowerCase()
+    for (const token of ['email', 'userid', 'user_id', 'session', 'visitorid']) {
+      assert.ok(!serialised.includes(token))
+    }
   })
 })
