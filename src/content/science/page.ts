@@ -44,6 +44,26 @@ export const SCIENCE_PAGE: SciencePageContent = {
       'This map is an educational cosmetic framework. It describes where visible needs appear, not where an ingredient travels. NFE products are not intended to diagnose, treat, cure, or prevent disease, and NFE makes no claim to change dermal structure.',
   },
 
+  layerContext: {
+    eyebrow: 'Layer Context',
+    heading: 'Where visible concerns begin. How NFE supports them.',
+    body: 'Each panel reads one part of the map above. All five are here whether or not you choose a pathway — choosing one simply brings its panel forward.',
+  },
+
+  formulaMatrix: {
+    eyebrow: 'Concern-to-Formula Matrix',
+    heading: 'A simpler way to read the formula logic.',
+    body: 'The same relationships, compressed. Each row connects what you are exploring to where it is read on the map, how NFE approaches it, and which ingredient families that involves.',
+    columns: [
+      'What you are exploring',
+      'Layer context',
+      'NFE formulation principle',
+      'Ingredient family',
+    ],
+    caption:
+      'Five relationships between what a visitor may be exploring, where it is read on the Skin Layer Intelligence Map, how NFE approaches it cosmetically, and the relevant ingredient families. Rows are not ranked and the order does not change.',
+  },
+
   formulationPrinciples: [
     {
       id: 'barrier-first',
