@@ -1,68 +1,65 @@
 'use client';
 
 import React from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-type Tab = 'science' | 'inci';
-
-const tabs: { id: Tab; label: string; href: string }[] = [
-  { id: 'science', label: 'Science', href: '/science' },
-  { id: 'inci', label: 'Ingredients', href: '/inci' },
+const links: { label: string; href: string }[] = [
+  { label: 'Science', href: '/science' },
+  { label: 'Ingredients', href: '/inci' },
 ];
 
+/**
+ * Navigation between the two education routes.
+ *
+ * This previously used role="tablist"/role="tab" on buttons that called
+ * router.push. Tab semantics describe panels swapping within one view; these
+ * are separate pages, so a screen-reader user was told to expect a tabpanel
+ * and instead got a navigation. It is now a <nav> of links with
+ * aria-current="page", which is what the interaction actually is.
+ *
+ * Links also restore ordinary browser behaviour the buttons had removed:
+ * middle-click, open-in-new-tab, and a visible target on hover.
+ *
+ * The visual treatment is unchanged, including the gold underline on the
+ * active route. The framer-motion layout animation was dropped with the
+ * buttons -- the underline is now static, which also removes a motion effect
+ * that had no reduced-motion handling of its own.
+ */
 export default function EducationNavTabs() {
   const pathname = usePathname();
-  const router = useRouter();
-  
-  // Determine active tab based on current pathname
-  const activeTab = pathname === '/science' ? 'science' : pathname === '/inci' ? 'inci' : null;
-
-  const handleTabClick = (href: string) => {
-    router.push(href);
-  };
 
   return (
-    <div className="w-full border-b border-[#C9A66B]/30 bg-gradient-to-br from-[#0B291E] via-[#0E2A22] to-[#0B291E] overflow-x-auto">
-      <div className="flex gap-1 overflow-x-auto whitespace-nowrap overscroll-x-contain [-webkit-overflow-scrolling:touch] px-4 min-w-max"
-        role="tablist"
-        aria-label="Education navigation"
-      >
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabClick(tab.href)}
-                role="tab"
-                aria-selected={isActive}
-                className={`flex-none px-6 py-4 font-medium text-sm transition-colors relative ${
+    <nav
+      aria-label="Education"
+      className="w-full border-b border-[#C9A66B]/30 bg-gradient-to-br from-[#0B291E] via-[#0E2A22] to-[#0B291E]"
+    >
+      <ul className="flex gap-1 px-4">
+        {links.map((link) => {
+          const isActive = pathname === link.href;
+          return (
+            <li key={link.href} className="flex-none">
+              <Link
+                href={link.href}
+                aria-current={isActive ? 'page' : undefined}
+                className={`relative flex min-h-[44px] items-center px-6 py-4 text-sm font-medium transition-colors ${
                   isActive
                     ? 'text-[#E7C686]'
                     : 'text-[#D5D2C7] hover:text-[#FDFCF8]'
                 }`}
               >
-                {tab.label}
+                {link.label}
                 {isActive && (
-                  <motion.div
+                  <span
+                    aria-hidden="true"
                     className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E7C686]"
-                    layoutId="activeTab"
-                    initial={false}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                   />
                 )}
-              </button>
-            );
-          })}
-      </div>
-    </div>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
-
-
-
-
-
-
-
-
