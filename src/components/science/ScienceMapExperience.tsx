@@ -141,7 +141,9 @@ export function ScienceMapExperience() {
 
       {/* Schematic + interpretation. Two columns on desktop, stacked on mobile. */}
       <div className="mt-12 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-        <div className="rounded-[1.75rem] border border-nfe-paper/12 bg-white/[0.04] p-4 md:p-7">
+        {/* Minimal padding on mobile so the schematic keeps as much width as
+            possible and its labels stay legible without zooming. */}
+        <div className="rounded-[1.75rem] border border-nfe-paper/12 bg-white/[0.04] p-2 md:p-7">
           <SkinLayerSchematic layers={SKIN_LAYERS} emphasized={emphasizedLayers} />
         </div>
 

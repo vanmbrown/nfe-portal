@@ -46,7 +46,7 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
 
   return (
     <svg
-      viewBox="0 0 460 292"
+      viewBox="0 0 520 292"
       className="h-auto w-full"
       preserveAspectRatio="xMidYMid meet"
       role="img"
@@ -134,7 +134,7 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
       )}
 
       {/* Anatomical context, visually quieter than the cosmetic zone labels. */}
-      <g fill="#17352a" opacity="0.7" className="text-[9px] uppercase tracking-[0.08em]">
+      <g fill="#17352a" opacity="0.7" className="text-[13px] uppercase tracking-[0.06em]">
         {anatomical.map((item) => (
           <text key={item.label} x="34" y={item.y}>
             {item.label}
@@ -156,19 +156,22 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
               strokeWidth={active ? 1.6 : 1}
               fill="none"
             />
+            {/* Label sizes are in viewBox units. The schematic scales down to
+                roughly 0.65 on a 375px viewport, so these are set large enough
+                to stay legible there without zooming. */}
             <text
               x="334"
-              y={midY - 2}
-              className="text-[13px] uppercase tracking-[0.06em]"
-              fill={active ? '#e6ca8c' : 'rgba(253,252,248,0.78)'}
+              y={midY - 3}
+              className="text-[19px] uppercase tracking-[0.05em]"
+              fill={active ? '#e6ca8c' : 'rgba(253,252,248,0.82)'}
             >
               {layer.label}
             </text>
             <text
               x="334"
-              y={midY + 13}
-              className="text-[10px]"
-              fill={active ? 'rgba(230,202,140,0.82)' : 'rgba(253,252,248,0.5)'}
+              y={midY + 16}
+              className="text-[14px]"
+              fill={active ? 'rgba(230,202,140,0.88)' : 'rgba(253,252,248,0.55)'}
             >
               {active ? 'In focus' : layer.zone}
             </text>
