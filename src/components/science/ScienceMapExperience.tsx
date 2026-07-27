@@ -176,7 +176,7 @@ export function ScienceMapExperience({
       </p>
 
       {/* Schematic + interpretation. Two columns on desktop, stacked on mobile. */}
-      <div className="mt-12 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+      <div className="mt-12 grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-start">
         {/* Minimal padding on mobile so the schematic keeps as much width as
             possible and its labels stay legible without zooming. */}
         <div className="rounded-[1.75rem] border border-nfe-paper/15 bg-white/[0.04] p-2 md:p-7">

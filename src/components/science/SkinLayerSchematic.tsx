@@ -28,18 +28,29 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
   const hasEmphasis = emphasized.length > 0
   const isUp = (id: LayerId) => !hasEmphasis || emphasized.includes(id)
 
-  // Generous band geometry. Taller and wider than the previous schematic so
-  // labels are legible without zoom on mobile.
+  // Band geometry, sized so the drawing itself carries the chapter rather than
+  // sitting as a small illustration beside a large body of text.
+  //
+  // The block occupies 320 of 520 viewBox units horizontally (was 286 of 566)
+  // and 272 of 300 vertically (was 232 of 292), so almost all of the viewBox is
+  // now drawing rather than empty margin. Combined with a wider schematic
+  // column, the rendered block grows roughly a quarter in each dimension.
+  //
+  // The label column could be narrowed because long zone names now wrap onto a
+  // second line instead of forcing the viewBox wide enough to fit them on one.
   //
   // Geometry lives here; colour does not. Fills come from the layer's `bandHex`
   // so the schematic band and the Layer Context colour bar below read the same
-  // token and cannot drift apart. The hex values are unchanged.
+  // token and cannot drift apart. The hex values are unchanged, as are the
+  // relative proportions of the five bands.
+  const BLOCK = { x: 16, y: 14, width: 320, height: 272 }
+
   const geometry: { id: LayerId; y: number; height: number }[] = [
-    { id: 'surface', y: 30, height: 46 },
-    { id: 'barrier', y: 76, height: 46 },
-    { id: 'tone', y: 122, height: 48 },
-    { id: 'texture', y: 170, height: 48 },
-    { id: 'radiance', y: 218, height: 44 },
+    { id: 'surface', y: 14, height: 54 },
+    { id: 'barrier', y: 68, height: 54 },
+    { id: 'tone', y: 122, height: 56 },
+    { id: 'texture', y: 178, height: 56 },
+    { id: 'radiance', y: 234, height: 52 },
   ]
 
   const bands = geometry.map((band) => ({
@@ -48,14 +59,34 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
   }))
 
   const anatomical = [
-    { label: 'Epidermis', y: 100 },
-    { label: 'Dermis', y: 196 },
-    { label: 'Hypodermis', y: 252 },
+    { label: 'Epidermis', y: 96 },
+    { label: 'Dermis', y: 209 },
+    { label: 'Hypodermis', y: 274 },
   ]
+
+  /**
+   * Splits a long zone name across two lines.
+   *
+   * This is what lets the block grow: single-line labels forced the viewBox
+   * wide enough for "Texture and suppleness", and every extra unit of label
+   * width shrank the drawing at a fixed column width.
+   */
+  const wrapLabel = (text: string): string[] => {
+    if (text.length <= 14) return [text]
+    const words = text.split(' ')
+    if (words.length < 2) return [text]
+    let head = ''
+    let index = 0
+    while (index < words.length - 1 && (head + words[index]).length < text.length / 2) {
+      head = head ? `${head} ${words[index]}` : words[index]
+      index += 1
+    }
+    return [head, words.slice(index).join(' ')]
+  }
 
   return (
     <svg
-      viewBox="0 0 566 292"
+      viewBox="0 0 520 300"
       className="h-auto w-full"
       preserveAspectRatio="xMidYMid meet"
       role="img"
@@ -80,16 +111,16 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
           <stop offset="1" stopColor="#0b2f24" stopOpacity="0" />
         </linearGradient>
         <clipPath id="nfe-map-clip">
-          <rect x="18" y="30" width="286" height="232" rx="20" />
+          <rect x="16" y="14" width="320" height="272" rx="22" />
         </clipPath>
       </defs>
 
       <rect
-        x="18"
-        y="30"
-        width="286"
-        height="232"
-        rx="20"
+        x={BLOCK.x}
+        y={BLOCK.y}
+        width={BLOCK.width}
+        height={BLOCK.height}
+        rx="22"
         fill="#0b2f24"
         stroke="rgba(253,252,248,0.34)"
         strokeWidth="1.5"
@@ -99,9 +130,9 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
         {bands.map((band) => (
           <rect
             key={band.id}
-            x="18"
+            x={BLOCK.x}
             y={band.y}
-            width="286"
+            width={BLOCK.width}
             height={band.height}
             fill={band.fill}
             opacity={isUp(band.id) ? 1 : 0.24}
@@ -109,19 +140,19 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
           />
         ))}
         <rect
-          x="18"
-          y="30"
-          width="286"
-          height="232"
+          x={BLOCK.x}
+          y={BLOCK.y}
+          width={BLOCK.width}
+          height={BLOCK.height}
           fill="url(#nfe-map-sheen)"
         />
         {/* Decorative depth cues in the lowest band. */}
         <g fill="#6f744f" opacity={isUp('radiance') ? 0.42 : 0.12} aria-hidden="true">
-          <circle cx="58" cy="240" r="3" />
-          <circle cx="104" cy="250" r="2.4" />
-          <circle cx="152" cy="236" r="2.8" />
-          <circle cx="204" cy="250" r="3.2" />
-          <circle cx="256" cy="240" r="2.6" />
+          <circle cx="61" cy="260" r="3.4" />
+          <circle cx="112" cy="272" r="2.7" />
+          <circle cx="166" cy="256" r="3.1" />
+          <circle cx="224" cy="272" r="3.6" />
+          <circle cx="282" cy="260" r="2.9" />
         </g>
       </g>
 
@@ -130,9 +161,9 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
         hasEmphasis && emphasized.includes(band.id) ? (
           <rect
             key={`focus-${band.id}`}
-            x="19.5"
+            x={BLOCK.x + 1.5}
             y={band.y + 1.5}
-            width="283"
+            width={BLOCK.width - 3}
             height={band.height - 3}
             fill="none"
             stroke="#e6ca8c"
@@ -143,9 +174,9 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
       )}
 
       {/* Anatomical context, visually quieter than the cosmetic zone labels. */}
-      <g fill="#17352a" opacity="0.7" className="text-[13px] uppercase tracking-[0.06em]">
+      <g fill="#17352a" opacity="0.7" className="text-[15px] uppercase tracking-[0.06em]">
         {anatomical.map((item) => (
-          <text key={item.label} x="34" y={item.y}>
+          <text key={item.label} x="32" y={item.y}>
             {item.label}
           </text>
         ))}
@@ -160,7 +191,7 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
         return (
           <g key={`label-${band.id}`}>
             <path
-              d={`M304 ${midY}H326`}
+              d={`M${BLOCK.x + BLOCK.width} ${midY}H${BLOCK.x + BLOCK.width + 20}`}
               stroke={active ? '#e6ca8c' : 'rgba(253,252,248,0.34)'}
               strokeWidth={active ? 1.6 : 1}
               fill="none"
@@ -169,20 +200,24 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
                 roughly 0.65 on a 375px viewport, so these are set large enough
                 to stay legible there without zooming. */}
             <text
-              x="334"
-              y={midY - 3}
-              className="text-[19px] uppercase tracking-[0.05em]"
+              x="364"
+              y={midY - 6}
+              className="text-[22px] uppercase tracking-[0.05em]"
               fill={active ? '#e6ca8c' : 'rgba(253,252,248,0.82)'}
             >
               {layer.label}
             </text>
             <text
-              x="334"
-              y={midY + 18}
-              className="text-[18px]"
-              fill={active ? 'rgba(230,202,140,0.9)' : 'rgba(253,252,248,0.6)'}
+              x="364"
+              y={midY + 16}
+              className="text-[20px]"
+              fill={active ? 'rgba(230,202,140,0.9)' : 'rgba(253,252,248,0.62)'}
             >
-              {active ? 'In focus' : layer.zone}
+              {(active ? ['In focus'] : wrapLabel(layer.zone)).map((line, index) => (
+                <tspan key={line} x="364" dy={index === 0 ? 0 : 22}>
+                  {line}
+                </tspan>
+              ))}
             </text>
           </g>
         )
