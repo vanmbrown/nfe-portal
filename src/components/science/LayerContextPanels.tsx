@@ -87,7 +87,7 @@ export function LayerContextPanels({
                 className={`grid gap-x-10 gap-y-7 rounded-2xl border p-5 transition-colors duration-200 ease-out sm:p-7 lg:grid-cols-[0.85fr_1.15fr] lg:p-9 ${
                   active
                     ? 'border-nfe-gold/55 bg-white/[0.07]'
-                    : 'border-nfe-paper/12 bg-white/[0.035]'
+                    : 'border-nfe-paper/15 bg-white/[0.035]'
                 }`}
               >
                 {/* Left — zone identity and what is visible there. */}
@@ -152,7 +152,7 @@ export function LayerContextPanels({
                     ))}
                   </ul>
 
-                  <p className="mt-7 border-t border-nfe-paper/12 pt-5 text-sm leading-6 text-nfe-paper/65">
+                  <p className="mt-7 border-t border-nfe-paper/15 pt-5 text-sm leading-6 text-nfe-paper/65">
                     On the map at {panel.layerIds.map((id) => LAYER_BY_ID[id].zone).join(' and ')}
                     {' · '}
                     Explored through the {pathway.label} pathway

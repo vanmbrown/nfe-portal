@@ -67,7 +67,7 @@ export function ConcernFormulaMatrix({ rows, emphasized }: ConcernFormulaMatrixP
               return (
                 <tr
                   key={row.id}
-                  className={`border-b border-nfe-paper/12 align-top transition-colors duration-200 ease-out ${
+                  className={`border-b border-nfe-paper/15 align-top transition-colors duration-200 ease-out ${
                     active ? 'bg-white/[0.055]' : ''
                   }`}
                 >
@@ -133,7 +133,7 @@ export function ConcernFormulaMatrix({ rows, emphasized }: ConcernFormulaMatrixP
                     <dt className="text-xs uppercase tracking-[0.2em] text-nfe-paper/55">
                       {columns[1]}
                     </dt>
-                    <dd className="mt-1.5 leading-7 text-nfe-paper/78">
+                    <dd className="mt-1.5 leading-7 text-nfe-paper/80">
                       {row.layerContext}
                     </dd>
                   </div>
@@ -141,7 +141,7 @@ export function ConcernFormulaMatrix({ rows, emphasized }: ConcernFormulaMatrixP
                     <dt className="text-xs uppercase tracking-[0.2em] text-nfe-paper/55">
                       {columns[2]}
                     </dt>
-                    <dd className="mt-1.5 leading-7 text-nfe-paper/78">
+                    <dd className="mt-1.5 leading-7 text-nfe-paper/80">
                       {row.formulationPrinciple}
                     </dd>
                   </div>
@@ -149,7 +149,7 @@ export function ConcernFormulaMatrix({ rows, emphasized }: ConcernFormulaMatrixP
                     <dt className="text-xs uppercase tracking-[0.2em] text-nfe-paper/55">
                       {columns[3]}
                     </dt>
-                    <dd className="mt-1.5 leading-7 text-nfe-paper/78">
+                    <dd className="mt-1.5 leading-7 text-nfe-paper/80">
                       {familyLabels(row)}
                     </dd>
                   </div>

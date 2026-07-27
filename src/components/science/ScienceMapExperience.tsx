@@ -179,7 +179,7 @@ export function ScienceMapExperience({
       <div className="mt-12 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
         {/* Minimal padding on mobile so the schematic keeps as much width as
             possible and its labels stay legible without zooming. */}
-        <div className="rounded-[1.75rem] border border-nfe-paper/12 bg-white/[0.04] p-2 md:p-7">
+        <div className="rounded-[1.75rem] border border-nfe-paper/15 bg-white/[0.04] p-2 md:p-7">
           <SkinLayerSchematic layers={SKIN_LAYERS} emphasized={emphasizedLayers} />
         </div>
 
@@ -194,13 +194,13 @@ export function ScienceMapExperience({
                   <h4 className="mt-3 font-serif text-2xl text-nfe-paper md:text-3xl">
                     {pathway.label}
                   </h4>
-                  <p className="mt-4 leading-7 text-nfe-paper/78">
+                  <p className="mt-4 leading-7 text-nfe-paper/80">
                     {pathway.interpretation}
                   </p>
                   <p className="mt-5 text-sm uppercase tracking-[0.2em] text-nfe-gold/85">
                     Within the skin
                   </p>
-                  <p className="mt-2 leading-7 text-nfe-paper/72">
+                  <p className="mt-2 leading-7 text-nfe-paper/70">
                     {pathway.emphasizedLayers
                       .map((id) => LAYER_BY_ID[id].zone)
                       .join(' · ')}
@@ -208,13 +208,13 @@ export function ScienceMapExperience({
                   <p className="mt-5 text-sm uppercase tracking-[0.2em] text-nfe-gold/85">
                     NFE approaches this through
                   </p>
-                  <p className="mt-2 leading-7 text-nfe-paper/72">
+                  <p className="mt-2 leading-7 text-nfe-paper/70">
                     {pathway.formulationPrinciple}
                   </p>
                   <p className="mt-5 text-sm uppercase tracking-[0.2em] text-nfe-gold/85">
                     Related ritual context
                   </p>
-                  <p className="mt-2 leading-7 text-nfe-paper/72">
+                  <p className="mt-2 leading-7 text-nfe-paper/70">
                     {pathway.ritualConnection}{' '}
                     <Link
                       href="/ritual"
@@ -227,13 +227,13 @@ export function ScienceMapExperience({
               ))}
 
               {families.length ? (
-                <div className="border-t border-nfe-paper/12 pt-8">
+                <div className="border-t border-nfe-paper/15 pt-8">
                   <p className="text-sm uppercase tracking-[0.2em] text-nfe-gold/85">
                     Relevant ingredient families
                   </p>
                   <ul className="mt-4 space-y-3">
                     {families.map((family) => (
-                      <li key={family.id} className="leading-7 text-nfe-paper/72">
+                      <li key={family.id} className="leading-7 text-nfe-paper/70">
                         <span className="text-nfe-paper">{family.label}</span> —{' '}
                         {family.role}
                       </li>
@@ -264,7 +264,7 @@ export function ScienceMapExperience({
                 {SKIN_LAYERS.map((layer) => (
                   <li key={layer.id}>
                     <p className="font-serif text-xl text-nfe-paper">{layer.zone}</p>
-                    <p className="mt-2 leading-7 text-nfe-paper/68">
+                    <p className="mt-2 leading-7 text-nfe-paper/70">
                       {layer.visibleContext}
                     </p>
                   </li>
@@ -304,7 +304,7 @@ export function ScienceMapExperience({
           >
             {SCIENCE_PAGE.formulaMatrix.heading}
           </h3>
-          <p className="mt-6 leading-8 text-nfe-paper/72">
+          <p className="mt-6 leading-8 text-nfe-paper/70">
             {SCIENCE_PAGE.formulaMatrix.body}
           </p>
         </div>
