@@ -20,8 +20,8 @@ export default function SkinStrategyPage() {
     // active-ingredient set via initializeActives() when contextActives is
     // empty (see NFESkinLayersMap.tsx / NFEMelanocyteMap.tsx). A route-scoped
     // provider with no props is therefore the correct, minimal fix: it is
-    // not shared with /science (ScienceIntelligence.tsx does not use this
-    // context at all) and does not touch the education route group's layout.
+    // not shared with /science (the Science page does not use this context
+    // at all) and does not touch the education route group's layout.
     <ScienceProvider>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-primary font-bold text-nfe-green mb-6">Skin Strategy</h1>
