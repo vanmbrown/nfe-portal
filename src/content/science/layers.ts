@@ -25,8 +25,7 @@ export const SKIN_LAYERS: SkinLayer[] = [
       'Where dryness, ashiness, and a rough or dull surface are usually noticed first.',
     formulationContext:
       'Surface hydration, cushioning, and a smoother-feeling finish.',
-    bandClass: 'bg-[#f4eadb]',
-    labelClass: 'border-[#d8c6ad] text-[#f4eadb]',
+    bandHex: '#f4eadb',
   },
   {
     id: 'barrier',
@@ -36,8 +35,7 @@ export const SKIN_LAYERS: SkinLayer[] = [
       'Where tightness, dehydration, and a less comfortable feel tend to show up.',
     formulationContext:
       'Barrier comfort, a replenished feel, and skin that feels cushioned rather than stripped.',
-    bandClass: 'bg-[#a5ad86]',
-    labelClass: 'border-[#c8d0ad] text-[#c8d0ad]',
+    bandHex: '#a5ad86',
   },
   {
     id: 'tone',
@@ -47,8 +45,7 @@ export const SKIN_LAYERS: SkinLayer[] = [
       'Where uneven-looking tone, visible dullness, and post-blemish-looking marks appear.',
     formulationContext:
       'A more even-looking complexion, tone integrity, and visible radiance.',
-    bandClass: 'bg-[#d5ae62]',
-    labelClass: 'border-[#e6ca8c] text-[#e6ca8c]',
+    bandHex: '#d5ae62',
   },
   {
     id: 'texture',
@@ -58,8 +55,7 @@ export const SKIN_LAYERS: SkinLayer[] = [
       'Where crepey-looking texture, the look of fine lines, and a loss of suppleness are noticed.',
     formulationContext:
       'Softening the look of texture and supporting supple, well-conditioned skin.',
-    bandClass: 'bg-[#a66f45]',
-    labelClass: 'border-[#c99a74] text-[#c99a74]',
+    bandHex: '#a66f45',
   },
   {
     id: 'radiance',
@@ -69,8 +65,7 @@ export const SKIN_LAYERS: SkinLayer[] = [
       'Where skin can look tired or flat, and where visible vitality is read.',
     formulationContext:
       'Antioxidant-supportive care, visible radiance, and a more rested look.',
-    bandClass: 'bg-[#ead7aa]',
-    labelClass: 'border-[#f1dfb6] text-[#f1dfb6]',
+    bandHex: '#ead7aa',
   },
 ]
 

@@ -4,6 +4,7 @@
 // into the client bundle.
 import { FAMILY_BY_ID } from '@/content/science/ingredient-families'
 import { LAYER_BY_ID } from '@/content/science/layers'
+import { SCIENCE_PAGE } from '@/content/science/page'
 import { PATHWAY_BY_ID } from '@/content/science/pathways'
 import type { LayerContextPanel, PathwayId } from '@/content/science/types'
 
@@ -14,24 +15,39 @@ interface LayerContextPanelsProps {
   headingId: string
 }
 
+const { eyebrow, heading, body, zonesLabel } = SCIENCE_PAGE.layerContext
+
 /**
- * Layer Context — five editorial readings of the map above.
+ * Layer Context — the schematic's companion.
  *
- * Presentational and pure, like SkinLayerSchematic. It renders whatever
- * emphasis it is handed and holds no state, so the server-rendered default and
- * every interactive state come from the same code path.
+ * This is a framed plate directly beneath the map, at the full width of the
+ * dark chapter, so the two read as one system rather than as a drawing followed
+ * by an unrelated essay. Each panel translates one band of the schematic into a
+ * named support zone, a visible appearance context, and how NFE formulates in
+ * response.
+ *
+ * The visual grammar is taken from the earlier implementation, which the
+ * founder valued: framed container, numbered zone eyebrows, a vertical
+ * zone-colour bar, and a left/right reading structure. What is not taken from
+ * it is the data — the old panels ended with chips naming specific actives
+ * beneath a line labelled "Formula support", which together asserted the
+ * composition of a formula. These name ingredient families only.
+ *
+ * Presentational and pure. It renders whatever emphasis it is handed and holds
+ * no state, so the server-rendered default and every interactive state come
+ * from one code path.
  *
  * Behaviour that is deliberate rather than incidental:
  *
- *  - All five panels are always rendered. Selection never filters, hides,
- *    reorders or ranks them. A panel that is not emphasised keeps full text
- *    contrast — only its container and title shift.
- *  - Emphasis is signalled by border, background, title colour *and* a visible
- *    "In focus" marker, so it never depends on colour alone.
- *  - Order is the content's `order` field, surface downward, mirroring the
- *    schematic bands. It does not change with selection.
- *  - Ingredient families are named as families. No panel names a specific
- *    ingredient, and none asserts what is in a product.
+ *  - All five panels always render. Selection never filters, hides, reorders or
+ *    ranks them. An unemphasised panel keeps full text contrast — only its
+ *    border, surface, title colour and bar intensity shift.
+ *  - Emphasis carries a visible "In focus" marker, so it never depends on
+ *    colour alone.
+ *  - Numbers are structural, tied to the schematic order and the matrix order.
+ *    They are not priorities and do not change with selection.
+ *  - The colour bar is decorative and aria-hidden; the zone name beside it
+ *    carries the same information as text.
  */
 export function LayerContextPanels({
   panels,
@@ -41,71 +57,112 @@ export function LayerContextPanels({
   const ordered = [...panels].sort((a, b) => a.order - b.order)
 
   return (
-    <ul aria-labelledby={headingId} className="mt-14 space-y-px">
-      {ordered.map((panel) => {
-        const active = emphasized.includes(panel.pathwayId)
-        const pathway = PATHWAY_BY_ID[panel.pathwayId]
+    <div className="rounded-[1.75rem] border border-nfe-gold/25 bg-white/[0.03] p-5 sm:p-8 lg:p-11">
+      <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-5">
+        <div className="max-w-2xl">
+          <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">{eyebrow}</p>
+          <h3
+            id={headingId}
+            className="mt-4 font-serif text-3xl leading-tight text-nfe-paper md:text-4xl"
+          >
+            {heading}
+          </h3>
+        </div>
+        <span className="rounded-full border border-nfe-gold/35 px-5 py-2.5 text-xs uppercase tracking-[0.2em] text-nfe-gold">
+          {zonesLabel}
+        </span>
+      </div>
 
-        return (
-          <li key={panel.id}>
-            <article
-              className={`grid gap-x-12 gap-y-6 border-l-2 px-6 py-10 transition-colors duration-200 ease-out md:grid-cols-[0.95fr_1.05fr] md:px-10 md:py-12 ${
-                active
-                  ? 'border-l-nfe-gold bg-white/[0.055]'
-                  : 'border-l-nfe-paper/15 bg-white/[0.015]'
-              }`}
-            >
-              <div>
-                <p className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs uppercase tracking-[0.24em] text-nfe-paper/65">
-                  <span>
-                    {String(panel.order).padStart(2, '0')} · {pathway.label}
-                  </span>
-                  {active ? (
-                    <span className="rounded-full border border-nfe-gold/45 px-3 py-1 text-[0.625rem] tracking-[0.2em] text-nfe-gold">
-                      In focus
-                    </span>
-                  ) : null}
-                </p>
+      <p className="mt-6 max-w-2xl leading-8 text-nfe-paper/75">{body}</p>
 
-                <h4
-                  className={`mt-4 font-serif text-2xl leading-snug transition-colors duration-200 ease-out md:text-3xl ${
-                    active ? 'text-nfe-gold' : 'text-nfe-paper'
-                  }`}
-                >
-                  {panel.title}
-                </h4>
+      <ul aria-labelledby={headingId} className="mt-10 space-y-4 lg:mt-12">
+        {ordered.map((panel) => {
+          const active = emphasized.includes(panel.pathwayId)
+          const pathway = PATHWAY_BY_ID[panel.pathwayId]
+          const zone = LAYER_BY_ID[panel.layerIds[0]]
 
-                <p className="mt-5 text-[1.0625rem] leading-8 text-nfe-paper/78">
-                  {panel.visibleContext}
-                </p>
-              </div>
+          return (
+            <li key={panel.id}>
+              <article
+                className={`grid gap-x-10 gap-y-7 rounded-2xl border p-5 transition-colors duration-200 ease-out sm:p-7 lg:grid-cols-[0.85fr_1.15fr] lg:p-9 ${
+                  active
+                    ? 'border-nfe-gold/55 bg-white/[0.07]'
+                    : 'border-nfe-paper/12 bg-white/[0.035]'
+                }`}
+              >
+                {/* Left — zone identity and what is visible there. */}
+                <div className="flex items-stretch gap-5">
+                  <div
+                    aria-hidden="true"
+                    className="w-3 shrink-0 rounded-full transition-opacity duration-200 ease-out md:w-4"
+                    style={{
+                      backgroundColor: zone.bandHex,
+                      opacity: active || emphasized.length === 0 ? 1 : 0.55,
+                    }}
+                  />
+                  <div>
+                    <p className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <span className="text-xs uppercase tracking-[0.22em] text-nfe-paper/70">
+                        {String(panel.order).padStart(2, '0')} · {zone.zone}
+                      </span>
+                      {active ? (
+                        <span className="rounded-full border border-nfe-gold/45 px-3 py-1 text-[0.625rem] uppercase tracking-[0.2em] text-nfe-gold">
+                          In focus
+                        </span>
+                      ) : null}
+                    </p>
 
-              <div className="md:pt-11">
-                <p className="text-xs uppercase tracking-[0.2em] text-nfe-gold/85">
-                  How NFE supports it
-                </p>
-                <p className="mt-4 text-[1.0625rem] leading-8 text-nfe-paper/78">
-                  {panel.formulationPrinciple}
-                </p>
+                    <h4
+                      className={`mt-3 font-serif text-2xl leading-snug transition-colors duration-200 ease-out md:text-[1.75rem] ${
+                        active ? 'text-nfe-gold' : 'text-nfe-paper'
+                      }`}
+                    >
+                      {panel.title}
+                    </h4>
 
-                <p className="mt-7 text-xs uppercase tracking-[0.2em] text-nfe-paper/55">
-                  Ingredient families
-                </p>
-                <p className="mt-3 leading-7 text-nfe-paper/72">
-                  {panel.ingredientFamilyIds
-                    .map((id) => FAMILY_BY_ID[id].label)
-                    .join(' · ')}
-                </p>
+                    <p className="mt-4 text-xs uppercase tracking-[0.2em] text-nfe-paper/60">
+                      Visible context
+                    </p>
+                    <p className="mt-2 text-[1.0625rem] leading-8 text-nfe-paper/80">
+                      {panel.visibleContext}
+                    </p>
+                  </div>
+                </div>
 
-                <p className="mt-6 text-sm leading-6 text-nfe-paper/60">
-                  Read on the map at{' '}
-                  {panel.layerIds.map((id) => LAYER_BY_ID[id].zone).join(' and ')}.
-                </p>
-              </div>
-            </article>
-          </li>
-        )
-      })}
-    </ul>
+                {/* Right — how NFE formulates in response. */}
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-nfe-gold/90">
+                    Formulation support
+                  </p>
+                  <p className="mt-2 text-[1.0625rem] leading-8 text-nfe-paper/80">
+                    {panel.formulationPrinciple}
+                  </p>
+
+                  <p className="mt-7 text-xs uppercase tracking-[0.2em] text-nfe-paper/60">
+                    Ingredient families
+                  </p>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {panel.ingredientFamilyIds.map((id) => (
+                      <li
+                        key={id}
+                        className="rounded-full bg-[#f4eadb] px-3.5 py-1.5 text-xs font-medium text-nfe-green-900"
+                      >
+                        {FAMILY_BY_ID[id].label}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <p className="mt-7 border-t border-nfe-paper/12 pt-5 text-sm leading-6 text-nfe-paper/65">
+                    On the map at {panel.layerIds.map((id) => LAYER_BY_ID[id].zone).join(' and ')}
+                    {' · '}
+                    Explored through the {pathway.label} pathway
+                  </p>
+                </div>
+              </article>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
   )
 }

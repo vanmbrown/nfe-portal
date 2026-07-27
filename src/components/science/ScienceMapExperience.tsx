@@ -282,22 +282,9 @@ export function ScienceMapExperience({
       {/* Layer Context — reads the map above. Sits here, inside the same dark
           chapter and the same client island, because it interprets the map and
           responds to the same pathway state. */}
-      <section aria-labelledby="nfe-layer-context-heading" className="mt-24 md:mt-28">
-        <div className="max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
-            {SCIENCE_PAGE.layerContext.eyebrow}
-          </p>
-          <h3
-            id="nfe-layer-context-heading"
-            className="mt-5 font-serif text-3xl leading-tight text-nfe-paper md:text-4xl"
-          >
-            {SCIENCE_PAGE.layerContext.heading}
-          </h3>
-          <p className="mt-6 leading-8 text-nfe-paper/72">
-            {SCIENCE_PAGE.layerContext.body}
-          </p>
-        </div>
-
+      {/* The framed plate owns its own heading, so the eyebrow, heading and
+          zones label sit inside the frame with the panels they introduce. */}
+      <section aria-labelledby="nfe-layer-context-heading" className="mt-16 md:mt-20">
         <LayerContextPanels
           panels={layerContextPanels}
           emphasized={selected}

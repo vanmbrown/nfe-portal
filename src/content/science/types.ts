@@ -44,10 +44,19 @@ export interface SkinLayer {
   visibleContext: string
   /** How NFE thinks about supporting this zone cosmetically. */
   formulationContext: string
-  /** Tailwind class for the schematic band fill. */
-  bandClass: string
-  /** Tailwind classes for the label chip on dark ground. */
-  labelClass: string
+  /**
+   * The zone's colour, as a plain hex.
+   *
+   * One token, read by both the schematic band and the Layer Context colour
+   * bar, so the two can never drift apart — the bar is the visual bridge
+   * between the drawing and its explanation.
+   *
+   * Deliberately not a Tailwind class. This file lives outside the Tailwind
+   * content globs, so an arbitrary class here would never be generated. The
+   * previous `bandClass` and `labelClass` fields were exactly that: populated,
+   * never read, and unusable if they had been.
+   */
+  bandHex: string
 }
 
 export interface EducationalPathway {
@@ -224,6 +233,8 @@ export interface SciencePageContent {
     eyebrow: string
     heading: string
     body: string
+    /** Supporting label beside the heading. Names what the panels are. */
+    zonesLabel: string
   }
   formulaMatrix: {
     eyebrow: string

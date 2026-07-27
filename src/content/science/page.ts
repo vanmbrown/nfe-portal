@@ -47,7 +47,8 @@ export const SCIENCE_PAGE: SciencePageContent = {
   layerContext: {
     eyebrow: 'Layer Context',
     heading: 'Where visible concerns begin. How NFE supports them.',
-    body: 'Each panel reads one part of the map above. All five are here whether or not you choose a pathway — choosing one simply brings its panel forward.',
+    body: 'Each panel reads one band of the map above. All five are here whether or not you choose a pathway — choosing one simply brings its panel forward.',
+    zonesLabel: 'Cosmetic support zones',
   },
 
   formulaMatrix: {

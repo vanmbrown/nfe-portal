@@ -30,13 +30,22 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
 
   // Generous band geometry. Taller and wider than the previous schematic so
   // labels are legible without zoom on mobile.
-  const bands: { id: LayerId; y: number; height: number; fill: string }[] = [
-    { id: 'surface', y: 30, height: 46, fill: '#f4eadb' },
-    { id: 'barrier', y: 76, height: 46, fill: '#a5ad86' },
-    { id: 'tone', y: 122, height: 48, fill: '#d5ae62' },
-    { id: 'texture', y: 170, height: 48, fill: '#a66f45' },
-    { id: 'radiance', y: 218, height: 44, fill: '#ead7aa' },
+  //
+  // Geometry lives here; colour does not. Fills come from the layer's `bandHex`
+  // so the schematic band and the Layer Context colour bar below read the same
+  // token and cannot drift apart. The hex values are unchanged.
+  const geometry: { id: LayerId; y: number; height: number }[] = [
+    { id: 'surface', y: 30, height: 46 },
+    { id: 'barrier', y: 76, height: 46 },
+    { id: 'tone', y: 122, height: 48 },
+    { id: 'texture', y: 170, height: 48 },
+    { id: 'radiance', y: 218, height: 44 },
   ]
+
+  const bands = geometry.map((band) => ({
+    ...band,
+    fill: layers.find((layer) => layer.id === band.id)?.bandHex ?? 'transparent',
+  }))
 
   const anatomical = [
     { label: 'Epidermis', y: 100 },
