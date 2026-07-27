@@ -1,4 +1,4 @@
-import type { LayerId, SkinLayer } from '@/content/science'
+import type { LayerId, SkinLayer } from '@/content/science/types'
 
 interface SkinLayerSchematicProps {
   layers: SkinLayer[]

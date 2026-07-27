@@ -1,9 +1,7 @@
-import {
-  FAMILY_BY_ID,
-  SCIENCE_PAGE,
-  type ConcernFormulaMatrixRow,
-  type PathwayId,
-} from '@/content/science'
+// Per-module, not the barrel — see LayerContextPanels for why.
+import { FAMILY_BY_ID } from '@/content/science/ingredient-families'
+import { SCIENCE_PAGE } from '@/content/science/page'
+import type { ConcernFormulaMatrixRow, PathwayId } from '@/content/science/types'
 
 interface ConcernFormulaMatrixProps {
   rows: ConcernFormulaMatrixRow[]

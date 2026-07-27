@@ -1,10 +1,11 @@
-import {
-  FAMILY_BY_ID,
-  LAYER_BY_ID,
-  PATHWAY_BY_ID,
-  type LayerContextPanel,
-  type PathwayId,
-} from '@/content/science'
+// Imported per-module rather than through the barrel. The barrel re-exports the
+// Layer Context and matrix content, and webpack does not tree-shake it back out
+// of this client chunk — a barrel import here put every panel and row of prose
+// into the client bundle.
+import { FAMILY_BY_ID } from '@/content/science/ingredient-families'
+import { LAYER_BY_ID } from '@/content/science/layers'
+import { PATHWAY_BY_ID } from '@/content/science/pathways'
+import type { LayerContextPanel, PathwayId } from '@/content/science/types'
 
 interface LayerContextPanelsProps {
   panels: LayerContextPanel[]

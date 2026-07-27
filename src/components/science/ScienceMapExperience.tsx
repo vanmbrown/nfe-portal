@@ -3,18 +3,18 @@
 import Link from 'next/link'
 import { useMemo, useRef, useState } from 'react'
 
-import {
-  CONCERN_FORMULA_MATRIX,
-  INGREDIENT_FAMILIES,
-  LAYER_BY_ID,
-  LAYER_CONTEXT_PANELS,
-  PATHWAYS,
-  SCIENCE_PAGE,
-  SKIN_LAYERS,
-  type IngredientFamilyId,
-  type LayerId,
-  type PathwayId,
-} from '@/content/science'
+// Per-module, not the barrel — see LayerContextPanels for why.
+import { INGREDIENT_FAMILIES } from '@/content/science/ingredient-families'
+import { LAYER_BY_ID, SKIN_LAYERS } from '@/content/science/layers'
+import { SCIENCE_PAGE } from '@/content/science/page'
+import { PATHWAYS } from '@/content/science/pathways'
+import type {
+  ConcernFormulaMatrixRow,
+  IngredientFamilyId,
+  LayerContextPanel,
+  LayerId,
+  PathwayId,
+} from '@/content/science/types'
 
 import { ConcernFormulaMatrix } from './ConcernFormulaMatrix'
 import { LayerContextPanels } from './LayerContextPanels'
@@ -30,6 +30,13 @@ import { SkinLayerSchematic } from './SkinLayerSchematic'
  * is a single authoritative selection; the rest of the page stays server-
  * rendered. Each module is a pure child that renders the emphasis it is handed.
  *
+ * Layer Context and matrix content arrive as props rather than being imported
+ * here. Importing them pulled their prose into the client bundle, which took
+ * the page chunk from 16,579 to 28,964 bytes and cost about three Lighthouse
+ * Performance points. As props they travel as data in the server payload
+ * instead of as code to parse. The server owns the content; this island owns
+ * only the interaction.
+ *
  * What this deliberately does not do:
  *  - it does not build a profile, score, rank, or classify anything
  *  - it does not persist: no localStorage, no sessionStorage, no cookie
@@ -44,7 +51,15 @@ import { SkinLayerSchematic } from './SkinLayerSchematic'
  * PATHWAYS order rather than click order, so the same set always reads the
  * same way. No combined labels are generated.
  */
-export function ScienceMapExperience() {
+interface ScienceMapExperienceProps {
+  layerContextPanels: LayerContextPanel[]
+  matrixRows: ConcernFormulaMatrixRow[]
+}
+
+export function ScienceMapExperience({
+  layerContextPanels,
+  matrixRows,
+}: ScienceMapExperienceProps) {
   const [selected, setSelected] = useState<PathwayId[]>([])
   const firstPathwayRef = useRef<HTMLButtonElement>(null)
 
@@ -284,7 +299,7 @@ export function ScienceMapExperience() {
         </div>
 
         <LayerContextPanels
-          panels={LAYER_CONTEXT_PANELS}
+          panels={layerContextPanels}
           emphasized={selected}
           headingId="nfe-layer-context-heading"
         />
@@ -307,7 +322,7 @@ export function ScienceMapExperience() {
           </p>
         </div>
 
-        <ConcernFormulaMatrix rows={CONCERN_FORMULA_MATRIX} emphasized={selected} />
+        <ConcernFormulaMatrix rows={matrixRows} emphasized={selected} />
 
         <p className="mt-10 max-w-3xl text-sm leading-6 text-nfe-paper/60">
           Ingredient families describe how NFE formulates. What is in a given

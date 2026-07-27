@@ -2,7 +2,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { ScienceMapExperience } from '@/components/science/ScienceMapExperience'
-import { INGREDIENT_FAMILIES, SCIENCE_PAGE } from '@/content/science'
+import {
+  CONCERN_FORMULA_MATRIX,
+  INGREDIENT_FAMILIES,
+  LAYER_CONTEXT_PANELS,
+  SCIENCE_PAGE,
+} from '@/content/science'
 
 export const metadata: Metadata = {
   title: 'Science, Method & Proof | NFE Beauty',
@@ -90,8 +95,14 @@ export default function SciencePage() {
           </div>
         </div>
 
+        {/* Layer Context and matrix content is passed in rather than imported
+            by the island, so the prose ships as data instead of as client
+            code. See ScienceMapExperience for the measurement. */}
         <div className="mt-16">
-          <ScienceMapExperience />
+          <ScienceMapExperience
+            layerContextPanels={LAYER_CONTEXT_PANELS}
+            matrixRows={CONCERN_FORMULA_MATRIX}
+          />
         </div>
       </section>
 
