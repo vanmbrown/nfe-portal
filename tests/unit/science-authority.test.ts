@@ -1001,3 +1001,199 @@ describe('visual refinement regression protection', () => {
     assert.deepEqual(clientFiles, [])
   })
 })
+
+/* ------------------------------------------------------------------ *
+ * Final refinement — pathway synchronization and schematic scale
+ * ------------------------------------------------------------------ */
+
+describe('pathway synchronization', () => {
+  it('exposes the pathway id and active state on every panel', () => {
+    const source = layerContextSource()
+    assert.match(source, /data-pathway-id=\{panel\.pathwayId\}/)
+    assert.match(source, /data-active=\{active \? 'true' : 'false'\}/)
+    assert.match(source, /data-has-selection=\{hasSelection \? 'true' : 'false'\}/)
+  })
+
+  it('derives active state from the pathway id, never a display string', () => {
+    const source = stripComments(layerContextSource())
+    assert.match(source, /emphasized\.includes\(panel\.pathwayId\)/)
+    // No comparison against a label, title or zone name anywhere.
+    assert.ok(!/===\s*panel\.title/.test(source))
+    assert.ok(!/===\s*pathway\.label/.test(source))
+    assert.ok(!/includes\(panel\.title\)/.test(source))
+  })
+
+  it('maps every pathway to exactly one panel, one layer and one matrix row', () => {
+    for (const pathway of PATHWAYS) {
+      const panels = LAYER_CONTEXT_PANELS.filter((p) => p.pathwayId === pathway.id)
+      const rows = CONCERN_FORMULA_MATRIX.filter((r) => r.pathwayId === pathway.id)
+      assert.equal(panels.length, 1, `${pathway.id} must map to exactly one panel`)
+      assert.equal(rows.length, 1, `${pathway.id} must map to exactly one row`)
+      assert.ok(panels[0].layerIds.length > 0)
+    }
+  })
+
+  it('agrees with the schematic on which layers a pathway brings forward', () => {
+    // The panel's primary layer must be one the pathway actually emphasises,
+    // so the band that lights up and the panel that lights up are the same idea.
+    for (const panel of LAYER_CONTEXT_PANELS) {
+      const pathway = PATHWAYS.find((p) => p.id === panel.pathwayId)
+      assert.ok(pathway, `${panel.id} references an unknown pathway`)
+      assert.ok(
+        pathway.emphasizedLayers.includes(panel.layerIds[0]),
+        `${panel.id} primary layer ${panel.layerIds[0]} is not emphasised by ${pathway.id}`
+      )
+    }
+  })
+
+  it('keeps one selection owner feeding all four expressions', () => {
+    const source = stripComments(experienceSource())
+    assert.equal((source.match(/useState[<(]/g) ?? []).length, 1)
+    assert.match(source, /<SkinLayerSchematic[\s\S]*?emphasized=\{emphasizedLayers\}/)
+    assert.match(source, /<LayerContextPanels[\s\S]*?emphasized=\{selected\}/)
+    assert.match(source, /<ConcernFormulaMatrix[\s\S]*?emphasized=\{selected\}/)
+  })
+})
+
+describe('layer context active-state strength', () => {
+  const activeBranch = () => {
+    const source = layerContextSource()
+    const match = source.match(/active\s*\n?\s*\?\s*'([^']+)'/)
+    return match ? match[1] : ''
+  }
+
+  it('builds the selected state from at least four distinct cues', () => {
+    const source = layerContextSource()
+    const cues = {
+      border: /border-nfe-gold\/60/.test(source),
+      surface: /bg-\[rgba\(244,234,219,0\.14\)\]/.test(source),
+      insetRing: /shadow-\[inset_0_0_0_1px_rgba\(198,166,100,0\.32\)\]/.test(source),
+      barRing: /ring-2 ring-nfe-gold\/40/.test(source),
+      eyebrow: /active \? 'text-nfe-gold' : 'text-nfe-paper\/70'/.test(source),
+      title: /active \? 'text-nfe-gold' : 'text-nfe-paper'/.test(source),
+      marker: /In focus/.test(source),
+    }
+    const present = Object.entries(cues).filter(([, v]) => v).map(([k]) => k)
+    assert.ok(
+      present.length >= 4,
+      `only ${present.length} cues present: ${present.join(', ')}`
+    )
+  })
+
+  it('uses a filled marker so the state reads without inspecting the border', () => {
+    assert.match(layerContextSource(), /bg-nfe-gold px-3 py-1[^"]*text-nfe-green-900/)
+  })
+
+  it('keeps the border weight constant so selection causes no layout shift', () => {
+    const source = layerContextSource()
+    assert.match(source, /rounded-2xl border-2 p-5/)
+    assert.ok(!activeBranch().includes('border-4'))
+    assert.ok(!/active \? 'border '/.test(source))
+  })
+
+  it('never emphasises by motion, scale or blur', () => {
+    const source = layerContextSource()
+    for (const banned of ['scale-', 'animate-', 'blur-', 'translate-']) {
+      assert.ok(!source.includes(banned), `emphasis must not use ${banned}`)
+    }
+  })
+
+  it('does not reduce panel opacity globally', () => {
+    const source = stripComments(layerContextSource())
+    assert.ok(!/opacity-\d/.test(source), 'no whole-panel opacity utility')
+  })
+})
+
+describe('schematic scale', () => {
+  const schematic = () => schematicSource()
+
+  it('anchors block geometry to one constant', () => {
+    const source = schematic()
+    assert.match(source, /const BLOCK = \{ x: 16, y: 14, width: 320, height: 272 \}/)
+    assert.match(source, /x=\{BLOCK\.x\}/)
+    assert.match(source, /width=\{BLOCK\.width\}/)
+  })
+
+  it('uses a viewBox the drawing nearly fills', () => {
+    const source = schematic()
+    const vb = source.match(/viewBox="0 0 (\d+) (\d+)"/)
+    assert.ok(vb, 'schematic needs an explicit viewBox')
+    const [width, height] = [Number(vb[1]), Number(vb[2])]
+    // Block is 320x272. Vertical dead space must stay small.
+    assert.ok(272 / height >= 0.85, `block fills only ${Math.round((272 / height) * 100)}% of viewBox height`)
+    assert.ok(320 / width >= 0.55, `block fills only ${Math.round((320 / width) * 100)}% of viewBox width`)
+  })
+
+  it('is larger than the previous implementation in both dimensions', () => {
+    // Previous: 286x232 in a 566x292 viewBox.
+    const source = schematic()
+    const vb = source.match(/viewBox="0 0 (\d+) (\d+)"/)
+    assert.ok(vb, 'schematic needs an explicit viewBox')
+    const scaleRatio = 566 / Number(vb[1])
+    const widthGain = (320 * scaleRatio) / 286
+    const heightGain = (272 * scaleRatio) / 232
+    assert.ok(widthGain >= 1.15, `width gain only ${widthGain.toFixed(2)}x`)
+    assert.ok(heightGain >= 1.15, `height gain only ${heightGain.toFixed(2)}x`)
+  })
+
+  it('raises label sizes above the previous 19/18/13 units', () => {
+    const source = schematic()
+    const sizes = Array.from(source.matchAll(/text-\[(\d+)px\]/g), (m) => Number(m[1]))
+    assert.ok(sizes.includes(22), 'zone label should be 22 units')
+    assert.ok(sizes.includes(20), 'zone sub-label should be 20 units')
+    assert.ok(sizes.includes(15), 'anatomical label should be 15 units')
+    assert.ok(Math.min(...sizes) >= 15, 'no schematic label below 15 units')
+  })
+
+  it('wraps long zone names instead of widening the viewBox', () => {
+    const source = schematic()
+    assert.match(source, /const wrapLabel/)
+    assert.match(source, /<tspan/)
+  })
+
+  it('lets the SVG fill its container rather than hardcoding a width', () => {
+    const source = schematic()
+    assert.match(source, /className="h-auto w-full"/)
+    assert.ok(!/<svg[^>]*\swidth="\d/.test(source), 'no hardcoded SVG width')
+    assert.ok(!/max-w-\[\d+px\]/.test(source), 'no fixed max width on the schematic')
+  })
+
+  it('gives the schematic column the approved share at the wide breakpoint', () => {
+    const source = experienceSource()
+    const match = source.match(/lg:grid-cols-\[([\d.]+)fr_([\d.]+)fr\]/)
+    assert.ok(match, 'map row needs an explicit two-column split')
+    const pct = (Number(match[1]) / (Number(match[1]) + Number(match[2]))) * 100
+    assert.ok(pct >= 58 && pct <= 65, `schematic column is ${pct.toFixed(0)}%, expected 58-65%`)
+  })
+
+  it('keeps band proportions and order unchanged', () => {
+    const source = schematic()
+    const heights = Array.from(
+      source.matchAll(/id: '(\w+)', y: \d+, height: (\d+)/g),
+      (m) => ({ id: m[1], h: Number(m[2]) })
+    )
+    assert.deepEqual(
+      heights.map((h) => h.id),
+      ['surface', 'barrier', 'tone', 'texture', 'radiance']
+    )
+    // Previous heights 46,46,48,48,44 — same relative ordering, all scaled up.
+    assert.deepEqual(
+      heights.map((h) => h.h),
+      [54, 54, 56, 56, 52]
+    )
+  })
+
+  it('keeps the schematic labelled and adds no biological claim', () => {
+    const source = schematic()
+    assert.match(source, /<title id="nfe-skin-map-title">/)
+    assert.match(source, /<desc id="nfe-skin-map-desc">/)
+    assert.match(source, /aria-hidden="true"/)
+    // Comments are stripped: the file states that no penetration or
+    // dermal-action claim is made, and scanning raw text would flag that
+    // disclaimer as the offence.
+    const rendered = stripComments(source).toLowerCase()
+    for (const banned of ['penetrat', 'absorb', 'dermal action', 'bloodstream', 'cellular']) {
+      assert.ok(!rendered.includes(banned), `schematic must not mention ${banned}`)
+    }
+  })
+})
