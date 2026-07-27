@@ -46,7 +46,7 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
 
   return (
     <svg
-      viewBox="0 0 520 292"
+      viewBox="0 0 566 292"
       className="h-auto w-full"
       preserveAspectRatio="xMidYMid meet"
       role="img"
