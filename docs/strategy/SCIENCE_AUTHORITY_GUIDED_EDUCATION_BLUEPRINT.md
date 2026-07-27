@@ -1541,3 +1541,224 @@ ingredient or claims change. No Founder Access or Study Circle change. No
 waitlist activation and no `/api/waitlist` request. No release branch, tag or
 merge. No new dependency and no lockfile change. No restoration of profiling,
 scoring, ranking or personalised recommendation.
+
+---
+
+# Phase 1 visual refinement — Layer Context as schematic companion
+
+Appended after the visual refinement. The strategy audit, the Phase 1
+implementation record and the Layer Context refinement record above are
+unchanged.
+
+## Founder decision
+
+Keep the current Science page flow and every other section as approved. Restore
+Layer Context as a large, visually distinct companion to the schematic:
+framed container, numbered support-zone panels, vertical zone-colour bars, and
+a clear two-column reading structure, at the full content width of the dark
+chapter. One visual refinement, not another redesign.
+
+## Branch
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-layer-context-visual-refinement` |
+| Branched from | `feature/nfe-science-layer-context-refinement` @ `215b391` |
+| Canonical production baseline | `4d779c8` |
+| Deployed | No. Implementation and local validation only |
+
+## The visual problem
+
+The previous implementation was structurally correct but visually recessive: a
+run of near-flat full-bleed strips separated by hairlines, with the heading
+floating outside them in a narrow column. Nothing framed the module, nothing
+tied a panel to the band of the schematic it explained, and the eye had no
+reason to enter it.
+
+Two causes turned out to be mechanical rather than compositional, and both are
+fixed here.
+
+## Cause one — zone colour had no shared token
+
+`layers.ts` carried `bandClass: 'bg-[#f4eadb]'` and `labelClass`, and the
+schematic carried its own hardcoded hex fills. Two sources for one colour.
+
+Worse, both fields were dead: nothing read them, and `src/content` sits outside
+the Tailwind content globs, so those arbitrary classes could never have been
+generated even if something had.
+
+`bandClass` is now `bandHex`, a plain hex; `labelClass` is removed. The
+schematic keeps its geometry and takes its fills from that token, and the Layer
+Context colour bar reads the same one. All five resolved fills were verified
+identical to the previous hardcoded values, so the drawing is unchanged.
+
+## Cause two — opacity utilities that emitted no CSS
+
+Tailwind's opacity scale runs in steps of 5. Utilities using `12`, `68`, `72`
+or `78` parse fine and look correct in review, but emit nothing — the element
+silently falls back to Tailwind's default border colour or an inherited text
+colour.
+
+`border-nfe-paper/12` was used in five places, **including the schematic's own
+container since Phase 1**, so that frame had been rendering a cool grey-200
+hairline on the warm dark green ground. That is a large part of why the chapter
+did not read as one plate.
+
+Corrected inside the dark chapter:
+
+| Before | After | Where |
+|---|---|---|
+| `border-nfe-paper/12` | `/15` | schematic container, families divider, matrix row rules, panel borders |
+| `text-nfe-paper/78` | `/80` | interpretation body, matrix stacked values |
+| `text-nfe-paper/72` | `/70` | interpretation labels, families list |
+| `text-nfe-paper/68` | `/70` | default layer list |
+
+Two remain in the light sections of `science/page.tsx` —
+`border-nfe-green-900/12` and `text-nfe-ink/72`. Those sections are protected,
+the fallback there is harmless, and fixing them is not needed for this
+refinement. Reported, not changed.
+
+A test now walks every `nfe` opacity utility in the dark chapter and fails on
+any step Tailwind cannot emit.
+
+## Outer container
+
+A framed plate at the full content width of the dark chapter, sharing the
+schematic's `1.75rem` radius, with a restrained gold/25 border and a slightly
+lifted surface. Its left edge aligns with the schematic container's to the
+pixel at every width measured. The eyebrow, heading and the restored
+"Cosmetic support zones" label now sit inside the frame with the panels they
+introduce.
+
+## Panel composition
+
+Five panels, `01`–`05`, ordered surface downward to mirror the schematic bands.
+
+Left column: vertical zone-colour bar, numbered eyebrow naming the zone,
+editorial title, visible appearance context. Right column: formulation support,
+ingredient-family pills, and a closing line naming the map zone and the pathway.
+
+Measured split **42 / 58** at 1440, 1280 and 1024px, inside the intended
+38–45 / 55–62. Panels stack below `lg`.
+
+The numbered eyebrow uses the layer's own zone name — "01 · Surface hydration" —
+so a panel and the band it explains cannot drift apart.
+
+## Zone colour system
+
+| # | Zone | Token |
+|---|---|---|
+| 01 | Surface hydration | `#f4eadb` |
+| 02 | Barrier comfort | `#a5ad86` |
+| 03 | Tone integrity | `#d5ae62` |
+| 04 | Texture and suppleness | `#a66f45` |
+| 05 | Visible resilience | `#ead7aa` |
+
+One token per zone, read by the schematic band and the panel bar. The bar is
+`aria-hidden`; the zone name beside it carries the same information as text.
+
+## Ingredient treatment
+
+Families only, as warm cream pills with dark green text, at **13.06:1**. No
+panel carries more than four, and a test enforces that. No named active
+appears, and nothing asserts the composition of a product. The label
+"Formulation support" replaces the old "Formula support", which sat directly
+above named actives and together read as a statement of what is in the formula.
+
+The glossary and product INCI discrepancy is untouched and still open.
+
+## Behaviour
+
+Default: all five panels equal, no focus markers, bars at full strength.
+Selected: gold border, lifted surface, gold title, and a visible "In focus"
+marker. Unselected panels keep full text contrast — only the decorative bar
+dims. Multi-selection emphasises every match equally in canonical order with no
+ranking. Clearing returns everything to default with focus preserved on a
+control and no scroll movement.
+
+## Accessibility
+
+`/science` Accessibility **100**, zero failing audits including contrast,
+heading order, list and definition-list semantics.
+
+178 text samples measured across default, single and multi-selected states —
+zero failures, lowest **5.7:1**. No interactive control inside a panel, no
+second live region, no focus movement, no auto-scroll. All content
+server-rendered: frame, label, five bars with their exact hexes, and 14 family
+pills, with zero "In focus" markers in the default state.
+
+## Responsive
+
+| Viewport | Layout | Columns | Overflow | Clipped | Pill rows |
+|---|---|---|---|---|---|
+| 1440 | framed, aligned | 42/58 | none | 0 | 1 |
+| 1280 | framed, aligned | 42/58 | none | 0 | 1 |
+| 1024 | framed, aligned | 42/58 | none | 0 | 1 |
+| 768 | framed, stacked | stacked | none | 0 | 1 |
+| 375 | framed, stacked | stacked | none | 0 | 2 |
+| 320 | framed, stacked | stacked | none | 0 | 3 |
+
+Minimum font size 12px at every width (uppercase labels); body copy 17px.
+
+## Performance
+
+Three interleaved Lighthouse runs against the parent branch and this one:
+
+| Metric | Parent | Visual |
+|---|---|---|
+| Performance | 98, 98, 98 — median **98** | 98, 98, 98 — median **98** |
+| Accessibility | 100 | **100** |
+| CLS | 0 | **0** |
+| `/science` client chunk | 23,679 B | **24,432 B** (+753) |
+| Routes | 62 | **62** |
+| Dependencies | — | **unchanged** |
+
+Other routes: `/` 97, `/skin-strategy` 72, `/products/face-elixir` 76 — all
+Accessibility 100, all pre-existing.
+
+## Copy changes
+
+Two, both minimal: `zonesLabel` added as new content ("Cosmetic support
+zones"), and one word in the module intro, "part" to "band", so the sentence
+names what a panel actually reads. No panel copy changed. No claim changed.
+
+## Tests
+
+88 to **112**. Four of the new guards were verified by deliberately breaking
+the code — reintroducing `border-nfe-paper/12`, putting a button inside a
+panel, pushing the column split out of range, and restoring a `bandClass`
+field. Each failed the suite; it returned to 112 green once reverted.
+
+## Files
+
+**Changed** — `content/science/types.ts`, `content/science/layers.ts`,
+`content/science/page.ts`, `components/science/LayerContextPanels.tsx`,
+`components/science/SkinLayerSchematic.tsx`,
+`components/science/ScienceMapExperience.tsx`,
+`components/science/ConcernFormulaMatrix.tsx`,
+`tests/unit/science-authority.test.ts`.
+
+**Added / removed** — none.
+
+## Customer-visible changes
+
+Layer Context becomes a framed plate with numbered panels and zone-colour bars.
+Borders in the dark chapter, including the schematic's own container, change
+from an unintended grey to the intended warm paper tint. Nothing else on the
+page changes.
+
+## Founder review notes
+
+The point of the module is that the first panel should make the drawing above
+it easier to understand. Worth checking against that directly: read panel 01,
+then look back at the top band of the map.
+
+## Explicit non-actions
+
+No deployment, Worker version, traffic, DNS, Cloudflare, wrangler, Supabase,
+Shopify, Sanity or CMS change. No product price, size, availability, formula,
+ingredient or claims change. No Founder Access or Study Circle change. No
+waitlist activation and no `/api/waitlist` request. No matrix redesign, no
+redesign of any other Science section. No profiling, scoring, ranking or
+personalised recommendation. No release branch, tag or merge. No new dependency
+and no lockfile change.
