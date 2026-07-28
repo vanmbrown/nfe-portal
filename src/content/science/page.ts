@@ -34,6 +34,55 @@ export const SCIENCE_PAGE: SciencePageContent = {
     ],
   },
 
+  scienceMethod: {
+    eyebrow: 'Method',
+    heading: 'How the NFE Science Map works.',
+    introduction:
+      'Visible skin needs rarely appear in isolation. Dryness can flatten radiance. Barrier discomfort can make tone look less even. Texture reads more sharply when skin feels depleted. The Science Map holds those relationships in one view, then shows the formulation logic behind them.',
+    steps: [
+      {
+        id: 'select',
+        stepLabel: 'Step 1',
+        title: 'Select what you are exploring',
+        description:
+          'Choose the pathways that feel closest to how your skin looks or feels today. Your selections stay on this page and simply change what the map brings into focus.',
+      },
+      {
+        id: 'relationships',
+        stepLabel: 'Step 2',
+        title: 'See the relationships by layer',
+        description:
+          'The schematic brings forward the surface and appearance layers connected to what you chose — without producing a diagnosis, a score, or a saved profile.',
+      },
+      {
+        id: 'formulation',
+        stepLabel: 'Step 3',
+        title: 'Understand the formulation logic',
+        description:
+          'Layer Context and the Concern-to-Formula Matrix explain how NFE approaches hydration, comfort, tone integrity, texture and visible resilience.',
+      },
+    ],
+    ctaLabel: 'Start your skin interpretation',
+    ctaHref: '#build-your-nfe-skin-profile',
+  },
+
+  profileIntro: {
+    eyebrow: 'Build Your NFE Skin Profile',
+    heading: 'Build Your NFE Skin Profile',
+    description:
+      'Choose the pathways that reflect what you would like to understand. Your selections stay on this page and simply change how the map, Layer Context and formula logic are emphasised.',
+    boundary: 'An interpretive guide, not a diagnosis.',
+    privacy: 'Nothing is saved or submitted.',
+    anchorId: 'build-your-nfe-skin-profile',
+  },
+
+  layerScience: {
+    eyebrow: 'Layer Science',
+    heading: 'How NFE Face Elixir supports the skin by layer.',
+    description:
+      'NFE Face Elixir is built as a layered cosmetic-support system. Some ingredients support surface hydration and barrier comfort. Others support the appearance of tone, radiance, texture and visible resilience.',
+  },
+
   mapIntro: {
     eyebrow: 'The Skin Layer Intelligence Map',
     heading: 'Where visible needs appear, and how they relate.',

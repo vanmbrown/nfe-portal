@@ -217,6 +217,59 @@ export interface FounderNote {
   body: string
 }
 
+/**
+ * One step in the method orientation.
+ *
+ * Steps describe what the visitor does and what happens as a result. They are
+ * not stages of an assessment: nothing here may hold an outcome, a score, a
+ * rank, or a state the visitor carries away from the page.
+ */
+export interface ScienceMethodStep {
+  id: string
+  /** Small uppercase marker, e.g. "Step 1". Position, not progress. */
+  stepLabel: string
+  title: string
+  description: string
+}
+
+export interface ScienceMethodContent {
+  eyebrow: string
+  heading: string
+  introduction: string
+  steps: ScienceMethodStep[]
+  /** Anchor label. Navigation only — never a form action. */
+  ctaLabel: string
+  /** In-page anchor to the pathway section. */
+  ctaHref: string
+}
+
+/**
+ * The framing above the pathway controls.
+ *
+ * "Profile" here is founder-approved editorial language for a temporary,
+ * page-local view. It is not a record, a score, a diagnosis or an account, and
+ * `boundary` and `privacy` are what keep that plain to the reader rather than
+ * only to us. There is deliberately no field on this type that could hold a
+ * result.
+ */
+export interface ScienceProfileIntroContent {
+  eyebrow: string
+  heading: string
+  description: string
+  /** "An interpretive guide, not a diagnosis." */
+  boundary: string
+  /** "Nothing is saved or submitted." Verified true against executable code. */
+  privacy: string
+  /** Stable anchor id — the CTA's destination and a public URL fragment. */
+  anchorId: string
+}
+
+export interface LayerScienceIntroContent {
+  eyebrow: string
+  heading: string
+  description: string
+}
+
 export interface SciencePageContent {
   hero: {
     eyebrow: string
@@ -225,6 +278,9 @@ export interface SciencePageContent {
     subIntro: string
   }
   method: ScienceChapter
+  scienceMethod: ScienceMethodContent
+  profileIntro: ScienceProfileIntroContent
+  layerScience: LayerScienceIntroContent
   mapIntro: {
     eyebrow: string
     heading: string

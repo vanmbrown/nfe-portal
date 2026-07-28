@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { ScienceMapExperience } from '@/components/science/ScienceMapExperience'
+import { ScienceMethod } from '@/components/science/ScienceMethod'
 import {
   CONCERN_FORMULA_MATRIX,
   INGREDIENT_FAMILIES,
@@ -80,7 +81,10 @@ export default function SciencePage() {
         </div>
       </section>
 
-      {/* 3, 4, 5 — Pathways, the map, and what the layers mean */}
+      {/* 3 — How the Science Map works, and the invitation into it */}
+      <ScienceMethod />
+
+      {/* 4, 5, 6 — Pathways, the map, and what the layers mean */}
       <section className="bg-nfe-green-900 py-24 text-nfe-paper md:py-32">
         <div className="mx-auto max-w-6xl px-6 md:px-12">
           <div className="max-w-3xl">
