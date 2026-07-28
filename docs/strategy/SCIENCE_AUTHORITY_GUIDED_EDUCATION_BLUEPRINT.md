@@ -2373,3 +2373,102 @@ change. No waitlist activation and no `/api/waitlist` request. No old form,
 dropdown, checkbox grid, profile generator, score, rank, diagnosis or
 personalised recommendation. No matrix, schematic, Layer Context or `/inci`
 redesign. No new route, release branch, tag or merge.
+
+---
+
+# Final founder correction — Complete Layer Science module restoration
+
+## Founder direction
+
+Restore the complete Layer Science module — the left editorial column and the
+three layer cards — and change absolutely nothing else.
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-layer-science-module-restoration` |
+| Branched from | `feature/nfe-science-orientation-restoration` @ `59898d6` |
+| Deployed | No |
+
+## What was missing, and why
+
+The eyebrow, heading and a supporting paragraph existed, tucked inside the dark
+chapter as a node passed to the client island. **The three cards had never been
+built.** The brief that introduced Layer Science specified only an eyebrow,
+heading and supporting copy; the cards were not part of it, so they were never
+made. This was an omission of scope, not a regression.
+
+## Restored
+
+A white editorial section immediately before the dark chapter. Left column:
+eyebrow, heading, supporting paragraph. Right column: Stratum Corneum,
+Epidermis, Dermis Support Story, in that order, with the approved copy verbatim.
+
+The Dermis card closes with *NFE does not claim to change dermal structure.* —
+the claims boundary for the module, asserted verbatim by test. No card says
+what a product does at a layer; each says what is seen or felt there.
+
+## Copy changes
+
+The supporting paragraph is now the founder's reference copy, which differed
+from the previous wording by more than punctuation. One adjustment: *the
+formula visible well-aging* reads as a missing possessive and is set as *the
+formula's*. Flagged rather than applied silently.
+
+## Duplication
+
+The partial intro is gone. What remains in its place is the single approved map
+paragraph it also carried, so nothing is duplicated and nothing approved is
+lost. The island prop `layerScienceIntro` is renamed `mapChapterNote` to match
+what it now holds; no behaviour changed.
+
+Verified: the heading and card titles appear in no other file, and no
+`layerScienceIntro` remains anywhere.
+
+## Placement, and one ambiguity
+
+The module sits outside the client island, immediately before the dark chapter,
+never inside it — the three consistent statements in the brief.
+
+**The numbered list in §5 implies otherwise**: it places the profile framing
+and pathway controls *before* the module. In the current build both live inside
+the dark chapter, so that reading would require splitting it. Recorded for the
+founder rather than assumed. Moving the module is a one-line change if the
+numbered list was the intent.
+
+## Visual and responsive
+
+| Viewport | Columns | Cards | Heading | Overflow | Clipping |
+|---|---|---|---|---|---|
+| 1440 | 42/58 | 3 × 633px | 44px | none | 0 |
+| 1280 | 42/58 | equal | 44px | none | 0 |
+| 1024 | 42/58 | 3 × 494px | 44px | none | 0 |
+| 768 | stacked | 3 × 657px | 36px | none | 0 |
+| 375 | stacked | equal | 30px | none | 0 |
+| 320 | stacked | 3 × 272px | 30px | none | 0 |
+
+White ground, warm-bone cards, restrained borders, no shadow, no icons, no
+interactive control inside any card.
+
+## Accessibility and performance
+
+`/science` Accessibility **100**, zero failing audits, one `h1`, zero duplicate
+ids, CLS 0. The module is static and server-rendered: the Science client chunk
+moved 25,522 → **25,519 bytes**, and none of its copy appears in the bundle.
+62 routes, no dependency change.
+
+## Interaction
+
+Retested after insertion: all five pathways singly, three-of-five, all five,
+clear, and the method anchor. Panel, map-zone and matrix counts identical to
+before; 14 family links throughout; the module renders exactly once in every
+state.
+
+## Nothing else changed
+
+Six files: the page, the new module, the island prop rename, Science content
+and types, and tests. Zero unrelated files, zero product or ingredient data,
+zero `/inci` code, zero global styles, zero dependency or lockfile changes.
+
+## Founder review status
+
+Awaiting approval, with the §5 placement ambiguity flagged above.
