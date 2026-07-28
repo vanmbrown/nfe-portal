@@ -36,21 +36,23 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
   // now drawing rather than empty margin. Combined with a wider schematic
   // column, the rendered block grows roughly a quarter in each dimension.
   //
-  // The label column could be narrowed because long zone names now wrap onto a
-  // second line instead of forcing the viewBox wide enough to fit them on one.
+  // Zone labels stay on one line. Wrapping them was tried and reverted: a band
+  // is 52-56 units tall, and a wrapped group needs 22 + 20 + 20 = 62 units, so
+  // the second line collided with the next zone's label. The viewBox is wide
+  // enough to hold the longest name instead.
   //
   // Geometry lives here; colour does not. Fills come from the layer's `bandHex`
   // so the schematic band and the Layer Context colour bar below read the same
   // token and cannot drift apart. The hex values are unchanged, as are the
   // relative proportions of the five bands.
-  const BLOCK = { x: 16, y: 14, width: 320, height: 272 }
+  const BLOCK = { x: 16, y: 10, width: 360, height: 280 }
 
   const geometry: { id: LayerId; y: number; height: number }[] = [
-    { id: 'surface', y: 14, height: 54 },
-    { id: 'barrier', y: 68, height: 54 },
-    { id: 'tone', y: 122, height: 56 },
-    { id: 'texture', y: 178, height: 56 },
-    { id: 'radiance', y: 234, height: 52 },
+    { id: 'surface', y: 10, height: 56 },
+    { id: 'barrier', y: 66, height: 56 },
+    { id: 'tone', y: 122, height: 58 },
+    { id: 'texture', y: 180, height: 58 },
+    { id: 'radiance', y: 238, height: 52 },
   ]
 
   const bands = geometry.map((band) => ({
@@ -59,34 +61,15 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
   }))
 
   const anatomical = [
-    { label: 'Epidermis', y: 96 },
-    { label: 'Dermis', y: 209 },
-    { label: 'Hypodermis', y: 274 },
+    { label: 'Epidermis', y: 94 },
+    { label: 'Dermis', y: 212 },
+    { label: 'Hypodermis', y: 278 },
   ]
 
-  /**
-   * Splits a long zone name across two lines.
-   *
-   * This is what lets the block grow: single-line labels forced the viewBox
-   * wide enough for "Texture and suppleness", and every extra unit of label
-   * width shrank the drawing at a fixed column width.
-   */
-  const wrapLabel = (text: string): string[] => {
-    if (text.length <= 14) return [text]
-    const words = text.split(' ')
-    if (words.length < 2) return [text]
-    let head = ''
-    let index = 0
-    while (index < words.length - 1 && (head + words[index]).length < text.length / 2) {
-      head = head ? `${head} ${words[index]}` : words[index]
-      index += 1
-    }
-    return [head, words.slice(index).join(' ')]
-  }
 
   return (
     <svg
-      viewBox="0 0 520 300"
+      viewBox="0 0 620 300"
       className="h-auto w-full"
       preserveAspectRatio="xMidYMid meet"
       role="img"
@@ -111,7 +94,7 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
           <stop offset="1" stopColor="#0b2f24" stopOpacity="0" />
         </linearGradient>
         <clipPath id="nfe-map-clip">
-          <rect x="16" y="14" width="320" height="272" rx="22" />
+          <rect x="16" y="10" width="360" height="280" rx="22" />
         </clipPath>
       </defs>
 
@@ -148,11 +131,11 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
         />
         {/* Decorative depth cues in the lowest band. */}
         <g fill="#6f744f" opacity={isUp('radiance') ? 0.42 : 0.12} aria-hidden="true">
-          <circle cx="61" cy="260" r="3.4" />
-          <circle cx="112" cy="272" r="2.7" />
-          <circle cx="166" cy="256" r="3.1" />
-          <circle cx="224" cy="272" r="3.6" />
-          <circle cx="282" cy="260" r="2.9" />
+          <circle cx="63" cy="264" r="3.4" />
+          <circle cx="116" cy="276" r="2.7" />
+          <circle cx="172" cy="260" r="3.1" />
+          <circle cx="232" cy="276" r="3.6" />
+          <circle cx="292" cy="264" r="2.9" />
         </g>
       </g>
 
@@ -200,24 +183,20 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
                 roughly 0.65 on a 375px viewport, so these are set large enough
                 to stay legible there without zooming. */}
             <text
-              x="364"
-              y={midY - 6}
+              x="396"
+              y={midY - 8}
               className="text-[22px] uppercase tracking-[0.05em]"
               fill={active ? '#e6ca8c' : 'rgba(253,252,248,0.82)'}
             >
               {layer.label}
             </text>
             <text
-              x="364"
-              y={midY + 16}
-              className="text-[20px]"
+              x="396"
+              y={midY + 18}
+              className="text-[18px]"
               fill={active ? 'rgba(230,202,140,0.9)' : 'rgba(253,252,248,0.62)'}
             >
-              {(active ? ['In focus'] : wrapLabel(layer.zone)).map((line, index) => (
-                <tspan key={line} x="364" dy={index === 0 ? 0 : 22}>
-                  {line}
-                </tspan>
-              ))}
+              {active ? 'In focus' : layer.zone}
             </text>
           </g>
         )
