@@ -2159,3 +2159,37 @@ change. No waitlist activation and no `/api/waitlist` request. No new route. No
 Science, matrix or schematic redesign. No profiling, scoring, ranking or
 personalised recommendation. No release branch, tag or merge. No new dependency
 and no lockfile change.
+
+---
+
+## Correction — schematic label collision and revised scale
+
+The wrapped zone sub-labels introduced in the pathway-synchronisation work
+overlapped the next zone's label. Wrapping could not have fitted: a band is
+52-58 units tall and a wrapped label group needs 62.
+
+Labels are back to one line and the geometry is sized to text measured in the
+browser rather than estimated. viewBox 620x300, block 360x280, bands 56/56/58/
+58/52, main label 22 units at midY-8, sub-label 18 units at midY+18.
+
+**The schematic figures recorded in the record above are wrong.** They were
+measured on the broken layout. Corrected against the Phase 1 baseline of
+266x216:
+
+| Metric | Recorded | Actual |
+|---|---|---|
+| Block width | +27% | **+20%** |
+| Block height | +34% | **+15%** |
+| Block area | ~+70% | **+39%** |
+
+The corrected result sits inside the 20-35% the brief asked for, rather than
+above it as previously flagged.
+
+Label sizes: zone 19 to 22 units and anatomical 13 to 15, both larger. The
+sub-label stays at 18 — unchanged, not larger — because it is the longest
+string and its width sets the viewBox width, which scales the whole drawing.
+
+Verified at 1440 and 320px, default and all-five-selected: zero overlapping
+label pairs, zero labels outside the viewBox. A test now computes
+baseline-to-baseline spacing between each zone's sub-label and the next zone's
+main label and requires at least one font size of clearance.
