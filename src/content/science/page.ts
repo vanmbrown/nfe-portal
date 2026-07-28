@@ -80,7 +80,26 @@ export const SCIENCE_PAGE: SciencePageContent = {
     eyebrow: 'Layer Science',
     heading: 'How NFE Face Elixir supports the skin by layer.',
     description:
-      'NFE Face Elixir is built as a layered cosmetic-support system. Some ingredients support surface hydration and barrier comfort. Others support the appearance of tone, radiance, texture and visible resilience.',
+      "NFE Face Elixir is built as a layered support system. Some ingredients focus on the outer barrier and surface feel. Others support the appearance of tone, radiance, and texture. Others contribute to the formula's visible well-aging and antioxidant story.",
+    cards: [
+      {
+        id: 'stratum-corneum',
+        title: 'Stratum Corneum',
+        body: 'The outermost visible layer, where dryness, tightness, softness, and barrier comfort are often felt first.',
+      },
+      {
+        id: 'epidermis',
+        title: 'Epidermis',
+        body: 'The layer most closely tied to the appearance of tone, radiance, dullness, and visible texture.',
+      },
+      {
+        id: 'dermis-support-story',
+        title: 'Dermis Support Story',
+        // The closing sentence is the claims boundary for this whole module and
+        // is asserted verbatim by test. It must not be softened or dropped.
+        body: 'A cosmetic storytelling layer for the appearance of firmness, smoothness, and visible well-aging support. NFE does not claim to change dermal structure.',
+      },
+    ],
   },
 
   mapIntro: {

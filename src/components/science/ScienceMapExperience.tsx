@@ -56,17 +56,18 @@ interface ScienceMapExperienceProps {
   layerContextPanels: LayerContextPanel[]
   matrixRows: ConcernFormulaMatrixRow[]
   /**
-   * Server-rendered Layer Science introduction, placed between the pathway
-   * controls and the schematic. Passed as a node rather than imported so the
-   * copy travels as markup instead of client code.
+   * A short server-rendered note between the pathway controls and the
+   * schematic. Passed as a node rather than imported so the copy travels as
+   * markup instead of client code. The Layer Science module itself is a
+   * separate white section above this chapter.
    */
-  layerScienceIntro?: ReactNode
+  mapChapterNote?: ReactNode
 }
 
 export function ScienceMapExperience({
   layerContextPanels,
   matrixRows,
-  layerScienceIntro,
+  mapChapterNote,
 }: ScienceMapExperienceProps) {
   const [selected, setSelected] = useState<PathwayId[]>([])
   const firstPathwayRef = useRef<HTMLButtonElement>(null)
@@ -183,7 +184,7 @@ export function ScienceMapExperience({
         {announcement}
       </p>
 
-      {layerScienceIntro ? <div className="mt-20">{layerScienceIntro}</div> : null}
+      {mapChapterNote ? <div className="mt-20">{mapChapterNote}</div> : null}
 
       {/* Schematic + interpretation. Two columns on desktop, stacked on mobile. */}
       <div className="mt-12 grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-start">

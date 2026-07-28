@@ -264,10 +264,23 @@ export interface ScienceProfileIntroContent {
   anchorId: string
 }
 
+/**
+ * One layer card in the Layer Science module.
+ *
+ * Editorial context for a named skin layer. Cards describe what is *seen* or
+ * *felt* at a layer; none of them claims that a product acts there.
+ */
+export interface LayerScienceCard {
+  id: string
+  title: string
+  body: string
+}
+
 export interface LayerScienceIntroContent {
   eyebrow: string
   heading: string
   description: string
+  cards: LayerScienceCard[]
 }
 
 export interface SciencePageContent {

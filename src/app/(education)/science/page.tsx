@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { ScienceMapExperience } from '@/components/science/ScienceMapExperience'
+import { LayerScienceModule } from '@/components/science/LayerScienceModule'
 import { ScienceMethod } from '@/components/science/ScienceMethod'
 import {
   CONCERN_FORMULA_MATRIX,
@@ -34,7 +35,6 @@ export default function SciencePage() {
     hero,
     method,
     profileIntro,
-    layerScience,
     mapIntro,
     formulationPrinciples,
     proof,
@@ -86,7 +86,10 @@ export default function SciencePage() {
       {/* 3 — How the Science Map works, and the invitation into it */}
       <ScienceMethod />
 
-      {/* 4, 5, 6 — Pathways, the map, and what the layers mean */}
+      {/* 4 — Layer Science: the editorial bridge into the interactive chapter */}
+      <LayerScienceModule />
+
+      {/* 5, 6, 7 — Pathways, the map, and what the layers mean */}
       <section className="bg-nfe-green-900 py-24 text-nfe-paper md:py-32">
         {/* The dark chapter now opens with the founder's framing for the
             pathway controls. This is also the destination of the method
@@ -119,23 +122,13 @@ export default function SciencePage() {
           <ScienceMapExperience
             layerContextPanels={LAYER_CONTEXT_PANELS}
             matrixRows={CONCERN_FORMULA_MATRIX}
-            layerScienceIntro={
-              /* Server-rendered and handed to the island as a node, so this
-                 copy travels as markup rather than as client code. It sits
-                 between the pathway controls and the schematic, which is what
-                 makes the drawing feel intended rather than abrupt. */
-              <div className="max-w-3xl">
-                <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
-                  {layerScience.eyebrow}
-                </p>
-                <h3 className="mt-4 font-serif text-2xl leading-tight text-nfe-paper md:text-4xl">
-                  {layerScience.heading}
-                </h3>
-                <p className="mt-6 text-lg leading-8 text-nfe-paper/80">
-                  {layerScience.description}
-                </p>
-                <p className="mt-4 leading-8 text-nfe-paper/70">{mapIntro.body}</p>
-              </div>
+            mapChapterNote={
+              /* The partial Layer Science intro that used to sit here is now the
+                 complete module above. Only this approved paragraph remains, so
+                 nothing is duplicated and nothing approved is lost. */
+              <p className="max-w-3xl text-lg leading-8 text-nfe-paper/80">
+                {mapIntro.body}
+              </p>
             }
           />
         </div>
