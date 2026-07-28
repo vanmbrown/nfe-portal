@@ -1959,3 +1959,203 @@ waitlist activation and no `/api/waitlist` request. No matrix redesign and no
 other Science section touched. No profiling, scoring, ranking or personalised
 recommendation. No release branch, tag or merge. No new dependency and no
 lockfile change.
+
+---
+
+# Final Phase 1 refinement — Science-to-Ingredients family navigation
+
+Appended after the refinement. The strategy audit and the four earlier records
+above are unchanged.
+
+## Founder decision
+
+Make each ingredient-family pill in Layer Context a link to that family's
+section on Ingredients, and organise Ingredients around the same taxonomy.
+Science explains the family, Ingredients reveals what is inside it, product
+pages stay authoritative on verified composition. Change nothing else.
+
+## Branch
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-ingredient-family-links` |
+| Branched from | `feature/nfe-science-pathway-sync-schematic-scale` @ `f3bcfac` |
+| Canonical production baseline | `4d779c8` |
+| Deployed | No. Implementation and local validation only |
+
+## Shared taxonomy
+
+`src/content/ingredients/` is the one authoritative source.
+
+| # | Id | Label | Ingredients |
+|---|---|---|---|
+| 1 | `humectants` | Humectants | 4 |
+| 2 | `emollients` | Emollients | 3 |
+| 3 | `barrier-supportive-lipids` | Barrier-supportive lipids | 2 |
+| 4 | `tone-supportive-cosmetic-ingredients` | Tone-supportive cosmetic ingredients | 5 |
+| 5 | `peptides` | Peptides | 2 |
+| 6 | `antioxidant-supportive-ingredients` | Antioxidant-supportive ingredients | 6 |
+| 7 | `botanical-oils` | Botanical oils | 2 |
+| 8 | `sensorial-support` | Sensorial support | 3 |
+
+Three Science ids were renamed to the canonical form, because these ids are now
+public URLs: `barrier-lipids`, `antioxidant-support` and `tone-supportive`.
+Science no longer defines family labels at all — it keeps only the family's
+role in its own voice and its representative examples, and resolves the label
+from the taxonomy at render time.
+
+The module is split. `families.ts` holds identity (id, label, order, href) and
+is safe for the Science client island. `family-copy.ts` holds descriptions and
+claims boundaries and is imported only by Ingredients. Without that split the
+prose added 2.4KB to the Science chunk for text that page never shows.
+
+## Science links
+
+Fourteen links across five panels, all plain `Link` elements with real hrefs
+built by `familyHref()` rather than by hand. No button, no `role="button"`, no
+click handler, no scroll script, no query string, no new tab, no
+`aria-label` override, no analytics. Repeated families share one canonical
+href — `emollients`, `antioxidant-supportive-ingredients` and
+`sensorial-support` each appear in three panels.
+
+The approved pill treatment is unchanged. Hover warms the surface and
+underlines; focus uses the existing gold ring with an offset.
+
+## Ingredients architecture
+
+The route was a client component whose content lived in three tabs. An anchor
+cannot land inside a tab panel that starts hidden, and a visitor without
+JavaScript would have found nothing. The tab UI moved verbatim into
+`INCITransparencyTabs`; the page around it is now server-rendered.
+
+Page order: intro, a compact index of eight plain anchors, the eight family
+sections, the composition clarification, the full transparency reference —
+INCI lists, actives table, complete glossary, unchanged — then a return link to
+Science.
+
+Each section has a stable id, an `aria-labelledby` pointing at a distinct
+`-heading` id, a visible `h2` carrying the canonical label, a claims-safe
+description, its ingredients with concise roles, and `scroll-mt-24`. Neither
+the site header nor the education nav is sticky, so that margin is breathing
+room rather than compensation.
+
+## Ingredient membership
+
+Membership follows the `category` and `function` values already recorded in
+`data/education/ingredientGlossary.json`. Nothing was invented.
+
+Five glossary entries are deliberately unassigned. Aqua, Optiphen Plus and the
+pH/stabilisation group are formulation infrastructure. Bakuchiol is recorded as
+"Retinol Alternative / Skin Conditioning", which maps to none of the eight, and
+Ectoin was assigned to barrier-supportive lipids on the strength of its
+recorded "Barrier Support" function despite not itself being a lipid — both are
+judgement calls worth a second look. All five remain visible in the full
+glossary, so nothing is hidden.
+
+## Product-composition boundary
+
+One line, once, before the full reference: *Ingredient families describe
+cosmetic roles and formulation logic. For what is in a particular formula, see
+that product's own ingredient declaration.*
+
+No family surface names Face Elixir or Body Elixir or claims presence in every
+product. No internal source-conflict vocabulary reaches customers.
+
+The glossary and `data/products/*.json` still list different ingredient sets.
+That discrepancy is untouched and still deferred. No product data, INCI
+declaration, percentage or claim was modified.
+
+## Accessibility
+
+`/science` **100** and `/inci` **100**, zero failing audits on both.
+
+`/inci` was at **94** on the parent branch, with one pre-existing failure: the
+product selector in `INCILists` used white text on the gold at 2.29:1. This
+work took it to 96, and the selector was corrected to the deep green already
+used on the page, which measures 6.66:1, bringing it to 100. Two colour tokens,
+not a redesign.
+
+All eight anchors land with the heading at a consistent 137px from the top at
+1280, 375 and 320px. Zero duplicate ids, one `h1`, native link semantics,
+keyboard focusable, no nested interactive elements, no focus ring clipped by an
+overflow ancestor, no page overflow at any width.
+
+## Link behaviour
+
+Normal click navigates. Keyboard Enter activates. No new tab. Browser Back
+returns to Science with the page still interactive — pathway selection
+re-tested after returning and still works. Direct hash loads resolve against
+server-rendered HTML with no JavaScript. No custom scroll handler, no focus
+trap, no analytics.
+
+## Performance
+
+| Metric | Baseline | After |
+|---|---|---|
+| `/science` client chunk | 24,944 B | **25,716 B** (+772) |
+| `/science` Lighthouse | Perf 97, A11y 100 | Perf 98, A11y **100** |
+| `/inci` Lighthouse | Perf ~97, A11y **94** | Perf 97, A11y **100** |
+| CLS | 0 | **0** |
+| Routes | 62 | **62** |
+| Dependencies | — | **unchanged** |
+
+## Copy changes
+
+| Location | Change | Reason |
+|---|---|---|
+| Science family label | "Tone-supportive ingredients" → "Tone-supportive cosmetic ingredients" | Canonical taxonomy label |
+| `/inci` intro | New paragraph | Frames the family organisation |
+| `/inci` family descriptions | Eight new | Required by the section architecture |
+| `/inci` clarification | New line | Product-composition boundary |
+| `/inci` reference heading | New | Introduces the existing tabs |
+| `/inci` return link | New | Orientation back to Science |
+
+No Science panel copy, matrix row, pathway label, schematic label or ingredient
+description was rewritten.
+
+## Tests
+
+131 → **159**. All four required violation tests performed and caught: a
+hardcoded incorrect href, an anchor section stripped of its id, a duplicated
+family id, and a pill converted to a button.
+
+## Files
+
+**Added** — five `src/content/ingredients/` modules,
+`components/ingredients/IngredientFamilySections.tsx`,
+`components/education/INCITransparencyTabs.tsx`.
+
+**Changed** — `app/(education)/inci/page.tsx`,
+`app/(education)/science/page.tsx`, `components/education/INCILists.tsx`,
+three Science components, four Science content modules, the test file.
+
+**Removed** — none.
+
+## Customer-visible changes
+
+Ingredient families on Science become links. Ingredients gains eight anchored
+family sections above its existing reference tabs, and its product selector
+reads dark green on gold instead of white. Nothing else changes.
+
+## Deferred
+
+Founder visual and copy approval; the glossary and product INCI reconciliation;
+the Bakuchiol and Ectoin family assignments; expert scientific review;
+commissioned diagrams; Phase 2 pathway refinement; Journal expansion; CMS
+decision; product accordion `aria-controls`; `/skin-strategy` performance; Face
+Elixir size wording; robots.txt; token-specimen metadata; Study Circle; founder
+dashboard.
+
+`/inci` still has no route metadata. It had none before, so adding a title and
+description would be a change beyond this task's scope — worth doing, not done
+here.
+
+## Explicit non-actions
+
+No deployment, Worker version, traffic, DNS, Cloudflare, wrangler, Supabase,
+Shopify, Sanity or CMS change. No product price, size, availability, formula,
+ingredient declaration or claims change. No Founder Access or Study Circle
+change. No waitlist activation and no `/api/waitlist` request. No new route. No
+Science, matrix or schematic redesign. No profiling, scoring, ranking or
+personalised recommendation. No release branch, tag or merge. No new dependency
+and no lockfile change.
