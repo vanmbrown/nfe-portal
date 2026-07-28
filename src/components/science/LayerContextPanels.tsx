@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 // Imported per-module rather than through the barrel. The barrel re-exports the
 // Layer Context and matrix content, and webpack does not tree-shake it back out
 // of this client chunk — a barrel import here put every panel and row of prose
@@ -166,13 +168,19 @@ export function LayerContextPanels({
                   <p className="mt-7 text-xs uppercase tracking-[0.2em] text-nfe-paper/60">
                     Ingredient families
                   </p>
+                  {/* Editorial links, not filters or controls. Each one is a
+                      plain anchor to the family's section on Ingredients, so
+                      normal click, keyboard, middle-click and browser Back all
+                      behave the way a visitor expects. */}
                   <ul className="mt-3 flex flex-wrap gap-2">
                     {panel.ingredientFamilyIds.map((id) => (
-                      <li
-                        key={id}
-                        className="rounded-full bg-[#f4eadb] px-3.5 py-1.5 text-xs font-medium text-nfe-green-900"
-                      >
-                        {FAMILY_BY_ID[id].label}
+                      <li key={id}>
+                        <Link
+                          href={familyHref(id)}
+                          className="inline-block rounded-full bg-[#f4eadb] px-3.5 py-1.5 text-xs font-medium text-nfe-green-900 transition-colors duration-200 ease-out hover:bg-nfe-paper hover:underline hover:underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-gold focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-green-900"
+                        >
+                          {FAMILY_BY_ID[id].label}
+                        </Link>
                       </li>
                     ))}
                   </ul>
