@@ -33,6 +33,8 @@ export default function SciencePage() {
   const {
     hero,
     method,
+    profileIntro,
+    layerScience,
     mapIntro,
     formulationPrinciples,
     proof,
@@ -86,16 +88,26 @@ export default function SciencePage() {
 
       {/* 4, 5, 6 — Pathways, the map, and what the layers mean */}
       <section className="bg-nfe-green-900 py-24 text-nfe-paper md:py-32">
-        <div className="mx-auto max-w-6xl px-6 md:px-12">
+        {/* The dark chapter now opens with the founder's framing for the
+            pathway controls. This is also the destination of the method
+            invitation above, so it carries the anchor id and scroll margin. */}
+        <div
+          id={profileIntro.anchorId}
+          className="mx-auto max-w-6xl scroll-mt-24 px-6 md:px-12"
+        >
           <div className="max-w-3xl">
             <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
-              {mapIntro.eyebrow}
+              {profileIntro.eyebrow}
             </p>
             <h2 className="mt-5 font-serif text-3xl leading-tight text-nfe-gold md:text-5xl">
-              {mapIntro.heading}
+              {profileIntro.heading}
             </h2>
             <p className="mt-8 text-lg leading-8 text-nfe-paper/80">
-              {mapIntro.body}
+              {profileIntro.description}
+            </p>
+            <p className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm leading-6 text-nfe-paper/70">
+              <span className="text-nfe-gold">{profileIntro.boundary}</span>
+              <span>{profileIntro.privacy}</span>
             </p>
           </div>
         </div>
@@ -107,6 +119,24 @@ export default function SciencePage() {
           <ScienceMapExperience
             layerContextPanels={LAYER_CONTEXT_PANELS}
             matrixRows={CONCERN_FORMULA_MATRIX}
+            layerScienceIntro={
+              /* Server-rendered and handed to the island as a node, so this
+                 copy travels as markup rather than as client code. It sits
+                 between the pathway controls and the schematic, which is what
+                 makes the drawing feel intended rather than abrupt. */
+              <div className="max-w-3xl">
+                <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
+                  {layerScience.eyebrow}
+                </p>
+                <h3 className="mt-4 font-serif text-2xl leading-tight text-nfe-paper md:text-4xl">
+                  {layerScience.heading}
+                </h3>
+                <p className="mt-6 text-lg leading-8 text-nfe-paper/80">
+                  {layerScience.description}
+                </p>
+                <p className="mt-4 leading-8 text-nfe-paper/70">{mapIntro.body}</p>
+              </div>
+            }
           />
         </div>
       </section>

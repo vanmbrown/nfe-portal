@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
 
 // Per-module, not the barrel — see LayerContextPanels for why.
 import { INGREDIENT_FAMILIES } from '@/content/science/ingredient-families'
@@ -55,11 +55,18 @@ import { SkinLayerSchematic } from './SkinLayerSchematic'
 interface ScienceMapExperienceProps {
   layerContextPanels: LayerContextPanel[]
   matrixRows: ConcernFormulaMatrixRow[]
+  /**
+   * Server-rendered Layer Science introduction, placed between the pathway
+   * controls and the schematic. Passed as a node rather than imported so the
+   * copy travels as markup instead of client code.
+   */
+  layerScienceIntro?: ReactNode
 }
 
 export function ScienceMapExperience({
   layerContextPanels,
   matrixRows,
+  layerScienceIntro,
 }: ScienceMapExperienceProps) {
   const [selected, setSelected] = useState<PathwayId[]>([])
   const firstPathwayRef = useRef<HTMLButtonElement>(null)
@@ -175,6 +182,8 @@ export function ScienceMapExperience({
       <p role="status" aria-live="polite" className="sr-only">
         {announcement}
       </p>
+
+      {layerScienceIntro ? <div className="mt-20">{layerScienceIntro}</div> : null}
 
       {/* Schematic + interpretation. Two columns on desktop, stacked on mobile. */}
       <div className="mt-12 grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-start">
