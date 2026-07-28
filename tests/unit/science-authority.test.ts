@@ -1534,6 +1534,8 @@ describe('ingredient source boundaries', () => {
 
 const methodSource = () => readFileSync(src('components/science/ScienceMethod.tsx'), 'utf8')
 const sciencePageSource = () => readFileSync(src('app/(education)/science/page.tsx'), 'utf8')
+const layerScienceModuleSource = () =>
+  readFileSync(src('components/science/LayerScienceModule.tsx'), 'utf8')
 
 describe('method orientation', () => {
   it('renders the approved eyebrow and heading', () => {
@@ -1717,20 +1719,25 @@ describe('layer science introduction', () => {
     }
   })
 
-  it('sits between the pathway controls and the schematic', () => {
-    const island = stripComments(experienceSource())
-    const controls = island.indexOf('aria-labelledby="nfe-pathways-label"')
-    const intro = island.indexOf('layerScienceIntro')
-    const map = island.indexOf('<SkinLayerSchematic')
-    assert.ok(controls > -1 && intro > -1 && map > -1)
-    assert.ok(controls < island.lastIndexOf('layerScienceIntro'))
-    assert.ok(island.lastIndexOf('layerScienceIntro') < map, 'intro must precede the schematic')
+  it('sits in its own white section immediately before the dark chapter', () => {
+    // The module moved out of the island: it is now a full editorial section
+    // rendered by the page, above the chapter that holds the controls and map.
+    const page = sciencePageSource()
+    const module_ = page.indexOf('<LayerScienceModule />')
+    const chapter = page.indexOf('<ScienceMapExperience')
+    assert.ok(module_ > -1, 'the Layer Science module must be rendered')
+    assert.ok(chapter > -1)
+    assert.ok(module_ < chapter, 'the module must precede the interactive chapter')
+    assert.ok(!page.includes('layerScienceIntro'), 'the partial intro must be gone')
   })
 
-  it('arrives as a server-rendered node, not client-imported copy', () => {
+  it('renders on the server and never inside the client island', () => {
     const island = experienceSource()
-    assert.match(island, /layerScienceIntro\?: ReactNode/)
-    assert.ok(!island.includes('SCIENCE_PAGE.layerScience'), 'copy must not be imported here')
+    assert.ok(!island.includes('SCIENCE_PAGE.layerScience'), 'copy must not reach the island')
+    assert.ok(!island.includes('Stratum Corneum'), 'cards must not reach the island')
+    const module_ = layerScienceModuleSource()
+    assert.ok(!/use client/.test(module_), 'the module must stay server-rendered')
+    assert.ok(!/useState|useEffect|onClick/.test(module_), 'the module must hold no behaviour')
   })
 })
 
@@ -1745,7 +1752,7 @@ describe('restored page order', () => {
     const explanation = at('{method.heading}')
     const methodModule = at('<ScienceMethod />')
     const profile = at('{profileIntro.heading}')
-    const layer = at('{layerScience.heading}')
+    const layer = at('<LayerScienceModule />')
     const island = at('<ScienceMapExperience')
     const principles = at('Formulation principles')
 
@@ -1839,6 +1846,207 @@ describe('orientation privacy and claims', () => {
       'treatment plan',
     ]) {
       assert.ok(!copy.includes(claim), `restored copy contains "${claim}"`)
+    }
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * Complete Layer Science module
+ * ------------------------------------------------------------------ */
+
+describe('layer science module', () => {
+  const APPROVED_CARDS = [
+    {
+      id: 'stratum-corneum',
+      title: 'Stratum Corneum',
+      body: 'The outermost visible layer, where dryness, tightness, softness, and barrier comfort are often felt first.',
+    },
+    {
+      id: 'epidermis',
+      title: 'Epidermis',
+      body: 'The layer most closely tied to the appearance of tone, radiance, dullness, and visible texture.',
+    },
+    {
+      id: 'dermis-support-story',
+      title: 'Dermis Support Story',
+      body: 'A cosmetic storytelling layer for the appearance of firmness, smoothness, and visible well-aging support. NFE does not claim to change dermal structure.',
+    },
+  ]
+
+  it('renders the approved eyebrow, heading and supporting paragraph', () => {
+    assert.equal(SCIENCE_PAGE.layerScience.eyebrow, 'Layer Science')
+    assert.equal(
+      SCIENCE_PAGE.layerScience.heading,
+      'How NFE Face Elixir supports the skin by layer.'
+    )
+    assert.match(SCIENCE_PAGE.layerScience.description, /^NFE Face Elixir is built as a layered support system\./)
+    assert.match(SCIENCE_PAGE.layerScience.description, /outer barrier and surface feel/)
+    assert.match(SCIENCE_PAGE.layerScience.description, /tone, radiance, and texture/)
+    assert.match(SCIENCE_PAGE.layerScience.description, /visible well-aging and antioxidant story/)
+  })
+
+  it('renders exactly three cards in the approved order', () => {
+    const cards = SCIENCE_PAGE.layerScience.cards
+    assert.equal(cards.length, 3, 'the module must have exactly three cards')
+    assert.deepEqual(
+      cards.map((c) => c.title),
+      ['Stratum Corneum', 'Epidermis', 'Dermis Support Story']
+    )
+    assert.deepEqual(
+      cards.map((c) => c.id),
+      APPROVED_CARDS.map((c) => c.id)
+    )
+  })
+
+  it('carries the approved card copy verbatim', () => {
+    const cards = SCIENCE_PAGE.layerScience.cards
+    for (const approved of APPROVED_CARDS) {
+      const actual = cards.find((c) => c.id === approved.id)
+      assert.ok(actual, `${approved.id} is missing`)
+      assert.equal(actual.title, approved.title)
+      assert.equal(actual.body, approved.body)
+    }
+  })
+
+  it('keeps the dermal boundary sentence exactly', () => {
+    const dermis = SCIENCE_PAGE.layerScience.cards.find((c) => c.id === 'dermis-support-story')
+    assert.ok(dermis)
+    assert.ok(
+      dermis.body.endsWith('NFE does not claim to change dermal structure.'),
+      'the dermal disclaimer must close the card'
+    )
+  })
+
+  it('makes no dermal, structural or treatment claim anywhere in the module', () => {
+    const copy = [
+      SCIENCE_PAGE.layerScience.heading,
+      SCIENCE_PAGE.layerScience.description,
+      ...SCIENCE_PAGE.layerScience.cards.flatMap((c) => [c.title, c.body]),
+    ]
+      .join(' ')
+      .toLowerCase()
+    for (const claim of [
+      'rebuild',
+      'collagen',
+      'regenerat',
+      'restructur',
+      'penetrat',
+      'repairs',
+      'treats',
+      'heals',
+      'reverses',
+      'stimulates',
+      'prevents aging',
+      'prevents sun damage',
+      'erases wrinkles',
+      'corrects pigmentation',
+    ]) {
+      assert.ok(!copy.includes(claim), `layer science copy claims "${claim}"`)
+    }
+    // "does not claim to change dermal structure" is the only permitted use.
+    const withoutDisclaimer = copy.replace(
+      /nfe does not claim to change dermal structure\./g,
+      ''
+    )
+    assert.ok(!withoutDisclaimer.includes('dermal structure'))
+  })
+
+  it('uses semantic structure with no interactive control', () => {
+    const source = layerScienceModuleSource()
+    assert.match(source, /<section aria-labelledby="layer-science-heading"/)
+    assert.match(source, /<h2\s+id="layer-science-heading"/)
+    assert.match(source, /<h3/)
+    assert.match(source, /<article/)
+    for (const banned of ['<button', '<a ', 'href=', 'onClick', 'tabIndex', 'aria-live', 'role="tab"']) {
+      assert.ok(!source.includes(banned), `the module must not contain ${banned}`)
+    }
+  })
+
+  it('lays out two columns on wide screens and stacks below', () => {
+    const source = layerScienceModuleSource()
+    const match = source.match(/lg:grid-cols-\[([\d.]+)fr_([\d.]+)fr\]/)
+    assert.ok(match, 'the module needs an explicit two-column split')
+    const left = Number(match[1])
+    const right = Number(match[2])
+    const leftPct = (left / (left + right)) * 100
+    assert.ok(leftPct >= 38 && leftPct <= 45, `left column is ${leftPct.toFixed(0)}%, expected 40-43%`)
+  })
+
+  it('appears exactly once on the page', () => {
+    const page = sciencePageSource()
+    assert.equal((page.match(/<LayerScienceModule \/>/g) ?? []).length, 1)
+    // The heading and cards live in one place only.
+    const island = experienceSource()
+    for (const source of [page, island]) {
+      assert.ok(!source.includes('How NFE Face Elixir supports the skin by layer.'))
+      assert.ok(!source.includes('Stratum Corneum'))
+    }
+  })
+
+  it('leaves no partial Layer Science intro behind in the dark chapter', () => {
+    const page = sciencePageSource()
+    const island = experienceSource()
+    assert.ok(!page.includes('layerScienceIntro'))
+    assert.ok(!island.includes('layerScienceIntro'))
+    assert.ok(!island.includes('SCIENCE_PAGE.layerScience'))
+  })
+
+  it('keeps the approved map paragraph rather than dropping it', () => {
+    // The partial intro used to carry this line. It stays in the dark chapter.
+    const page = sciencePageSource()
+    assert.match(page, /\{mapIntro\.body\}/)
+  })
+})
+
+describe('layer science module placement', () => {
+  it('sits outside and immediately before the client island', () => {
+    // Placement follows the brief's three consistent statements: outside the
+    // client island, immediately before the dark chapter, and never inside it.
+    // The dark chapter opens with the profile framing, so the module precedes
+    // that too.
+    const page = sciencePageSource()
+    const method = page.indexOf('<ScienceMethod />')
+    const module_ = page.indexOf('<LayerScienceModule />')
+    const darkChapter = page.indexOf('bg-nfe-green-900 py-24')
+    const island = page.indexOf('<ScienceMapExperience')
+    assert.ok(module_ > -1 && island > -1, 'module and island must both render')
+    assert.ok(method < module_, 'the method orientation comes first')
+    assert.ok(module_ < darkChapter, 'the module must sit before the dark chapter')
+    assert.ok(module_ < island, 'the module must sit outside the client island')
+  })
+
+  it('is not nested inside the dark chapter or the pathway controls', () => {
+    const island = experienceSource()
+    assert.ok(!island.includes('<LayerScienceModule'))
+    assert.ok(!island.includes('layer-science-heading'))
+  })
+
+  it('leaves every other section exactly where it was', () => {
+    const page = sciencePageSource()
+    const order = [
+      '{hero.heading}',
+      '{method.heading}',
+      '<ScienceMethod />',
+      '<LayerScienceModule />',
+      '{profileIntro.heading}',
+      '<ScienceMapExperience',
+      'Formulation principles',
+      'Ingredient families',
+      '{proof.heading}',
+      '{founderNote.heading}',
+      '{productContext.heading}',
+      '{concierge.heading}',
+    ]
+    const positions = order.map((marker) => {
+      const index = page.indexOf(marker)
+      assert.ok(index > -1, `${marker} missing from the page`)
+      return index
+    })
+    for (let i = 1; i < positions.length; i += 1) {
+      assert.ok(
+        positions[i] > positions[i - 1],
+        `${order[i]} must follow ${order[i - 1]}`
+      )
     }
   })
 })
