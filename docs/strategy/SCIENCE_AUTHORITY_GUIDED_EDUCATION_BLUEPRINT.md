@@ -2193,3 +2193,183 @@ Verified at 1440 and 320px, default and all-five-selected: zero overlapping
 label pairs, zero labels outside the viewBox. A test now computes
 baseline-to-baseline spacing between each zone's sub-label and the next zone's
 main label and requires at least one font size of clearance.
+
+---
+
+# Final Phase 1 refinement — Founder-guided orientation restoration
+
+Appended after the restoration. The strategy audit and the five earlier records
+above are unchanged.
+
+## Founder decision
+
+Restore four orientation elements the redesign lost — the method explanation,
+the three-step orientation, the invitation into the pathway selector, the
+"Build Your NFE Skin Profile" framing, and the Layer Science introduction —
+adapted to the current non-diagnostic, pathway-led architecture. Change nothing
+else.
+
+## Branch
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-orientation-restoration` |
+| Branched from | `feature/nfe-science-ingredient-family-links` @ `eb8eb27` |
+| Canonical production baseline | `4d779c8` |
+| Deployed | No. Implementation and local validation only |
+
+**Branch-point note.** The brief named `f4614fa` as the starting HEAD. That
+branch had since moved to `eb8eb27`, adding the schematic label-collision fix
+and its documentation correction. Branching from `f4614fa` would have silently
+re-introduced the colliding zone labels, so this work starts from the current
+tip.
+
+## Restored modules
+
+**Method.** "How the NFE Science Map works." with an introduction and three
+steps, between the opening explanation and the dark chapter. Server-rendered,
+warm ground, an ordered list of three cards. No progress indicator, no numbered
+circles, no animation: it orients, then recedes.
+
+Step 2 states in as many words that nothing is diagnosed, scored or saved,
+because that is the question this module invites.
+
+**Invitation.** "Start your skin interpretation" — a plain `Link` to
+`#build-your-nfe-skin-profile`. No handler, no scroll script, no router, no
+query string, no new tab. The href is asserted equal to the destination anchor
+id, so the two cannot drift apart.
+
+**Profile framing.** "Build Your NFE Skin Profile" opens the dark chapter
+directly above the pathway controls and carries the anchor. Two short lines set
+beside each other rather than stacked as disclaimers: *An interpretive guide,
+not a diagnosis.* and *Nothing is saved or submitted.*
+
+**Layer Science.** "How NFE Face Elixir supports the skin by layer." sits
+between the pathway controls and the schematic, passed into the island as a
+server-rendered node so the copy travels as markup rather than client code.
+
+## The privacy statement was verified before publishing
+
+The brief requires that "Nothing is saved or submitted" be factually true. The
+Science components and route were scanned with comments stripped: zero
+occurrences of localStorage, sessionStorage, cookies, fetch, sendBeacon,
+analytics, form or submit in executable code. The only raw matches sit in a doc
+comment describing what the component does not do. The statement is true.
+
+## What "profile" means here, and where it is allowed
+
+A temporary, page-local view. Not a record, an account, a score, a rank, a
+diagnosis or a recommendation. Every occurrence of the word in the Science
+source is one of three things: the approved heading, its anchor or identifier,
+or a denial of profiling. A test confines it to those, and would fail if the
+word spread to panels, matrix, pathways, steps or layer copy.
+
+## One existing string moved
+
+The map intro paragraph about how visible needs relate is now the closing line
+of the Layer Science block. The map intro eyebrow and heading it sat under are
+superseded by the founder's headings. Reported rather than silently dropped.
+
+## Preserved unchanged
+
+Pathway controls and their single selection owner, the enlarged schematic, the
+dynamic interpretation, Layer Context and its active-state synchronisation, the
+Concern-to-Formula Matrix, all fourteen ingredient-family links, the `/inci`
+anchor architecture, formulation principles, ingredient families, proof
+discipline, Founder Note, product context, Concierge and the closing note.
+
+Verified across every pathway singly, all five together, and clear: identical
+behaviour, no result block at any point, and no change in how often the word
+"profile" appears.
+
+## What was not restored
+
+No skin-type dropdown, concern checkbox grid, submit button, validation, result
+banner, profile generator, score, rank, active matching, personalised ritual or
+product recommendation. Zero `<select>`, `<input>`, `type="checkbox"`,
+`<form>` or `onSubmit` anywhere in the Science components or route.
+
+## Accessibility
+
+`/science` **100** and `/inci` **100**, zero failing audits on both. One `h1`,
+**zero skipped heading levels** across 35 headings, zero duplicate ids. The
+invitation is a keyboard-focusable anchor with no role or target override; its
+destination heading lands at 132px, visible; browser Back returns cleanly and
+the page stays interactive. No new live region, no focus movement, no
+JavaScript required for any orientation content.
+
+## Responsive
+
+| Viewport | Step columns | Card text | Chars/line | Anchor heading | Overflow |
+|---|---|---|---|---|---|
+| 1440 | 3 | 261px | 33 | visible | none |
+| 1280 | 3 | 261px | 33 | visible | none |
+| 1024 | 3 | ~237px | ~30 | visible | none |
+| 768 | 2 | 253px | 32 | visible | none |
+| 375 | 1 | ~250px | ~31 | visible | none |
+| 320 | 1 | 216px | 27 | visible | none |
+
+Three columns break at `lg`, not `md`. At 768px three cards gave 139px of text
+and about seventeen characters a line, running a short paragraph to eleven
+lines — measured, then corrected.
+
+## Performance
+
+| Metric | Baseline | After |
+|---|---|---|
+| Science client chunk | 25,447 B | **25,522 B** (+75) |
+| `/science` Lighthouse | Perf 98, A11y 100 | Perf **98**, A11y **100** |
+| `/inci` Lighthouse | Perf 97, A11y 100 | Perf **97**, A11y **100** |
+| CLS | 0 | **0** |
+| Routes | 62 | **62** |
+| Dependencies | — | **unchanged** |
+
+The restored modules are server-rendered HTML and CSS. The +75 bytes is the
+optional node prop on the island, not the copy.
+
+## Tests
+
+160 → **187**. Four violation tests performed and caught: a removed step, the
+invitation turned into a button, the anchor id changed so link and destination
+disagree, and a ranking phrase inserted into the boundary line.
+
+## Files
+
+**Added** — `components/science/ScienceMethod.tsx`.
+
+**Changed** — `content/science/types.ts`, `content/science/page.ts`,
+`app/(education)/science/page.tsx`,
+`components/science/ScienceMapExperience.tsx`,
+`tests/unit/science-authority.test.ts`.
+
+**Removed** — none.
+
+## Customer-visible changes
+
+`/science` gains a method explanation with three steps and an invitation, a
+"Build Your NFE Skin Profile" framing above the pathway controls, and a Layer
+Science introduction before the schematic. The page is longer by design. No
+other route changed.
+
+## Claims review
+
+All restored copy is new customer-facing writing and needs a founder read. The
+two statements carrying the most weight are the boundary line and the privacy
+line, because they are what make the restored "profile" language safe; both are
+asserted verbatim by tests so they cannot be softened by accident.
+
+## Founder review status
+
+Awaiting approval. The check that matters: read the three steps, then look at
+the pathway controls, and see whether it is obvious what will happen and what
+will not.
+
+## Explicit non-actions
+
+No deployment, Worker version, traffic, DNS, Cloudflare, wrangler, Supabase,
+Shopify, Sanity or CMS change. No product price, size, availability, formula,
+ingredient declaration or claims change. No Founder Access or Study Circle
+change. No waitlist activation and no `/api/waitlist` request. No old form,
+dropdown, checkbox grid, profile generator, score, rank, diagnosis or
+personalised recommendation. No matrix, schematic, Layer Context or `/inci`
+redesign. No new route, release branch, tag or merge.
