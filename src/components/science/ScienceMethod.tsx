@@ -17,6 +17,10 @@ const { eyebrow, heading, introduction, steps, ctaLabel, ctaHref } =
  * are static text, and the invitation is a plain anchor — the page needs no
  * JavaScript to be understood or navigated.
  *
+ * Three columns only from lg. At 768px three cards gave 139px of text and
+ * about seventeen characters a line, which is the crowding this module is
+ * meant to avoid; tablets get two columns instead.
+ *
  * The steps describe what the visitor does and what follows. Deliberately
  * absent: any language of assessment, ranking, priority or result. Step 2 says
  * in as many words that nothing is diagnosed, scored or saved, because that is
@@ -39,7 +43,7 @@ export function ScienceMethod() {
           <p className="mt-8 text-lg leading-8 text-nfe-ink/75">{introduction}</p>
         </div>
 
-        <ol className="mt-14 grid gap-6 md:grid-cols-3">
+        <ol className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {steps.map((step) => (
             <li
               key={step.id}
