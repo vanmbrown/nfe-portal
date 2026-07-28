@@ -1527,3 +1527,318 @@ describe('ingredient source boundaries', () => {
     assert.ok(!/%|percent/.test(membership.replace(/\/\*[\s\S]*?\*\//g, '')))
   })
 })
+
+/* ------------------------------------------------------------------ *
+ * Founder-guided orientation restoration
+ * ------------------------------------------------------------------ */
+
+const methodSource = () => readFileSync(src('components/science/ScienceMethod.tsx'), 'utf8')
+const sciencePageSource = () => readFileSync(src('app/(education)/science/page.tsx'), 'utf8')
+
+describe('method orientation', () => {
+  it('renders the approved eyebrow and heading', () => {
+    assert.equal(SCIENCE_PAGE.scienceMethod.eyebrow, 'Method')
+    assert.equal(SCIENCE_PAGE.scienceMethod.heading, 'How the NFE Science Map works.')
+  })
+
+  it('provides exactly three steps in order', () => {
+    const steps = SCIENCE_PAGE.scienceMethod.steps
+    assert.equal(steps.length, 3, 'the method must have exactly three steps')
+    assert.deepEqual(
+      steps.map((s) => s.stepLabel),
+      ['Step 1', 'Step 2', 'Step 3']
+    )
+    assert.deepEqual(
+      steps.map((s) => s.id),
+      ['select', 'relationships', 'formulation']
+    )
+  })
+
+  it('gives every step a semantic heading in an ordered list', () => {
+    const source = methodSource()
+    assert.match(source, /<ol/, 'steps are a sequence, so they belong in an ordered list')
+    assert.match(source, /<h3/)
+    for (const step of SCIENCE_PAGE.scienceMethod.steps) {
+      assert.ok(step.title.length > 0, `${step.id} has no title`)
+      assert.ok(step.description.length > 0, `${step.id} has no description`)
+    }
+  })
+
+  it('says plainly that nothing is diagnosed, scored or saved', () => {
+    const step2 = SCIENCE_PAGE.scienceMethod.steps[1].description.toLowerCase()
+    assert.ok(step2.includes('diagnosis'))
+    assert.ok(step2.includes('score'))
+    assert.ok(step2.includes('saved profile'))
+  })
+
+  it('carries no assessment, ranking or recommendation language', () => {
+    const copy = [
+      SCIENCE_PAGE.scienceMethod.heading,
+      SCIENCE_PAGE.scienceMethod.introduction,
+      ...SCIENCE_PAGE.scienceMethod.steps.flatMap((s) => [s.title, s.description]),
+    ]
+      .join(' ')
+      .toLowerCase()
+    for (const banned of [
+      'your top priorities',
+      'first, second, and third',
+      'we recommend',
+      'recommended for you',
+      'your skin type',
+      'assessment result',
+      'severity',
+      'view my nfe skin profile',
+      'skin score',
+    ]) {
+      assert.ok(!copy.includes(banned), `method copy contains "${banned}"`)
+    }
+  })
+
+  it('renders server-side with no client boundary', () => {
+    assert.ok(!/use client/.test(methodSource()))
+  })
+})
+
+describe('start interpretation invitation', () => {
+  it('uses the approved label', () => {
+    assert.equal(SCIENCE_PAGE.scienceMethod.ctaLabel, 'Start your skin interpretation')
+  })
+
+  it('is a link, never a button', () => {
+    const source = stripComments(methodSource())
+    assert.match(source, /<Link\s+href=\{ctaHref\}/)
+    for (const banned of ['<button', 'role="button"', 'onClick', 'type="submit"', 'target=']) {
+      assert.ok(!source.includes(banned), `the invitation must not use ${banned}`)
+    }
+  })
+
+  it('points at the profile anchor, with no query string', () => {
+    assert.equal(SCIENCE_PAGE.scienceMethod.ctaHref, '#build-your-nfe-skin-profile')
+    assert.equal(
+      SCIENCE_PAGE.scienceMethod.ctaHref,
+      `#${SCIENCE_PAGE.profileIntro.anchorId}`,
+      'the invitation and its destination must stay in step'
+    )
+    assert.ok(!SCIENCE_PAGE.scienceMethod.ctaHref.includes('?'))
+  })
+
+  it('scrolls by anchor, never by script', () => {
+    const source = stripComments(methodSource())
+    assert.ok(!/scrollIntoView|scrollTo|useRouter|router\.push|setTimeout/.test(source))
+  })
+
+  it('has a destination that exists and clears the top of the viewport', () => {
+    const page = sciencePageSource()
+    assert.match(page, /id=\{profileIntro\.anchorId\}/)
+    assert.match(page, /scroll-mt-\d+/)
+  })
+})
+
+describe('skin profile framing', () => {
+  it('restores the approved eyebrow and heading', () => {
+    assert.equal(SCIENCE_PAGE.profileIntro.eyebrow, 'Build Your NFE Skin Profile')
+    assert.equal(SCIENCE_PAGE.profileIntro.heading, 'Build Your NFE Skin Profile')
+  })
+
+  it('states the non-diagnostic boundary and the privacy line verbatim', () => {
+    assert.equal(SCIENCE_PAGE.profileIntro.boundary, 'An interpretive guide, not a diagnosis.')
+    assert.equal(SCIENCE_PAGE.profileIntro.privacy, 'Nothing is saved or submitted.')
+  })
+
+  it('describes the profile as page-local rather than as a record', () => {
+    const description = SCIENCE_PAGE.profileIntro.description.toLowerCase()
+    assert.ok(description.includes('stay on this page') || description.includes('this page'))
+    for (const banned of ['your account', 'we save', 'stored', 'your record', 'your results']) {
+      assert.ok(!description.includes(banned), `profile copy implies "${banned}"`)
+    }
+  })
+
+  it('keeps "profile" out of every other Science surface', () => {
+    // The word is approved for this heading only. It must not spread.
+    const elsewhere = [
+      JSON.stringify(LAYER_CONTEXT_PANELS),
+      JSON.stringify(CONCERN_FORMULA_MATRIX),
+      JSON.stringify(PATHWAYS),
+      JSON.stringify(SCIENCE_PAGE.scienceMethod.steps),
+      JSON.stringify(SCIENCE_PAGE.layerScience),
+      JSON.stringify(SCIENCE_PAGE.mapIntro),
+    ]
+      .join(' ')
+      .toLowerCase()
+    // Step 2 may say "saved profile" precisely to deny it.
+    const withoutDenial = elsewhere.replace(/saved profile/g, '')
+    assert.ok(!withoutDenial.includes('profile'), 'profile language has spread beyond its heading')
+  })
+
+  it('carries no field that could hold a result', () => {
+    for (const key of Object.keys(SCIENCE_PAGE.profileIntro)) {
+      for (const banned of ['score', 'rank', 'result', 'severity', 'match', 'recommend']) {
+        assert.ok(!key.toLowerCase().includes(banned), `profileIntro exposes "${key}"`)
+      }
+    }
+  })
+
+  it('restores no part of the old form', () => {
+    const page = sciencePageSource()
+    const island = experienceSource()
+    for (const source of [page, island]) {
+      for (const banned of ['<select', '<input', 'type="checkbox"', '<form', 'onSubmit']) {
+        assert.ok(!source.includes(banned), `the old form must not return: ${banned}`)
+      }
+    }
+    assert.ok(!page.includes('View My NFE Skin Profile'))
+  })
+})
+
+describe('layer science introduction', () => {
+  it('restores the approved eyebrow and heading', () => {
+    assert.equal(SCIENCE_PAGE.layerScience.eyebrow, 'Layer Science')
+    assert.equal(
+      SCIENCE_PAGE.layerScience.heading,
+      'How NFE Face Elixir supports the skin by layer.'
+    )
+  })
+
+  it('describes layered cosmetic support without a mechanism claim', () => {
+    const copy = SCIENCE_PAGE.layerScience.description.toLowerCase()
+    assert.ok(copy.includes('support'))
+    for (const banned of [
+      'penetrat',
+      'rebuild',
+      'collagen',
+      'regenerat',
+      'cellular',
+      'repairs',
+      'dermal action',
+      'treats',
+      'heals',
+    ]) {
+      assert.ok(!copy.includes(banned), `layer science copy claims "${banned}"`)
+    }
+  })
+
+  it('sits between the pathway controls and the schematic', () => {
+    const island = stripComments(experienceSource())
+    const controls = island.indexOf('aria-labelledby="nfe-pathways-label"')
+    const intro = island.indexOf('layerScienceIntro')
+    const map = island.indexOf('<SkinLayerSchematic')
+    assert.ok(controls > -1 && intro > -1 && map > -1)
+    assert.ok(controls < island.lastIndexOf('layerScienceIntro'))
+    assert.ok(island.lastIndexOf('layerScienceIntro') < map, 'intro must precede the schematic')
+  })
+
+  it('arrives as a server-rendered node, not client-imported copy', () => {
+    const island = experienceSource()
+    assert.match(island, /layerScienceIntro\?: ReactNode/)
+    assert.ok(!island.includes('SCIENCE_PAGE.layerScience'), 'copy must not be imported here')
+  })
+})
+
+describe('restored page order', () => {
+  it('places every restored module in the approved sequence', () => {
+    const page = sciencePageSource()
+    const at = (needle: string) => {
+      const index = page.indexOf(needle)
+      assert.ok(index > -1, `${needle} not found on the page`)
+      return index
+    }
+    const explanation = at('{method.heading}')
+    const methodModule = at('<ScienceMethod />')
+    const profile = at('{profileIntro.heading}')
+    const layer = at('{layerScience.heading}')
+    const island = at('<ScienceMapExperience')
+    const principles = at('Formulation principles')
+
+    assert.ok(explanation < methodModule, 'explanation must precede the method')
+    assert.ok(methodModule < profile, 'method must precede the profile framing')
+    assert.ok(profile < island, 'profile framing must precede the interactive chapter')
+    assert.ok(layer < principles, 'layer science must precede formulation principles')
+  })
+
+  it('keeps every existing section', () => {
+    const page = sciencePageSource()
+    for (const marker of [
+      'formulationPrinciples',
+      'INGREDIENT_FAMILIES',
+      'proof',
+      'founderNote',
+      'productContext',
+      'concierge',
+      'closingDisclaimer',
+    ]) {
+      assert.ok(page.includes(marker), `${marker} must remain`)
+    }
+  })
+
+  it('duplicates none of the interactive modules', () => {
+    const page = sciencePageSource()
+    assert.equal((page.match(/<ScienceMapExperience/g) ?? []).length, 1)
+    const island = experienceSource()
+    assert.equal((island.match(/<SkinLayerSchematic/g) ?? []).length, 1)
+    assert.equal((island.match(/<LayerContextPanels/g) ?? []).length, 1)
+    assert.equal((island.match(/<ConcernFormulaMatrix/g) ?? []).length, 1)
+  })
+
+  it('keeps one h1 and adds no second client island', () => {
+    const page = sciencePageSource()
+    assert.equal((page.match(/<h1/g) ?? []).length, 1)
+    assert.ok(!page.includes("'use client'"))
+    assert.ok(!methodSource().includes("'use client'"))
+  })
+})
+
+describe('orientation privacy and claims', () => {
+  it('adds no persistence, network or analytics', () => {
+    for (const path of [
+      'components/science/ScienceMethod.tsx',
+      'app/(education)/science/page.tsx',
+    ]) {
+      const source = stripComments(readFileSync(src(path), 'utf8'))
+      for (const token of [
+        'localStorage',
+        'sessionStorage',
+        'document.cookie',
+        'fetch(',
+        'sendBeacon',
+        'track(',
+        'analytics',
+        '<form',
+        'onSubmit',
+      ]) {
+        assert.ok(!source.includes(token), `${path} uses ${token}`)
+      }
+    }
+  })
+
+  it('keeps prohibited claims out of all restored copy', () => {
+    const copy = [
+      SCIENCE_PAGE.scienceMethod.introduction,
+      ...SCIENCE_PAGE.scienceMethod.steps.map((s) => `${s.title} ${s.description}`),
+      SCIENCE_PAGE.scienceMethod.ctaLabel,
+      SCIENCE_PAGE.profileIntro.description,
+      SCIENCE_PAGE.profileIntro.boundary,
+      SCIENCE_PAGE.profileIntro.privacy,
+      SCIENCE_PAGE.layerScience.description,
+    ]
+      .join(' ')
+      .toLowerCase()
+    for (const claim of [
+      'treats melasma',
+      'cures hyperpigmentation',
+      'rebuilds collagen',
+      'repairs damaged skin',
+      'reverses aging',
+      'prevents sun damage',
+      'stops melanin production',
+      'erases wrinkles',
+      'anti-aging',
+      'age-defying',
+      'youthful',
+      'problem skin',
+      'clinical profile',
+      'treatment plan',
+    ]) {
+      assert.ok(!copy.includes(claim), `restored copy contains "${claim}"`)
+    }
+  })
+})
