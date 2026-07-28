@@ -914,8 +914,12 @@ describe('layer context emphasis presentation', () => {
   })
 
   it('adds no interactive control inside a panel', () => {
-    const source = layerContextSource()
-    for (const tag of ['<button', '<a ', 'onClick', 'href=', 'tabIndex']) {
+    // Panels carry editorial links to Ingredients, which is intended. What they
+    // must never carry is a *control*: a button, a click handler, a tabIndex
+    // workaround or any second selection surface. The pathway buttons remain
+    // the only controls in this chapter.
+    const source = stripComments(layerContextSource())
+    for (const tag of ['<button', 'onClick', 'tabIndex', 'role="button"', 'aria-pressed']) {
       assert.ok(!source.includes(tag), `panels must not contain ${tag}`)
     }
   })
