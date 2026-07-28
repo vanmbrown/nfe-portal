@@ -8,6 +8,8 @@ import { describe, it } from 'node:test'
 import { CONCERN_FORMULA_MATRIX } from '@/content/science/formula-matrix'
 import { INGREDIENT_FAMILIES } from '@/content/science/ingredient-families'
 import { INGREDIENT_FAMILIES as INGREDIENT_FAMILY_TAXONOMY } from '@/content/ingredients/families'
+import { familyHref } from '@/content/ingredients/families'
+import { FAMILY_INGREDIENTS, ingredientsInFamily } from '@/content/ingredients/membership'
 import { LAYER_CONTEXT_PANELS } from '@/content/science/layer-context'
 import { SKIN_LAYERS } from '@/content/science/layers'
 import { SCIENCE_PAGE } from '@/content/science/page'
@@ -1200,5 +1202,286 @@ describe('schematic scale', () => {
     for (const banned of ['penetrat', 'absorb', 'dermal action', 'bloodstream', 'cellular']) {
       assert.ok(!rendered.includes(banned), `schematic must not mention ${banned}`)
     }
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * Science-to-Ingredients family navigation
+ * ------------------------------------------------------------------ */
+
+const inciPageSource = () => readFileSync(src('app/(education)/inci/page.tsx'), 'utf8')
+const familySectionsSource = () =>
+  readFileSync(src('components/ingredients/IngredientFamilySections.tsx'), 'utf8')
+
+const REQUIRED_FAMILY_IDS = [
+  'humectants',
+  'emollients',
+  'barrier-supportive-lipids',
+  'tone-supportive-cosmetic-ingredients',
+  'peptides',
+  'antioxidant-supportive-ingredients',
+  'botanical-oils',
+  'sensorial-support',
+]
+
+describe('ingredient family taxonomy', () => {
+  it('defines exactly the eight required families with canonical ids', () => {
+    assert.deepEqual(
+      [...INGREDIENT_FAMILY_TAXONOMY].sort((a, b) => a.order - b.order).map((f) => f.id).sort(),
+      [...REQUIRED_FAMILY_IDS].sort()
+    )
+  })
+
+  it('keeps every id and label unique', () => {
+    const ids = INGREDIENT_FAMILY_TAXONOMY.map((f) => f.id)
+    const labels = INGREDIENT_FAMILY_TAXONOMY.map((f) => f.label)
+    assert.equal(new Set(ids).size, ids.length, 'duplicate family id')
+    assert.equal(new Set(labels).size, labels.length, 'duplicate family label')
+  })
+
+  it('uses url-safe ids, never derived from labels at runtime', () => {
+    for (const family of INGREDIENT_FAMILY_TAXONOMY) {
+      assert.match(family.id, /^[a-z][a-z-]*[a-z]$/, `${family.id} is not url-safe`)
+      assert.ok(!family.id.includes('--'))
+    }
+    // The id must not be generated from the label anywhere.
+    const sources = [familySectionsSource(), inciPageSource(), layerContextSource()]
+    for (const source of sources) {
+      assert.ok(
+        !/toLowerCase\(\)[\s\S]{0,40}replace\([^)]*\s/.test(source),
+        'ids must not be slugified from labels at runtime'
+      )
+    }
+  })
+
+  it('orders families deterministically from 1', () => {
+    const orders = [...INGREDIENT_FAMILY_TAXONOMY].map((f) => f.order).sort((a, b) => a - b)
+    assert.deepEqual(orders, [1, 2, 3, 4, 5, 6, 7, 8])
+  })
+
+  it('defines each family once, not separately in Science and Ingredients', () => {
+    // Science's array carries role and examples only; the label lives in the
+    // taxonomy. A label field on the Science type would be a second source.
+    const scienceFamilies = readFileSync(src('content/science/ingredient-families.ts'), 'utf8')
+    assert.ok(!/^\s*label:/m.test(scienceFamilies), 'Science must not restate family labels')
+    const scienceTypes = readFileSync(src('content/science/types.ts'), 'utf8')
+    assert.match(scienceTypes, /from '\.\.\/ingredients\/types'/)
+  })
+
+  it('resolves every Science family reference against the taxonomy', () => {
+    const known = new Set(INGREDIENT_FAMILY_TAXONOMY.map((f) => f.id))
+    for (const panel of LAYER_CONTEXT_PANELS) {
+      for (const id of panel.ingredientFamilyIds) {
+        assert.ok(known.has(id), `panel ${panel.id} references unknown family ${id}`)
+      }
+    }
+    for (const row of CONCERN_FORMULA_MATRIX) {
+      for (const id of row.ingredientFamilyIds) {
+        assert.ok(known.has(id), `row ${row.id} references unknown family ${id}`)
+      }
+    }
+    for (const pathway of PATHWAYS) {
+      for (const id of pathway.ingredientFamilies) {
+        assert.ok(known.has(id), `pathway ${pathway.id} references unknown family ${id}`)
+      }
+    }
+  })
+
+  it('leaves no orphaned family: every family is used and rendered', () => {
+    const referenced = new Set([
+      ...LAYER_CONTEXT_PANELS.flatMap((p) => p.ingredientFamilyIds),
+      ...CONCERN_FORMULA_MATRIX.flatMap((r) => r.ingredientFamilyIds),
+      ...PATHWAYS.flatMap((p) => p.ingredientFamilies),
+    ])
+    for (const family of INGREDIENT_FAMILY_TAXONOMY) {
+      assert.ok(referenced.has(family.id), `${family.id} is defined but never referenced`)
+    }
+  })
+
+  it('assigns every listed ingredient to at least one valid family', () => {
+    const known = new Set(INGREDIENT_FAMILY_TAXONOMY.map((f) => f.id))
+    const ids = FAMILY_INGREDIENTS.map((i) => i.id)
+    assert.equal(new Set(ids).size, ids.length, 'duplicate ingredient id')
+    for (const ingredient of FAMILY_INGREDIENTS) {
+      assert.ok(ingredient.familyIds.length > 0, `${ingredient.id} has no family`)
+      for (const id of ingredient.familyIds) {
+        assert.ok(known.has(id), `${ingredient.id} references unknown family ${id}`)
+      }
+    }
+  })
+
+  it('gives every family at least one ingredient to show', () => {
+    for (const family of INGREDIENT_FAMILY_TAXONOMY) {
+      assert.ok(
+        ingredientsInFamily(family.id).length > 0,
+        `${family.id} would render an empty section`
+      )
+    }
+  })
+})
+
+describe('science family links', () => {
+  it('renders family pills as links, never buttons', () => {
+    const source = layerContextSource()
+    assert.match(source, /<Link\s+href=\{familyHref\(id\)\}/)
+    const stripped = stripComments(source)
+    for (const banned of ['<button', 'role="button"', 'onClick', 'target="_blank"']) {
+      assert.ok(!stripped.includes(banned), `family links must not use ${banned}`)
+    }
+  })
+
+  it('builds every href from the shared taxonomy, not by hand', () => {
+    const source = stripComments(layerContextSource())
+    assert.match(source, /familyHref\(id\)/)
+    assert.ok(!/href="\/inci#/.test(source), 'hrefs must not be hardcoded')
+  })
+
+  it('produces the canonical anchor href for every family', () => {
+    for (const family of INGREDIENT_FAMILY_TAXONOMY) {
+      assert.equal(familyHref(family.id), `/inci#${family.id}`)
+    }
+  })
+
+  it('shows the canonical label as the visible and accessible name', () => {
+    const source = layerContextSource()
+    assert.match(source, /\{FAMILY_BY_ID\[id\]\.label\}/)
+    // No hidden verbose label overriding the visible text.
+    assert.ok(!/aria-label=/.test(source), 'links must not override their visible name')
+  })
+
+  it('every panel family resolves to a section that exists', () => {
+    const sectionIds = new Set(INGREDIENT_FAMILY_TAXONOMY.map((f) => f.id))
+    for (const panel of LAYER_CONTEXT_PANELS) {
+      for (const id of panel.ingredientFamilyIds) {
+        assert.ok(sectionIds.has(id), `${panel.id} links to missing section ${id}`)
+      }
+    }
+  })
+
+  it('uses no query string or client navigation', () => {
+    const source = stripComments(layerContextSource())
+    assert.ok(!/\?family=/.test(source))
+    assert.ok(!/useRouter|router\.push|scrollIntoView/.test(source))
+  })
+})
+
+describe('inci anchor sections', () => {
+  it('renders a section per family with a stable id', () => {
+    const source = familySectionsSource()
+    assert.match(source, /id=\{family\.id\}/)
+    assert.match(source, /aria-labelledby=\{`\$\{family\.id\}-heading`\}/)
+  })
+
+  it('gives each section a semantic heading carrying the canonical label', () => {
+    const source = familySectionsSource()
+    assert.match(source, /<h2\s+id=\{`\$\{family\.id\}-heading`\}/)
+    assert.match(source, /\{family\.label\}/)
+  })
+
+  it('does not reuse the section id as the heading id', () => {
+    // Duplicate ids would break the aria-labelledby relationship.
+    const source = familySectionsSource()
+    assert.match(source, /\$\{family\.id\}-heading/)
+  })
+
+  it('applies scroll margin so a linked heading is not flush to the edge', () => {
+    assert.match(familySectionsSource(), /scroll-mt-\d+/)
+  })
+
+  it('renders server-side with no client boundary', () => {
+    assert.ok(!/use client/.test(familySectionsSource()))
+    assert.ok(!/use client/.test(inciPageSource()))
+  })
+
+  it('keeps the full transparency reference on the page', () => {
+    const source = inciPageSource()
+    assert.match(source, /INCITransparencyTabs/)
+    const tabs = readFileSync(src('components/education/INCITransparencyTabs.tsx'), 'utf8')
+    for (const part of ['INCILists', 'ActivesDataTable', 'IngredientGlossary']) {
+      assert.ok(tabs.includes(part), `${part} must remain available`)
+    }
+  })
+
+  it('offers the family index as plain anchors', () => {
+    const source = inciPageSource()
+    assert.match(source, /href=\{`#\$\{family\.id\}`\}/)
+    assert.ok(!/onClick/.test(source), 'the index must not use click handlers')
+  })
+})
+
+describe('ingredient source boundaries', () => {
+  it('states the composition clarification exactly once', () => {
+    const source = inciPageSource()
+    const matches = source.match(/Ingredient families describe cosmetic roles/g) ?? []
+    assert.equal(matches.length, 1, 'clarification should appear once, not per family')
+  })
+
+  it('never claims a family is present in a named product', () => {
+    const surfaces = [
+      inciPageSource(),
+      familySectionsSource(),
+      JSON.stringify(INGREDIENT_FAMILY_TAXONOMY),
+      JSON.stringify(FAMILY_INGREDIENTS),
+    ].join(' ')
+    for (const phrase of [
+      'Face Elixir',
+      'Body Elixir',
+      'in every NFE',
+      'all NFE products contain',
+      'Actives in',
+    ]) {
+      assert.ok(!surfaces.includes(phrase), `family surfaces must not claim "${phrase}"`)
+    }
+  })
+
+  it('exposes no internal source-conflict language to customers', () => {
+    const surfaces = [
+      inciPageSource(),
+      familySectionsSource(),
+      JSON.stringify(INGREDIENT_FAMILY_TAXONOMY),
+    ].join(' ')
+    for (const phrase of ['unverified', 'discrepanc', 'conflict', 'may or may not', 'TODO']) {
+      assert.ok(
+        !surfaces.toLowerCase().includes(phrase.toLowerCase()),
+        `customer-facing surfaces must not say "${phrase}"`
+      )
+    }
+  })
+
+  it('keeps prohibited claims out of family descriptions', () => {
+    const copy = INGREDIENT_FAMILY_TAXONOMY.map((f) => `${f.label} ${f.description}`)
+      .join(' ')
+      .toLowerCase()
+    for (const claim of [
+      'treats melasma',
+      'cures hyperpigmentation',
+      'rebuilds collagen',
+      'repairs damaged skin',
+      'reverses aging',
+      'prevents sun damage',
+      'heals inflammation',
+      'stops melanin production',
+      'erases wrinkles',
+      'penetrates the dermis',
+      'repairs the barrier',
+      'recommended ingredients',
+      'best ingredients',
+      'treatment ingredients',
+    ]) {
+      assert.ok(!copy.includes(claim), `family copy contains "${claim}"`)
+    }
+  })
+
+  it('carries a claims boundary on every family', () => {
+    for (const family of INGREDIENT_FAMILY_TAXONOMY) {
+      assert.ok(family.claimsBoundary.length > 0, `${family.id} has no claims boundary`)
+    }
+  })
+
+  it('changes no product data', () => {
+    // Membership references the glossary only. Product INCI stays authoritative.
+    const membership = readFileSync(src('content/ingredients/membership.ts'), 'utf8')
+    assert.ok(!/face-elixir|body-elixir/.test(membership))
+    assert.ok(!/%|percent/.test(membership.replace(/\/\*[\s\S]*?\*\//g, '')))
   })
 })
