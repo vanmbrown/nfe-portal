@@ -8,6 +8,7 @@ import {
   LAYER_CONTEXT_PANELS,
   SCIENCE_PAGE,
 } from '@/content/science'
+import { FAMILY_BY_ID as FAMILY_LABELS } from '@/content/ingredients/families'
 
 export const metadata: Metadata = {
   title: 'Science, Method & Proof | NFE Beauty',
@@ -154,7 +155,7 @@ export default function SciencePage() {
                 className="border-t border-nfe-green-900/12 pt-6"
               >
                 <dt className="font-serif text-xl text-nfe-green-900">
-                  {family.label}
+                  {FAMILY_LABELS[family.id].label}
                 </dt>
                 <dd className="mt-3 leading-7 text-nfe-ink/72">
                   {family.role}

@@ -39,7 +39,7 @@ export const CONCERN_FORMULA_MATRIX: ConcernFormulaMatrixRow[] = [
     explorationLabel: 'Tightness and barrier comfort',
     layerContext: 'Barrier-supportive surface context',
     formulationPrinciple: 'Cushioned feel and replenishing care',
-    ingredientFamilyIds: ['barrier-lipids', 'sensorial-support'],
+    ingredientFamilyIds: ['barrier-supportive-lipids', 'sensorial-support'],
   },
   {
     id: 'uneven-tone',
@@ -48,7 +48,7 @@ export const CONCERN_FORMULA_MATRIX: ConcernFormulaMatrixRow[] = [
     explorationLabel: 'Uneven-looking tone',
     layerContext: 'Epidermal appearance and tone integrity',
     formulationPrinciple: 'More even-looking complexion and visible radiance',
-    ingredientFamilyIds: ['tone-supportive', 'antioxidant-support'],
+    ingredientFamilyIds: ['tone-supportive-cosmetic-ingredients', 'antioxidant-supportive-ingredients'],
   },
   {
     id: 'texture-fine-lines',
@@ -57,7 +57,7 @@ export const CONCERN_FORMULA_MATRIX: ConcernFormulaMatrixRow[] = [
     explorationLabel: 'Texture and fine-line appearance',
     layerContext: 'Surface texture and visible refinement',
     formulationPrinciple: 'Supple-looking skin and visible softness',
-    ingredientFamilyIds: ['peptides', 'emollients', 'antioxidant-support'],
+    ingredientFamilyIds: ['peptides', 'emollients', 'antioxidant-supportive-ingredients'],
   },
   {
     id: 'dull-tired',
@@ -66,7 +66,7 @@ export const CONCERN_FORMULA_MATRIX: ConcernFormulaMatrixRow[] = [
     explorationLabel: 'Dull or tired-looking appearance',
     layerContext: 'Visible radiance and environmental context',
     formulationPrinciple: 'Rested-looking skin and luminous appearance',
-    ingredientFamilyIds: ['antioxidant-support', 'botanical-oils', 'sensorial-support'],
+    ingredientFamilyIds: ['antioxidant-supportive-ingredients', 'botanical-oils', 'sensorial-support'],
   },
 ]
 

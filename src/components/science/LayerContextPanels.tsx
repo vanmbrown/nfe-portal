@@ -2,7 +2,7 @@
 // Layer Context and matrix content, and webpack does not tree-shake it back out
 // of this client chunk — a barrel import here put every panel and row of prose
 // into the client bundle.
-import { FAMILY_BY_ID } from '@/content/science/ingredient-families'
+import { FAMILY_BY_ID, familyHref } from '@/content/ingredients/families'
 import { LAYER_BY_ID } from '@/content/science/layers'
 import { SCIENCE_PAGE } from '@/content/science/page'
 import { PATHWAY_BY_ID } from '@/content/science/pathways'

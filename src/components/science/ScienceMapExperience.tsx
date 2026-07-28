@@ -5,6 +5,7 @@ import { useMemo, useRef, useState } from 'react'
 
 // Per-module, not the barrel — see LayerContextPanels for why.
 import { INGREDIENT_FAMILIES } from '@/content/science/ingredient-families'
+import { FAMILY_BY_ID as FAMILY_LABELS } from '@/content/ingredients/families'
 import { LAYER_BY_ID, SKIN_LAYERS } from '@/content/science/layers'
 import { SCIENCE_PAGE } from '@/content/science/page'
 import { PATHWAYS } from '@/content/science/pathways'
@@ -234,7 +235,7 @@ export function ScienceMapExperience({
                   <ul className="mt-4 space-y-3">
                     {families.map((family) => (
                       <li key={family.id} className="leading-7 text-nfe-paper/70">
-                        <span className="text-nfe-paper">{family.label}</span> —{' '}
+                        <span className="text-nfe-paper">{FAMILY_LABELS[family.id].label}</span> —{' '}
                         {family.role}
                       </li>
                     ))}

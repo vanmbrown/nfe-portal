@@ -50,7 +50,7 @@ export const LAYER_CONTEXT_PANELS: LayerContextPanel[] = [
       'Tightness after cleansing, a surface that feels less cushioned than it used to, and skin that has started responding to products it once tolerated. Comfort is felt long before it is visible, which is why it is so often left until it shows.',
     formulationPrinciple:
       'Comfort before correction. Barrier-supportive lipids and conditioning agents are used to help skin feel replenished, rather than layering assertive actives onto a surface that is asking to be left alone.',
-    ingredientFamilyIds: ['barrier-lipids', 'emollients', 'sensorial-support'],
+    ingredientFamilyIds: ['barrier-supportive-lipids', 'emollients', 'sensorial-support'],
     layerIds: ['barrier', 'surface'],
     claimsBoundary: [
       'repairs the barrier',
@@ -68,7 +68,7 @@ export const LAYER_CONTEXT_PANELS: LayerContextPanel[] = [
       'Uneven-looking tone, visible dullness, and the marks that stay long after the blemish that caused them has gone. In mature melanated skin those marks routinely outlast their cause, which is why tone is so often judged more harshly than texture.',
     formulationPrinciple:
       'Patient work at restrained levels. Tone-supportive and antioxidant-supportive ingredients used steadily over months, alongside the barrier care that keeps skin from being irritated into looking more uneven than it is.',
-    ingredientFamilyIds: ['tone-supportive', 'antioxidant-support'],
+    ingredientFamilyIds: ['tone-supportive-cosmetic-ingredients', 'antioxidant-supportive-ingredients'],
     layerIds: ['tone'],
     claimsBoundary: [
       'treats hyperpigmentation',
@@ -87,7 +87,7 @@ export const LAYER_CONTEXT_PANELS: LayerContextPanel[] = [
       'Crepey-looking texture, the appearance of fine lines, and a surface that reads less supple than it did. Skin that is simply depleted can look textured while nothing structural has changed at all.',
     formulationPrinciple:
       'Conditioning rather than resurfacing. Peptides and emollients support a supple-looking surface, instead of stripping skin to force a smoothness it has no way to keep.',
-    ingredientFamilyIds: ['peptides', 'emollients', 'antioxidant-support'],
+    ingredientFamilyIds: ['peptides', 'emollients', 'antioxidant-supportive-ingredients'],
     layerIds: ['texture'],
     claimsBoundary: [
       'rebuilds collagen',
@@ -105,7 +105,7 @@ export const LAYER_CONTEXT_PANELS: LayerContextPanel[] = [
       'Skin that reads flat or tired rather than rested. This is rarely traceable to one thing — it is the accumulated look of daylight, climate, sleep and time.',
     formulationPrinciple:
       'Antioxidant-supportive care applied consistently, and restraint everywhere else. Well-aging, not anti-aging: the aim is skin that looks rested, not skin performing an age it is not.',
-    ingredientFamilyIds: ['antioxidant-support', 'botanical-oils', 'sensorial-support'],
+    ingredientFamilyIds: ['antioxidant-supportive-ingredients', 'botanical-oils', 'sensorial-support'],
     layerIds: ['radiance'],
     claimsBoundary: [
       'prevents environmental damage',

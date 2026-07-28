@@ -82,20 +82,23 @@ export interface EducationalPathway {
   claimsBoundary: string[]
 }
 
-export type IngredientFamilyId =
-  | 'humectants'
-  | 'emollients'
-  | 'barrier-lipids'
-  | 'antioxidant-support'
-  | 'tone-supportive'
-  | 'peptides'
-  | 'botanical-oils'
-  | 'sensorial-support'
+/**
+ * Re-exported from the shared ingredient taxonomy.
+ *
+ * Science does not define its own family ids or labels. Both live in
+ * src/content/ingredients, so a family named here and a section rendered on
+ * Ingredients cannot drift apart and the links between them cannot rot.
+ */
+import type { IngredientFamilyId } from '../ingredients/types'
+
+export type { IngredientFamilyId }
 
 export interface IngredientFamily {
   id: IngredientFamilyId
-  label: string
-  /** What the family does, in cosmetic appearance language. */
+  /**
+   * What the family does, in Science's voice. The canonical label lives in the
+   * shared taxonomy and is resolved at render time, never restated here.
+   */
   role: string
   /**
    * Representative examples drawn from NFE's published ingredient glossary

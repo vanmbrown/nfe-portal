@@ -7,6 +7,7 @@ import { describe, it } from 'node:test'
 // hook does not resolve directory imports, while Next.js does.
 import { CONCERN_FORMULA_MATRIX } from '@/content/science/formula-matrix'
 import { INGREDIENT_FAMILIES } from '@/content/science/ingredient-families'
+import { INGREDIENT_FAMILIES as INGREDIENT_FAMILY_TAXONOMY } from '@/content/ingredients/families'
 import { LAYER_CONTEXT_PANELS } from '@/content/science/layer-context'
 import { SKIN_LAYERS } from '@/content/science/layers'
 import { SCIENCE_PAGE } from '@/content/science/page'
@@ -410,7 +411,7 @@ describe('layer context structure', () => {
     assert.match(source, /PATHWAY_BY_ID/)
     assert.match(source, /FAMILY_BY_ID/)
     const serialised = JSON.stringify(LAYER_CONTEXT_PANELS)
-    for (const family of INGREDIENT_FAMILIES) {
+    for (const family of INGREDIENT_FAMILY_TAXONOMY) {
       assert.ok(
         !serialised.includes(`"${family.label}"`),
         `panel content hardcodes the family label "${family.label}"`

@@ -1,4 +1,4 @@
-import type { IngredientFamily } from './types'
+import type { IngredientFamily, IngredientFamilyId } from './types'
 
 /**
  * Ingredient families, presented editorially.
@@ -27,49 +27,41 @@ import type { IngredientFamily } from './types'
 export const INGREDIENT_FAMILIES: IngredientFamily[] = [
   {
     id: 'humectants',
-    label: 'Humectants',
     role: 'Draw and hold water at the surface, helping skin feel replenished rather than tight.',
     representativeExamples: ['Hyaluronic Acid', 'Glycerin', 'Propanediol'],
   },
   {
     id: 'emollients',
-    label: 'Emollients',
     role: 'Soften the surface feel and improve slip, so the ritual is inviting enough to keep.',
     representativeExamples: ['Squalane', 'Coco-Caprylate'],
   },
   {
-    id: 'barrier-lipids',
-    label: 'Barrier-supportive lipids',
+    id: 'barrier-supportive-lipids',
     role: 'Support the feel of the skin barrier and help skin hold comfort through the day.',
     representativeExamples: ['Ceramide NP, AP and EOP'],
   },
   {
-    id: 'antioxidant-support',
-    label: 'Antioxidant-supportive ingredients',
+    id: 'antioxidant-supportive-ingredients',
     role: 'Support the look of vitality in skin that reads tired or flat.',
     representativeExamples: ['Tocopherol', 'Green Tea Extract', 'Coenzyme Q10'],
   },
   {
-    id: 'tone-supportive',
-    label: 'Tone-supportive ingredients',
+    id: 'tone-supportive-cosmetic-ingredients',
     role: 'Support the appearance of a more even complexion, patiently and over time.',
     representativeExamples: ['Niacinamide', 'Tranexamic Acid', 'Alpha-Arbutin'],
   },
   {
     id: 'peptides',
-    label: 'Peptides',
     role: 'Support the look of a well-conditioned, supple surface.',
     representativeExamples: ['Palmitoyl Tripeptide-1', 'Copper Tripeptide-1'],
   },
   {
     id: 'botanical-oils',
-    label: 'Botanical oils',
     role: 'Bring conditioning and a considered sensory character to the ritual.',
     representativeExamples: ['Rosehip Oil', 'Jojoba Oil', 'Prickly Pear Seed Oil'],
   },
   {
     id: 'sensorial-support',
-    label: 'Sensorial support',
     role: 'Shape how a formula feels on skin — the part of care most easily overlooked.',
     representativeExamples: ['Centella Asiatica Extract', 'Bisabolol', 'Allantoin'],
   },

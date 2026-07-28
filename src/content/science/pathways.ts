@@ -24,7 +24,7 @@ export const PATHWAYS: EducationalPathway[] = [
       'This pathway brings attention to the outermost part of the skin, where comfort is felt before it is seen. When the surface is well conditioned, skin tends to feel cushioned rather than tight, and everything layered over it behaves more predictably.',
     formulationPrinciple:
       'NFE approaches this by supporting the feel of the skin barrier first, with lipids and conditioning agents, rather than layering strong actives onto a surface that is asking for comfort.',
-    ingredientFamilies: ['barrier-lipids', 'emollients', 'humectants'],
+    ingredientFamilies: ['barrier-supportive-lipids', 'emollients', 'humectants'],
     ritualConnection:
       'Consistency matters more than intensity here. Ritual explains how to layer without over-stripping.',
     claimsBoundary: [
@@ -42,7 +42,7 @@ export const PATHWAYS: EducationalPathway[] = [
       'This pathway explores the relationship between water and comfort. Hydration is what makes skin look fresher and feel more supple, and it is also the first thing lost when skin is stripped or exposed.',
     formulationPrinciple:
       'NFE approaches this in layers: humectants to draw water in, emollients to soften the surface, and barrier-supportive lipids to help skin hold what it has been given.',
-    ingredientFamilies: ['humectants', 'emollients', 'barrier-lipids'],
+    ingredientFamilies: ['humectants', 'emollients', 'barrier-supportive-lipids'],
     ritualConnection:
       'Hydration reads quickly and fades quickly. Ritual explains the cadence that helps it last.',
     claimsBoundary: [
@@ -60,7 +60,7 @@ export const PATHWAYS: EducationalPathway[] = [
       'This pathway brings attention to how tone reads across the skin — including the marks that can linger after a blemish, and the unevenness that mature melanated skin is often left to interpret alone. Tone support is patient work, measured in months rather than days.',
     formulationPrinciple:
       'NFE approaches this through layered, tone-supportive ingredients used at restrained levels, alongside the barrier care that keeps skin from being irritated into looking more uneven.',
-    ingredientFamilies: ['tone-supportive', 'antioxidant-support'],
+    ingredientFamilies: ['tone-supportive-cosmetic-ingredients', 'antioxidant-supportive-ingredients'],
     ritualConnection:
       'Daily sun protection belongs alongside any tone-supportive ritual. Ritual explains where it sits in the sequence.',
     claimsBoundary: [
@@ -97,7 +97,7 @@ export const PATHWAYS: EducationalPathway[] = [
       'This pathway looks across the whole relationship rather than one part of it. Resilience is what shows when comfort, hydration, tone and texture are all being supported at once — skin that looks rested rather than corrected.',
     formulationPrinciple:
       'NFE approaches this as the outcome of restraint: fewer, better-considered formulas used consistently, so that support accumulates instead of competing.',
-    ingredientFamilies: ['antioxidant-support', 'barrier-lipids', 'sensorial-support'],
+    ingredientFamilies: ['antioxidant-supportive-ingredients', 'barrier-supportive-lipids', 'sensorial-support'],
     ritualConnection:
       'This is well-aging as a practice rather than a product. Ritual explains what that looks like day to day.',
     claimsBoundary: [
