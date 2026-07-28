@@ -1,3 +1,4 @@
+import { FAMILY_COPY_BY_ID } from '@/content/ingredients/family-copy'
 import { INGREDIENT_FAMILIES } from '@/content/ingredients/families'
 import { ingredientsInFamily } from '@/content/ingredients/membership'
 
@@ -42,7 +43,7 @@ export function IngredientFamilySections() {
             </h2>
 
             <p className="mt-4 max-w-2xl text-lg leading-8 text-[#0E2A22]/75">
-              {family.description}
+              {FAMILY_COPY_BY_ID[family.id].description}
             </p>
 
             <ul className="mt-8 space-y-5">

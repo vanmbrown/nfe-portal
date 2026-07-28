@@ -9,6 +9,7 @@ import { CONCERN_FORMULA_MATRIX } from '@/content/science/formula-matrix'
 import { INGREDIENT_FAMILIES } from '@/content/science/ingredient-families'
 import { INGREDIENT_FAMILIES as INGREDIENT_FAMILY_TAXONOMY } from '@/content/ingredients/families'
 import { familyHref } from '@/content/ingredients/families'
+import { FAMILY_COPY, FAMILY_COPY_BY_ID } from '@/content/ingredients/family-copy'
 import { FAMILY_INGREDIENTS, ingredientsInFamily } from '@/content/ingredients/membership'
 import { LAYER_CONTEXT_PANELS } from '@/content/science/layer-context'
 import { SKIN_LAYERS } from '@/content/science/layers'
@@ -1421,6 +1422,7 @@ describe('ingredient source boundaries', () => {
       inciPageSource(),
       familySectionsSource(),
       JSON.stringify(INGREDIENT_FAMILY_TAXONOMY),
+      JSON.stringify(FAMILY_COPY),
       JSON.stringify(FAMILY_INGREDIENTS),
     ].join(' ')
     for (const phrase of [
@@ -1439,6 +1441,7 @@ describe('ingredient source boundaries', () => {
       inciPageSource(),
       familySectionsSource(),
       JSON.stringify(INGREDIENT_FAMILY_TAXONOMY),
+      JSON.stringify(FAMILY_COPY),
     ].join(' ')
     for (const phrase of ['unverified', 'discrepanc', 'conflict', 'may or may not', 'TODO']) {
       assert.ok(
@@ -1449,7 +1452,9 @@ describe('ingredient source boundaries', () => {
   })
 
   it('keeps prohibited claims out of family descriptions', () => {
-    const copy = INGREDIENT_FAMILY_TAXONOMY.map((f) => `${f.label} ${f.description}`)
+    const copy = INGREDIENT_FAMILY_TAXONOMY.map(
+      (f) => `${f.label} ${FAMILY_COPY_BY_ID[f.id].description}`
+    )
       .join(' ')
       .toLowerCase()
     for (const claim of [
@@ -1473,8 +1478,12 @@ describe('ingredient source boundaries', () => {
   })
 
   it('carries a claims boundary on every family', () => {
+    assert.equal(FAMILY_COPY.length, INGREDIENT_FAMILY_TAXONOMY.length)
     for (const family of INGREDIENT_FAMILY_TAXONOMY) {
-      assert.ok(family.claimsBoundary.length > 0, `${family.id} has no claims boundary`)
+      const copy = FAMILY_COPY_BY_ID[family.id]
+      assert.ok(copy, `${family.id} has no copy entry`)
+      assert.ok(copy.claimsBoundary.length > 0, `${family.id} has no claims boundary`)
+      assert.ok(copy.description.length > 0, `${family.id} has no description`)
     }
   })
 

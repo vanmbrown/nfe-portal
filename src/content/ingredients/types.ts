@@ -22,15 +22,30 @@ export type IngredientFamilyId =
   | 'botanical-oils'
   | 'sensorial-support'
 
+/**
+ * A family's identity: what it is called and where it lives.
+ *
+ * Deliberately small. Science renders family labels inside its client island,
+ * so anything on this type ships to the browser. Prose belongs on
+ * IngredientFamilyCopy, which only Ingredients imports.
+ */
 export interface IngredientFamily {
   /** Stable anchor id. Public URL surface — do not change casually. */
   id: IngredientFamilyId
   /** Canonical display label. The only place this text is written. */
   label: string
-  /** Claims-safe description of the family's cosmetic role. */
-  description: string
   /** Deterministic order on Ingredients. Never sorted by anything else. */
   order: number
+}
+
+/**
+ * A family's prose. Rendered only on Ingredients, so it is kept apart from the
+ * identity above and never reaches the Science client bundle.
+ */
+export interface IngredientFamilyCopy {
+  id: IngredientFamilyId
+  /** Claims-safe description of the family's cosmetic role. */
+  description: string
   /**
    * Wording this family must never drift into. Retained in content so the
    * claims-governance test can assert against it directly.
