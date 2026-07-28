@@ -71,7 +71,7 @@ export default function INCILists() {
           onClick={() => setProduct('face')}
           className={`px-4 py-2 rounded-md font-medium ${
             product === 'face'
-              ? 'bg-[#C9A66B] text-white'
+              ? 'bg-[#C9A66B] text-[#0E2A22]'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
@@ -81,7 +81,7 @@ export default function INCILists() {
           onClick={() => setProduct('body')}
           className={`px-4 py-2 rounded-md font-medium ${
             product === 'body'
-              ? 'bg-[#C9A66B] text-white'
+              ? 'bg-[#C9A66B] text-[#0E2A22]'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
