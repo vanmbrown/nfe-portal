@@ -3183,3 +3183,197 @@ The full Science lineage, each stage founder-approved in turn:
 No blocker outstanding. Release assembly is a separate, separately authorised
 task: no release branch, tag, merge, Worker version or deployment has been
 created by any of the work above.
+
+---
+
+# Science Authority Phase 1 — Release assembly and predeployment review
+
+Date: 2026-07-29
+
+## Founder authorization
+
+Assemble the approved Science experience into a release branch based on the
+verified current production source. Do not deploy.
+
+The approved Science tip was frozen at `499d488`; the prompt's `ee35bf0`
+references were superseded by founder instruction, `ee35bf0` remaining the
+code-complete parent.
+
+## Verified current production source
+
+| | |
+|---|---|
+| Branch | `release/production-hygiene-assets-fonts` |
+| HEAD | `4d779c8e21c343b119d243ce488ae2fb72250e6a` |
+| Deployed commit | `c81b7c25bff7f4c774721d9bcd2f4f2eacd14627` |
+| Live Worker version | `1ba7471d-53f8-42f8-aa71-299657b7bf42` |
+| Traffic | 100% |
+
+Three independent lines of evidence agree:
+
+1. **Cloudflare** — `wrangler deployments list` returns ten deployments; the
+   most recent, 2026-07-26T22:14:55Z, carries version `1ba7471d`.
+2. **Repository** — the product-architecture-cleanup closeout records the same
+   version id, the same date, and names `c81b7c2` as the deployed commit.
+3. **Live probe** — `/products/hydration-serum` returns 404 on
+   www.nfebeauty.com, matching the dynamic product route deleted in that
+   release. Live `/science` carries the pre-Phase-1 page.
+
+`4d779c8` is `c81b7c2` plus the closeout record: zero difference under `src/`,
+`tests/` or `public/`.
+
+**`main` is not production.** At `4f2c411` it is 29 commits behind the
+pre-maison-wave-1 tag and carries neither live marker. A release branched from
+`main` would have reverted three shipped releases.
+
+## Ancestry
+
+| | |
+|---|---|
+| merge base | `4d779c8` — production itself |
+| production ancestor of Science | yes |
+| Science ancestor of production | no |
+| production-only commits | 0 |
+| Science-only commits | 64 |
+
+Classification **A**. Fast-forward available, nothing to reconcile.
+
+## Integration
+
+`release/science-authority-phase-1`, created from `4d779c8`, fast-forwarded to
+`499d488` — §7 Option 1, the least destructive method. **No merge commit, no
+cherry-pick, no rebase, no squash. No conflicts.** Approved feature history is
+preserved commit for commit.
+
+Production preservation proved after the fact: zero commits in production that
+are not in the release, and production remains an ancestor of the release HEAD.
+
+## Production diff — 34 files
+
+Thirty are Science and Ingredients modules, shared typed content, the URL-state
+helpers, tests, and the blueprint. Four sat outside that boundary and were
+inspected rather than accepted:
+
+| File | Change | Finding |
+|---|---|---|
+| `ScienceIntelligence.tsx` | deleted, 1,616 lines | The old profiling engine Phase 1 replaced. Expected. |
+| `skin-strategy/page.tsx` | 4 lines | Comment only. It referenced the deleted file by name. Zero runtime effect. |
+| `INCILists.tsx` | 4 lines | Contrast fix: white on gold → deep green. Repairs a live AA failure. |
+| `EducationNavTabs.tsx` | 91 lines | `role="tab"` buttons calling `router.push` replaced by real links with `aria-current`. Scoped to the `(education)` layout — `/science` and `/inci` only, not global navigation. Visual treatment preserved; a framer-motion layout animation was dropped. |
+
+Zero changes to: dependencies, `package-lock.json`, wrangler/Next/Tailwind
+config, `public/`, `data/`, API routes, product or shop routes, Study Circle,
+Founder Access, Supabase or auth, legal copy, analytics.
+
+## An existing production defect this release repairs
+
+Production `/inci` scores **Accessibility 95** today, with one contrast
+failure: the product-toggle buttons render white on `#C9A66B` at **2.29:1**.
+The release takes `/inci` to **100**. Not a goal of this work — a consequence
+of the Phase 1 accessibility pass — but it ships with the release.
+
+## Accessibility release gate
+
+| URL | Accessibility | Contrast failures | CLS |
+|---|---:|---:|---:|
+| `/science` | 100 | 0 | 0 |
+| `/science?pathways=hydration` | 100 | 0 | 0 |
+| `/science?pathways=hydration,tone-integrity` | 100 | 0 | 0 |
+| `/science?pathways=` all five | 100 | 0 | 0 |
+| `/inci` | 100 | 0 | 0 |
+| `/inci?from=science&pathways=hydration` | 100 | 0 | 0 |
+| `/` | 100 | 0 | 0 |
+| `/products/face-elixir` | 100 | 0 | 0 |
+
+Active Layer Context: token `#d3b478`, measured 4.86:1, `/90` removed from the
+active *Formulation support* label. **Gate passed.**
+
+## Performance against an equivalent production build
+
+Both sides built with `next build` + OpenNext and served by `wrangler dev`.
+
+| Metric | Production | Release | Δ |
+|---|---:|---:|---:|
+| Science client chunk | 50,000 | **32,023** | −17,977 |
+| Ingredients client chunk | 14,551 | **14,344** | −207 |
+| `/science` Performance | 97 | 97 | 0 |
+| `/inci` Performance | 96 | 97 | +1 |
+| `/` Performance | 96 | 95 | −1 |
+| `/products/face-elixir` | 76 | 76 | 0 |
+| CLS | 0 | 0 | 0 |
+| Route count | 63 | 63 | 0 |
+
+The Science chunk falls by 36% — the old profiling engine leaving the bundle.
+An initial `/science` reading of 99 versus 97 did not reproduce; a second
+measurement returned 97 on both sides, with the release ahead on LCP, TBT and
+TTFB. Recorded as run-to-run variance, not a regression.
+
+## Behaviour verified in the browser
+
+Dual entry, both modes, converging on one state. Profile of *dry or easily
+depleted* + *dryness or ashiness* + *fine-line appearance* resolved to Barrier
+Comfort, Hydration and Texture & Suppleness across buttons, schematic,
+interpretation, Layer Context and matrix. Mode switching preserved both the map
+state and the visitor's description. Manual pathway changes took authority back
+and cleared the status line. *Start over* cleared form, map and outgoing links.
+
+All eight family anchors: heading visible on landing, floating return visible at
+landing and at 25%, 50%, 75% and the footer — **40 of 40** — with no heading
+obstruction and the correct return href at each.
+
+Responsive at 1440, 1280, 1024, 768, 375 and 320: no overflow, one `h1`, no
+duplicate ids, every target at least 44px, gold CTA present at every width.
+
+## Claims and privacy
+
+No prohibited claim appears in served HTML on `/science`, a restored-pathway
+`/science`, `/inci`, or contextual `/inci`. The phrases the scan surfaced in
+the diff live only inside `claimsBoundary` arrays — the guard data the suite
+asserts against. Every occurrence of "diagnosis" is a boundary statement.
+
+Malformed input — invalid, mixed, duplicated, `%00`, wrong origin, and a
+crafted `returnTo` — all return HTTP 200 with the return href fixed to
+`/science`. The return control renders only for an exact `from=science`.
+
+## Tests
+
+**329 of 329 passing**, meeting the required minimum exactly. None deleted,
+none weakened.
+
+## Metadata
+
+`/science` and `/inci` titles byte-identical to production. A query-bearing
+Science URL serves the same title. No canonical tags exist on either page —
+pre-existing and unchanged; recorded as deferred, not introduced here.
+
+## Deferred, and untouched
+
+Bakuchiol and Ectoin classification, glossary versus product-INCI
+reconciliation, family description rewrites, product accordion `aria-controls`,
+`/skin-strategy` performance, robots.txt, `/dev/token-specimen` metadata,
+`/inci` metadata, Founder Dashboard, Study Circle, legal review, staging,
+formula, ingredient and pricing changes, Discovery size strategy. None was
+altered by the release diff.
+
+## Rollback
+
+| | |
+|---|---|
+| Current Worker version | `1ba7471d-53f8-42f8-aa71-299657b7bf42` |
+| Traffic | 100% |
+| Production commit | `c81b7c2` (branch HEAD `4d779c8`) |
+| Rollback version | `692bc54f-c280-4174-b488-1707c8e36d07` |
+| Second rollback retained | `c22fca1d-5b51-456c-9412-9dcee433ff76` |
+
+Not executed. No traffic altered.
+
+## Explicit non-actions
+
+No deployment, Worker version, traffic change, DNS change, environment change,
+production merge, merge into `main`, tag, force-push, history rewrite, squash,
+dependency, lockfile change, feature addition, copy rewrite, redesign, product,
+formula, ingredient, pricing or Study Circle change.
+
+## Deployment status
+
+**Not deployed.** Founder authorization required before deployment.
