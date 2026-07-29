@@ -293,8 +293,14 @@ export function ScienceMapExperience({
         </div>
       </div>
 
-      {/* The second way in. Same state, different input. */}
-      {entryMode === 'profile' ? (
+      {/* The second way in. Same state, different input.
+
+          Hidden rather than unmounted, exactly as the pathway controls are.
+          Unmounting discarded the visitor's description the moment she glanced
+          at pathway mode, so coming back showed her an empty form. `hidden` is
+          display:none, so it leaves the tab order and the accessibility tree
+          either way. */}
+      <div className={entryMode === 'profile' ? undefined : 'hidden'}>
         <SkinProfileBuilder
           copy={skinProfile}
           contexts={skinContexts}
@@ -304,7 +310,7 @@ export function ScienceMapExperience({
           onReset={resetProfile}
           applied={profileApplied}
         />
-      ) : null}
+      </div>
 
       {/* Concise, polite announcement of interpretation changes only. */}
       <p role="status" aria-live="polite" className="sr-only">
