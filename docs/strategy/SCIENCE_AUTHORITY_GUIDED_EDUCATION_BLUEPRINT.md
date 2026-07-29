@@ -2472,3 +2472,185 @@ zero `/inci` code, zero global styles, zero dependency or lockfile changes.
 ## Founder review status
 
 Awaiting approval, with the §5 placement ambiguity flagged above.
+
+---
+
+# Final Phase 1 continuity refinement — Return from Ingredients with pathway state
+
+## Founder decision
+
+A visitor exploring pathways on Science who follows an ingredient-family link
+should be able to come back to the same focused view. Without a stored profile,
+an account, or anything saved.
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-ingredient-return-continuity` |
+| Branched from | `feature/nfe-science-layer-science-module-restoration` @ `2171199` |
+| Deployed | No |
+
+## The model: URL state, and nothing else
+
+Pathways travel in the address bar. They last exactly as long as the URL does.
+
+| | |
+|---|---|
+| Science → Ingredients | `/inci?from=science&pathways=hydration,tone-integrity#humectants` |
+| No selection | `/inci?from=science#humectants` |
+| Return | `/science?pathways=hydration,tone-integrity#science-map` |
+| Nothing to restore | `/science#science-map` |
+
+Canonical ids only — `barrier-comfort`, `hydration`, `tone-integrity`,
+`texture-suppleness`, `visible-resilience` — drawn from the existing pathway
+content, never invented and never renamed. Labels never appear in a URL.
+
+The URL is an opening position, not a synchronised copy. Selections stay in
+React; the address bar is not rewritten on every click. Measured: five toggles
+plus Clear added **zero** history entries.
+
+## Security boundary
+
+No function in `src/lib/science-pathway-state.ts` accepts a URL. The return
+href is built from a fixed path constant and validated ids, so there is no
+`returnTo` parameter and no open redirect to have.
+
+Nothing trusts the query. Every inbound value is checked against the canonical
+ids and dropped unless it matches exactly; duplicates collapse; order is
+canonical, not the order given; malformed input returns an empty array and
+nothing throws. Serialization validates too, because its output goes into a
+public URL where the type no longer holds.
+
+The origin marker is strict — exactly one value, exactly `science`. So
+`?from=other` and `?from=SCIENCE` show nothing.
+
+Verified against `invalid`, mixed valid and invalid, repeats, a null byte,
+empty, path traversal, a script tag, a 10,000-character value, and 500 repeated
+segments. Every case: HTTP 200, correct output, no error.
+
+## Privacy
+
+No localStorage, sessionStorage, cookie, IndexedDB, API, database or analytics.
+The six touched files are scanned for all of them by test.
+
+**Analytics audit.** GA4 is defined in `src/lib/analytics.ts` but
+`initializeAnalytics()` is never called, and `trackPageView` — the only thing
+that would send `page_location` — is imported by `/learn` and `/skin-strategy`
+only. Neither Science nor Ingredients emits any event. The UTM helper writes a
+landing page to sessionStorage but runs only on Concierge and Founder Access.
+**No pathway id can reach analytics.** No new analytics was added.
+
+One thing to know rather than discover later: on a *hard* navigation from a
+Science URL carrying pathways to Concierge or Founder Access,
+`document.referrer` would contain that URL, and the existing attribution helper
+stores the referrer. Soft navigation — every in-app link — does not update
+`document.referrer`, so the ordinary path does not reach it. Recorded, not
+changed: that helper is outside this task's scope.
+
+## Ingredients
+
+One quiet return link, under the family introduction, shown only for the
+Science journey. *Return to your Science Map*, with *Continue with the pathways
+you were exploring.* only when there are pathways to continue with.
+
+Nothing was saved and nothing was restored from a record, so no wording claims
+a session, a profile, results or a diagnosis. A test asserts the absence of all
+of them.
+
+A restrained text link with a small arrow on a gold rule — not sticky, not
+floating, not a banner, not a filled button. 14.04:1; the supporting line
+5.52:1. Keyboard focus reaches it and draws a real 2px gold ring.
+
+The existing *Return to Science* link at the foot of the page is untouched and
+still goes to `/science` without pathways.
+
+## The anchor, and a correction
+
+`science-map` sits on the wrapper of the interactive chapter.
+
+It was first placed on the dark chapter wrapper. Browser measurement showed a
+returning visitor landing on the first-visit framing, with the controls only
+fully in view at 900px tall and the schematic below the fold at every height
+tested. Moved onto the map wrapper, both are in view from 720px up.
+
+| Anchor on | Controls | Schematic |
+|---|---|---|
+| chapter wrapper | 676px | 1081px |
+| map wrapper | 224px | 629px |
+
+## Restored state
+
+Verified at 1440, 1280, 1024, 768, 375 and 320 — identical at every one:
+two buttons `aria-pressed`, two panels in focus, two matrix rows, two matrix
+cards, four schematic zones, the interpretation naming both, and all 14 family
+links carrying the state. No overflow, one `h1`, no duplicate ids anywhere.
+
+**Clear-state freshness.** Restore two pathways from a URL, press Clear, then
+follow a family link: all eight hrefs drop back to `?from=science` and the
+outgoing link carries nothing stale. The address bar still shows the old query,
+which is expected — hrefs come from live state, never from the query.
+
+**Browser Back** returns to a working Science page; React state is not
+preserved by the page cache, which is why the explicit return link exists. The
+link is the deterministic mechanism; Back is not depended on.
+
+## Performance
+
+Reading searchParams moves `/science` and `/inci` from prerendered to
+per-request. Measured against the parent build in the same session:
+
+| | Parent (static) | Branch (dynamic) |
+|---|---|---|
+| `/science` | 97 · TTFB 50ms · LCP 2.5s | **98** · TTFB 20ms · LCP 2.3s |
+| `/inci` | 97 · TTFB 30ms · LCP 2.5s | **97** · TTFB 20ms · LCP 2.5s |
+
+No local cost. Worth knowing that local `wrangler dev` does not reproduce
+production edge caching of static assets, so the real difference may be larger
+than these numbers suggest.
+
+Science client chunk 25,519 → **25,770** (+251, the URL builders). Ingredients
+chunk unchanged at 14,342 — the return module is server-rendered. Route count
+63 → 63. No dependency change.
+
+## Accessibility — one blocker, pre-existing
+
+`/science` **100**, `/inci` **100**, `/inci` with the return module **100**.
+
+`/science?pathways=…` scores **96**: four contrast failures on *active* Layer
+Context panels — the gold zone eyebrow at 4.18:1 and *Formulation support* at
+3.7:1, both against the lifted active-panel ground, both under the 4.5:1 AA
+threshold.
+
+**This is not introduced here.** `git diff` against the parent shows the only
+change to `LayerContextPanels.tsx` is the import and the href; every colour
+class is byte-identical. Measured in the click-only path that predates this
+branch, the same foreground `#c6a664` fails the same way. What changed is that
+the selected state is now reachable by URL, so it can be audited — and shared.
+
+Not fixed here: Layer Context active states are protected by the brief. The
+remedy is small — the gold reaches 4.15:1 on that ground and needs roughly ten
+percent more luminance, for example `#d3b478` at 4.85:1, plus dropping the
+`/90` on *Formulation support*. Two tokens on a protected surface. Founder's
+call.
+
+## Tests
+
+200 → **264**. Parser, serialization, origin marker, both href builders across
+every family, the return module, restored state, the anchor, and a privacy and
+security sweep of all six touched files.
+
+Four guards deliberately broken and each caught: an invalid id through the
+parser (6 failures), a duplicated serialization (5), a raw `returnTo` on the
+return link (2), stale pathways after Clear (2). The first attempt at the
+invalid-id break was a no-op — the parser filters twice, so defeating it needed
+both removed.
+
+## Files changed
+
+Seven. The utility, the two pages, the panels, the island, the return module,
+and tests. Zero product, ingredient, formula, style, dependency or lockfile
+changes; no new route; no unrelated file.
+
+## Founder review status
+
+Awaiting approval, with the pre-existing active-panel contrast failure above as
+the one open item.
