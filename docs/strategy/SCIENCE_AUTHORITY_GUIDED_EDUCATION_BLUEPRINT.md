@@ -2654,3 +2654,174 @@ changes; no new route; no unrelated file.
 
 Awaiting approval, with the pre-existing active-panel contrast failure above as
 the one open item.
+
+---
+
+# Final continuity refinement — Persistent Ingredients return navigation
+
+## Founder decision
+
+The return link must be visible wherever the visitor lands on Ingredients, and
+stay visible while she reads.
+
+| | |
+|---|---|
+| Branch | `feature/nfe-inci-floating-science-return` |
+| Branched from | `feature/nfe-science-ingredient-return-continuity` @ `2fc38c8` |
+| Deployed | No |
+
+## The problem
+
+The return link sat in the page flow near the top. A visitor following a family
+link lands deep in the document — Sensorial support is past eight sections — so
+by the time she arrived the way back had already scrolled off. She had to
+scroll to the top to find it.
+
+## Fixed, not sticky
+
+`position: fixed`. A sticky element stops following once its own section ends,
+and the requirement is that this stays visible for the whole page. Confirmed
+`fixed` at every viewport, with a test that fails if it becomes static.
+
+## Placement, measured rather than assumed
+
+The reading column on Ingredients leaves this much room to its right:
+
+| Viewport | Right margin |
+|---|---|
+| 1440 | 88px |
+| 1280 | 15px |
+| 1024 | 15px |
+| 768 | 15px |
+| 375 | 15px |
+| 320 | 15px |
+
+A side rail needs 190–260px. It would have sat on top of the text at every
+width, so the compact bottom-corner fallback was taken instead.
+
+| | Placement | Control |
+|---|---|---|
+| Desktop ≥1024 | fixed bottom-right, 32px inset | 260 × 46 |
+| Tablet 768 | fixed bottom-right, 24px inset | 260 × 46 |
+| Mobile 375 | fixed bar, 16px both edges | 328 × 46 |
+| Mobile 320 | fixed bar, 16px both edges | 273 × 46 |
+
+Safe-area padding on the wrapper lifts the mobile bar clear of a phone's home
+indicator; it resolves to zero everywhere else.
+
+The pill was also narrowed. The uppercase treatment used elsewhere on this page
+rendered it at 360px — well past what a floating control should take. Sentence
+case with slight tracking measures 253–260px.
+
+## Visibility through the page
+
+All eight family anchors, at landing and at 25, 50, 75 and 100 percent scroll:
+**visible in all forty cases**. The family heading is visible at 137px on
+landing at every anchor, and the control never covers it.
+
+## Content protection
+
+Contextual bottom padding — 112px from `md` up, 128px below — applied only when
+the control renders. An ordinary visit keeps exactly the spacing it always had.
+
+Scrolled to the very bottom of the document at six viewports: **zero footer
+links covered**, closing content clears the pill at every width, no horizontal
+overflow.
+
+Stated plainly rather than claimed away: a fixed control passes over body text
+at intermediate scroll positions — 3 instances across 13 scroll samples at
+1440, more at narrower widths where the column runs to the edge. Nothing is
+lost, because the text scrolls past. That is inherent to the fixed model the
+brief chose, not a defect of this implementation.
+
+## Stacking
+
+`z-40`, deliberately below the cookie consent dialog at `z-50`. A consent
+decision should outrank navigation, so on a first visit the banner covers the
+control until it is answered. The test asserts *any* value below 50 rather than
+the literal, because that is the property that matters.
+
+## Conditional rendering
+
+Rendered only for a validated Science origin, using the existing strict parser.
+Verified in server HTML with JavaScript out of the picture:
+
+| URL | Control |
+|---|---|
+| `/inci` | absent |
+| `/inci#humectants` | absent |
+| `/inci?from=other#humectants` | absent |
+| `/inci?from=SCIENCE#humectants` | absent |
+| `/inci?pathways=hydration#humectants` | absent |
+| `/inci?from=science&from=science` | absent |
+| `/inci?from=science#humectants` | present |
+
+Origin is never inferred from the referrer or from history.
+
+## Return URL — unchanged
+
+No new parser, no new route, no `returnTo`. Server HTML:
+
+- `?from=science` → `/science#science-map`
+- `?from=science&pathways=hydration` → `/science?pathways=hydration#science-map`
+- `?from=science&pathways=invalid,hydration,hydration` → `/science?pathways=hydration#science-map`
+
+Returning from the deepest anchor restores both pathways, both panels, two
+matrix rows, four schematic zones and the interpretation, landing at 96px.
+
+## Accessibility
+
+`/inci` **100** plain and **100** with the control; no failing audits either
+way, and no fixed-element finding. Native anchor, no role override, no
+auto-focus, no live region, no keyboard interception. Accessible name equals
+the visible label; the arrow is `aria-hidden`. Warm cream on deep green at
+**12.85:1**. Target 260 × 46, above the 44px minimum. One labelled landmark,
+no duplicate landmark labels, one `h1`, no duplicate ids.
+
+At 200% zoom the control fits the viewport at desktop and both phone widths.
+The horizontal overflow that appears on narrow phones at that zoom is
+**pre-existing** — identical with and without the control, `scrollWidth` 318
+either way — and belongs to something else on the page.
+
+## Performance
+
+CSS and markup only. No listener, no observer, no state, no dependency.
+
+| | Before | After |
+|---|---|---|
+| `/inci` client chunk | 14,342 | 14,344 (+2) |
+| `/science` client chunk | 25,770 | 25,768 (−2) |
+| `/inci` Lighthouse | 97 · a11y 100 · CLS 0 | 97 · a11y 100 · CLS 0 |
+| Route count | 63 | 63 |
+
+## Tests
+
+264 → **287**. Visibility conditions, fixed behaviour, breakpoint placement,
+safe area, stacking order, pointer-events, absence of listeners and state, no
+dismiss control, target size and focus, semantics, landmark, contextual
+padding, duplication, and regression.
+
+Four guards deliberately broken and each caught: static instead of fixed,
+safe-area padding removed, the control on plain `/inci`, and the link
+duplicated. Three earlier guards were rewritten — one asserted a supporting
+sentence the floating model no longer has, one banned `aria-label` anywhere
+when the new landmark needs it, one banned `fixed` and `z-40` which are now the
+design.
+
+## Files changed
+
+Three: the Ingredients page, the return component, and tests. Zero ingredient,
+taxonomy, product, formula, global-style, dependency or lockfile changes. The
+pathway URL state — parser, serializer, builders, Science restoration — was not
+touched.
+
+## Known separate issue
+
+The active Layer Context contrast failure recorded in the previous entry is
+unchanged: still present, still pre-existing, still not introduced or modified
+here, still deferred pending founder authorization. `/science?pathways=…`
+scores 96 for that reason and that reason alone.
+
+## Founder review status
+
+Awaiting approval.
