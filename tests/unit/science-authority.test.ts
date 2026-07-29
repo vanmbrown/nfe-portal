@@ -2441,10 +2441,12 @@ describe('ingredients return module', () => {
     assert.match(returnLinkSource(), /Return to your Science Map/)
   })
 
-  it('uses the supporting line only when there is something to continue', () => {
-    const source = returnLinkSource()
-    assert.match(source, /hasPathways \? \(/)
-    assert.match(source, /Continue with the pathways you were exploring\./)
+  it('carries a single line and no supporting sentence', () => {
+    // The floating control replaced the inline block. A second line would make
+    // it taller on a phone, where it sits over the content, for no gain.
+    const source = stripComments(returnLinkSource())
+    assert.ok(!source.includes('Continue with the pathways you were exploring.'))
+    assert.ok(!source.includes('hasPathways'), 'no conditional second line remains')
   })
 
   it('never claims a saved session, profile, result or diagnosis', () => {
@@ -2492,22 +2494,35 @@ describe('ingredients return module', () => {
   })
 
   it('lets the visible label be the accessible name', () => {
-    const source = returnLinkSource()
-    assert.ok(!/aria-label=/.test(source), 'no hidden name may override the label')
+    const source = stripComments(returnLinkSource())
+    // The landmark carries a label; the link must not. An aria-label on the
+    // anchor would replace the words the visitor can see.
+    const anchor = source.slice(source.indexOf('<Link'), source.indexOf('</Link>'))
+    assert.ok(!/aria-label=/.test(anchor), 'no hidden name may override the label')
+    assert.match(source, /<aside\s+aria-label="Science navigation"/)
     // The arrow is decorative and hidden, so it is not part of the name.
     assert.match(source, /<span aria-hidden="true">&larr;<\/span>/)
+    assert.match(source, /<span>Return to your Science Map<\/span>/)
   })
 
   it('is quiet orientation, not a call to action', () => {
-    // Comments first: the prose explains that the destination is a *fixed*
-    // path, and scanning it raw would read that as a fixed-position banner.
     const source = stripComments(returnLinkSource())
-    for (const banned of ['fixed ', 'sticky', 'z-50', 'z-40', 'animate-', 'shadow-lg']) {
-      assert.ok(!source.includes(banned), `return link must not use ${banned}`)
+    for (const banned of [
+      'animate-',
+      'animate-pulse',
+      'shadow-2xl',
+      'Dismiss',
+      'aria-label="Close"',
+      'text-lg',
+      'text-xl',
+      'font-bold',
+      'uppercase',
+    ]) {
+      assert.ok(!source.includes(banned), `return control must not use ${banned}`)
     }
-    // A text link, not a filled button.
+    // Deep green with warm cream, not a filled gold promotional button.
+    assert.match(source, /bg-\[#0E2A22\]/)
     assert.ok(!/bg-\[#C9A66B\]|bg-nfe-gold/.test(source))
-    assert.match(source, /underline/)
   })
 
   it('leaves the existing Return to Science link untouched', () => {
@@ -2751,5 +2766,245 @@ describe('return continuity regression', () => {
   it('keeps the layer science module and the schematic exactly as approved', () => {
     assert.equal(SCIENCE_PAGE.layerScience.cards.length, 3)
     assert.match(schematicSource(), /viewBox="0 0 620 300"/)
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * Persistent Ingredients return navigation
+ * ------------------------------------------------------------------ */
+
+describe('floating return control — visibility conditions', () => {
+  it('renders only for a validated science origin', () => {
+    const page = inciPageSource()
+    assert.match(page, /const cameFromScience = isScienceOrigin\(params\[ORIGIN_PARAM\]\)/)
+    assert.match(page, /cameFromScience \? <ScienceReturnLink pathwayIds=\{pathwayIds\} \/> : null/)
+  })
+
+  it('leans on the existing strict origin check, not a new one', () => {
+    // The control must not appear because a pathway parameter happens to be
+    // present, and must not sniff the referrer or history to guess an origin.
+    assert.equal(isScienceOrigin('science'), true)
+    for (const value of ['other', 'SCIENCE', 'Science', '', undefined, ['science', 'science']]) {
+      assert.equal(isScienceOrigin(value as string | string[] | undefined), false)
+    }
+    const sources = [stripComments(inciPageSource()), stripComments(returnLinkSource())]
+    for (const source of sources) {
+      for (const banned of ['document.referrer', 'history.', 'navigator.', 'useSearchParams']) {
+        assert.ok(!source.includes(banned), `origin must not be inferred via ${banned}`)
+      }
+    }
+  })
+
+  it('renders with zero, one and many pathways alike', () => {
+    // Visibility depends on origin only; the pathways change the href, not
+    // whether the control exists.
+    const source = stripComments(returnLinkSource())
+    assert.ok(!/pathwayIds\.length/.test(source), 'presence must not depend on pathway count')
+    assert.equal(buildScienceReturnHref([]), '/science#science-map')
+    assert.equal(
+      buildScienceReturnHref(['hydration']),
+      '/science?pathways=hydration#science-map'
+    )
+    assert.equal(
+      buildScienceReturnHref(['tone-integrity', 'hydration']),
+      '/science?pathways=hydration,tone-integrity#science-map'
+    )
+  })
+})
+
+describe('floating return control — fixed behaviour', () => {
+  const classes = () => {
+    const source = returnLinkSource()
+    const aside = source.slice(source.indexOf('<aside'), source.indexOf('<Link'))
+    const link = source.slice(source.indexOf('<Link'), source.indexOf('</Link>'))
+    return { aside, link }
+  }
+
+  it('travels with the viewport rather than the document', () => {
+    const { aside } = classes()
+    assert.match(aside, /\bfixed\b/, 'the control must be viewport-fixed')
+    assert.ok(!/\bsticky\b/.test(aside), 'sticky stops following once its section ends')
+    assert.ok(!/\babsolute\b/.test(aside))
+  })
+
+  it('places itself for every breakpoint', () => {
+    const { aside } = classes()
+    // Mobile: a bar inset from both edges, near the bottom.
+    assert.match(aside, /inset-x-4/)
+    assert.match(aside, /bottom-4/)
+    // Tablet and up: a compact pill in the bottom corner.
+    assert.match(aside, /md:inset-x-auto/)
+    assert.match(aside, /md:right-6/)
+    assert.match(aside, /md:bottom-6/)
+    // Desktop: a little more breathing room.
+    assert.match(aside, /lg:right-8/)
+    assert.match(aside, /lg:bottom-8/)
+  })
+
+  it('lifts clear of the phone home indicator', () => {
+    assert.match(
+      returnLinkSource(),
+      /paddingBottom: 'env\(safe-area-inset-bottom\)'/,
+      'the mobile bar needs safe-area padding'
+    )
+  })
+
+  it('sits under the consent dialog, never over it', () => {
+    const { aside } = classes()
+    const z = aside.match(/z-(\d+)/)
+    assert.ok(z, 'the control needs an explicit stacking order')
+    assert.ok(
+      Number(z[1]) < 50,
+      `z-${z[1]} would cover the cookie consent dialog at z-50`
+    )
+  })
+
+  it('never swallows a click meant for the page beneath it', () => {
+    const { aside, link } = classes()
+    assert.match(aside, /pointer-events-none/)
+    assert.match(link, /pointer-events-auto/)
+  })
+
+  it('costs nothing at runtime — no listener, no observer, no state', () => {
+    const source = stripComments(returnLinkSource())
+    for (const banned of [
+      "'use client'",
+      'addEventListener',
+      'onScroll',
+      'IntersectionObserver',
+      'ResizeObserver',
+      'useState',
+      'useEffect',
+      'useRef',
+      'requestAnimationFrame',
+      'getBoundingClientRect',
+      'window.',
+    ]) {
+      assert.ok(!source.includes(banned), `the control must not use ${banned}`)
+    }
+  })
+
+  it('offers no dismiss control', () => {
+    const source = stripComments(returnLinkSource())
+    // Not a bare "hidden" scan — the decorative arrow is legitimately
+    // aria-hidden, and that is the opposite of a dismiss affordance.
+    for (const banned of ['<button', 'Close', 'Dismiss', 'onClick', 'className="hidden']) {
+      assert.ok(!source.includes(banned), `the control must not be dismissible (${banned})`)
+    }
+  })
+
+  it('keeps a comfortable target and a visible focus ring', () => {
+    const { link } = classes()
+    assert.match(link, /min-h-\[44px\]/)
+    assert.match(link, /focus-visible:ring-2/)
+    assert.match(link, /focus-visible:ring-\[#C9A66B\]/)
+    assert.match(link, /focus-visible:ring-offset-2/)
+  })
+
+  it('stays a plain anchor with no new tab or scripted navigation', () => {
+    const { link } = classes()
+    assert.match(link, /<Link\s+href=\{buildScienceReturnHref\(pathwayIds\)\}/)
+    for (const banned of ['target=', 'rel="noopener"', 'role="button"', 'onClick']) {
+      assert.ok(!link.includes(banned), `the control must not use ${banned}`)
+    }
+  })
+
+  it('is wrapped in a labelled landmark', () => {
+    assert.match(returnLinkSource(), /<aside\s+aria-label="Science navigation"/)
+  })
+})
+
+describe('floating return control — content protection', () => {
+  it('gives the page room to clear the control, and only then', () => {
+    const page = inciPageSource()
+    assert.match(
+      page,
+      /cameFromScience \? 'pb-32 md:pb-28' : ''/,
+      'bottom padding must be contextual, not permanent'
+    )
+  })
+
+  it('leaves an ordinary visit to Ingredients exactly as it was', () => {
+    const page = inciPageSource()
+    // The padding and the control are both behind the same condition, so a
+    // direct visit renders neither.
+    const conditional = page.match(/cameFromScience \?/g) ?? []
+    assert.equal(conditional.length, 2, 'control and padding are both contextual')
+    assert.match(page, /container mx-auto px-4 py-8 \$\{/)
+  })
+
+  it('reserves more room on mobile, where the bar spans the width', () => {
+    const page = inciPageSource()
+    const mobile = Number(page.match(/pb-(\d+) md:pb-\d+/)![1])
+    const desktop = Number(page.match(/pb-\d+ md:pb-(\d+)/)![1])
+    assert.ok(mobile > desktop, 'the full-width bar needs more clearance than the pill')
+    // Control is 46px tall; clearance must exceed it by a real margin.
+    assert.ok(desktop * 4 >= 46 + 24, `${desktop * 4}px is not enough clearance`)
+  })
+})
+
+describe('floating return control — no duplication', () => {
+  it('is the only contextual return control on the page', () => {
+    const page = inciPageSource()
+    assert.equal((page.match(/<ScienceReturnLink/g) ?? []).length, 1)
+    assert.equal(
+      (page.match(/Return to your Science Map/g) ?? []).length,
+      0,
+      'the page must not restate the label inline'
+    )
+    assert.equal(
+      (returnLinkSource().match(/Return to your Science Map/g) ?? []).length,
+      1
+    )
+  })
+
+  it('does not repeat inside the family sections', () => {
+    const sections = familySectionsSource()
+    assert.ok(!sections.includes('ScienceReturnLink'))
+    assert.ok(!sections.includes('Return to your Science Map'))
+  })
+
+  it('leaves the longstanding footer link alone', () => {
+    const page = inciPageSource()
+    assert.match(page, /href="\/science"[\s\S]{0,400}Return to Science/)
+    // Distinct copy, so the two are not read as duplicates.
+    assert.ok(!page.includes('Return to your Science Map'))
+  })
+})
+
+describe('persistent return regression', () => {
+  it('keeps all eight family anchors', () => {
+    assert.equal(INGREDIENT_FAMILY_TAXONOMY.length, 8)
+    for (const family of INGREDIENT_FAMILY_TAXONOMY) {
+      assert.equal(familyHref(family.id), `/inci#${family.id}`)
+    }
+  })
+
+  it('leaves the pathway URL contract untouched', () => {
+    assert.deepEqual(parsePathwayQuery('hydration,invalid,hydration'), ['hydration'])
+    assert.deepEqual(parsePathwayQuery('tone-integrity,hydration'), [
+      'hydration',
+      'tone-integrity',
+    ])
+    assert.equal(serializePathwayIds([]), undefined)
+    assert.equal(
+      buildIngredientFamilyHref('humectants', ['hydration']),
+      '/inci?from=science&pathways=hydration#humectants'
+    )
+  })
+
+  it('keeps Ingredients server-rendered with its sections intact', () => {
+    const page = inciPageSource()
+    assert.ok(!page.includes("'use client'"))
+    assert.match(page, /<IngredientFamilySections \/>/)
+    assert.match(page, /<INCITransparencyTabs \/>/)
+    assert.match(page, /export default async function INCIPage/)
+  })
+
+  it('adds no route and no new parser', () => {
+    assert.ok(!existsSync(src('app/(education)/inci/[family]')))
+    const source = stripComments(returnLinkSource())
+    assert.ok(!source.includes('function parse'), 'the control must reuse the shared parser')
+    assert.match(returnLinkSource(), /from '@\/lib\/science-pathway-state'/)
   })
 })
