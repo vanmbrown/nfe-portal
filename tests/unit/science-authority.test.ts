@@ -15,6 +15,15 @@ import { LAYER_CONTEXT_PANELS } from '@/content/science/layer-context'
 import { SKIN_LAYERS } from '@/content/science/layers'
 import { SCIENCE_PAGE } from '@/content/science/page'
 import { PATHWAYS } from '@/content/science/pathways'
+import {
+  SCIENCE_MAP_ANCHOR,
+  buildIngredientFamilyHref,
+  buildScienceReturnHref,
+  isScienceOrigin,
+  parsePathwayQuery,
+  serializePathwayIds,
+} from '@/lib/science-pathway-state'
+import type { PathwayId } from '@/content/science/types'
 
 /**
  * Guards the Science Authority experience delivered in Phase 1
@@ -1246,6 +1255,10 @@ describe('schematic scale', () => {
 const inciPageSource = () => readFileSync(src('app/(education)/inci/page.tsx'), 'utf8')
 const familySectionsSource = () =>
   readFileSync(src('components/ingredients/IngredientFamilySections.tsx'), 'utf8')
+const pathwayStateSource = () =>
+  readFileSync(src('lib/science-pathway-state.ts'), 'utf8')
+const returnLinkSource = () =>
+  readFileSync(src('components/ingredients/ScienceReturnLink.tsx'), 'utf8')
 
 const REQUIRED_FAMILY_IDS = [
   'humectants',
@@ -1357,7 +1370,7 @@ describe('ingredient family taxonomy', () => {
 describe('science family links', () => {
   it('renders family pills as links, never buttons', () => {
     const source = layerContextSource()
-    assert.match(source, /<Link\s+href=\{familyHref\(id\)\}/)
+    assert.match(source, /<Link\s+href=\{buildIngredientFamilyHref\(id, emphasized\)\}/)
     const stripped = stripComments(source)
     for (const banned of ['<button', 'role="button"', 'onClick', 'target="_blank"']) {
       assert.ok(!stripped.includes(banned), `family links must not use ${banned}`)
@@ -1366,8 +1379,17 @@ describe('science family links', () => {
 
   it('builds every href from the shared taxonomy, not by hand', () => {
     const source = stripComments(layerContextSource())
-    assert.match(source, /familyHref\(id\)/)
+    assert.match(source, /buildIngredientFamilyHref\(/)
     assert.ok(!/href="\/inci#/.test(source), 'hrefs must not be hardcoded')
+    assert.ok(
+      !/href="\/inci\?/.test(source),
+      'the contextual query must not be hardcoded either'
+    )
+    // The builder is the only thing that knows the anchor, and it gets it from
+    // the shared taxonomy rather than restating it.
+    const builder = stripComments(pathwayStateSource())
+    assert.match(builder, /familyHref\(familyId\)/)
+    assert.ok(!/`\/inci/.test(builder), 'the builder must not restate the route')
   })
 
   it('produces the canonical anchor href for every family', () => {
@@ -2048,5 +2070,674 @@ describe('layer science module placement', () => {
         `${order[i]} must follow ${order[i - 1]}`
       )
     }
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * Science-to-Ingredients return continuity
+ * ------------------------------------------------------------------ */
+
+describe('pathway query parser', () => {
+  it('accepts one valid id', () => {
+    assert.deepEqual(parsePathwayQuery('hydration'), ['hydration'])
+  })
+
+  it('accepts several valid ids in one value', () => {
+    assert.deepEqual(parsePathwayQuery('hydration,tone-integrity'), [
+      'hydration',
+      'tone-integrity',
+    ])
+  })
+
+  it('accepts a repeated parameter as well as a comma list', () => {
+    assert.deepEqual(parsePathwayQuery(['hydration', 'tone-integrity']), [
+      'hydration',
+      'tone-integrity',
+    ])
+    assert.deepEqual(
+      parsePathwayQuery(['hydration,visible-resilience', 'tone-integrity']),
+      ['hydration', 'tone-integrity', 'visible-resilience']
+    )
+  })
+
+  it('discards unknown ids and keeps the valid ones', () => {
+    assert.deepEqual(parsePathwayQuery('invalid'), [])
+    assert.deepEqual(parsePathwayQuery('hydration,invalid'), ['hydration'])
+    assert.deepEqual(parsePathwayQuery('invalid,hydration,also-invalid'), [
+      'hydration',
+    ])
+  })
+
+  it('deduplicates', () => {
+    assert.deepEqual(parsePathwayQuery('hydration,hydration'), ['hydration'])
+    assert.deepEqual(parsePathwayQuery(['hydration', 'hydration']), ['hydration'])
+  })
+
+  it('returns canonical order regardless of the order given', () => {
+    const canonical = PATHWAYS.map((pathway) => pathway.id)
+    const reversed = [...canonical].reverse().join(',')
+    assert.deepEqual(parsePathwayQuery(reversed), canonical)
+    assert.deepEqual(parsePathwayQuery('tone-integrity,hydration'), [
+      'hydration',
+      'tone-integrity',
+    ])
+  })
+
+  it('returns an empty array for missing, empty or malformed input', () => {
+    for (const input of [
+      undefined,
+      '',
+      ',',
+      ',,,',
+      '   ',
+      ' ',
+      '%00',
+      'null',
+      'undefined',
+      '[]',
+      '{"a":1}',
+      '../../etc/passwd',
+      '<script>alert(1)</script>',
+      'https://example.com',
+      'hydration; DROP TABLE',
+      [],
+      ['', '  '],
+    ] as (string | string[] | undefined)[]) {
+      assert.deepEqual(
+        parsePathwayQuery(input),
+        [],
+        `expected nothing from ${JSON.stringify(input)}`
+      )
+    }
+  })
+
+  it('trims surrounding whitespace around otherwise valid ids', () => {
+    assert.deepEqual(parsePathwayQuery(' hydration , tone-integrity '), [
+      'hydration',
+      'tone-integrity',
+    ])
+  })
+
+  it('never throws, whatever arrives in the query string', () => {
+    const hostile = [
+      undefined,
+      '',
+      'x'.repeat(10_000),
+      Array.from({ length: 500 }, () => 'hydration').join(','),
+      Array.from({ length: 500 }, () => 'nope'),
+      ' �\uD800',
+      '%2e%2e%2f',
+    ] as (string | string[] | undefined)[]
+    for (const input of hostile) {
+      assert.doesNotThrow(() => parsePathwayQuery(input))
+    }
+  })
+
+  it('accepts every canonical id, and only those', () => {
+    for (const pathway of PATHWAYS) {
+      assert.deepEqual(parsePathwayQuery(pathway.id), [pathway.id])
+    }
+    // The labels are not accepted — ids only, never display strings.
+    for (const pathway of PATHWAYS) {
+      assert.deepEqual(parsePathwayQuery(pathway.label), [])
+    }
+  })
+})
+
+describe('pathway serialization', () => {
+  it('produces no parameter at all for zero ids', () => {
+    assert.equal(serializePathwayIds([]), undefined)
+  })
+
+  it('serializes one id', () => {
+    assert.equal(serializePathwayIds(['hydration']), 'hydration')
+  })
+
+  it('serializes several ids', () => {
+    assert.equal(
+      serializePathwayIds(['hydration', 'tone-integrity']),
+      'hydration,tone-integrity'
+    )
+  })
+
+  it('emits canonical order regardless of the order given', () => {
+    assert.equal(
+      serializePathwayIds(['tone-integrity', 'hydration']),
+      'hydration,tone-integrity'
+    )
+  })
+
+  it('never emits a duplicate', () => {
+    assert.equal(
+      serializePathwayIds(['hydration', 'hydration', 'hydration']),
+      'hydration'
+    )
+  })
+
+  it('filters anything that is not a canonical id, even when typed as one', () => {
+    const smuggled = ['hydration', 'not-a-pathway'] as PathwayId[]
+    assert.equal(serializePathwayIds(smuggled), 'hydration')
+    assert.equal(serializePathwayIds(['nope'] as unknown as PathwayId[]), undefined)
+  })
+
+  it('round-trips through the parser unchanged', () => {
+    const all = PATHWAYS.map((pathway) => pathway.id)
+    for (const subset of [
+      [],
+      ['hydration'],
+      ['tone-integrity', 'hydration'],
+      all,
+    ] as PathwayId[][]) {
+      const serialized = serializePathwayIds(subset)
+      assert.deepEqual(parsePathwayQuery(serialized), parsePathwayQuery(
+        serializePathwayIds(parsePathwayQuery(serialized))
+      ))
+    }
+  })
+
+  it('only ever emits url-safe tokens, so no encoding is needed', () => {
+    for (const pathway of PATHWAYS) {
+      assert.match(pathway.id, /^[a-z][a-z-]*$/, `${pathway.id} needs encoding`)
+    }
+    for (const family of INGREDIENT_FAMILY_TAXONOMY) {
+      assert.match(family.id, /^[a-z][a-z-]*$/, `${family.id} needs encoding`)
+    }
+  })
+})
+
+describe('science origin marker', () => {
+  it('recognises exactly the science marker', () => {
+    assert.equal(isScienceOrigin('science'), true)
+  })
+
+  it('rejects any other value', () => {
+    for (const value of [
+      undefined,
+      '',
+      'other',
+      'Science',
+      'SCIENCE',
+      'science-map',
+      'sciences',
+      ' science x',
+      'inci',
+      ['science', 'other'],
+      ['other'],
+      [],
+    ] as (string | string[] | undefined)[]) {
+      assert.equal(
+        isScienceOrigin(value),
+        false,
+        `${JSON.stringify(value)} must not read as the science origin`
+      )
+    }
+  })
+
+  it('rejects a repeated marker rather than taking the first', () => {
+    assert.equal(isScienceOrigin(['science', 'science']), false)
+  })
+})
+
+describe('contextual ingredient family links', () => {
+  const familyIds = INGREDIENT_FAMILY_TAXONOMY.map((family) => family.id)
+
+  it('carries the origin marker with no pathways selected', () => {
+    assert.equal(
+      buildIngredientFamilyHref('humectants', []),
+      '/inci?from=science#humectants'
+    )
+  })
+
+  it('carries one selected pathway', () => {
+    assert.equal(
+      buildIngredientFamilyHref('humectants', ['hydration']),
+      '/inci?from=science&pathways=hydration#humectants'
+    )
+  })
+
+  it('carries several selected pathways in canonical order', () => {
+    assert.equal(
+      buildIngredientFamilyHref('antioxidant-supportive-ingredients', [
+        'tone-integrity',
+        'hydration',
+      ]),
+      '/inci?from=science&pathways=hydration,tone-integrity#antioxidant-supportive-ingredients'
+    )
+  })
+
+  it('never emits an empty pathways parameter', () => {
+    for (const id of familyIds) {
+      const href = buildIngredientFamilyHref(id, [])
+      assert.ok(!href.includes('pathways='), `${href} carries an empty parameter`)
+    }
+  })
+
+  it('keeps every family anchor intact, and identical to the plain link', () => {
+    for (const id of familyIds) {
+      for (const ids of [[], ['hydration'], ['hydration', 'visible-resilience']] as PathwayId[][]) {
+        const href = buildIngredientFamilyHref(id, ids)
+        assert.ok(href.endsWith(`#${id}`), `${href} lost its anchor`)
+        assert.equal(href.split('?')[0], familyHref(id).split('#')[0])
+        assert.equal(href.split('#')[1], familyHref(id).split('#')[1])
+      }
+    }
+  })
+
+  it('resolves to a section that exists on Ingredients', () => {
+    const sections = new Set<string>(INGREDIENT_FAMILY_TAXONOMY.map((f) => f.id))
+    for (const panel of LAYER_CONTEXT_PANELS) {
+      for (const id of panel.ingredientFamilyIds) {
+        const href = buildIngredientFamilyHref(id, ['hydration'])
+        assert.ok(sections.has(href.split('#')[1]))
+      }
+    }
+  })
+
+  it('is generated from the live selection, never a remembered one', () => {
+    const source = layerContextSource()
+    // `emphasized` is the prop the panels are currently rendering. Nothing else
+    // may feed the href — an initial or stored value would go stale on Clear.
+    assert.match(source, /buildIngredientFamilyHref\(id, emphasized\)/)
+    const stripped = stripComments(source)
+    for (const banned of [
+      'initialSelected',
+      'useState',
+      'useRef',
+      'useMemo',
+      'localStorage',
+      'sessionStorage',
+    ]) {
+      assert.ok(
+        !stripped.includes(banned),
+        `panels must hold no state of their own (${banned})`
+      )
+    }
+  })
+
+  it('stays a plain anchor with no new-tab or handler behaviour', () => {
+    const stripped = stripComments(layerContextSource())
+    for (const banned of [
+      'target=',
+      'rel="noopener"',
+      'onClick',
+      'role="button"',
+      '<button',
+      'router.push',
+    ]) {
+      assert.ok(!stripped.includes(banned), `family links must not use ${banned}`)
+    }
+  })
+})
+
+describe('science return href', () => {
+  it('returns to the map alone when there is nothing to restore', () => {
+    assert.equal(buildScienceReturnHref([]), '/science#science-map')
+  })
+
+  it('carries one pathway', () => {
+    assert.equal(
+      buildScienceReturnHref(['hydration']),
+      '/science?pathways=hydration#science-map'
+    )
+  })
+
+  it('carries several pathways in canonical order', () => {
+    assert.equal(
+      buildScienceReturnHref(['tone-integrity', 'hydration']),
+      '/science?pathways=hydration,tone-integrity#science-map'
+    )
+  })
+
+  it('always points at the fixed science route and anchor', () => {
+    const cases: PathwayId[][] = [
+      [],
+      ['hydration'],
+      PATHWAYS.map((pathway) => pathway.id),
+      ['nope'] as unknown as PathwayId[],
+    ]
+    for (const ids of cases) {
+      const href = buildScienceReturnHref(ids)
+      assert.ok(href.startsWith('/science'), `${href} left the science route`)
+      assert.ok(href.endsWith('#science-map'), `${href} lost the map anchor`)
+      assert.ok(!/^https?:|^\/\//.test(href), `${href} is not an internal path`)
+    }
+  })
+
+  it('cannot be pointed at an arbitrary destination', () => {
+    const source = stripComments(pathwayStateSource())
+    // No function here takes a URL, so there is no open redirect to have.
+    for (const banned of [
+      'returnTo',
+      'redirect',
+      'nextUrl',
+      'document.referrer',
+      'window.location',
+      'new URL(',
+    ]) {
+      assert.ok(!source.includes(banned), `url state must not use ${banned}`)
+    }
+    assert.match(source, /export const SCIENCE_PATH = '\/science'/)
+  })
+})
+
+describe('ingredients return module', () => {
+  it('renders only for a visitor who came from science', () => {
+    const source = inciPageSource()
+    assert.match(source, /isScienceOrigin\(params\[ORIGIN_PARAM\]\)/)
+    assert.match(source, /cameFromScience \? <ScienceReturnLink/)
+  })
+
+  it('appears exactly once', () => {
+    const source = inciPageSource()
+    assert.equal((source.match(/<ScienceReturnLink/g) ?? []).length, 1)
+    const familySections = familySectionsSource()
+    assert.ok(
+      !familySections.includes('ScienceReturnLink'),
+      'the return link must not repeat inside every family section'
+    )
+  })
+
+  it('carries the approved visible label', () => {
+    assert.match(returnLinkSource(), /Return to your Science Map/)
+  })
+
+  it('uses the supporting line only when there is something to continue', () => {
+    const source = returnLinkSource()
+    assert.match(source, /hasPathways \? \(/)
+    assert.match(source, /Continue with the pathways you were exploring\./)
+  })
+
+  it('never claims a saved session, profile, result or diagnosis', () => {
+    const copy = stripComments(returnLinkSource()).toLowerCase()
+    for (const banned of [
+      'saved session',
+      'resume session',
+      'resume your profile',
+      'your results',
+      'your diagnosis',
+      'personalized results',
+      'personalised results',
+      'recommended pathway',
+      'your concerns',
+      'we remembered',
+      'welcome back',
+      'restored',
+      'session',
+      'profile',
+      'query string',
+      'parameter',
+      'url',
+    ]) {
+      assert.ok(!copy.includes(banned), `return copy must not say "${banned}"`)
+    }
+  })
+
+  it('is a native link, server-rendered, with no new tab or handler', () => {
+    const source = returnLinkSource()
+    assert.match(source, /<Link\s+href=\{buildScienceReturnHref\(pathwayIds\)\}/)
+    assert.ok(!source.includes("'use client'"), 'the return link must render on the server')
+    const stripped = stripComments(source)
+    for (const banned of [
+      'target=',
+      'onClick',
+      '<button',
+      'role="button"',
+      'aria-live',
+      'useState',
+      'useEffect',
+      'router',
+    ]) {
+      assert.ok(!stripped.includes(banned), `return link must not use ${banned}`)
+    }
+  })
+
+  it('lets the visible label be the accessible name', () => {
+    const source = returnLinkSource()
+    assert.ok(!/aria-label=/.test(source), 'no hidden name may override the label')
+    // The arrow is decorative and hidden, so it is not part of the name.
+    assert.match(source, /<span aria-hidden="true">&larr;<\/span>/)
+  })
+
+  it('is quiet orientation, not a call to action', () => {
+    // Comments first: the prose explains that the destination is a *fixed*
+    // path, and scanning it raw would read that as a fixed-position banner.
+    const source = stripComments(returnLinkSource())
+    for (const banned of ['fixed ', 'sticky', 'z-50', 'z-40', 'animate-', 'shadow-lg']) {
+      assert.ok(!source.includes(banned), `return link must not use ${banned}`)
+    }
+    // A text link, not a filled button.
+    assert.ok(!/bg-\[#C9A66B\]|bg-nfe-gold/.test(source))
+    assert.match(source, /underline/)
+  })
+
+  it('leaves the existing Return to Science link untouched', () => {
+    const source = inciPageSource()
+    assert.match(source, /href="\/science"[\s\S]{0,400}Return to Science/)
+  })
+})
+
+describe('science initial state from the url', () => {
+  it('parses the query on the server, not in the browser', () => {
+    const page = sciencePageSource()
+    assert.match(page, /export default async function SciencePage\(\{ searchParams \}/)
+    assert.match(page, /parsePathwayQuery\(params\[PATHWAYS_PARAM\]\)/)
+    const stripped = stripComments(page)
+    for (const banned of ['useSearchParams', 'window.location', "'use client'"]) {
+      assert.ok(!stripped.includes(banned), `science must not read the url via ${banned}`)
+    }
+  })
+
+  it('hands the validated ids to the existing island as initial state', () => {
+    assert.match(
+      sciencePageSource(),
+      /initialSelectedPathwayIds=\{initialSelectedPathwayIds\}/
+    )
+    const island = experienceSource()
+    assert.match(island, /useState<PathwayId\[\]>\(\s*initialSelectedPathwayIds\s*\)/)
+  })
+
+  it('keeps one selection state, seeded once and then owned by react', () => {
+    const island = stripComments(experienceSource())
+    assert.equal((island.match(/useState</g) ?? []).length, 1)
+    // No synchronisation back into the url: no router churn, no history spam.
+    for (const banned of [
+      'router.replace',
+      'router.push',
+      'useRouter',
+      'useSearchParams',
+      'history.pushState',
+      'history.replaceState',
+      'useEffect',
+    ]) {
+      assert.ok(!island.includes(banned), `the island must not use ${banned}`)
+    }
+  })
+
+  it('defaults to no selection when the url says nothing', () => {
+    assert.match(experienceSource(), /initialSelectedPathwayIds = \[\]/)
+  })
+
+  it('restores nothing from an invalid or duplicated query', () => {
+    assert.deepEqual(parsePathwayQuery('invalid'), [])
+    assert.deepEqual(parsePathwayQuery('hydration,invalid,hydration'), ['hydration'])
+  })
+
+  it('keeps Clear pathways able to empty a url-restored state', () => {
+    const island = stripComments(experienceSource())
+    assert.match(island, /function clearPathways\(\)/)
+    assert.match(island, /setSelected\(\[\]\)/)
+  })
+})
+
+describe('return anchor', () => {
+  it('gives the interactive chapter a stable, unique id', () => {
+    const page = sciencePageSource()
+    assert.match(page, /id=\{SCIENCE_MAP_ANCHOR\}/)
+    assert.equal((page.match(/id=\{SCIENCE_MAP_ANCHOR\}/g) ?? []).length, 1)
+    assert.equal(SCIENCE_MAP_ANCHOR, 'science-map')
+  })
+
+  it('clears the sticky header without changing layout', () => {
+    assert.match(sciencePageSource(), /scroll-mt-24 bg-nfe-green-900/)
+  })
+
+  it('does not collide with the existing profile anchor', () => {
+    assert.notEqual(SCIENCE_MAP_ANCHOR, SCIENCE_PAGE.profileIntro.anchorId)
+    const page = sciencePageSource()
+    assert.match(page, /id=\{profileIntro\.anchorId\}/)
+  })
+
+  it('needs no javascript and no scripted scrolling', () => {
+    const page = stripComments(sciencePageSource())
+    for (const banned of ['scrollIntoView', 'scrollTo', 'behavior:', 'useEffect']) {
+      assert.ok(!page.includes(banned), `the anchor must not rely on ${banned}`)
+    }
+  })
+})
+
+describe('return continuity privacy and security', () => {
+  const CONTINUITY_FILES = [
+    'lib/science-pathway-state.ts',
+    'components/ingredients/ScienceReturnLink.tsx',
+    'app/(education)/inci/page.tsx',
+    'app/(education)/science/page.tsx',
+    'components/science/LayerContextPanels.tsx',
+    'components/science/ScienceMapExperience.tsx',
+  ]
+
+  const continuitySource = () =>
+    CONTINUITY_FILES.map((path) => ({
+      path,
+      contents: stripComments(readFileSync(src(path), 'utf8')),
+    }))
+
+  it('stores nothing, anywhere', () => {
+    for (const { path, contents } of continuitySource()) {
+      for (const banned of [
+        'localStorage',
+        'sessionStorage',
+        'indexedDB',
+        'document.cookie',
+        'cookies(',
+        'Cache.',
+        'caches.',
+      ]) {
+        assert.ok(!contents.includes(banned), `${path} uses ${banned}`)
+      }
+    }
+  })
+
+  it('sends nothing anywhere', () => {
+    for (const { path, contents } of continuitySource()) {
+      for (const banned of [
+        'fetch(',
+        'XMLHttpRequest',
+        'navigator.sendBeacon',
+        'supabase',
+        '/api/',
+        'trackNfeEvent',
+        'trackPageView',
+        'gtag',
+        'dataLayer',
+      ]) {
+        assert.ok(!contents.includes(banned), `${path} transmits via ${banned}`)
+      }
+    }
+  })
+
+  it('accepts no destination from the query string', () => {
+    for (const { path, contents } of continuitySource()) {
+      for (const banned of ['returnTo', 'redirect(', 'permanentRedirect']) {
+        assert.ok(!contents.includes(banned), `${path} accepts a destination via ${banned}`)
+      }
+    }
+  })
+
+  it('puts only pathway ids in a url — never a person, a score or a product', () => {
+    const url = [
+      buildScienceReturnHref(PATHWAYS.map((p) => p.id)),
+      buildIngredientFamilyHref('humectants', PATHWAYS.map((p) => p.id)),
+    ].join(' ')
+    for (const banned of [
+      'skinType',
+      'skin_type',
+      'severity',
+      'score',
+      'rank',
+      'profile',
+      'concern',
+      'email',
+      'id=',
+      'uid',
+      'session',
+      'product',
+    ]) {
+      assert.ok(!url.includes(banned), `urls must not carry ${banned}`)
+    }
+    for (const pathway of PATHWAYS) {
+      assert.ok(!url.includes(pathway.label), 'urls carry ids, never display labels')
+    }
+  })
+
+  it('keeps metadata fixed, so a pathway combination is never its own page', () => {
+    const page = sciencePageSource()
+    assert.match(page, /export const metadata: Metadata = \{/)
+    // Metadata is a static export: it cannot read searchParams.
+    assert.ok(!/generateMetadata/.test(page))
+    assert.ok(!/alternates/.test(page), 'no per-query canonical may be generated')
+    assert.ok(!/generateMetadata/.test(inciPageSource()))
+  })
+})
+
+describe('return continuity regression', () => {
+  it('leaves every science section in place and in order', () => {
+    const page = sciencePageSource()
+    const order = [
+      '{hero.heading}',
+      '{method.heading}',
+      '<ScienceMethod />',
+      '<LayerScienceModule />',
+      '{profileIntro.heading}',
+      '<ScienceMapExperience',
+      'Formulation principles',
+      'Ingredient families',
+      '{proof.heading}',
+      '{founderNote.heading}',
+      '{productContext.heading}',
+      '{concierge.heading}',
+    ]
+    const positions = order.map((marker) => {
+      const index = page.indexOf(marker)
+      assert.ok(index > -1, `${marker} missing from the page`)
+      return index
+    })
+    for (let i = 1; i < positions.length; i += 1) {
+      assert.ok(positions[i] > positions[i - 1], `${order[i]} must follow ${order[i - 1]}`)
+    }
+  })
+
+  it('keeps all five pathways and the whole layer context plate', () => {
+    assert.equal(PATHWAYS.length, 5)
+    assert.equal(LAYER_CONTEXT_PANELS.length, 5)
+    assert.equal(CONCERN_FORMULA_MATRIX.length, 5)
+    assert.equal(SKIN_LAYERS.length, 5)
+    assert.equal(INGREDIENT_FAMILY_TAXONOMY.length, 8)
+  })
+
+  it('keeps the ingredients page server-rendered', () => {
+    const source = inciPageSource()
+    assert.ok(!source.includes("'use client'"))
+    assert.match(source, /<IngredientFamilySections \/>/)
+    assert.match(source, /<INCITransparencyTabs \/>/)
+  })
+
+  it('adds no new route', () => {
+    assert.ok(!existsSync(src('app/(education)/science/[pathways]')))
+    assert.ok(!existsSync(src('app/(education)/inci/[family]')))
+  })
+
+  it('keeps the layer science module and the schematic exactly as approved', () => {
+    assert.equal(SCIENCE_PAGE.layerScience.cards.length, 3)
+    assert.match(schematicSource(), /viewBox="0 0 620 300"/)
   })
 })
