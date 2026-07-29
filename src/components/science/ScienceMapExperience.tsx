@@ -62,14 +62,30 @@ interface ScienceMapExperienceProps {
    * separate white section above this chapter.
    */
   mapChapterNote?: ReactNode
+  /**
+   * Pathways to open with, parsed and validated on the server from the page's
+   * query string. This is how a visitor returning from Ingredients gets her
+   * view back.
+   *
+   * It seeds the state once and is never read again. The URL is an opening
+   * position, not a synchronised copy: selections made here stay in React, the
+   * address bar is not rewritten on every click, and no history entry is
+   * created for exploring. Because the same validated array renders on the
+   * server and seeds the first client render, there is nothing for hydration
+   * to disagree about.
+   */
+  initialSelectedPathwayIds?: PathwayId[]
 }
 
 export function ScienceMapExperience({
   layerContextPanels,
   matrixRows,
   mapChapterNote,
+  initialSelectedPathwayIds = [],
 }: ScienceMapExperienceProps) {
-  const [selected, setSelected] = useState<PathwayId[]>([])
+  const [selected, setSelected] = useState<PathwayId[]>(
+    initialSelectedPathwayIds
+  )
   const firstPathwayRef = useRef<HTMLButtonElement>(null)
 
   const activePathways = useMemo(

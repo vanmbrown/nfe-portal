@@ -4,11 +4,12 @@ import Link from 'next/link'
 // Layer Context and matrix content, and webpack does not tree-shake it back out
 // of this client chunk — a barrel import here put every panel and row of prose
 // into the client bundle.
-import { FAMILY_BY_ID, familyHref } from '@/content/ingredients/families'
+import { FAMILY_BY_ID } from '@/content/ingredients/families'
 import { LAYER_BY_ID } from '@/content/science/layers'
 import { SCIENCE_PAGE } from '@/content/science/page'
 import { PATHWAY_BY_ID } from '@/content/science/pathways'
 import type { LayerContextPanel, PathwayId } from '@/content/science/types'
+import { buildIngredientFamilyHref } from '@/lib/science-pathway-state'
 
 interface LayerContextPanelsProps {
   panels: LayerContextPanel[]
@@ -171,12 +172,19 @@ export function LayerContextPanels({
                   {/* Editorial links, not filters or controls. Each one is a
                       plain anchor to the family's section on Ingredients, so
                       normal click, keyboard, middle-click and browser Back all
-                      behave the way a visitor expects. */}
+                      behave the way a visitor expects.
+
+                      The href carries what the visitor is currently reading, so
+                      Ingredients can offer a way back to the same view. It is
+                      built from `emphasized` — the live selection this component
+                      is rendering — and never from a remembered or initial
+                      value, so clearing the pathways immediately clears them
+                      from every link too. */}
                   <ul className="mt-3 flex flex-wrap gap-2">
                     {panel.ingredientFamilyIds.map((id) => (
                       <li key={id}>
                         <Link
-                          href={familyHref(id)}
+                          href={buildIngredientFamilyHref(id, emphasized)}
                           className="inline-block rounded-full bg-[#f4eadb] px-3.5 py-1.5 text-xs font-medium text-nfe-green-900 transition-colors duration-200 ease-out hover:bg-nfe-paper hover:underline hover:underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-gold focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-green-900"
                         >
                           {FAMILY_BY_ID[id].label}

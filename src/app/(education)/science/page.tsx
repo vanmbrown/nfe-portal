@@ -11,7 +11,18 @@ import {
   SCIENCE_PAGE,
 } from '@/content/science'
 import { FAMILY_BY_ID as FAMILY_LABELS } from '@/content/ingredients/families'
+import {
+  PATHWAYS_PARAM,
+  SCIENCE_MAP_ANCHOR,
+  parsePathwayQuery,
+  type SearchParamValue,
+} from '@/lib/science-pathway-state'
 
+/**
+ * Title, description and canonical identity are fixed and do not vary with the
+ * query string. A pathway combination is a temporary view of one page, not a
+ * page of its own, so it must never become separately indexable.
+ */
 export const metadata: Metadata = {
   title: 'Science, Method & Proof | NFE Beauty',
   description:
@@ -29,8 +40,28 @@ export const metadata: Metadata = {
  * The page is written to be read straight through. No selection is required
  * for any content to appear, and the map has a complete default state, so the
  * page remains meaningful without JavaScript.
+ *
+ * `?pathways=` is read here rather than in the browser. A visitor returning
+ * from Ingredients gets her selections back in the first HTML the server sends,
+ * so there is no flash of the default state and nothing for hydration to
+ * disagree about. Reading searchParams makes this route render per request
+ * instead of being prerendered; that is the cost of restoring the view on the
+ * server, and the page's output is identical for the same URL.
+ *
+ * Everything about that state is temporary: it is validated, held in React, and
+ * never written to storage, an API or a record.
  */
-export default function SciencePage() {
+interface SciencePageProps {
+  searchParams: Promise<Record<string, SearchParamValue>>
+}
+
+export default async function SciencePage({ searchParams }: SciencePageProps) {
+  const params = await searchParams
+
+  // Validated against the canonical pathway ids. Anything else is discarded,
+  // so a crafted URL can restore a view but cannot introduce one.
+  const initialSelectedPathwayIds = parsePathwayQuery(params[PATHWAYS_PARAM])
+
   const {
     hero,
     method,
@@ -90,7 +121,15 @@ export default function SciencePage() {
       <LayerScienceModule />
 
       {/* 5, 6, 7 — Pathways, the map, and what the layers mean */}
-      <section className="bg-nfe-green-900 py-24 text-nfe-paper md:py-32">
+      {/* `science-map` is the return destination from Ingredients. It sits on
+          the chapter wrapper so the visitor lands on the framing, the pathway
+          controls and the restored emphasis together. A plain fragment: it
+          resolves without JavaScript, and scroll-margin keeps it clear of the
+          sticky header without affecting layout. */}
+      <section
+        id={SCIENCE_MAP_ANCHOR}
+        className="scroll-mt-24 bg-nfe-green-900 py-24 text-nfe-paper md:py-32"
+      >
         {/* The dark chapter now opens with the founder's framing for the
             pathway controls. This is also the destination of the method
             invitation above, so it carries the anchor id and scroll margin. */}
@@ -122,6 +161,7 @@ export default function SciencePage() {
           <ScienceMapExperience
             layerContextPanels={LAYER_CONTEXT_PANELS}
             matrixRows={CONCERN_FORMULA_MATRIX}
+            initialSelectedPathwayIds={initialSelectedPathwayIds}
             mapChapterNote={
               /* The partial Layer Science intro that used to sit here is now the
                  complete module above. Only this approved paragraph remains, so
