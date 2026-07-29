@@ -2,7 +2,15 @@ import Link from 'next/link'
 
 import INCITransparencyTabs from '@/components/education/INCITransparencyTabs'
 import { IngredientFamilySections } from '@/components/ingredients/IngredientFamilySections'
+import { ScienceReturnLink } from '@/components/ingredients/ScienceReturnLink'
 import { INGREDIENT_FAMILIES } from '@/content/ingredients/families'
+import {
+  ORIGIN_PARAM,
+  PATHWAYS_PARAM,
+  isScienceOrigin,
+  parsePathwayQuery,
+  type SearchParamValue,
+} from '@/lib/science-pathway-state'
 
 /**
  * Ingredients.
@@ -15,8 +23,29 @@ import { INGREDIENT_FAMILIES } from '@/content/ingredients/families'
  * The page reads: what a family is for, which ingredients sit inside it, then
  * the full transparency reference — INCI lists, actives table and the complete
  * glossary — unchanged, in the client island it always lived in.
+ *
+ * One thing varies with the URL. A visitor who followed an ingredient-family
+ * link from Science arrives carrying the pathways she was reading, and gets a
+ * quiet way back to that same view. Arriving any other way, the page is exactly
+ * what it has always been — the marker is checked strictly, so `?from=other` is
+ * not the Science journey and shows nothing.
+ *
+ * Reading searchParams renders this route per request rather than prerendering
+ * it. Metadata and canonical identity do not vary with the query: this is one
+ * page seen from two directions, not two pages.
  */
-export default function INCIPage() {
+interface INCIPageProps {
+  searchParams: Promise<Record<string, SearchParamValue>>
+}
+
+export default async function INCIPage({ searchParams }: INCIPageProps) {
+  const params = await searchParams
+  const cameFromScience = isScienceOrigin(params[ORIGIN_PARAM])
+
+  // Parsed regardless of origin, then only used when the origin is Science, so
+  // a pathway value on its own can never introduce the module.
+  const pathwayIds = parsePathwayQuery(params[PATHWAYS_PARAM])
+
   const families = [...INGREDIENT_FAMILIES].sort((a, b) => a.order - b.order)
 
   return (
@@ -31,6 +60,9 @@ export default function INCIPage() {
           each other. Each family below describes a cosmetic role and the
           ingredients NFE draws on for it.
         </p>
+
+        {/* Shown only for a visitor who came from Science, and only once. */}
+        {cameFromScience ? <ScienceReturnLink pathwayIds={pathwayIds} /> : null}
 
         {/* Compact index. Eight sections is enough that a way in helps, and
             these are plain anchors — no filtering, no state. */}
