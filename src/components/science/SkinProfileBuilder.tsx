@@ -2,13 +2,15 @@
 
 import { useId, useState } from 'react'
 
-import {
-  mapProfileToPathways,
-  type SkinContextId,
-  type SkinProfileOption,
-  type SkinSignalId,
+import type {
+  SkinContextId,
+  SkinProfileOption,
+  SkinSignalId,
 } from '@/content/science/skin-profile'
 import type { PathwayId, SkinProfileContent } from '@/content/science/types'
+// Type-only above, so no option label reaches the browser. The mapping rule
+// arrives as this prose-free helper instead.
+import { collectPathways } from '@/lib/science-profile-mapping'
 
 interface SkinProfileBuilderProps {
   /**
@@ -88,6 +90,15 @@ export function SkinProfileBuilder({
     setContextId(null)
     setSignalIds([])
     onReset()
+  }
+
+  /** The options she actually chose, resolved through the shared rule. */
+  function chosenPathways() {
+    const chosen = [
+      ...contexts.filter((option) => option.id === contextId),
+      ...signals.filter((option) => signalIds.includes(option.id)),
+    ]
+    return collectPathways(chosen)
   }
 
   return (
@@ -217,7 +228,7 @@ export function SkinProfileBuilder({
           <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
             <button
               type="button"
-              onClick={() => onApply(mapProfileToPathways(contextId, signalIds))}
+              onClick={() => onApply(chosenPathways())}
               disabled={!canApply}
               // Described by the helper below, so a disabled control explains
               // itself rather than leaving the visitor to guess.

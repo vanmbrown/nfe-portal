@@ -3060,7 +3060,8 @@ describe('dual entry structure', () => {
 
   it('reaches the map only through the parent, never around it', () => {
     const builder = stripComments(profileBuilderSource())
-    assert.match(builder, /onApply\(mapProfileToPathways\(contextId, signalIds\)\)/)
+    assert.match(builder, /onApply\(chosenPathways\(\)\)/)
+    assert.match(builder, /collectPathways\(chosen\)/)
     for (const banned of [
       'createContext',
       'useContext',
@@ -3320,9 +3321,9 @@ describe('dual entry shared state', () => {
   it('maps only on the action, never on every change', () => {
     const builder = stripComments(profileBuilderSource())
     // The single call site is the button's own handler.
-    const calls = builder.match(/mapProfileToPathways\(/g) ?? []
-    assert.equal(calls.length, 1)
-    assert.match(builder, /onClick=\{\(\) => onApply\(mapProfileToPathways/)
+    const calls = builder.match(/chosenPathways\(\)/g) ?? []
+    assert.equal(calls.length, 2, 'defined once, called once from the action')
+    assert.match(builder, /onClick=\{\(\) => onApply\(chosenPathways\(\)\)\}/)
     assert.ok(!builder.includes('useEffect'), 'no effect may remap silently')
   })
 

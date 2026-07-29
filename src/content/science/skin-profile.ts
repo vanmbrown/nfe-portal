@@ -1,4 +1,5 @@
-import { PATHWAYS } from './pathways'
+import { collectPathways } from '@/lib/science-profile-mapping'
+
 import type { PathwayId } from './types'
 
 /**
@@ -96,28 +97,26 @@ export const SKIN_SIGNALS: SkinProfileOption<SkinSignalId>[] = [
  */
 export const MAX_SKIN_SIGNALS = 5
 
-const CANONICAL_PATHWAY_IDS: readonly PathwayId[] = PATHWAYS.map((p) => p.id)
-
 /**
- * Resolve a profile to pathways.
+ * Resolve a profile, by id, to pathways.
  *
- * Deduplicated and returned in canonical order, so the same set of signals
- * always produces the same reading, and the order never suggests a priority.
- * Unknown ids are ignored rather than trusted.
+ * Unknown ids are ignored rather than trusted. Ordering and deduplication come
+ * from `collectPathways`, which is the single implementation the builder uses
+ * too — so what a test asserts here is what a visitor gets.
  */
 export function mapProfileToPathways(
   contextId: SkinContextId | null,
   signalIds: readonly SkinSignalId[]
 ): PathwayId[] {
-  const wanted = new Set<PathwayId>()
+  const chosen: SkinProfileOption<string>[] = []
 
   const context = SKIN_CONTEXTS.find((option) => option.id === contextId)
-  if (context) for (const id of context.pathways) wanted.add(id)
+  if (context) chosen.push(context)
 
   for (const signalId of signalIds) {
     const signal = SKIN_SIGNALS.find((option) => option.id === signalId)
-    if (signal) for (const id of signal.pathways) wanted.add(id)
+    if (signal) chosen.push(signal)
   }
 
-  return CANONICAL_PATHWAY_IDS.filter((id) => wanted.has(id))
+  return collectPathways(chosen)
 }
