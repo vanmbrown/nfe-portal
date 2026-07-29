@@ -50,6 +50,11 @@ export default async function INCIPage({ searchParams }: INCIPageProps) {
 
   return (
     <div id="inci-panel" className="min-h-screen w-full bg-[#F6F5F3]">
+      {/* Shown only for a visitor who came from Science, and only once. It is
+          fixed to the viewport, so it appears first in the document for
+          keyboard order but takes no space in the flow. */}
+      {cameFromScience ? <ScienceReturnLink pathwayIds={pathwayIds} /> : null}
+
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl md:text-4xl font-primary font-bold text-[#0E2A22] mb-6">
           NFE Ingredient Transparency
@@ -60,9 +65,6 @@ export default async function INCIPage({ searchParams }: INCIPageProps) {
           each other. Each family below describes a cosmetic role and the
           ingredients NFE draws on for it.
         </p>
-
-        {/* Shown only for a visitor who came from Science, and only once. */}
-        {cameFromScience ? <ScienceReturnLink pathwayIds={pathwayIds} /> : null}
 
         {/* Compact index. Eight sections is enough that a way in helps, and
             these are plain anchors — no filtering, no state. */}
