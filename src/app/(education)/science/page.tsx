@@ -121,15 +121,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
       <LayerScienceModule />
 
       {/* 5, 6, 7 — Pathways, the map, and what the layers mean */}
-      {/* `science-map` is the return destination from Ingredients. It sits on
-          the chapter wrapper so the visitor lands on the framing, the pathway
-          controls and the restored emphasis together. A plain fragment: it
-          resolves without JavaScript, and scroll-margin keeps it clear of the
-          sticky header without affecting layout. */}
-      <section
-        id={SCIENCE_MAP_ANCHOR}
-        className="scroll-mt-24 bg-nfe-green-900 py-24 text-nfe-paper md:py-32"
-      >
+      <section className="bg-nfe-green-900 py-24 text-nfe-paper md:py-32">
         {/* The dark chapter now opens with the founder's framing for the
             pathway controls. This is also the destination of the method
             invitation above, so it carries the anchor id and scroll margin. */}
@@ -157,7 +149,17 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
         {/* Layer Context and matrix content is passed in rather than imported
             by the island, so the prose ships as data instead of as client
             code. See ScienceMapExperience for the measurement. */}
-        <div className="mt-16">
+        {/* `science-map` is the return destination from Ingredients, and it
+            sits on the map itself rather than on the chapter above it.
+            Measured: anchored to the chapter wrapper, a returning visitor
+            landed on the first-visit framing with the controls only fully in
+            view at 900px tall and the schematic below the fold at every height
+            tested. Anchored here, the controls and the schematic are both in
+            view from 720px up. The framing is still one scroll away.
+
+            A plain fragment — it resolves without JavaScript, and scroll-margin
+            is layout-neutral. */}
+        <div id={SCIENCE_MAP_ANCHOR} className="mt-16 scroll-mt-24">
           <ScienceMapExperience
             layerContextPanels={LAYER_CONTEXT_PANELS}
             matrixRows={CONCERN_FORMULA_MATRIX}

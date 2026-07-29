@@ -2577,8 +2577,20 @@ describe('return anchor', () => {
     assert.equal(SCIENCE_MAP_ANCHOR, 'science-map')
   })
 
-  it('clears the sticky header without changing layout', () => {
-    assert.match(sciencePageSource(), /scroll-mt-24 bg-nfe-green-900/)
+  it('carries scroll-margin, which cannot shift layout', () => {
+    assert.match(sciencePageSource(), /id=\{SCIENCE_MAP_ANCHOR\} className="mt-16 scroll-mt-24"/)
+  })
+
+  it('lands on the map, not on the first-visit framing above it', () => {
+    // Measured: on the chapter wrapper the schematic was below the fold at
+    // every height tested. On the island wrapper the controls and the
+    // schematic are both in view from 720px up.
+    const page = sciencePageSource()
+    const anchor = page.indexOf('id={SCIENCE_MAP_ANCHOR}')
+    const framing = page.indexOf('id={profileIntro.anchorId}')
+    const island = page.indexOf('<ScienceMapExperience')
+    assert.ok(framing > -1 && anchor > framing, 'the anchor must follow the framing')
+    assert.ok(anchor < island, 'the anchor must wrap the interactive chapter')
   })
 
   it('does not collide with the existing profile anchor', () => {
