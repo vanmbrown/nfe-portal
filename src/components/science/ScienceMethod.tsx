@@ -60,13 +60,21 @@ export function ScienceMethod() {
           ))}
         </ol>
 
-        {/* An invitation, not a control. A plain anchor to the pathway section:
-            no handler, no scroll script, no state, so it behaves the way a
-            visitor expects and works without JavaScript. */}
+        {/* An invitation, not a control. A plain anchor to the dual-entry
+            section: no handler, no scroll script, no state, so it behaves the
+            way a visitor expects and works without JavaScript.
+
+            Filled in muted gold so it reads as the way in rather than as one
+            more link on the page. Measured on this ground: deep green on
+            #C6A664 is 6.63:1, and 5.19:1 on the darker hover gold — both clear
+            AA for normal text. The focus ring is deep green rather than gold,
+            because a gold ring on a gold fill is the one pairing that would not
+            be visible. No gradient, no glow, no shadow, no animation beyond the
+            colour change. */}
         <p className="mt-12">
           <Link
             href={ctaHref}
-            className="inline-flex min-h-[44px] items-center rounded-full border border-nfe-green-900 px-7 text-sm uppercase tracking-[0.18em] text-nfe-green-900 transition-colors hover:bg-nfe-green-900 hover:text-nfe-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-gold focus-visible:ring-offset-2"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-nfe-gold-hover bg-nfe-gold px-7 text-sm font-medium uppercase tracking-[0.18em] text-nfe-green-900 transition-colors hover:bg-nfe-gold-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-green-900 focus-visible:ring-offset-2"
           >
             {ctaLabel}
           </Link>
