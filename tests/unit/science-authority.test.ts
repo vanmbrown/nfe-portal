@@ -16,6 +16,12 @@ import { SKIN_LAYERS } from '@/content/science/layers'
 import { SCIENCE_PAGE } from '@/content/science/page'
 import { PATHWAYS } from '@/content/science/pathways'
 import {
+  MAX_SKIN_SIGNALS,
+  SKIN_CONTEXTS,
+  SKIN_SIGNALS,
+  mapProfileToPathways,
+} from '@/content/science/skin-profile'
+import {
   SCIENCE_MAP_ANCHOR,
   buildIngredientFamilyHref,
   buildScienceReturnHref,
@@ -3010,5 +3016,498 @@ describe('persistent return regression', () => {
     const source = stripComments(returnLinkSource())
     assert.ok(!source.includes('function parse'), 'the control must reuse the shared parser')
     assert.match(returnLinkSource(), /from '@\/lib\/science-pathway-state'/)
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * Dual entry — pathways and the NFE Skin Profile
+ * ------------------------------------------------------------------ */
+
+const profileBuilderSource = () =>
+  readFileSync(src('components/science/SkinProfileBuilder.tsx'), 'utf8')
+const skinProfileContentSource = () =>
+  readFileSync(src('content/science/skin-profile.ts'), 'utf8')
+
+describe('dual entry structure', () => {
+  it('offers both ways in', () => {
+    assert.equal(SCIENCE_PAGE.entryModes.pathwayLabel, 'Explore by pathway')
+    assert.equal(SCIENCE_PAGE.entryModes.profileLabel, 'Build your NFE Skin Profile')
+    const island = experienceSource()
+    assert.match(island, /entryModes\.pathwayLabel/)
+    assert.match(island, /entryModes\.profileLabel/)
+  })
+
+  it('opens on pathway mode', () => {
+    assert.match(experienceSource(), /useState<EntryMode>\('pathway'\)/)
+  })
+
+  it('uses pressed buttons rather than an ARIA tab widget', () => {
+    const island = stripComments(experienceSource())
+    assert.match(island, /aria-pressed=\{active\}[\s\S]{0,120}data-entry-mode=\{mode\}/)
+    for (const banned of ['role="tab"', 'role="tablist"', 'role="tabpanel"', 'aria-selected']) {
+      assert.ok(!island.includes(banned), `entry modes must not use ${banned}`)
+    }
+  })
+
+  it('keeps exactly one pathway state for both inputs', () => {
+    const island = stripComments(experienceSource())
+    assert.equal((island.match(/useState<PathwayId\[\]>/g) ?? []).length, 1)
+    // The builder holds form state only; it never holds pathways.
+    const builder = stripComments(profileBuilderSource())
+    assert.ok(!builder.includes('useState<PathwayId[]>'))
+    assert.ok(!builder.includes('setSelected'))
+  })
+
+  it('reaches the map only through the parent, never around it', () => {
+    const builder = stripComments(profileBuilderSource())
+    assert.match(builder, /onApply\(mapProfileToPathways\(contextId, signalIds\)\)/)
+    for (const banned of [
+      'createContext',
+      'useContext',
+      'zustand',
+      'redux',
+      'globalThis',
+      'window.',
+    ]) {
+      assert.ok(!builder.includes(banned), `the builder must not use ${banned}`)
+    }
+  })
+})
+
+describe('existing pathway mode preserved', () => {
+  it('keeps the approved invitation and framing', () => {
+    const island = experienceSource()
+    assert.match(island, /Choose a pathway, or read the layers as they are\./)
+    assert.match(island, /Each pathway is a way into the map\./)
+  })
+
+  it('keeps five pathways, their labels and their order', () => {
+    assert.deepEqual(
+      PATHWAYS.map((p) => p.label),
+      [
+        'Barrier Comfort',
+        'Hydration',
+        'Tone Integrity',
+        'Texture & Suppleness',
+        'Visible Resilience',
+      ]
+    )
+  })
+
+  it('keeps multi-selection and Clear exactly as they were', () => {
+    const island = stripComments(experienceSource())
+    assert.match(island, /function togglePathway\(id: PathwayId\)/)
+    assert.match(island, /current\.includes\(id\) \? current\.filter/)
+    assert.match(island, /function clearPathways\(\)/)
+    assert.match(island, /firstPathwayRef\.current\?\.focus\(\)/)
+  })
+
+  it('keeps the three modules reading the one selection', () => {
+    const island = experienceSource()
+    assert.match(island, /<SkinLayerSchematic[\s\S]*?emphasized=\{emphasizedLayers\}/)
+    assert.match(island, /<LayerContextPanels[\s\S]*?emphasized=\{selected\}/)
+    assert.match(island, /<ConcernFormulaMatrix[\s\S]*?emphasized=\{selected\}/)
+  })
+})
+
+describe('skin profile builder', () => {
+  it('carries the approved eyebrow, heading and boundary', () => {
+    const p = SCIENCE_PAGE.skinProfile
+    assert.equal(p.eyebrow, 'Build Your NFE Skin Profile')
+    assert.equal(p.heading, 'Select what your skin is asking for.')
+    assert.equal(p.boundary, 'An interpretive guide, not a diagnosis.')
+    assert.equal(p.privacy, 'Nothing is saved or submitted.')
+    assert.equal(p.applyLabel, 'View my NFE Skin Profile')
+    assert.equal(p.resetLabel, 'Start over')
+  })
+
+  it('renders every approved skin context, one choice only', () => {
+    assert.deepEqual(
+      SKIN_CONTEXTS.map((c) => c.label),
+      [
+        'Dry or easily depleted',
+        'Balanced',
+        'Combination',
+        'Oily',
+        'Sensitive or easily unsettled',
+        'Mature or changing',
+        'Not sure',
+      ]
+    )
+    const builder = profileBuilderSource()
+    assert.match(builder, /type="radio"/)
+    assert.match(builder, /name=\{`\$\{groupId\}-context`\}/)
+  })
+
+  it('renders every approved signal, multi-choice', () => {
+    assert.deepEqual(
+      SKIN_SIGNALS.map((s) => s.label),
+      [
+        'Dryness or ashiness',
+        'Tightness or reduced comfort',
+        'Uneven-looking tone',
+        'Visible dullness',
+        'Post-blemish-looking marks',
+        'Fine-line appearance',
+        'Crepey-looking texture',
+        'Loss of suppleness',
+        'Tired-looking skin',
+        'Sensitivity awareness',
+      ]
+    )
+    assert.match(profileBuilderSource(), /type="checkbox"/)
+  })
+
+  it('caps the signals quietly, without an error', () => {
+    assert.equal(MAX_SKIN_SIGNALS, 5)
+    const builder = stripComments(profileBuilderSource())
+    assert.match(builder, /if \(current\.length >= maxSignals\) return current/)
+    const copy = SCIENCE_PAGE.skinProfile
+    assert.match(copy.limitNote, /^Choose up to five signals/)
+    for (const banned of ['error', 'invalid', 'required', 'incomplete']) {
+      assert.ok(
+        !copy.limitNote.toLowerCase().includes(banned) &&
+          !copy.applyDisabledHelper.toLowerCase().includes(banned),
+        `profile guidance must not read as a validation failure (${banned})`
+      )
+    }
+  })
+
+  it('uses native inputs with real labels', () => {
+    const builder = profileBuilderSource()
+    assert.match(builder, /<fieldset/)
+    assert.match(builder, /<legend/)
+    assert.match(builder, /htmlFor=\{id\}/)
+    for (const banned of ['role="radio"', 'role="checkbox"', 'onKeyDown', 'tabIndex']) {
+      assert.ok(!builder.includes(banned), `the builder must not use ${banned}`)
+    }
+  })
+
+  it('produces no profile name, score, rank or recommendation', () => {
+    const sources = [
+      stripComments(profileBuilderSource()),
+      stripComments(skinProfileContentSource()),
+    ]
+    for (const source of sources) {
+      for (const banned of [
+        'score',
+        'rank',
+        'severity',
+        'primary',
+        'secondary',
+        'tertiary',
+        'profileName',
+        'recommend',
+        'diagnos',
+        'assignProfile',
+        'scorePriorities',
+      ]) {
+        assert.ok(
+          !source.toLowerCase().includes(banned.toLowerCase()),
+          `the profile must not produce "${banned}"`
+        )
+      }
+    }
+    // The option shape has nowhere to put a weight even if someone tried.
+    for (const option of [...SKIN_CONTEXTS, ...SKIN_SIGNALS]) {
+      assert.deepEqual(Object.keys(option).sort(), ['id', 'label', 'pathways'])
+    }
+  })
+})
+
+describe('profile to pathway mapping', () => {
+  const CANONICAL = PATHWAYS.map((p) => p.id)
+
+  it('maps every signal to the approved pathways', () => {
+    const expected: Record<string, string[]> = {
+      'dryness-ashiness': ['hydration'],
+      'tightness-comfort': ['barrier-comfort'],
+      'uneven-tone': ['tone-integrity'],
+      'visible-dullness': ['tone-integrity', 'visible-resilience'],
+      'post-blemish-marks': ['tone-integrity'],
+      'fine-lines': ['texture-suppleness'],
+      'crepey-texture': ['texture-suppleness'],
+      'loss-of-suppleness': ['texture-suppleness'],
+      'tired-looking': ['visible-resilience'],
+      'sensitivity-awareness': ['barrier-comfort'],
+    }
+    for (const signal of SKIN_SIGNALS) {
+      assert.deepEqual(
+        mapProfileToPathways(null, [signal.id]),
+        expected[signal.id],
+        `${signal.id} maps wrongly`
+      )
+    }
+  })
+
+  it('maps every skin context to the approved pathways', () => {
+    const expected: Record<string, string[]> = {
+      'dry-depleted': ['barrier-comfort', 'hydration'],
+      balanced: [],
+      combination: [],
+      oily: [],
+      'sensitive-unsettled': ['barrier-comfort'],
+      'mature-changing': ['hydration', 'texture-suppleness', 'visible-resilience'],
+      'not-sure': [],
+    }
+    for (const context of SKIN_CONTEXTS) {
+      assert.deepEqual(
+        mapProfileToPathways(context.id, []),
+        expected[context.id],
+        `${context.id} maps wrongly`
+      )
+    }
+  })
+
+  it('lets one signal reach more than one pathway', () => {
+    assert.deepEqual(mapProfileToPathways(null, ['visible-dullness']), [
+      'tone-integrity',
+      'visible-resilience',
+    ])
+    assert.deepEqual(mapProfileToPathways('mature-changing', []), [
+      'hydration',
+      'texture-suppleness',
+      'visible-resilience',
+    ])
+  })
+
+  it('deduplicates when several inputs reach the same pathway', () => {
+    const result = mapProfileToPathways('dry-depleted', [
+      'dryness-ashiness',
+      'tightness-comfort',
+      'sensitivity-awareness',
+    ])
+    assert.deepEqual(result, ['barrier-comfort', 'hydration'])
+    assert.equal(new Set(result).size, result.length)
+  })
+
+  it('returns canonical order, never selection order', () => {
+    const forward = mapProfileToPathways(null, ['tired-looking', 'dryness-ashiness'])
+    const reverse = mapProfileToPathways(null, ['dryness-ashiness', 'tired-looking'])
+    assert.deepEqual(forward, reverse)
+    assert.deepEqual(forward, ['hydration', 'visible-resilience'])
+  })
+
+  it('only ever emits canonical pathway ids', () => {
+    const everything = mapProfileToPathways(
+      'mature-changing',
+      SKIN_SIGNALS.map((s) => s.id)
+    )
+    for (const id of everything) assert.ok(CANONICAL.includes(id), `${id} is not a pathway`)
+    assert.deepEqual(everything, CANONICAL)
+    for (const option of [...SKIN_CONTEXTS, ...SKIN_SIGNALS]) {
+      for (const id of option.pathways) {
+        assert.ok(CANONICAL.includes(id), `${option.id} points at unknown pathway ${id}`)
+      }
+    }
+  })
+
+  it('ignores unknown ids rather than trusting them', () => {
+    assert.deepEqual(mapProfileToPathways('nope' as never, []), [])
+    assert.deepEqual(mapProfileToPathways(null, ['nope' as never]), [])
+    assert.deepEqual(mapProfileToPathways(null, []), [])
+  })
+})
+
+describe('dual entry shared state', () => {
+  it('applies a profile by replacing the one selection', () => {
+    const island = stripComments(experienceSource())
+    assert.match(island, /function applyProfile\(pathwayIds: PathwayId\[\]\)/)
+    assert.match(island, /setSelected\(pathwayIds\)/)
+    assert.match(island, /onApply=\{applyProfile\}/)
+  })
+
+  it('maps only on the action, never on every change', () => {
+    const builder = stripComments(profileBuilderSource())
+    // The single call site is the button's own handler.
+    const calls = builder.match(/mapProfileToPathways\(/g) ?? []
+    assert.equal(calls.length, 1)
+    assert.match(builder, /onClick=\{\(\) => onApply\(mapProfileToPathways/)
+    assert.ok(!builder.includes('useEffect'), 'no effect may remap silently')
+  })
+
+  it('hands manual control back the moment a pathway is touched', () => {
+    const island = stripComments(experienceSource())
+    const toggle = island.slice(
+      island.indexOf('function togglePathway'),
+      island.indexOf('function applyProfile')
+    )
+    assert.match(toggle, /setProfileApplied\(false\)/)
+  })
+
+  it('starts over through the existing clearing, not a second system', () => {
+    const island = stripComments(experienceSource())
+    assert.match(island, /function resetProfile\(\)/)
+    assert.match(island, /onReset=\{resetProfile\}/)
+    const builder = stripComments(profileBuilderSource())
+    assert.match(builder, /setContextId\(null\)/)
+    assert.match(builder, /setSignalIds\(\[\]\)/)
+    assert.match(builder, /onReset\(\)/)
+  })
+
+  it('switching modes does not disturb the selection', () => {
+    const island = stripComments(experienceSource())
+    const setMode = island.match(/setEntryMode\([^)]*\)/g) ?? []
+    assert.ok(setMode.length > 0)
+    // Nothing clears or rewrites the pathways when the mode changes.
+    assert.ok(!/setEntryMode\([^)]*\)[\s\S]{0,80}setSelected/.test(island))
+  })
+})
+
+describe('dual entry privacy', () => {
+  it('stores and transmits nothing', () => {
+    const sources = [
+      stripComments(profileBuilderSource()),
+      stripComments(skinProfileContentSource()),
+      stripComments(experienceSource()),
+    ]
+    for (const source of sources) {
+      for (const banned of [
+        'localStorage',
+        'sessionStorage',
+        'document.cookie',
+        'indexedDB',
+        'fetch(',
+        'navigator.sendBeacon',
+        'supabase',
+        '/api/',
+        'trackNfeEvent',
+        'gtag',
+        'dataLayer',
+      ]) {
+        assert.ok(!source.includes(banned), `the profile must not use ${banned}`)
+      }
+    }
+  })
+
+  it('keeps profile inputs out of the URL', () => {
+    // Only canonical pathway ids are transferable. Nothing knows how to
+    // serialise a context or a signal, so nothing can.
+    const state = stripComments(pathwayStateSource())
+    for (const id of [...SKIN_CONTEXTS, ...SKIN_SIGNALS].map((o) => o.id)) {
+      assert.ok(!state.includes(id), `${id} must never reach the URL layer`)
+    }
+    assert.ok(!state.includes('SkinContext'))
+    assert.ok(!state.includes('SkinSignal'))
+    const builder = stripComments(profileBuilderSource())
+    assert.ok(!builder.includes('searchParams'))
+    assert.ok(!builder.includes('pathways='))
+  })
+
+  it('keeps the privacy statement true', () => {
+    assert.equal(SCIENCE_PAGE.skinProfile.privacy, 'Nothing is saved or submitted.')
+    const builder = stripComments(profileBuilderSource())
+    // A form that cannot submit: the only handler prevents it.
+    assert.match(builder, /onSubmit=\{\(event\) => event\.preventDefault\(\)\}/)
+    assert.ok(!builder.includes('action='))
+    assert.ok(!builder.includes('method='))
+  })
+})
+
+describe('start interpretation invitation — gold treatment', () => {
+  it('carries the approved copy', () => {
+    assert.equal(
+      SCIENCE_PAGE.scienceMethod.ctaLabel,
+      'Start Your Skin Interpretation'
+    )
+    // The misspelling the brief warned about must never appear.
+    for (const text of customerFacingStrings()) {
+      assert.ok(!/intepretation/i.test(text), `misspelling in copy: "${text}"`)
+    }
+  })
+
+  it('wears the muted gold fill with deep green text', () => {
+    const source = methodSource()
+    assert.match(source, /bg-nfe-gold\b/)
+    assert.match(source, /text-nfe-green-900/)
+    assert.match(source, /border-nfe-gold-hover/)
+    assert.match(source, /hover:bg-nfe-gold-hover/)
+  })
+
+  it('keeps a focus ring that is visible against the gold', () => {
+    const source = methodSource()
+    assert.match(source, /focus-visible:ring-nfe-green-900/)
+    assert.ok(
+      !/focus-visible:ring-nfe-gold\b/.test(source),
+      'a gold ring on a gold fill would not be visible'
+    )
+  })
+
+  it('stays quiet — no gradient, glow, shadow or animation', () => {
+    const source = stripComments(methodSource())
+    for (const banned of [
+      'gradient',
+      'animate-',
+      'shadow-lg',
+      'shadow-xl',
+      'drop-shadow',
+      'blur',
+      'scale-1',
+    ]) {
+      assert.ok(!source.includes(banned), `the invitation must not use ${banned}`)
+    }
+  })
+
+  it('remains a plain anchor to the same destination', () => {
+    assert.equal(SCIENCE_PAGE.scienceMethod.ctaHref, '#build-your-nfe-skin-profile')
+    const source = stripComments(methodSource())
+    assert.match(source, /<Link\s+href=\{ctaHref\}/)
+    for (const banned of ['<button', 'role="button"', 'onClick', 'type="submit"', 'target=']) {
+      assert.ok(!source.includes(banned), `the invitation must not use ${banned}`)
+    }
+  })
+})
+
+describe('dual entry regression', () => {
+  it('leaves every approved section in place and in order', () => {
+    const page = sciencePageSource()
+    const order = [
+      '{hero.heading}',
+      '{method.heading}',
+      '<ScienceMethod />',
+      '<LayerScienceModule />',
+      '{profileIntro.heading}',
+      '<ScienceMapExperience',
+      'Formulation principles',
+      'Ingredient families',
+      '{proof.heading}',
+      '{founderNote.heading}',
+      '{productContext.heading}',
+      '{concierge.heading}',
+    ]
+    const positions = order.map((marker) => {
+      const index = page.indexOf(marker)
+      assert.ok(index > -1, `${marker} missing`)
+      return index
+    })
+    for (let i = 1; i < positions.length; i += 1) {
+      assert.ok(positions[i] > positions[i - 1], `${order[i]} must follow ${order[i - 1]}`)
+    }
+  })
+
+  it('leaves the schematic, taxonomy and matrix untouched', () => {
+    assert.match(schematicSource(), /viewBox="0 0 620 300"/)
+    assert.equal(INGREDIENT_FAMILY_TAXONOMY.length, 8)
+    assert.equal(CONCERN_FORMULA_MATRIX.length, 5)
+    assert.equal(LAYER_CONTEXT_PANELS.length, 5)
+    assert.equal(SCIENCE_PAGE.layerScience.cards.length, 3)
+  })
+
+  it('leaves the ingredients continuity and floating return alone', () => {
+    assert.equal(
+      buildIngredientFamilyHref('humectants', ['hydration']),
+      '/inci?from=science&pathways=hydration#humectants'
+    )
+    assert.equal(
+      buildScienceReturnHref(['hydration']),
+      '/science?pathways=hydration#science-map'
+    )
+    assert.match(returnLinkSource(), /Return to your Science Map/)
+    assert.match(inciPageSource(), /cameFromScience \? <ScienceReturnLink/)
+  })
+
+  it('adds no route', () => {
+    assert.ok(!existsSync(src('app/(education)/science/profile')))
+    assert.ok(!existsSync(src('app/(education)/science/[mode]')))
   })
 })
