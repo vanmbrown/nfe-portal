@@ -62,7 +62,10 @@ export const SCIENCE_PAGE: SciencePageContent = {
           'Layer Context and the Concern-to-Formula Matrix explain how NFE approaches hydration, comfort, tone integrity, texture and visible resilience.',
       },
     ],
-    ctaLabel: 'Start your skin interpretation',
+    // Title case, per the founder's wording for the strengthened invitation.
+    // The brief also asked to correct a misspelling — "Intepretation" — which
+    // does not appear anywhere in this codebase. Only the casing changed.
+    ctaLabel: 'Start Your Skin Interpretation',
     ctaHref: '#build-your-nfe-skin-profile',
   },
 
@@ -74,6 +77,34 @@ export const SCIENCE_PAGE: SciencePageContent = {
     boundary: 'An interpretive guide, not a diagnosis.',
     privacy: 'Nothing is saved or submitted.',
     anchorId: 'build-your-nfe-skin-profile',
+  },
+
+  entryModes: {
+    label: 'How would you like to begin?',
+    pathwayLabel: 'Explore by pathway',
+    profileLabel: 'Build your NFE Skin Profile',
+  },
+
+  skinProfile: {
+    eyebrow: 'Build Your NFE Skin Profile',
+    heading: 'Select what your skin is asking for.',
+    description:
+      'Choose the signals that feel most relevant to how your skin looks or feels today. Your selections stay within this page and simply change what the NFE Science Map brings into focus.',
+    boundary: 'An interpretive guide, not a diagnosis.',
+    privacy: 'Nothing is saved or submitted.',
+    contextLabel: 'Skin context',
+    contextHelper:
+      'Choose the option that most closely reflects how your skin tends to feel.',
+    signalsLabel: 'What your skin is asking for',
+    signalsHelper: 'Choose the signals you would like to understand.',
+    limitNote: 'Choose up to five signals so the interpretation remains clear.',
+    applyLabel: 'View my NFE Skin Profile',
+    applyDisabledHelper:
+      'Choose at least one signal to build your NFE Skin Profile.',
+    resetLabel: 'Start over',
+    appliedStatus: 'Your profile is now reflected across the Science Map.',
+    appliedDetail:
+      'The highlighted layers, Layer Context panels, and formula matrix correspond to the signals you selected.',
   },
 
   layerScience: {

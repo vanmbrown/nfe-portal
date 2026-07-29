@@ -270,7 +270,9 @@ describe('copy governance', () => {
   it('renders no profiling or quiz language', () => {
     const profiling = [
       /your skin profile/i,
-      /view my nfe skin profile/i,
+      // "View my NFE Skin Profile" is founder-approved copy for the second way
+      // into the same map. What must stay out is *result* language, which the
+      // rest of this list covers and which the dual-entry suite tests directly.
       /your (?:top )?priorities/i,
       /your skin (?:type )?result/i,
       /your skin score/i,
@@ -594,9 +596,11 @@ describe('formula matrix behaviour and semantics', () => {
 describe('shared pathway state', () => {
   it('keeps one selection owner for all three modules', () => {
     const source = stripComments(experienceSource())
-    // Match invocations, not the import line, which also contains the name.
-    const stateHooks = source.match(/useState[<(]/g) ?? []
-    assert.equal(stateHooks.length, 1, 'more than one state source in the chapter')
+    // Exactly one pathway state. The chapter also tracks which input the
+    // visitor is using, which is not a second source of truth for the map, so
+    // count the pathway state specifically rather than every hook.
+    const pathwayState = source.match(/useState<PathwayId\[\]>/g) ?? []
+    assert.equal(pathwayState.length, 1, 'more than one pathway state in the chapter')
     assert.match(source, /<SkinLayerSchematic/)
     assert.match(source, /<LayerContextPanels/)
     assert.match(source, /<ConcernFormulaMatrix/)
@@ -1065,7 +1069,7 @@ describe('pathway synchronization', () => {
 
   it('keeps one selection owner feeding all four expressions', () => {
     const source = stripComments(experienceSource())
-    assert.equal((source.match(/useState[<(]/g) ?? []).length, 1)
+    assert.equal((source.match(/useState<PathwayId\[\]>/g) ?? []).length, 1)
     assert.match(source, /<SkinLayerSchematic[\s\S]*?emphasized=\{emphasizedLayers\}/)
     assert.match(source, /<LayerContextPanels[\s\S]*?emphasized=\{selected\}/)
     assert.match(source, /<ConcernFormulaMatrix[\s\S]*?emphasized=\{selected\}/)
@@ -1625,7 +1629,7 @@ describe('method orientation', () => {
 
 describe('start interpretation invitation', () => {
   it('uses the approved label', () => {
-    assert.equal(SCIENCE_PAGE.scienceMethod.ctaLabel, 'Start your skin interpretation')
+    assert.equal(SCIENCE_PAGE.scienceMethod.ctaLabel, 'Start Your Skin Interpretation')
   })
 
   it('is a link, never a button', () => {
@@ -2553,7 +2557,7 @@ describe('science initial state from the url', () => {
 
   it('keeps one selection state, seeded once and then owned by react', () => {
     const island = stripComments(experienceSource())
-    assert.equal((island.match(/useState</g) ?? []).length, 1)
+    assert.equal((island.match(/useState<PathwayId\[\]>/g) ?? []).length, 1)
     // No synchronisation back into the url: no router churn, no history spam.
     for (const banned of [
       'router.replace',

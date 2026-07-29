@@ -15,11 +15,23 @@ import type {
   LayerContextPanel,
   LayerId,
   PathwayId,
+  ScienceEntryModesContent,
+  SkinProfileContent,
 } from '@/content/science/types'
+
+import type {
+  SkinContextId,
+  SkinProfileOption,
+  SkinSignalId,
+} from '@/content/science/skin-profile'
 
 import { ConcernFormulaMatrix } from './ConcernFormulaMatrix'
 import { LayerContextPanels } from './LayerContextPanels'
 import { SkinLayerSchematic } from './SkinLayerSchematic'
+import { SkinProfileBuilder } from './SkinProfileBuilder'
+
+/** The two ways in. Both write to one selected-pathway state. */
+type EntryMode = 'pathway' | 'profile'
 
 /**
  * The interactive Science chapter, and the only interactive element on the
@@ -75,6 +87,16 @@ interface ScienceMapExperienceProps {
    * to disagree about.
    */
   initialSelectedPathwayIds?: PathwayId[]
+  /**
+   * Copy and options for the Skin Profile builder, passed in rather than
+   * imported so the labels travel as data instead of client code — the same
+   * reason the Layer Context panels and matrix rows arrive as props.
+   */
+  entryModes: ScienceEntryModesContent
+  skinProfile: SkinProfileContent
+  skinContexts: SkinProfileOption<SkinContextId>[]
+  skinSignals: SkinProfileOption<SkinSignalId>[]
+  maxSkinSignals: number
 }
 
 export function ScienceMapExperience({
@@ -82,10 +104,19 @@ export function ScienceMapExperience({
   matrixRows,
   mapChapterNote,
   initialSelectedPathwayIds = [],
+  entryModes,
+  skinProfile,
+  skinContexts,
+  skinSignals,
+  maxSkinSignals,
 }: ScienceMapExperienceProps) {
   const [selected, setSelected] = useState<PathwayId[]>(
     initialSelectedPathwayIds
   )
+  // Which input the visitor is using. Not a second state for the map — the
+  // selected pathways below are the only authority, and both modes write to
+  // them. Switching modes therefore never disturbs what is selected.
+  const [entryMode, setEntryMode] = useState<EntryMode>('pathway')
   const firstPathwayRef = useRef<HTMLButtonElement>(null)
 
   const activePathways = useMemo(
@@ -136,25 +167,61 @@ export function ScienceMapExperience({
 
   return (
     <div className="mx-auto max-w-6xl px-6 md:px-12">
-      {/* Pathway selector. On mobile this sits above the schematic. */}
-      <div className="mx-auto max-w-3xl">
-        <h3
-          id="nfe-pathways-label"
-          className="font-serif text-2xl text-nfe-gold md:text-3xl"
-        >
-          Choose a pathway, or read the layers as they are.
-        </h3>
-        <p className="mt-3 text-sm leading-6 text-nfe-paper/70">
-          Each pathway is a way into the map. Choosing one brings a relationship
-          forward — it does not assess your skin, and nothing is saved.
-        </p>
-      </div>
-
+      {/* Two ways in. Plain buttons with aria-pressed rather than an ARIA tab
+          widget: there is no roving focus to manage and nothing is hidden that
+          a tab panel would need to describe, so the simpler semantics are the
+          more accurate ones. */}
       <div
         role="group"
-        aria-labelledby="nfe-pathways-label"
-        className="mt-8 flex flex-wrap gap-3"
+        aria-label={entryModes.label}
+        className="mb-12 flex flex-wrap gap-3"
       >
+        {(
+          [
+            ['pathway', entryModes.pathwayLabel],
+            ['profile', entryModes.profileLabel],
+          ] as const
+        ).map(([mode, label]) => {
+          const active = entryMode === mode
+          return (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setEntryMode(mode)}
+              aria-pressed={active}
+              data-entry-mode={mode}
+              className={`min-h-[44px] rounded-full border px-6 py-3 text-sm tracking-[0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-gold focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-green-900 ${
+                active
+                  ? 'border-nfe-gold bg-nfe-gold font-medium text-nfe-green-900'
+                  : 'border-nfe-paper/30 text-nfe-paper/85 hover:border-nfe-gold/70'
+              }`}
+            >
+              {label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Pathway selector. On mobile this sits above the schematic. */}
+      <div className={entryMode === 'pathway' ? undefined : 'hidden'}>
+        <div className="mx-auto max-w-3xl">
+          <h3
+            id="nfe-pathways-label"
+            className="font-serif text-2xl text-nfe-gold md:text-3xl"
+          >
+            Choose a pathway, or read the layers as they are.
+          </h3>
+          <p className="mt-3 text-sm leading-6 text-nfe-paper/70">
+            Each pathway is a way into the map. Choosing one brings a relationship
+            forward — it does not assess your skin, and nothing is saved.
+          </p>
+        </div>
+
+        <div
+          role="group"
+          aria-labelledby="nfe-pathways-label"
+          className="mt-8 flex flex-wrap gap-3"
+        >
         {PATHWAYS.map((pathway, index) => {
           const active = selected.includes(pathway.id)
           return (
@@ -193,7 +260,18 @@ export function ScienceMapExperience({
             Clear pathways
           </button>
         ) : null}
+        </div>
       </div>
+
+      {/* The second way in. Same state, different input. */}
+      {entryMode === 'profile' ? (
+        <SkinProfileBuilder
+          copy={skinProfile}
+          contexts={skinContexts}
+          signals={skinSignals}
+          maxSignals={maxSkinSignals}
+        />
+      ) : null}
 
       {/* Concise, polite announcement of interpretation changes only. */}
       <p role="status" aria-live="polite" className="sr-only">

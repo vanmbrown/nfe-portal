@@ -12,6 +12,11 @@ import {
 } from '@/content/science'
 import { FAMILY_BY_ID as FAMILY_LABELS } from '@/content/ingredients/families'
 import {
+  MAX_SKIN_SIGNALS,
+  SKIN_CONTEXTS,
+  SKIN_SIGNALS,
+} from '@/content/science/skin-profile'
+import {
   PATHWAYS_PARAM,
   SCIENCE_MAP_ANCHOR,
   parsePathwayQuery,
@@ -164,6 +169,11 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
             layerContextPanels={LAYER_CONTEXT_PANELS}
             matrixRows={CONCERN_FORMULA_MATRIX}
             initialSelectedPathwayIds={initialSelectedPathwayIds}
+            entryModes={SCIENCE_PAGE.entryModes}
+            skinProfile={SCIENCE_PAGE.skinProfile}
+            skinContexts={SKIN_CONTEXTS}
+            skinSignals={SKIN_SIGNALS}
+            maxSkinSignals={MAX_SKIN_SIGNALS}
             mapChapterNote={
               /* The partial Layer Science intro that used to sit here is now the
                  complete module above. Only this approved paragraph remains, so

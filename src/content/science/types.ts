@@ -283,6 +283,53 @@ export interface LayerScienceIntroContent {
   cards: LayerScienceCard[]
 }
 
+/**
+ * The two ways into the Science Map.
+ *
+ * Both are inputs to the same selected-pathway state. Neither is a separate
+ * experience, and the labels must not suggest one produces a different or
+ * fuller result than the other.
+ */
+export interface ScienceEntryModesContent {
+  /** Accessible name for the group of mode controls. */
+  label: string
+  /** Choose pathways directly. The default. */
+  pathwayLabel: string
+  /** Describe what skin is asking for, and let it resolve to pathways. */
+  profileLabel: string
+}
+
+/**
+ * The Skin Profile builder.
+ *
+ * "Profile" is founder-approved editorial language for a temporary, page-local
+ * reading. There is deliberately no field on this type that could hold a
+ * result, a name, a score or a rank — the builder's only output is a set of
+ * canonical pathway ids, and the shape of this content makes that plain.
+ */
+export interface SkinProfileContent {
+  eyebrow: string
+  heading: string
+  description: string
+  /** "An interpretive guide, not a diagnosis." */
+  boundary: string
+  /** "Nothing is saved or submitted." Verified true against executable code. */
+  privacy: string
+  contextLabel: string
+  contextHelper: string
+  signalsLabel: string
+  signalsHelper: string
+  /** Shown quietly once the signal limit is reached. Never an error. */
+  limitNote: string
+  applyLabel: string
+  /** Why the action is unavailable. Guidance, never a validation failure. */
+  applyDisabledHelper: string
+  resetLabel: string
+  /** One concise line after the profile is applied. Not a result banner. */
+  appliedStatus: string
+  appliedDetail: string
+}
+
 export interface SciencePageContent {
   hero: {
     eyebrow: string
@@ -293,6 +340,8 @@ export interface SciencePageContent {
   method: ScienceChapter
   scienceMethod: ScienceMethodContent
   profileIntro: ScienceProfileIntroContent
+  entryModes: ScienceEntryModesContent
+  skinProfile: SkinProfileContent
   layerScience: LayerScienceIntroContent
   mapIntro: {
     eyebrow: string
