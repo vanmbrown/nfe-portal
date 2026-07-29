@@ -55,7 +55,10 @@ export function ScienceReturnLink({ pathwayIds }: ScienceReturnLinkProps) {
     >
       <Link
         href={buildScienceReturnHref(pathwayIds)}
-        className="pointer-events-auto flex min-h-[44px] w-full items-center justify-center gap-3 rounded-full border border-[#C9A66B]/45 bg-[#0E2A22] px-6 py-3 text-sm uppercase tracking-[0.16em] text-[#F4EADB] shadow-[0_6px_24px_rgba(14,42,34,0.18)] transition-colors hover:bg-[#143026] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A66B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F5F3] md:w-auto"
+        // Sentence case with only slight tracking, measured: the uppercase
+        // treatment used elsewhere on this page renders the pill at 360px,
+        // well past the width a floating control should take. This is 253px.
+        className="pointer-events-auto flex min-h-[44px] w-full items-center justify-center gap-3 rounded-full border border-[#C9A66B]/45 bg-[#0E2A22] px-5 py-3 text-sm tracking-[0.02em] text-[#F4EADB] shadow-[0_6px_24px_rgba(14,42,34,0.18)] transition-colors hover:bg-[#143026] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A66B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F5F3] md:w-auto"
       >
         {/* Decorative. The link's accessible name is the visible label. */}
         <span aria-hidden="true">&larr;</span>

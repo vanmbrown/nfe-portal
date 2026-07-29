@@ -55,7 +55,15 @@ export default async function INCIPage({ searchParams }: INCIPageProps) {
           keyboard order but takes no space in the flow. */}
       {cameFromScience ? <ScienceReturnLink pathwayIds={pathwayIds} /> : null}
 
-      <div className="container mx-auto px-4 py-8">
+      {/* The floating control overlays the foot of the page, so the closing
+          content needs room to clear it. Applied only when the control is
+          actually rendered — an ordinary visit to Ingredients keeps exactly
+          the spacing it always had. */}
+      <div
+        className={`container mx-auto px-4 py-8 ${
+          cameFromScience ? 'pb-32 md:pb-28' : ''
+        }`}
+      >
         <h1 className="text-3xl md:text-4xl font-primary font-bold text-[#0E2A22] mb-6">
           NFE Ingredient Transparency
         </h1>
