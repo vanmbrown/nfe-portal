@@ -3028,3 +3028,86 @@ pending authorization. `/science?pathways=…` scores 96 for that reason alone.
 ## Founder review status
 
 Awaiting approval.
+
+---
+
+# Founder-approved correction — Active Layer Context contrast
+
+## Founder decision
+
+Change the active Layer Context gold from `#c6a664` to `#d3b478`. Remove the
+`/90` opacity from the active *Formulation support* label. Change nothing else.
+`/science?pathways=…` must score Accessibility 100 before release assembly.
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-layer-context-contrast` |
+| Branched from | `feature/nfe-science-dual-entry-profile` @ `525f6cd` |
+| Deployed | No |
+
+## What was failing
+
+The active panel lifts its ground with a warm cream overlay. On that raised
+surface the approved gold fell under AA, while the same gold on the darker
+inactive ground passed. The defect had been carried since the pathway-sync
+refinement and was reachable by URL once pathway state became restorable.
+
+| Element | Before | After |
+|---|---|---|
+| Active zone eyebrow | 4.18 | **4.86** |
+| Active panel title | 4.18 | **4.86** |
+| Active *Formulation support* | 3.70 | **4.86** |
+
+Measured on the composited active ground `#324a3e`.
+
+## What changed
+
+`#d3b478` in the three places the active state renders gold text — zone
+eyebrow, panel title, formulation label — and the `/90` removed from that
+label on active panels only.
+
+## What did not change
+
+Inactive panels are untouched and measure exactly as before: eyebrow 6.91,
+title 12.38, formulation label 4.81 with its `/90` intact.
+
+The *In focus* badge is a gold **fill** with dark green text, not gold text. It
+passed at 6.63:1 and needed nothing, so it remains `#c6a664`. It now sits beside
+an eyebrow at `#d3b478` — an RGB distance of 27.7, perceptible if looked for.
+Recorded for a decision rather than changed silently. The panel border, zone-bar
+ring and inset hairline are likewise unchanged structural gold.
+
+## The release gate
+
+| URL | Accessibility | Failing audits |
+|---|---|---|
+| `/science?pathways=hydration` | **100** | none |
+| `/science?pathways=hydration,tone-integrity` | **100** | none |
+| `/science?pathways=` all five | **100** | none |
+| `/science` | 100 | none |
+| `/inci` and contextual `/inci` | 100 | none |
+
+CLS 0 throughout. The blocker recorded in the two previous entries is cleared.
+
+## Validation
+
+`npm ci` 0 · `tsc` 0 · `lint` 0 · **329/329** · `next build` 0 · OpenNext 0 ·
+63 routes · Science chunk 31,997 → 32,023.
+
+The arbitrary colour class was checked in the built stylesheet rather than
+assumed — this page has been bitten before by Tailwind classes that emit no CSS.
+
+## Tests
+
+326 → **329**. One existing guard followed the approved value; three added so
+the correction cannot be undone by accident: the exact gold in exactly three
+places, the label's opacity conditional rather than blanket, and the inactive
+treatment intact.
+
+## Files changed
+
+Two: `LayerContextPanels.tsx` and tests. Nothing else in the repository.
+
+## Founder review status
+
+Awaiting approval. No blocker outstanding.
