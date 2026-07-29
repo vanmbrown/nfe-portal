@@ -2,12 +2,13 @@
 
 import { useId, useState } from 'react'
 
-import type {
-  SkinContextId,
-  SkinProfileOption,
-  SkinSignalId,
+import {
+  mapProfileToPathways,
+  type SkinContextId,
+  type SkinProfileOption,
+  type SkinSignalId,
 } from '@/content/science/skin-profile'
-import type { SkinProfileContent } from '@/content/science/types'
+import type { PathwayId, SkinProfileContent } from '@/content/science/types'
 
 interface SkinProfileBuilderProps {
   /**
@@ -19,6 +20,17 @@ interface SkinProfileBuilderProps {
   contexts: SkinProfileOption<SkinContextId>[]
   signals: SkinProfileOption<SkinSignalId>[]
   maxSignals: number
+  /**
+   * Hand the resolved pathways to the chapter. Called only when the visitor
+   * activates the action — never on a checkbox change, so the map cannot shift
+   * under her while she is still reading the options, and pathways she set by
+   * hand are never silently overwritten.
+   */
+  onApply: (pathwayIds: PathwayId[]) => void
+  /** Clear the map, using the chapter's existing clear logic. */
+  onReset: () => void
+  /** Whether a profile has been applied, so the status line can show. */
+  applied: boolean
 }
 
 /**
@@ -53,12 +65,16 @@ export function SkinProfileBuilder({
   contexts,
   signals,
   maxSignals,
+  onApply,
+  onReset,
+  applied,
 }: SkinProfileBuilderProps) {
   const groupId = useId()
   const [contextId, setContextId] = useState<SkinContextId | null>(null)
   const [signalIds, setSignalIds] = useState<SkinSignalId[]>([])
 
   const atLimit = signalIds.length >= maxSignals
+  const canApply = signalIds.length > 0
 
   function toggleSignal(id: SkinSignalId) {
     setSignalIds((current) => {
@@ -66,6 +82,12 @@ export function SkinProfileBuilder({
       if (current.length >= maxSignals) return current
       return [...current, id]
     })
+  }
+
+  function startOver() {
+    setContextId(null)
+    setSignalIds([])
+    onReset()
   }
 
   return (
@@ -89,6 +111,19 @@ export function SkinProfileBuilder({
           <span>{copy.privacy}</span>
         </p>
 
+        {/* One quiet line once the profile is applied. Not a result banner,
+            and not a live region: the chapter already announces selection
+            changes politely, and a second announcer would say it twice. */}
+        {applied ? (
+          <div className="mt-8 border-l-2 border-nfe-gold/50 pl-5">
+            <p className="text-[1.0625rem] leading-8 text-nfe-paper">
+              {copy.appliedStatus}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-nfe-paper/70">
+              {copy.appliedDetail}
+            </p>
+          </div>
+        ) : null}
       </div>
 
       {/* Right — the inputs. */}
@@ -177,6 +212,39 @@ export function SkinProfileBuilder({
             </p>
           ) : null}
         </fieldset>
+
+        <div className="mt-10 border-t border-nfe-paper/15 pt-8">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+            <button
+              type="button"
+              onClick={() => onApply(mapProfileToPathways(contextId, signalIds))}
+              disabled={!canApply}
+              // Described by the helper below, so a disabled control explains
+              // itself rather than leaving the visitor to guess.
+              aria-describedby={canApply ? undefined : `${groupId}-apply-help`}
+              className="min-h-[44px] rounded-full border border-nfe-gold bg-nfe-gold px-6 py-3 text-sm font-medium tracking-[0.02em] text-nfe-green-900 transition-colors hover:bg-nfe-gold-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-paper focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-green-900 disabled:cursor-not-allowed disabled:border-nfe-paper/25 disabled:bg-transparent disabled:text-nfe-paper/60"
+            >
+              {copy.applyLabel}
+            </button>
+
+            <button
+              type="button"
+              onClick={startOver}
+              className="min-h-[44px] rounded-full border border-nfe-paper/25 px-5 py-3 text-sm tracking-[0.02em] text-nfe-paper/75 transition-colors hover:border-nfe-paper/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-gold focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-green-900"
+            >
+              {copy.resetLabel}
+            </button>
+          </div>
+
+          {canApply ? null : (
+            <p
+              id={`${groupId}-apply-help`}
+              className="mt-4 text-sm leading-6 text-nfe-paper/70"
+            >
+              {copy.applyDisabledHelper}
+            </p>
+          )}
+        </div>
       </form>
     </div>
   )

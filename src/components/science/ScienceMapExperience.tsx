@@ -117,6 +117,9 @@ export function ScienceMapExperience({
   // selected pathways below are the only authority, and both modes write to
   // them. Switching modes therefore never disturbs what is selected.
   const [entryMode, setEntryMode] = useState<EntryMode>('pathway')
+  // Whether the profile status line should show. Presentation only — the map
+  // reads `selected` and nothing else.
+  const [profileApplied, setProfileApplied] = useState(false)
   const firstPathwayRef = useRef<HTMLButtonElement>(null)
 
   const activePathways = useMemo(
@@ -146,6 +149,22 @@ export function ScienceMapExperience({
     setSelected((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
     )
+    // A manual change makes the controls authoritative. The status line would
+    // otherwise keep claiming the map reflects a profile it no longer matches.
+    setProfileApplied(false)
+  }
+
+  /**
+   * The profile's one write into the map.
+   *
+   * It replaces the selection rather than merging with it, so what the visitor
+   * described is what she sees. She can still adjust by hand afterwards, and
+   * from that moment the controls are authoritative — nothing remaps until she
+   * asks for a profile again.
+   */
+  function applyProfile(pathwayIds: PathwayId[]) {
+    setSelected(pathwayIds)
+    setProfileApplied(pathwayIds.length > 0)
   }
 
   function clearPathways() {
@@ -155,6 +174,17 @@ export function ScienceMapExperience({
     // focus to the start of the group first, while that node is still mounted.
     firstPathwayRef.current?.focus()
     setSelected([])
+    setProfileApplied(false)
+  }
+
+  /**
+   * "Start over" in the profile panel. The same clearing as the pathway
+   * control, without moving focus: the button the visitor just pressed is
+   * still there, unlike "Clear pathways", which removes itself.
+   */
+  function resetProfile() {
+    setSelected([])
+    setProfileApplied(false)
   }
 
   const hasSelection = activePathways.length > 0
@@ -270,6 +300,9 @@ export function ScienceMapExperience({
           contexts={skinContexts}
           signals={skinSignals}
           maxSignals={maxSkinSignals}
+          onApply={applyProfile}
+          onReset={resetProfile}
+          applied={profileApplied}
         />
       ) : null}
 
