@@ -128,7 +128,12 @@ export function LayerContextPanels({
                     <p className="flex flex-wrap items-center gap-x-3 gap-y-2">
                       <span
                         className={`text-xs uppercase tracking-[0.22em] transition-colors duration-200 ease-out ${
-                          active ? 'text-nfe-gold' : 'text-nfe-paper/70'
+                          // Founder-approved: the active gold is lifted from
+                        // #c6a664 to #d3b478. On the active panel's raised
+                        // ground the old gold measured 4.18:1 against AA's
+                        // 4.5:1; this reads 4.85:1. Inactive panels sit on the
+                        // darker ground, already passed, and are unchanged.
+                        active ? 'text-[#d3b478]' : 'text-nfe-paper/70'
                         }`}
                       >
                         {String(panel.order).padStart(2, '0')} · {zone.zone}
@@ -142,7 +147,7 @@ export function LayerContextPanels({
 
                     <h4
                       className={`mt-3 font-serif text-2xl leading-snug transition-colors duration-200 ease-out md:text-[1.75rem] ${
-                        active ? 'text-nfe-gold' : 'text-nfe-paper'
+                        active ? 'text-[#d3b478]' : 'text-nfe-paper'
                       }`}
                     >
                       {panel.title}
@@ -159,7 +164,14 @@ export function LayerContextPanels({
 
                 {/* Right — how NFE formulates in response. */}
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-nfe-gold/90">
+                  {/* The /90 comes off on the active panel, where the raised
+                      ground left it at 3.7:1. Inactive keeps it exactly as
+                      approved — it sits on the darker ground at 5.21:1. */}
+                  <p
+                    className={`text-xs uppercase tracking-[0.2em] ${
+                      active ? 'text-[#d3b478]' : 'text-nfe-gold/90'
+                    }`}
+                  >
                     Formulation support
                   </p>
                   <p className="mt-2 text-[1.0625rem] leading-8 text-nfe-paper/80">

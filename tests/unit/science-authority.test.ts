@@ -902,7 +902,34 @@ describe('layer context emphasis presentation', () => {
     const source = layerContextSource()
     assert.match(source, /border-nfe-gold\/60 bg-\[rgba\(244,234,219,0\.14\)\]/)
     assert.match(source, /border-nfe-paper\/15 bg-white\/\[0\.035\]/)
-    assert.match(source, /active \? 'text-nfe-gold' : 'text-nfe-paper'/)
+    assert.match(source, /active \? 'text-\[#d3b478\]' : 'text-nfe-paper'/)
+  })
+
+  it('carries the founder-approved active gold, and only on active panels', () => {
+    const source = layerContextSource()
+    // #c6a664 measured 4.18:1 on the raised active ground. #d3b478 is 4.85:1.
+    assert.match(source, /active \? 'text-\[#d3b478\]' : 'text-nfe-paper\/70'/)
+    assert.match(source, /active \? 'text-\[#d3b478\]' : 'text-nfe-paper'/)
+    assert.match(source, /active \? 'text-\[#d3b478\]' : 'text-nfe-gold\/90'/)
+    // Three active gold text colours, no more: the correction is scoped.
+    assert.equal((source.match(/text-\[#d3b478\]/g) ?? []).length, 3)
+  })
+
+  it('takes the opacity off the active formulation support label only', () => {
+    const source = layerContextSource()
+    // The inactive label keeps /90 exactly as approved; it already passed.
+    assert.match(source, /text-xs uppercase tracking-\[0\.2em\][\s\S]{0,120}text-nfe-gold\/90/)
+    assert.ok(
+      !/tracking-\[0\.2em\] text-nfe-gold\/90">/.test(source),
+      'the label must no longer be unconditionally /90'
+    )
+  })
+
+  it('leaves the inactive panels untouched', () => {
+    const source = layerContextSource()
+    assert.match(source, /'text-nfe-paper\/70'/)
+    assert.match(source, /'text-nfe-paper'/)
+    assert.match(source, /text-nfe-gold\/90/)
   })
 
   it('keeps a visible non-colour marker for the focused panel', () => {
