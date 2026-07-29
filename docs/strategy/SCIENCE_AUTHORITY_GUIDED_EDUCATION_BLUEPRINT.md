@@ -2825,3 +2825,206 @@ scores 96 for that reason and that reason alone.
 ## Founder review status
 
 Awaiting approval.
+
+---
+
+# Final founder refinement — Dual pathway and Skin Profile entry
+
+## Founder decision
+
+Keep the pathway experience exactly as approved, add a second way in for a
+visitor who would rather describe what her skin is asking for, and make the
+invitation into the map look like the invitation it is.
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-dual-entry-profile` |
+| Branched from | `feature/nfe-inci-floating-science-return` @ `f1fda2a` |
+| Deployed | No |
+
+## Two ways in, one map
+
+Two plain buttons with `aria-pressed` rather than an ARIA tab widget — there is
+no roving focus to manage and nothing hidden a tab panel would need to
+describe, so the simpler semantics are the more accurate ones.
+
+*Explore by pathway* is the default. The page reads fully without ever opening
+the other.
+
+Both are inputs to the same selected-pathway state, which stays where it always
+was, in the Science chapter. No second store, no provider, no context, no
+duplicate state, no separate result system. The builder holds its own form
+state and reaches the map only by handing pathway ids to its parent.
+
+## The pathway experience is untouched
+
+Same heading — *Choose a pathway, or read the layers as they are.* — same
+supporting copy, same five controls in the same order, same multi-selection,
+same Clear with its focus fix, same schematic, Layer Context and matrix
+synchronisation. It gained a wrapper for the mode switch and nothing else.
+
+## The Skin Profile builder
+
+| Element | Copy | Control | Required |
+|---|---|---|---|
+| Eyebrow | Build Your NFE Skin Profile | — | — |
+| Heading | Select what your skin is asking for. | — | — |
+| Boundary | An interpretive guide, not a diagnosis. | — | — |
+| Privacy | Nothing is saved or submitted. | — | — |
+| Skin context | 7 options | radios, one choice | optional |
+| Signals | 10 options | checkboxes, up to five | at least one |
+| Action | View my NFE Skin Profile | button | — |
+| Reset | Start over | button | — |
+
+Native inputs throughout — real fieldsets, legends and labels, no custom
+keyboard handling, no focus management, no auto-scroll. The sixth signal is
+quietly unavailable rather than refused, and the action explains itself through
+a helper line reached by `aria-describedby`, never an error.
+
+## Mapping
+
+| Input | Pathways |
+|---|---|
+| Dry or easily depleted | Barrier Comfort · Hydration |
+| Sensitive or easily unsettled | Barrier Comfort |
+| Mature or changing | Hydration · Texture & Suppleness · Visible Resilience |
+| Balanced · Combination · Oily · Not sure | — |
+| Dryness or ashiness | Hydration |
+| Tightness or reduced comfort | Barrier Comfort |
+| Uneven-looking tone | Tone Integrity |
+| Visible dullness | Tone Integrity · Visible Resilience |
+| Post-blemish-looking marks | Tone Integrity |
+| Fine-line appearance | Texture & Suppleness |
+| Crepey-looking texture | Texture & Suppleness |
+| Loss of suppleness | Texture & Suppleness |
+| Tired-looking skin | Visible Resilience |
+| Sensitivity awareness | Barrier Comfort |
+
+Deduplicated, canonical order, unknown ids ignored. Four contexts map to
+nothing, which is honest: they describe how skin behaves without pointing at a
+particular reading of the map.
+
+No profile name, no score, no rank, no primary or secondary concern, no
+recommendation. The option shape is exactly `id`, `label`, `pathways` — a
+weight cannot be expressed even by accident, and a test asserts those three
+keys.
+
+## When it writes
+
+Only on the action. Remapping on every checkbox would shift the map while she
+was still reading, and would silently overwrite pathways she had set by hand.
+
+Applying replaces the selection, so what she described is what she sees. The
+moment she toggles a pathway herself the controls are authoritative again and
+the status line clears — it would otherwise keep claiming the map reflects a
+profile it no longer matches. *Start over* clears both form and map through the
+chapter's existing clearing logic.
+
+Switching modes never disturbs the selection. The builder is hidden rather than
+unmounted, so her description survives a glance at pathway mode — browser
+testing caught that it did not, at first.
+
+## Privacy and URL
+
+No storage, cookie, request or analytics. The form cannot submit: its only
+handler prevents it, and there is no action or method.
+
+Only canonical pathway ids travel. Verified end to end: a profile of
+*Uneven-looking tone* + *Tired-looking skin* produced
+`/inci?from=science&pathways=tone-integrity,visible-resilience#…`, the return
+restored both pathways, and no signal or context id appeared anywhere in the
+URL. A test asserts the URL layer contains none of the seventeen input ids.
+
+## The invitation
+
+*Start Your Skin Interpretation*, title case, in muted gold with deep green
+text — **6.7:1** measured, **5.19:1** on hover. The focus ring changed from
+gold to deep green, because a gold ring on a gold fill is the one pairing that
+would not have been visible.
+
+The brief asked to correct a misspelling, *Intepretation*. That spelling
+appears nowhere in this codebase; only the casing changed.
+
+Same destination, same semantics, still a plain anchor that works without
+JavaScript.
+
+## Accessibility
+
+Every new control measured on its real ground, all passing AA:
+
+| Control | Ratio |
+|---|---|
+| Gold CTA | 6.70 |
+| Active mode button | 6.70 |
+| Inactive mode button | 11.07 |
+| Apply, disabled | 5.79 |
+| Start over | 8.15 |
+| Fieldset legend | 5.99 |
+| Helper text | 7.31 |
+
+17 inputs, 17 labelled. Two fieldsets, two legends. Every target 44px or more.
+One `h1`, valid heading order, no duplicate ids, no auto-focus, and one
+`aria-live` region — the pre-existing one, not a new one.
+
+`/science` **100**, `/inci` **100** plain and contextual, CLS 0.
+
+## Responsive
+
+| Viewport | Entry selector | Profile | CTA | Overflow |
+|---|---|---|---|---|
+| 1440 · 1280 · 1024 | one row | two columns | 381×44 | none |
+| 768 | one row | single column | 381×44 | none |
+| 375 · 320 | wraps to two rows | single column | full width | none |
+
+Heading 36px down to 30px; helper text stays 14px. Smallest signal target 46px
+everywhere.
+
+## Performance
+
+| Metric | Before | After |
+|---|---|---|
+| Science client chunk | 25,768 | **31,997** |
+| `/science` Perf · A11y · CLS | 98 · 100 · 0 | 98 · 100 · 0 |
+| Route count | 63 | 63 |
+
+The chunk first went to 33,320 because the mapping function reads the option
+arrays, so importing it into the island pulled every label into the browser —
+the same shape as the barrel-import problem this page has hit before.
+Extracting the ordering rule into a prose-free helper brought it to 31,997 with
+the labels verifiably gone. The remaining 6,229 is the builder itself: two
+fieldsets, radios, checkboxes and the action row. That is interactive code and
+cannot travel as data.
+
+## Tests
+
+287 → **326**. Both entry modes and the default, pressed-button semantics, one
+pathway state, preserved pathway behaviour, every profile field, the complete
+mapping, shared state, privacy, the gold CTA, and regression.
+
+Four guards deliberately broken and each caught: a signal pointed at a
+non-existent pathway (3 failures), a severity field added to the option shape
+(1), profile input written to localStorage (2), the gold CTA reverted (1).
+
+Five earlier guards were tightened rather than relaxed. Three counted every
+`useState` in the chapter to prove one selection owner; they now count
+`useState<PathwayId[]>`, which is narrower and still catches a duplicated
+pathway state. One pinned the CTA to sentence case. One banned the phrase that
+is now approved copy, while every result-language pattern around it stayed.
+
+## Files changed
+
+Nine: the Science page, the chapter, the method section, the new builder, the
+new profile content, the new mapping helper, Science content and types, and
+tests. Zero `/inci`, ingredient, taxonomy, product, formula, global-style,
+dependency or lockfile changes. The pathway URL state was not touched.
+
+## Known separate issue
+
+The active Layer Context contrast failure is unchanged: the same four nodes at
+the same 4.18:1 and 3.7:1, and `LayerContextPanels.tsx` has an empty diff
+against the parent. Not introduced here, not modified here, still deferred
+pending authorization. `/science?pathways=…` scores 96 for that reason alone.
+
+## Founder review status
+
+Awaiting approval.
