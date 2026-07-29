@@ -3111,3 +3111,75 @@ Two: `LayerContextPanels.tsx` and tests. Nothing else in the repository.
 ## Founder review status
 
 Awaiting approval. No blocker outstanding.
+
+---
+
+# Science release readiness — Founder sign-off
+
+## Founder decision
+
+The *In focus* badge stays at `#c6a664`. It already passes at 6.63:1, and the
+instruction was to change nothing else; the slight difference from the adjacent
+`#d3b478` eyebrow reads as intentional tonal layering. The visual system is not
+to be reopened for it.
+
+Recorded honestly: the badge was not visually reviewed in the implementation
+session — the preview pane was not compositing frames, so no screenshot was
+possible. The decision rests on the founder's review, not on an observation
+this record can claim.
+
+## Status
+
+```
+NFE DUAL-ENTRY SCIENCE INTERPRETATION
+
+IMPLEMENTATION COMPLETE
+TECHNICAL VALIDATION PASSED
+FOUNDER VISUAL REVIEW COMPLETE
+SELECTED-STATE CONTRAST CORRECTION COMPLETE
+ACCESSIBILITY 100
+READY FOR RELEASE ASSEMBLY
+```
+
+## Release assembly source
+
+| | |
+|---|---|
+| Branch | `feature/nfe-science-layer-context-contrast` |
+| HEAD | `ee35bf05ab3dc9dd2fb2c2b82f952deff9ce6de8` |
+
+No further feature changes are required before assembling the Science release.
+
+## What that branch carries
+
+The full Science lineage, each stage founder-approved in turn:
+
+| Stage | Ends at |
+|---|---|
+| Science Authority Phase 1 | `9a6b242` |
+| Layer Context + Concern-to-Formula Matrix | `215b391` |
+| Layer Context as schematic companion | `0953c15` |
+| Pathway synchronisation + enlarged schematic | `f3bcfac` |
+| Ingredient-family links to anchored `/inci` | `eb8eb27` |
+| Founder-guided orientation restoration | `59898d6` |
+| Complete Layer Science module | `2171199` |
+| Science-to-Ingredients pathway continuity | `2fc38c8` |
+| Persistent floating return navigation | `f1fda2a` |
+| Dual pathway and Skin Profile entry | `525f6cd` |
+| Active Layer Context contrast correction | `ee35bf0` |
+
+## State at sign-off
+
+329 tests passing · TypeScript, lint, Next build and OpenNext all clean ·
+63 routes · CLS 0.
+
+| Surface | Accessibility |
+|---|---|
+| `/science` | 100 |
+| `/science?pathways=…` (one, two, all five) | 100 |
+| `/inci` | 100 |
+| `/inci?from=science&pathways=…` | 100 |
+
+No blocker outstanding. Release assembly is a separate, separately authorised
+task: no release branch, tag, merge, Worker version or deployment has been
+created by any of the work above.
