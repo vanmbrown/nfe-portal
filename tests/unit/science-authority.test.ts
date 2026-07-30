@@ -3539,3 +3539,132 @@ describe('dual entry regression', () => {
     assert.ok(!existsSync(src('app/(education)/science/[mode]')))
   })
 })
+
+/* ------------------------------------------------------------------ *
+ * Science introduction — shared editorial grid and interval
+ * ------------------------------------------------------------------ */
+
+/**
+ * The explanation block, sliced from code rather than from a comment.
+ *
+ * Comments are stripped first, so the slice must be anchored on markup that
+ * survives stripping — anchoring on the `{/* 2 — Why NFE Science … *\/}` label
+ * produced an empty string and made every assertion pass for the wrong reason.
+ */
+const explanationBlockSource = () => {
+  const page = stripComments(sciencePageSource())
+  const start = page.indexOf('<section className="px-6 pt-24 pb-16 md:px-12">')
+  const end = page.indexOf('<ScienceMethod />')
+  return start > -1 && end > start ? page.slice(start, end) : ''
+}
+
+describe('science introduction alignment', () => {
+  it('keeps the approved copy of both introductory blocks', () => {
+    assert.equal(SCIENCE_PAGE.method.eyebrow, 'Why this reads differently')
+    assert.equal(SCIENCE_PAGE.method.heading, 'An explanation, not an assessment.')
+    assert.equal(SCIENCE_PAGE.scienceMethod.eyebrow, 'Method')
+    assert.equal(SCIENCE_PAGE.scienceMethod.heading, 'How the NFE Science Map works.')
+  })
+
+  it('puts both blocks on the same container pattern', () => {
+    // max-w-5xl sets the editorial left edge; max-w-3xl keeps the reading
+    // measure. Measured at 1440 this is x=201, the same spine as formulation
+    // principles and ingredient families below.
+    const page = sciencePageSource()
+    assert.match(
+      page,
+      /<section className="px-6 pt-24 pb-16 md:px-12">\s*<div className="mx-auto max-w-5xl">\s*<div className="max-w-3xl">/
+    )
+    const method = methodSource()
+    assert.match(method, /<div className="mx-auto max-w-5xl">\s*<div className="max-w-3xl">/)
+  })
+
+  it('no longer centres the explanation on its own narrow container', () => {
+    const intro = explanationBlockSource()
+    // Guard the guard: anchoring on a comment would slice to '' once comments
+    // are stripped, and every assertion below would pass vacuously.
+    assert.ok(intro.length > 200, 'the explanation block slice must be real')
+    assert.ok(
+      !/mx-auto max-w-3xl/.test(intro),
+      'the explanation must not sit on a centred max-w-3xl container'
+    )
+  })
+
+  it('shares the left edge with the sections below', () => {
+    // Formulation principles and ingredient families are the reference spine.
+    const page = sciencePageSource()
+    assert.ok(
+      (page.match(/mx-auto max-w-5xl/g) ?? []).length >= 4,
+      'the 5xl editorial column must be the shared container'
+    )
+  })
+})
+
+describe('science introduction interval', () => {
+  it('closes the gap between the two blocks with existing tokens', () => {
+    // 192px (py-24 + py-24) became 128px (pb-16 + pt-16) — a 33% reduction.
+    assert.match(sciencePageSource(), /className="px-6 pt-24 pb-16 md:px-12"/)
+    assert.match(methodSource(), /className="px-6 pt-16 pb-24 md:px-12"/)
+  })
+
+  it('preserves the space above the first block and below the cards', () => {
+    assert.match(sciencePageSource(), /pt-24/)
+    assert.match(methodSource(), /pb-24/)
+  })
+
+  it('uses no arbitrary pixel offset or negative margin', () => {
+    const sources = [stripComments(sciencePageSource()), stripComments(methodSource())]
+    for (const source of sources) {
+      // Class-boundary aware: a bare '-mt-' substring also matches
+      // scroll-mt-24, which is legitimate scroll-margin, not a negative margin.
+      assert.ok(
+        !/(^|["'\s])-m[trblxy]?-/.test(source),
+        'alignment must not use a negative margin'
+      )
+      for (const banned of ['translate-', 'absolute', 'ml-[']) {
+        assert.ok(!source.includes(banned), `alignment must not use ${banned}`)
+      }
+    }
+  })
+})
+
+describe('science introduction structure unchanged', () => {
+  it('keeps three method cards below the heading', () => {
+    assert.equal(SCIENCE_PAGE.scienceMethod.steps.length, 3)
+    const method = methodSource()
+    const heading = method.indexOf('nfe-science-method-heading')
+    const cards = method.indexOf('<ol className=')
+    assert.ok(cards > heading, 'the cards must follow the heading')
+    assert.match(method, /sm:grid-cols-2 lg:grid-cols-3/)
+  })
+
+  it('keeps the section order, with Layer Science after Method', () => {
+    const page = sciencePageSource()
+    const order = [
+      '{hero.heading}',
+      '{method.heading}',
+      '<ScienceMethod />',
+      '<LayerScienceModule />',
+      '<ScienceMapExperience',
+    ]
+    const positions = order.map((m) => {
+      const i = page.indexOf(m)
+      assert.ok(i > -1, `${m} missing`)
+      return i
+    })
+    for (let i = 1; i < positions.length; i += 1) {
+      assert.ok(positions[i] > positions[i - 1], `${order[i]} must follow ${order[i - 1]}`)
+    }
+  })
+
+  it('changes no copy and adds no decoration', () => {
+    const intro = explanationBlockSource()
+    assert.ok(intro.length > 200, 'the explanation block slice must be real')
+    assert.match(intro, /\{method\.eyebrow\}/)
+    assert.match(intro, /\{method\.heading\}/)
+    assert.match(intro, /\{method\.body\.map/)
+    for (const banned of ['border-l', '<hr', 'divide-', 'bg-gradient']) {
+      assert.ok(!intro.includes(banned), `the introduction must not add ${banned}`)
+    }
+  })
+})
