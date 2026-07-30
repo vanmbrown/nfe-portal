@@ -55,12 +55,25 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
     { id: 'radiance', y: 238, height: 52 },
   ]
 
+  // No font-family is set on this SVG, and that is deliberate. The text
+  // inherits Inter from the body, which next/font applies at the root, so the
+  // diagram already carries the page's supporting family. Tailwind's
+  // `font-sans` would NOT preserve that: this config declares only `primary`
+  // and `ui` under fontFamily, so `font-sans` falls through to Tailwind's own
+  // default stack and would render Segoe UI on Windows instead of Inter. The
+  // labels match the page by inheriting; naming a token here would break it.
   const bands = geometry.map((band) => ({
     ...band,
     fill: layers.find((layer) => layer.id === band.id)?.bandHex ?? 'transparent',
   }))
 
+  // Anatomical context, set at the vertical centre of the band each name sits
+  // over. The top band had no anatomical name until now; the stratum corneum is
+  // the outermost layer of the epidermis, which is what that band stands for,
+  // so naming it makes the sequence read correctly from the surface down. The
+  // three existing names are unchanged.
   const anatomical = [
+    { label: 'Stratum Corneum', y: 38 },
     { label: 'Epidermis', y: 94 },
     { label: 'Dermis', y: 212 },
     { label: 'Hypodermis', y: 278 },
@@ -156,8 +169,22 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
         ) : null
       )}
 
-      {/* Anatomical context, visually quieter than the cosmetic zone labels. */}
-      <g fill="#17352a" opacity="0.7" className="text-[15px] uppercase tracking-[0.06em]">
+      {/* Anatomical context, visually quieter than the cosmetic zone labels.
+          Quieter is carried by size, case and position, not by fading the ink:
+          these are 15 units against the zone labels' 22, dark on a light band
+          rather than cream on the dark ground, and they carry no leader line.
+
+          The 0.7 opacity that used to sit here was doing the fading, and it
+          cost too much: sampled against the rasterised band behind each name,
+          Epidermis was 3.83:1, Dermis 2.93:1 and Hypodermis 4.47:1, all short
+          of AA for text this size.
+
+          Dropping the opacity alone did not finish the job. Dermis sits on the
+          texture band, the darkest ground of the four, and #17352a at full
+          strength still only reached 3.73:1 there. The ink is a deeper green
+          for that reason. Measured on the rendered page, not calculated from
+          the token: see the schematic contrast test for the figures. */}
+      <g fill="#0a1f17" className="text-[15px] uppercase tracking-[0.06em]">
         {anatomical.map((item) => (
           <text key={item.label} x="32" y={item.y}>
             {item.label}
