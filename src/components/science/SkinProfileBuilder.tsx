@@ -110,7 +110,7 @@ export function SkinProfileBuilder({
         </p>
         <h3
           id={`${groupId}-heading`}
-          className="mt-5 font-serif text-3xl leading-tight text-nfe-gold md:text-4xl"
+          className="mt-5 font-primary text-3xl leading-tight text-nfe-gold md:text-4xl"
         >
           {copy.heading}
         </h3>

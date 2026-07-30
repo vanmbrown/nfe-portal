@@ -28,7 +28,7 @@ export function LayerScienceModule() {
           </p>
           <h2
             id="layer-science-heading"
-            className="mt-5 font-serif text-3xl leading-tight text-nfe-green-900 md:text-4xl lg:text-[2.75rem]"
+            className="mt-5 font-primary text-3xl leading-tight text-nfe-green-900 md:text-5xl"
           >
             {heading}
           </h2>
@@ -39,7 +39,7 @@ export function LayerScienceModule() {
           {cards.map((card) => (
             <li key={card.id}>
               <article className="rounded-2xl border border-nfe-green-900/15 bg-[#FCFBF8] p-7 md:p-8">
-                <h3 className="font-serif text-xl text-nfe-green-900 md:text-2xl">
+                <h3 className="font-primary text-xl text-nfe-green-900 md:text-2xl">
                   {card.title}
                 </h3>
                 <p className="mt-4 text-[1.0625rem] leading-8 text-nfe-ink/75">
