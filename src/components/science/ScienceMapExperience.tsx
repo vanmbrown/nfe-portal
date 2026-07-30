@@ -237,13 +237,13 @@ export function ScienceMapExperience({
         <div className="mx-auto max-w-3xl">
           <h3
             id="nfe-pathways-label"
-            className="font-serif text-2xl text-nfe-gold md:text-3xl"
+            className="font-primary text-3xl text-nfe-gold md:text-4xl"
           >
             Choose a pathway, or read the layers as they are.
           </h3>
           <p className="mt-3 text-sm leading-6 text-nfe-paper/70">
             Each pathway is a way into the map. Choosing one brings a relationship
-            forward — it does not assess your skin, and nothing is saved.
+            forward. It does not assess your skin, and nothing is saved.
           </p>
         </div>
 
@@ -335,7 +335,7 @@ export function ScienceMapExperience({
                   <p className="text-xs uppercase tracking-[0.28em] text-nfe-gold">
                     You are exploring
                   </p>
-                  <h4 className="mt-3 font-serif text-2xl text-nfe-paper md:text-3xl">
+                  <h4 className="mt-3 font-primary text-xl text-nfe-paper md:text-2xl">
                     {pathway.label}
                   </h4>
                   <p className="mt-4 leading-7 text-nfe-paper/80">
@@ -378,7 +378,7 @@ export function ScienceMapExperience({
                   <ul className="mt-4 space-y-3">
                     {families.map((family) => (
                       <li key={family.id} className="leading-7 text-nfe-paper/70">
-                        <span className="text-nfe-paper">{FAMILY_LABELS[family.id].label}</span> —{' '}
+                        <span className="text-nfe-paper">{FAMILY_LABELS[family.id].label}</span>:{' '}
                         {family.role}
                       </li>
                     ))}
@@ -407,7 +407,7 @@ export function ScienceMapExperience({
               <ul className="mt-8 space-y-5">
                 {SKIN_LAYERS.map((layer) => (
                   <li key={layer.id}>
-                    <p className="font-serif text-xl text-nfe-paper">{layer.zone}</p>
+                    <p className="font-primary text-xl text-nfe-paper">{layer.zone}</p>
                     <p className="mt-2 leading-7 text-nfe-paper/70">
                       {layer.visibleContext}
                     </p>
@@ -444,7 +444,7 @@ export function ScienceMapExperience({
           </p>
           <h3
             id="nfe-formula-matrix-heading"
-            className="mt-5 font-serif text-3xl leading-tight text-nfe-paper md:text-4xl"
+            className="mt-5 font-primary text-3xl leading-tight text-nfe-paper md:text-4xl"
           >
             {SCIENCE_PAGE.formulaMatrix.heading}
           </h3>

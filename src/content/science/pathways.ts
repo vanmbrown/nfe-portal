@@ -57,7 +57,7 @@ export const PATHWAYS: EducationalPathway[] = [
     invitation: 'How even-looking tone is supported.',
     emphasizedLayers: ['tone', 'radiance'],
     interpretation:
-      'This pathway brings attention to how tone reads across the skin — including the marks that can linger after a blemish, and the unevenness that mature melanated skin is often left to interpret alone. Tone support is patient work, measured in months rather than days.',
+      'This pathway brings attention to how tone reads across the skin, including the marks that can linger after a blemish, and the unevenness that mature melanated skin is often left to interpret alone. Tone support is patient work, measured in months rather than days.',
     formulationPrinciple:
       'NFE approaches this through layered, tone-supportive ingredients used at restrained levels, alongside the barrier care that keeps skin from being irritated into looking more uneven.',
     ingredientFamilies: ['tone-supportive-cosmetic-ingredients', 'antioxidant-supportive-ingredients'],
@@ -78,7 +78,7 @@ export const PATHWAYS: EducationalPathway[] = [
     interpretation:
       'This pathway explores the relationship between texture and cushioning. Skin that is well conditioned tends to look more refined; skin that is depleted can read crepey even when nothing structural has changed.',
     formulationPrinciple:
-      'NFE approaches this by conditioning rather than resurfacing — supporting suppleness so the surface looks softer, instead of stripping it to force smoothness.',
+      'NFE approaches this by conditioning rather than resurfacing, supporting suppleness so the surface looks softer, instead of stripping it to force smoothness.',
     ingredientFamilies: ['peptides', 'emollients', 'botanical-oils'],
     ritualConnection:
       'Texture responds to steadiness. Ritual explains the unhurried application this asks for.',
@@ -94,7 +94,7 @@ export const PATHWAYS: EducationalPathway[] = [
     invitation: 'How skin reads rested across all of it.',
     emphasizedLayers: ['surface', 'barrier', 'tone', 'texture', 'radiance'],
     interpretation:
-      'This pathway looks across the whole relationship rather than one part of it. Resilience is what shows when comfort, hydration, tone and texture are all being supported at once — skin that looks rested rather than corrected.',
+      'This pathway looks across the whole relationship rather than one part of it. Resilience is what shows when comfort, hydration, tone and texture are all being supported at once: skin that looks rested rather than corrected.',
     formulationPrinciple:
       'NFE approaches this as the outcome of restraint: fewer, better-considered formulas used consistently, so that support accumulates instead of competing.',
     ingredientFamilies: ['antioxidant-supportive-ingredients', 'barrier-supportive-lipids', 'sensorial-support'],

@@ -102,7 +102,7 @@ export const LAYER_CONTEXT_PANELS: LayerContextPanel[] = [
     pathwayId: 'visible-resilience',
     title: 'Environmental context and visible radiance',
     visibleContext:
-      'Skin that reads flat or tired rather than rested. This is rarely traceable to one thing — it is the accumulated look of daylight, climate, sleep and time.',
+      'Skin that reads flat or tired rather than rested. This is rarely traceable to one thing. It is the accumulated look of daylight, climate, sleep and time.',
     formulationPrinciple:
       'Antioxidant-supportive care applied consistently, and restraint everywhere else. Well-aging, not anti-aging: the aim is skin that looks rested, not skin performing an age it is not.',
     ingredientFamilyIds: ['antioxidant-supportive-ingredients', 'botanical-oils', 'sensorial-support'],

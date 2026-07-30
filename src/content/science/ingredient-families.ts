@@ -62,7 +62,7 @@ export const INGREDIENT_FAMILIES: IngredientFamily[] = [
   },
   {
     id: 'sensorial-support',
-    role: 'Shape how a formula feels on skin — the part of care most easily overlooked.',
+    role: 'Shape how a formula feels on skin, the part of care most easily overlooked.',
     representativeExamples: ['Centella Asiatica Extract', 'Bisabolol', 'Allantoin'],
   },
 ]
