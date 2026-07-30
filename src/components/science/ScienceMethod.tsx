@@ -26,9 +26,17 @@ const { eyebrow, heading, introduction, steps, ctaLabel, ctaHref } =
  * in as many words that nothing is diagnosed, scored or saved, because that is
  * the question this module invites.
  */
+// pt-16 rather than py-24 halves this section's share of the interval above it,
+// so the explanation and the Method read as one sequence. The bottom padding is
+// untouched, keeping the cards clear of Layer Science.
+//
+// The left edge is deliberately not changed: measured at 1440, this section
+// already sits at 201px, exactly on the same spine as formulation principles
+// and ingredient families below. It was the explanation block above that was
+// out of line, not this one.
 export function ScienceMethod() {
   return (
-    <section aria-labelledby="nfe-science-method-heading" className="px-6 py-24 md:px-12">
+    <section aria-labelledby="nfe-science-method-heading" className="px-6 pt-16 pb-24 md:px-12">
       <div className="mx-auto max-w-5xl">
         <div className="max-w-3xl">
           <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">

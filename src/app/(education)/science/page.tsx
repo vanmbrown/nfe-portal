@@ -101,20 +101,35 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
       </section>
 
       {/* 2 — Why NFE Science is different */}
-      <section className="px-6 py-24 md:px-12">
-        <div className="mx-auto max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-            {method.eyebrow}
-          </p>
-          <h2 className="mt-5 font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
-            {method.heading}
-          </h2>
-          <div className="mt-8 space-y-6">
-            {method.body.map((paragraph) => (
-              <p key={paragraph} className="text-lg leading-8 text-nfe-ink/75">
-                {paragraph}
-              </p>
-            ))}
+      {/* Measured before this correction: this block sat on a centred max-w-3xl
+          container, putting its left edge 128px right of everything beneath it
+          at 1440 — 329 against 201 for Method, formulation principles and
+          ingredient families. It read as indented rather than as the opening of
+          the page's editorial column.
+
+          It now uses the same container pattern the Method section already
+          uses: max-w-5xl establishes the left edge, max-w-3xl keeps the
+          reading measure. Same words, same width, same tone — it simply starts
+          where the rest of the page starts.
+
+          pb-16 rather than py-24 closes the interval to the Method block; the
+          space above is deliberately unchanged. */}
+      <section className="px-6 pt-24 pb-16 md:px-12">
+        <div className="mx-auto max-w-5xl">
+          <div className="max-w-3xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
+              {method.eyebrow}
+            </p>
+            <h2 className="mt-5 font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
+              {method.heading}
+            </h2>
+            <div className="mt-8 space-y-6">
+              {method.body.map((paragraph) => (
+                <p key={paragraph} className="text-lg leading-8 text-nfe-ink/75">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       </section>
