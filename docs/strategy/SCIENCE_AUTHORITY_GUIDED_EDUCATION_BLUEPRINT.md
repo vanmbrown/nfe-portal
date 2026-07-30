@@ -3377,3 +3377,144 @@ formula, ingredient, pricing or Study Circle change.
 ## Deployment status
 
 **Not deployed.** Founder authorization required before deployment.
+
+---
+
+# Science Authority Phase 1 — Production release closeout
+
+## Founder authorization
+
+Deployment authorized 2026-07-29, conditional on source integrity, a production
+environment gate, full build validation, production smoke tests and a live
+accessibility gate. Every condition was met before traffic moved. Release tag
+and closeout authorized separately after production review.
+
+## Release
+
+| | |
+|---|---|
+| Release branch | `release/science-authority-phase-1` |
+| Deployed source commit | `5c377fede2553657d89cd80608e3f32c0b745cf7` |
+| Release tag | `nfe-science-authority-phase-1-2026-07-30` (annotated, peels to the deployed commit) |
+| Prior Worker | `1ba7471d-53f8-42f8-aa71-299657b7bf42` |
+| **New Worker** | **`c25b8b8a-5a4a-44ea-8812-df0ccf619008`** |
+| Version created | 2026-07-30T01:59:46.961Z |
+| Deployed | 2026-07-30T01:59:48.431Z |
+| Traffic | **100%** |
+
+## Production environment gate
+
+The only rollback in this Worker's history was a build shipped with zero
+environment values, which broke `/focus-group/login`. That failure mode was
+reproduced locally before deployment and closed.
+
+Values came from the canonical `.env.production` — not `.env.local` — and were
+supplied to the build process only. Nothing was written into the release
+worktree, printed, logged or committed. `NEXT_PUBLIC_SITE_URL` was set to the
+production host and `NEXT_PUBLIC_BUILD_SHA` to the deployed commit.
+`NEXT_PUBLIC_GA4_MEASUREMENT_ID` and `NEXT_PUBLIC_MOCK_USER_ID` were left unset.
+Analytics was not enabled or altered, and the pre-existing GA name mismatch was
+left alone.
+
+`/focus-group/login` moved from **500 to 200** once the environment was present.
+That was the mandatory gate.
+
+## Focus-group routes, live
+
+`/focus-group/login` 200 · `/focus-group/enclave` 200 · `/focus-group/feedback`
+200 · no missing-environment error · no authentication initialisation error ·
+zero console errors.
+
+## Science, live
+
+Hero, Method, the gold *Start Your Skin Interpretation* invitation, and the
+Layer Science module — the last at byte 8,773, before the dark chapter at
+11,357, confirming its approved position. Two entry-mode controls with
+*Explore by pathway* default, the enlarged schematic, five Layer Context panels,
+the Concern-to-Formula Matrix, and the `science-map` anchor.
+
+**Dual entry.** Hydration alone brings forward 1 panel, 1 matrix row, 2 map
+zones. The profile *Dry or easily depleted* + *Dryness or ashiness* +
+*Fine-line appearance* resolves to **Barrier Comfort, Hydration, Texture &
+Suppleness** — 3 panels, 3 rows, 3 zones — with the status line shown. Both
+inputs write to one state.
+
+**Continuity.** Family links carry canonical pathway ids; the floating return
+control renders on `/inci` only for `from=science` and is absent on an ordinary
+visit; a crafted `returnTo=https://example.com` still returns
+`/science#science-map`. A malformed `?pathways=invalid,hydration,hydration`
+restores Hydration alone.
+
+**Clear-state freshness.** *Start over* clears the form, the map and the
+outgoing links, which fall back to `?from=science` with no stale pathways.
+
+## Accessibility, live
+
+| URL | Accessibility | Contrast failures | Duplicate ids | CLS |
+|---|---:|---:|---|---:|
+| `/science` | **100** | 0 | none | 0 |
+| `?pathways=hydration` | **100** | 0 | none | 0 |
+| `?pathways=hydration,tone-integrity` | **100** | 0 | none | 0 |
+| all five pathways | **100** | 0 | none | 0 |
+| `/inci` | **100** | 0 | none | 0 |
+| contextual `/inci` | **100** | 0 | none | 0 |
+
+Active Layer Context measured on the live page: zone eyebrow and *Formulation
+support* both `rgb(211,180,120)` — **`#d3b478`** — six occurrences across two
+active panels, with the CSS rule present in the served stylesheet. The three
+remaining `/90` labels belong to the inactive panels, which were to stay as
+approved.
+
+`/inci` also moved from **95 to 100**. A 2.29:1 white-on-gold contrast failure
+had been live on the product-toggle buttons; the Phase 1 accessibility pass
+carries the repair.
+
+## Production routes
+
+Nineteen routes verified live: `/`, `/shop`, `/our-story`, `/science`, two
+restored-pathway Science URLs, `/inci`, contextual `/inci`, `/ritual`,
+`/journal`, `/concierge`, both product pages and `/founder-access` all **200**;
+the three focus-group routes **200**; `/study-circle` and `/dev/token-specimen`
+**404**. No unexpected redirect, no console error, no hydration error.
+
+## Build
+
+329 tests passing, 63 routes, `npm ci`, TypeScript, lint, Next build and
+OpenNext all exit 0. No dependency change, no lockfile change.
+
+## Rollback readiness
+
+Rollback target `1ba7471d-53f8-42f8-aa71-299657b7bf42` retained, with
+`692bc54f-c280-4174-b488-1707c8e36d07` as a second fallback. Procedure:
+`wrangler rollback --version-id 1ba7471d-53f8-42f8-aa71-299657b7bf42`.
+
+**Rollback was not executed. No hotfix was required.**
+
+## Monitoring note
+
+`/inci` Performance reads **92** live against 97 on the local Worker. The
+difference is the real edge serving real assets rather than a defect:
+Accessibility is 100 and CLS is 0. Worth watching rather than acting on.
+
+## Deferred, and untouched by this release
+
+Bakuchiol and Ectoin classification, glossary versus product-INCI
+reconciliation, ingredient-family description rewrites, product accordion
+`aria-controls`, `/skin-strategy` performance, `robots.txt`,
+`/dev/token-specimen` metadata, `/inci` metadata and canonical tags, the
+`NEXT_PUBLIC_GA_MEASUREMENT_ID` versus `NEXT_PUBLIC_GA4_MEASUREMENT_ID`
+mismatch, the *In focus* badge gold, Founder Dashboard, Study Circle, legal
+review, staging, formula, ingredient and pricing work, Discovery size strategy.
+
+## Explicit non-actions
+
+No source, test, product, formula, ingredient, pricing, dependency,
+environment-file or deployment-configuration change during closeout. No
+redeployment, no additional Worker version, no traffic change, no DNS change,
+no merge into any other branch, and no environment file committed at any point.
+
+## Final production status
+
+**Deployed from `5c377fede2553657d89cd80608e3f32c0b745cf7`. Worker
+`c25b8b8a-5a4a-44ea-8812-df0ccf619008` serving 100% of traffic. Production
+validation passed. Rollback not executed. No hotfix required.**
