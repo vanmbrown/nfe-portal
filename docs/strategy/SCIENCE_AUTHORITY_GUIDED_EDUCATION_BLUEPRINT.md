@@ -3518,3 +3518,142 @@ no merge into any other branch, and no environment file committed at any point.
 **Deployed from `5c377fede2553657d89cd80608e3f32c0b745cf7`. Worker
 `c25b8b8a-5a4a-44ea-8812-df0ccf619008` serving 100% of traffic. Production
 validation passed. Rollback not executed. No hotfix required.**
+
+---
+
+# NFE Science Final Refinement — Production Release Closeout
+
+Recorded 2026-07-30. This section closes the final refinement release. It is a
+record only; it changes no application source.
+
+## Release identity
+
+| | |
+| --- | --- |
+| Release name | NFE Science Final Refinement |
+| Founder approval | Confirmed before assembly. Visual review passed on the local preview; typography, hero CTA, intro spacing, schematic, and diagram labelling each approved individually. |
+| Release branch | `release/science-final-refinement` |
+| Branch point | `cf15ff195f6ef98b7db5df1053f65f17f569b5bb` (closed Phase 1 release tip) |
+| Merged | `feature/nfe-science-typography-hero-diagram-refinement` @ `7d730f7` |
+| Deployed source commit | `1e78ea1f6ad4a084b21d02cffe38a53116c222a6` |
+| Production tag | `nfe-science-final-refinement-2026-07-30` (annotated, on the deployed source) |
+| New Worker version | `c44359b1-cbd7-443c-9439-f2fe84e916bb` |
+| Previous Worker version | `c25b8b8a-5a4a-44ea-8812-df0ccf619008` |
+| Rollback target | `c25b8b8a-5a4a-44ea-8812-df0ccf619008` (retained, verified present) |
+| Deployment timestamp | 2026-07-31T03:07:55Z |
+| Traffic | 100% |
+
+## History preservation
+
+The release was assembled from the closed Phase 1 release tip and then merged
+with the approved refinement branch, rather than branched from the feature tip.
+That ordering is what keeps the Phase 1 production closeout record in the
+history instead of dropping it.
+
+Both parents are ancestors of the release tip:
+
+- `cf15ff1` — Phase 1 production closeout documentation
+- `7d730f7` — founder-approved refinement source
+
+The merge is explicit and non-fast-forward: `1e78ea1`.
+
+Application source on the release tip is byte-identical to `7d730f7`.
+`git diff --quiet 7d730f7..HEAD -- src public tests package.json
+package-lock.json tailwind.config.js` exits 0, and the tree hashes for `src`,
+`public`, `tests`, `package.json`, `package-lock.json` and `tailwind.config.js`
+match individually. The only difference between the approved tip and the release
+tip is the Phase 1 closeout documentation carried forward, +141 lines in this
+file.
+
+## What shipped
+
+Seven commits above `a1f93af`, all founder-approved:
+
+- brand serif token applied across the Science surface
+- top schematic band named "Stratum Corneum"; anatomical labels lifted above AA
+- em dashes removed from rendered Science copy
+- interpretation invitation moved into the hero
+- typography, hero and diagram guards added
+- schematic deepened to run the length of the interpretation column; zone
+  labels set in the brand serif
+- schematic geometry derived from band weights rather than pinned coordinates
+
+## Validation
+
+| Check | Result |
+| --- | --- |
+| Tests | 358 run, 358 passed, 0 failed, 0 skipped |
+| TypeScript | pass |
+| ESLint | pass |
+| Next build | pass |
+| OpenNext build | pass |
+| Route count | 63 |
+| Accessibility, /science | 100 |
+| Accessibility, selected-pathway /science | 100 |
+| Accessibility, /inci | 100 |
+| Accessibility, contextual /inci | 100 |
+| CLS, all four routes | 0 |
+| Console errors | none |
+| Hydration warnings | none |
+| Horizontal overflow | none at 1440, 1280, 1024, 768, 375, 320 |
+
+Diagram label contrast was measured separately, because Lighthouse does not
+evaluate SVG text. Sampled against the rasterised band behind each label on the
+rendered page: Stratum Corneum 14.50:1, Epidermis 8.75:1, Dermis 4.82:1,
+Hypodermis 10.62:1. Zone labels 9.57:1 and 6.13:1 on the dark chapter ground.
+All fourteen labels clear AA. Dermis is the marginal case and sits above 4.5:1.
+
+Live production route results: `/`, `/science`, all five canonical pathway URLs,
+`/inci`, all five contextual Science-to-Ingredients URLs, `/focus-group/login`,
+`/focus-group/enclave` and `/focus-group/feedback` all returned 200.
+`/study-circle` and `/dev/token-specimen` remain 404.
+
+## Environment
+
+The production build used the canonical `.env.production` values, exported into
+the build shell only. The file was not copied into the release worktree and no
+value was printed, logged or committed. Runtime secrets remain Cloudflare Worker
+secrets; the inventory was unchanged by this release. Worker bindings, routes,
+custom domain and traffic rules were not modified.
+
+The focus-group routes were the specific regression risk, because a previous
+deployment broke `/focus-group/login` by building without
+`NEXT_PUBLIC_SUPABASE_URL`. Those values were present in this build and the
+route returns 200 in production.
+
+## Path-naming note
+
+The release brief listed `/enclave` and `/feedback` as routes requiring 200.
+Those bare paths do not exist in this application and already returned 404 on
+production before this deployment. The canonical paths are
+`/focus-group/enclave` and `/focus-group/feedback`, both of which return 200
+locally and in production. No regression is involved; the brief's list was
+shorthand.
+
+## Monitoring note
+
+`/inci` production performance was previously observed at 92 and recorded as a
+monitoring item rather than a release blocker. Measured after this deployment it
+was 100. Performance for the four measured routes ranged 95 to 100. No change
+was made to `/inci` to influence this, and none should be made for that purpose.
+
+## Explicit non-actions
+
+No design, copy, typography, spacing, schematic, pathway-logic, profile-logic,
+Layer Context, matrix, `/inci`, product, formula or dependency change was made
+during release assembly. No opportunistic cleanup, formatting normalisation or
+component renaming was performed. Study Circle remains frozen.
+`/dev/token-specimen` remains non-public.
+
+The Phase 1 tag `nfe-science-authority-phase-1-2026-07-30` still points at
+`5c377fede2553657d89cd80608e3f32c0b745cf7` and was not moved, recreated or
+deleted. `release/science-authority-phase-1` and
+`feature/nfe-science-typography-hero-diagram-refinement` were not modified,
+rebased, amended or force-pushed.
+
+## Final production status
+
+NFE Science final refinement is live at 100% traffic on Worker version
+`c44359b1-cbd7-443c-9439-f2fe84e916bb`, serving
+`1e78ea1f6ad4a084b21d02cffe38a53116c222a6`. The previous version is retained as
+an immediate rollback target. No rollback was required.
