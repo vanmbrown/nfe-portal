@@ -15,8 +15,9 @@ interface SkinLayerSchematicProps {
  *
  * Scientific caution carried forward unchanged from the previous
  * implementation:
- *  - both the anatomical labels (Epidermis, Dermis, Hypodermis) and the
- *    cosmetic zone labels are retained, and the two are visually distinct
+ *  - both the anatomical labels (Stratum Corneum, Epidermis, Dermis,
+ *    Hypodermis) and the cosmetic zone labels are retained, and the two are
+ *    visually distinct
  *  - the bands describe where visible needs *appear*, not where an ingredient
  *    travels; no penetration or dermal-action claim is made or implied
  *  - no biological mechanism has been added
@@ -24,52 +25,83 @@ interface SkinLayerSchematicProps {
  * Emphasis is communicated by opacity *and* by an outline plus a visible
  * "In focus" marker, so it never depends on colour alone.
  */
+
+// The drawing is 620 units wide and 810 tall, and the block fills all but a
+// 10-unit margin. Height rather than width was the thing to change: at the
+// previous 620x300 the schematic finished roughly 455px above the bottom of
+// the interpretation column beside it, leaving a long band of empty green.
+// Deepening the viewBox lets the drawing run the length of that column.
+//
+// Only the vertical dimension moved. The width, the label sizes and the
+// relative depth of the five bands are all unchanged, so the block gets taller
+// without the labels changing size: label units are relative to the 620 width,
+// which is what sets the render scale at a fixed column width.
+const VIEW = { width: 620, height: 810 }
+const BLOCK = { x: 16, y: 10, width: 360, height: VIEW.height - 20 }
+
+// Relative depth of each band, exactly as approved. Geometry is derived from
+// these rather than written out as absolute offsets, so the proportions cannot
+// drift apart from the block if its height is ever changed again.
+const BAND_WEIGHTS: { id: LayerId; weight: number }[] = [
+  { id: 'surface', weight: 56 },
+  { id: 'barrier', weight: 56 },
+  { id: 'tone', weight: 58 },
+  { id: 'texture', weight: 58 },
+  { id: 'radiance', weight: 52 },
+]
+const TOTAL_WEIGHT = BAND_WEIGHTS.reduce((sum, band) => sum + band.weight, 0)
+
+// Anatomical context, named by the band it sits over rather than by a hard
+// coordinate, so each label stays centred on its band at any block height.
+// The stratum corneum is the outermost layer of the epidermis, which is what
+// the top band stands for.
+const ANATOMY: { label: string; band: LayerId }[] = [
+  { label: 'Stratum Corneum', band: 'surface' },
+  { label: 'Epidermis', band: 'barrier' },
+  { label: 'Dermis', band: 'texture' },
+  { label: 'Hypodermis', band: 'radiance' },
+]
+
+// Decorative depth cues, held as offsets from the centre of the lowest band so
+// they stay a cluster instead of spreading out as the band deepens.
+const DEPTH_CUES = [
+  { cx: 63, dy: 0, r: 3.4 },
+  { cx: 116, dy: 12, r: 2.7 },
+  { cx: 172, dy: -4, r: 3.1 },
+  { cx: 232, dy: 12, r: 3.6 },
+  { cx: 292, dy: 0, r: 2.9 },
+]
+
 export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicProps) {
   const hasEmphasis = emphasized.length > 0
   const isUp = (id: LayerId) => !hasEmphasis || emphasized.includes(id)
 
-  // Band geometry, sized so the drawing itself carries the chapter rather than
-  // sitting as a small illustration beside a large body of text.
-  //
-  // The block occupies 320 of 520 viewBox units horizontally (was 286 of 566)
-  // and 272 of 300 vertically (was 232 of 292), so almost all of the viewBox is
-  // now drawing rather than empty margin. Combined with a wider schematic
-  // column, the rendered block grows roughly a quarter in each dimension.
-  //
-  // Zone labels stay on one line. Wrapping them was tried and reverted: a band
-  // is 52-56 units tall, and a wrapped group needs 22 + 20 + 20 = 62 units, so
-  // the second line collided with the next zone's label. The viewBox is wide
-  // enough to hold the longest name instead.
-  //
-  // Geometry lives here; colour does not. Fills come from the layer's `bandHex`
-  // so the schematic band and the Layer Context colour bar below read the same
-  // token and cannot drift apart. The hex values are unchanged, as are the
-  // relative proportions of the five bands.
-  const BLOCK = { x: 16, y: 10, width: 360, height: 280 }
+  // Fills come from the layer's `bandHex` so the schematic band and the Layer
+  // Context colour bar below read the same token and cannot drift apart.
+  let cursor = BLOCK.y
+  const bands = BAND_WEIGHTS.map(({ id, weight }) => {
+    const height = (weight / TOTAL_WEIGHT) * BLOCK.height
+    const band = {
+      id,
+      y: cursor,
+      height,
+      midY: cursor + height / 2,
+      fill: layers.find((layer) => layer.id === id)?.bandHex ?? 'transparent',
+    }
+    cursor += height
+    return band
+  })
 
-  const geometry: { id: LayerId; y: number; height: number }[] = [
-    { id: 'surface', y: 10, height: 56 },
-    { id: 'barrier', y: 66, height: 56 },
-    { id: 'tone', y: 122, height: 58 },
-    { id: 'texture', y: 180, height: 58 },
-    { id: 'radiance', y: 238, height: 52 },
-  ]
-
-  const bands = geometry.map((band) => ({
-    ...band,
-    fill: layers.find((layer) => layer.id === band.id)?.bandHex ?? 'transparent',
+  const bandById = (id: LayerId) => bands.find((band) => band.id === id)
+  const anatomical = ANATOMY.map(({ label, band }) => ({
+    label,
+    y: bandById(band)?.midY ?? BLOCK.y,
   }))
-
-  const anatomical = [
-    { label: 'Epidermis', y: 94 },
-    { label: 'Dermis', y: 212 },
-    { label: 'Hypodermis', y: 278 },
-  ]
-
+  const lowest = bandById('radiance')
 
   return (
     <svg
-      viewBox="0 0 620 300"
+      viewBox={`0 0 ${VIEW.width} ${VIEW.height}`}
       className="h-auto w-full"
       preserveAspectRatio="xMidYMid meet"
       role="img"
@@ -94,7 +126,13 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
           <stop offset="1" stopColor="#0b2f24" stopOpacity="0" />
         </linearGradient>
         <clipPath id="nfe-map-clip">
-          <rect x="16" y="10" width="360" height="280" rx="22" />
+          <rect
+            x={BLOCK.x}
+            y={BLOCK.y}
+            width={BLOCK.width}
+            height={BLOCK.height}
+            rx="22"
+          />
         </clipPath>
       </defs>
 
@@ -131,11 +169,11 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
         />
         {/* Decorative depth cues in the lowest band. */}
         <g fill="#6f744f" opacity={isUp('radiance') ? 0.42 : 0.12} aria-hidden="true">
-          <circle cx="63" cy="264" r="3.4" />
-          <circle cx="116" cy="276" r="2.7" />
-          <circle cx="172" cy="260" r="3.1" />
-          <circle cx="232" cy="276" r="3.6" />
-          <circle cx="292" cy="264" r="2.9" />
+          {lowest
+            ? DEPTH_CUES.map((cue) => (
+                <circle key={cue.cx} cx={cue.cx} cy={lowest.midY + cue.dy} r={cue.r} />
+              ))
+            : null}
         </g>
       </g>
 
@@ -156,8 +194,24 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
         ) : null
       )}
 
-      {/* Anatomical context, visually quieter than the cosmetic zone labels. */}
-      <g fill="#17352a" opacity="0.7" className="text-[15px] uppercase tracking-[0.06em]">
+      {/* Anatomical context, visually quieter than the cosmetic zone labels.
+          Quieter is carried by size, case and family, not by fading the ink:
+          these are 15 units against the zone labels' 22, and they stay in the
+          page's supporting sans while the zone labels take the brand serif.
+          That is the same division the column beside this drawing uses, where
+          the "All layers" eyebrow is sans and each zone heading is serif.
+
+          The 0.7 opacity that used to sit here was doing the fading, and it
+          cost too much: sampled against the rasterised band behind each name,
+          Epidermis was 3.83:1, Dermis 2.93:1 and Hypodermis 4.47:1, all short
+          of AA for text this size.
+
+          Dropping the opacity alone did not finish the job. Dermis sits on the
+          texture band, the darkest ground of the four, and #17352a at full
+          strength still only reached 3.73:1 there. The ink is a deeper green
+          for that reason. Measured on the rendered page, not calculated from
+          the token: see the schematic contrast test for the figures. */}
+      <g fill="#0a1f17" className="text-[15px] uppercase tracking-[0.06em]">
         {anatomical.map((item) => (
           <text key={item.label} x="32" y={item.y}>
             {item.label}
@@ -169,31 +223,33 @@ export function SkinLayerSchematic({ layers, emphasized }: SkinLayerSchematicPro
       {bands.map((band) => {
         const layer = layers.find((l) => l.id === band.id)
         if (!layer) return null
-        const midY = band.y + band.height / 2
         const active = hasEmphasis && emphasized.includes(band.id)
         return (
           <g key={`label-${band.id}`}>
             <path
-              d={`M${BLOCK.x + BLOCK.width} ${midY}H${BLOCK.x + BLOCK.width + 20}`}
+              d={`M${BLOCK.x + BLOCK.width} ${band.midY}H${BLOCK.x + BLOCK.width + 20}`}
               stroke={active ? '#e6ca8c' : 'rgba(253,252,248,0.34)'}
               strokeWidth={active ? 1.6 : 1}
               fill="none"
             />
-            {/* Label sizes are in viewBox units. The schematic scales down to
-                roughly 0.65 on a 375px viewport, so these are set large enough
-                to stay legible there without zooming. */}
+            {/* These two lines name the same zones the interpretation column
+                beside them names, and that column sets those headings in the
+                brand serif. They carried the supporting sans instead, so the
+                identical words appeared in two different faces side by side.
+                They take font-primary for that reason. Sizes are unchanged;
+                only the family moved. */}
             <text
               x="396"
-              y={midY - 8}
-              className="text-[22px] uppercase tracking-[0.05em]"
+              y={band.midY - 8}
+              className="font-primary text-[22px] uppercase tracking-[0.05em]"
               fill={active ? '#e6ca8c' : 'rgba(253,252,248,0.82)'}
             >
               {layer.label}
             </text>
             <text
               x="396"
-              y={midY + 18}
-              className="text-[18px]"
+              y={band.midY + 18}
+              className="font-primary text-[18px]"
               fill={active ? 'rgba(230,202,140,0.9)' : 'rgba(253,252,248,0.62)'}
             >
               {active ? 'In focus' : layer.zone}

@@ -70,6 +70,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
   const {
     hero,
     method,
+    scienceMethod,
     profileIntro,
     mapIntro,
     formulationPrinciples,
@@ -88,7 +89,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <p className="text-xs uppercase tracking-[0.35em] text-nfe-gold">
             {hero.eyebrow}
           </p>
-          <h1 className="mt-6 font-serif text-4xl leading-tight text-nfe-gold md:text-6xl">
+          <h1 className="mt-6 font-primary text-4xl leading-tight text-nfe-gold md:text-6xl">
             {hero.heading}
           </h1>
           <p className="mt-10 max-w-3xl text-lg leading-8 text-nfe-paper/85 md:text-xl">
@@ -97,24 +98,65 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <p className="mt-5 max-w-2xl leading-7 text-nfe-paper/70">
             {hero.subIntro}
           </p>
+          {/* The invitation into the interpretation, moved up from the foot of
+              the Method section so a visitor who already knows she wants to
+              begin does not have to read two chapters to find the way in. It
+              stays at the foot of the hero content, after both paragraphs, so
+              the heading still opens the page.
+
+              There is one of these on the page, not two: this is the same
+              anchor, relocated, not a duplicate.
+
+              Same gold fill and deep-green label as before, so the measured
+              6.63:1 is unchanged. The focus ring is the one thing that had to
+              change with the ground: a deep-green ring was legible on warm
+              paper but would disappear on this dark green, so the ring is
+              paper and the offset is the hero's own green. */}
+          <p className="mt-10">
+            <Link
+              href={scienceMethod.ctaHref}
+              className="inline-flex min-h-[44px] items-center rounded-full border border-nfe-gold-hover bg-nfe-gold px-7 text-sm font-medium uppercase tracking-[0.18em] text-nfe-green-900 transition-colors hover:bg-nfe-gold-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-paper focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-green-900"
+            >
+              {scienceMethod.ctaLabel}
+            </Link>
+          </p>
         </div>
       </section>
 
       {/* 2 — Why NFE Science is different */}
-      <section className="px-6 py-24 md:px-12">
-        <div className="mx-auto max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-            {method.eyebrow}
-          </p>
-          <h2 className="mt-5 font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
-            {method.heading}
-          </h2>
-          <div className="mt-8 space-y-6">
-            {method.body.map((paragraph) => (
-              <p key={paragraph} className="text-lg leading-8 text-nfe-ink/75">
-                {paragraph}
-              </p>
-            ))}
+      {/* Measured before this correction: this block sat on a centred max-w-3xl
+          container, putting its left edge 128px right of everything beneath it
+          at 1440 — 329 against 201 for Method, formulation principles and
+          ingredient families. It read as indented rather than as the opening of
+          the page's editorial column.
+
+          It now uses the same container pattern the Method section already
+          uses: max-w-5xl establishes the left edge, max-w-3xl keeps the
+          reading measure. Same words, same width, same tone — it simply starts
+          where the rest of the page starts.
+
+          pb-14 rather than py-24 closes the interval to the Method block; the
+          space above is deliberately unchanged.
+
+          The approved alignment pass took the interval from 192px to 128px, a
+          third of it. This is the finishing adjustment on top of that, and is
+          deliberately a much smaller move: 128px to 112px, 16px, 12.5%. */}
+      <section className="px-6 pt-24 pb-14 md:px-12">
+        <div className="mx-auto max-w-5xl">
+          <div className="max-w-3xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
+              {method.eyebrow}
+            </p>
+            <h2 className="mt-5 font-primary text-3xl leading-tight text-nfe-green-900 md:text-5xl">
+              {method.heading}
+            </h2>
+            <div className="mt-8 space-y-6">
+              {method.body.map((paragraph) => (
+                <p key={paragraph} className="text-lg leading-8 text-nfe-ink/75">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -138,7 +180,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
             <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
               {profileIntro.eyebrow}
             </p>
-            <h2 className="mt-5 font-serif text-3xl leading-tight text-nfe-gold md:text-5xl">
+            <h2 className="mt-5 font-primary text-3xl leading-tight text-nfe-gold md:text-5xl">
               {profileIntro.heading}
             </h2>
             <p className="mt-8 text-lg leading-8 text-nfe-paper/80">
@@ -192,7 +234,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
             Formulation principles
           </p>
-          <h2 className="mt-5 max-w-2xl font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
+          <h2 className="mt-5 max-w-2xl font-primary text-3xl leading-tight text-nfe-green-900 md:text-5xl">
             How NFE decides what belongs in a formula.
           </h2>
           <div className="mt-14 space-y-12">
@@ -201,7 +243,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
                 key={principle.id}
                 className="grid gap-4 border-t border-nfe-green-900/12 pt-8 md:grid-cols-[0.8fr_1.2fr] md:gap-10"
               >
-                <h3 className="font-serif text-2xl text-nfe-green-900 md:text-3xl">
+                <h3 className="font-primary text-2xl text-nfe-green-900 md:text-3xl">
                   {principle.title}
                 </h3>
                 <p className="text-lg leading-8 text-nfe-ink/72">
@@ -219,12 +261,12 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
             Ingredient families
           </p>
-          <h2 className="mt-5 max-w-2xl font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
+          <h2 className="mt-5 max-w-2xl font-primary text-3xl leading-tight text-nfe-green-900 md:text-5xl">
             Families, not a catalogue.
           </h2>
           <p className="mt-8 max-w-2xl text-lg leading-8 text-nfe-ink/72">
             NFE formulates with families that work in relation to each other.
-            These describe the character of that thinking — the specifics of any
+            These describe the character of that thinking. The specifics of any
             single ingredient, and what is in each formula, live on Ingredients.
           </p>
           <dl className="mt-14 grid gap-x-12 gap-y-10 md:grid-cols-2">
@@ -233,7 +275,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
                 key={family.id}
                 className="border-t border-nfe-green-900/12 pt-6"
               >
-                <dt className="font-serif text-xl text-nfe-green-900">
+                <dt className="font-primary text-xl text-nfe-green-900">
                   {FAMILY_LABELS[family.id].label}
                 </dt>
                 <dd className="mt-3 leading-7 text-nfe-ink/72">
@@ -264,7 +306,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
             {proof.eyebrow}
           </p>
-          <h2 className="mt-5 max-w-2xl font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
+          <h2 className="mt-5 max-w-2xl font-primary text-3xl leading-tight text-nfe-green-900 md:text-5xl">
             {proof.heading}
           </h2>
           <div className="mt-14 space-y-12">
@@ -273,7 +315,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
                 key={stage.id}
                 className="grid gap-4 border-t border-nfe-green-900/12 pt-8 md:grid-cols-[0.8fr_1.2fr] md:gap-10"
               >
-                <h3 className="font-serif text-2xl text-nfe-green-900">
+                <h3 className="font-primary text-2xl text-nfe-green-900 md:text-3xl">
                   {stage.title}
                 </h3>
                 <p className="text-lg leading-8 text-nfe-ink/72">{stage.body}</p>
@@ -289,7 +331,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <p className="text-xs uppercase tracking-[0.3em] text-[#7a4f22]">
             {founderNote.eyebrow}
           </p>
-          <h2 className="mt-5 font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
+          <h2 className="mt-5 font-primary text-3xl leading-tight text-nfe-green-900 md:text-5xl">
             {founderNote.heading}
           </h2>
           <p className="mt-8 text-lg leading-8 text-[#5c5c5c]">
@@ -304,7 +346,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
             {productContext.eyebrow}
           </p>
-          <h2 className="mt-5 font-serif text-3xl leading-tight text-nfe-green-900 md:text-4xl">
+          <h2 className="mt-5 font-primary text-3xl leading-tight text-nfe-green-900 md:text-4xl">
             {productContext.heading}
           </h2>
           <p className="mt-8 text-lg leading-8 text-nfe-ink/72">
@@ -329,7 +371,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
             {concierge.eyebrow}
           </p>
-          <h2 className="mt-5 font-serif text-3xl leading-tight text-nfe-green-900 md:text-4xl">
+          <h2 className="mt-5 font-primary text-3xl leading-tight text-nfe-green-900 md:text-4xl">
             {concierge.heading}
           </h2>
           <p className="mt-6 text-lg leading-8 text-nfe-ink/72">

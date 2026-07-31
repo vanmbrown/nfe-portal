@@ -354,6 +354,34 @@ const experienceSource = () =>
   readFileSync(src('components/science/ScienceMapExperience.tsx'), 'utf8')
 const schematicSource = () =>
   readFileSync(src('components/science/SkinLayerSchematic.tsx'), 'utf8')
+
+/**
+ * Derives band geometry from the schematic the same way the component does:
+ * from the declared VIEW box and the relative band weights. The drawing is
+ * parameterised rather than written out as absolute offsets, so a test that
+ * pinned literal y/height values would only be re-copying the source.
+ */
+const schematicGeometry = () => {
+  const source = schematicSource()
+  const view = source.match(/const VIEW = \{ width: (\d+), height: (\d+) \}/)
+  assert.ok(view, 'schematic needs a VIEW constant')
+  const width = Number(view[1])
+  const height = Number(view[2])
+  const blockHeight = height - 20
+  const weights = Array.from(
+    source.matchAll(/\{ id: '(\w+)', weight: (\d+) \}/g),
+    (m) => ({ id: m[1], weight: Number(m[2]) })
+  )
+  const total = weights.reduce((sum, w) => sum + w.weight, 0)
+  let cursor = 10
+  const bands = weights.map((w) => {
+    const h = (w.weight / total) * blockHeight
+    const band = { id: w.id, weight: w.weight, y: cursor, height: h, midY: cursor + h / 2 }
+    cursor += h
+    return band
+  })
+  return { width, height, blockHeight, bands }
+}
 const LAYER_BY_ID_FOR_TEST = Object.fromEntries(
   SKIN_LAYERS.map((layer) => [layer.id, layer])
 ) as Record<string, (typeof SKIN_LAYERS)[number]>
@@ -1163,33 +1191,39 @@ describe('schematic scale', () => {
 
   it('anchors block geometry to one constant', () => {
     const source = schematic()
-    assert.match(source, /const BLOCK = \{ x: 16, y: 10, width: 360, height: 280 \}/)
+    assert.match(source, /const VIEW = \{ width: 620, height: \d+ \}/)
+    assert.match(
+      source,
+      /const BLOCK = \{ x: 16, y: 10, width: 360, height: VIEW\.height - 20 \}/
+    )
     assert.match(source, /x=\{BLOCK\.x\}/)
     assert.match(source, /width=\{BLOCK\.width\}/)
+    // The clip path and the block must read the same constant, or the bands
+    // clip against a rectangle that is no longer where the block is.
+    assert.ok(
+      (source.match(/height=\{BLOCK\.height\}/g) ?? []).length >= 3,
+      'block, sheen and clip path must all size from BLOCK.height'
+    )
   })
 
   it('uses a viewBox the drawing nearly fills', () => {
-    const source = schematic()
-    const vb = source.match(/viewBox="0 0 (\d+) (\d+)"/)
-    assert.ok(vb, 'schematic needs an explicit viewBox')
-    const [width, height] = [Number(vb[1]), Number(vb[2])]
-    // Block is 320x272. Vertical dead space must stay small.
-    assert.ok(280 / height >= 0.85, `block fills only ${Math.round((280 / height) * 100)}% of viewBox height`)
-    assert.ok(360 / width >= 0.55, `block fills only ${Math.round((360 / width) * 100)}% of viewBox width`)
+    const { width, height, blockHeight } = schematicGeometry()
+    assert.ok(
+      blockHeight / height >= 0.85,
+      `block fills only ${Math.round((blockHeight / height) * 100)}% of viewBox height`
+    )
+    assert.ok(
+      360 / width >= 0.55,
+      `block fills only ${Math.round((360 / width) * 100)}% of viewBox width`
+    )
   })
 
   it('is larger than the previous implementation in both dimensions', () => {
     // Previous: 286x232 in a 566x292 viewBox.
-    const source = schematic()
-    const vb = source.match(/viewBox="0 0 (\d+) (\d+)"/)
-    assert.ok(vb, 'schematic needs an explicit viewBox')
-    const scaleRatio = 566 / Number(vb[1])
+    const { width, blockHeight } = schematicGeometry()
+    const scaleRatio = 566 / width
     const widthGain = (360 * scaleRatio) / 286
-    const heightGain = (280 * scaleRatio) / 232
-    // 1.10, not 1.15: the viewBox has to be wide enough to hold "Texture and
-    // suppleness" on one line, and that width costs scale. Wrapping bought a
-    // bigger block but collided with the next zone's label, so this is the
-    // honest ceiling while the labels stay legible and correct.
+    const heightGain = (blockHeight * scaleRatio) / 232
     assert.ok(widthGain >= 1.1, `width gain only ${widthGain.toFixed(2)}x`)
     assert.ok(heightGain >= 1.1, `height gain only ${heightGain.toFixed(2)}x`)
   })
@@ -1211,20 +1245,14 @@ describe('schematic scale', () => {
     // next zone's label. This checks the arithmetic the browser proved wrong --
     // main baseline at midY-8, sub at midY+18, next main at nextMidY-8, and a
     // 22-unit glyph box needs the gap to exceed the font size.
-    const source = schematic()
-    const bands = Array.from(
-      source.matchAll(/id: '(\w+)', y: (\d+), height: (\d+)/g),
-      (m) => ({ id: m[1], y: Number(m[2]), height: Number(m[3]) })
-    )
+    const { bands } = schematicGeometry()
     assert.equal(bands.length, 5)
     for (let i = 0; i < bands.length - 1; i += 1) {
-      const midY = bands[i].y + bands[i].height / 2
-      const nextMidY = bands[i + 1].y + bands[i + 1].height / 2
-      const subBaseline = midY + 18
-      const nextMainBaseline = nextMidY - 8
+      const subBaseline = bands[i].midY + 18
+      const nextMainBaseline = bands[i + 1].midY - 8
       assert.ok(
         nextMainBaseline - subBaseline >= 22,
-        `${bands[i].id} sub-label sits ${nextMainBaseline - subBaseline} units from the next label; needs 22`
+        `${bands[i].id} sub-label sits ${Math.round(nextMainBaseline - subBaseline)} units from the next label; needs 22`
       )
     }
   })
@@ -1254,20 +1282,21 @@ describe('schematic scale', () => {
   })
 
   it('keeps band proportions and order unchanged', () => {
-    const source = schematic()
-    const heights = Array.from(
-      source.matchAll(/id: '(\w+)', y: \d+, height: (\d+)/g),
-      (m) => ({ id: m[1], h: Number(m[2]) })
-    )
+    const { bands, blockHeight } = schematicGeometry()
     assert.deepEqual(
-      heights.map((h) => h.id),
+      bands.map((b) => b.id),
       ['surface', 'barrier', 'tone', 'texture', 'radiance']
     )
-    // Previous heights 46,46,48,48,44 — same relative ordering, all scaled up.
+    // The relative depths are the approved ones. They are now weights rather
+    // than pixel heights, so the block can deepen without the proportions
+    // drifting.
     assert.deepEqual(
-      heights.map((h) => h.h),
+      bands.map((b) => b.weight),
       [56, 56, 58, 58, 52]
     )
+    // And they must still tile the block exactly, leaving no seam or overlap.
+    const covered = bands.reduce((sum, b) => sum + b.height, 0)
+    assert.ok(Math.abs(covered - blockHeight) < 0.001, 'bands must fill the block')
   })
 
   it('keeps the schematic labelled and adds no biological claim', () => {
@@ -1666,8 +1695,8 @@ describe('start interpretation invitation', () => {
   })
 
   it('is a link, never a button', () => {
-    const source = stripComments(methodSource())
-    assert.match(source, /<Link\s+href=\{ctaHref\}/)
+    const source = stripComments(sciencePageSource())
+    assert.match(source, /<Link\s+href=\{scienceMethod\.ctaHref\}/)
     for (const banned of ['<button', 'role="button"', 'onClick', 'type="submit"', 'target=']) {
       assert.ok(!source.includes(banned), `the invitation must not use ${banned}`)
     }
@@ -1684,7 +1713,7 @@ describe('start interpretation invitation', () => {
   })
 
   it('scrolls by anchor, never by script', () => {
-    const source = stripComments(methodSource())
+    const source = stripComments(sciencePageSource())
     assert.ok(!/scrollIntoView|scrollTo|useRouter|router\.push|setTimeout/.test(source))
   })
 
@@ -2802,7 +2831,9 @@ describe('return continuity regression', () => {
 
   it('keeps the layer science module and the schematic exactly as approved', () => {
     assert.equal(SCIENCE_PAGE.layerScience.cards.length, 3)
-    assert.match(schematicSource(), /viewBox="0 0 620 300"/)
+    // The schematic was deepened so it runs the length of the interpretation
+    // column beside it. Width, band proportions and label sizes are unchanged.
+    assert.match(schematicSource(), /const VIEW = \{ width: 620, height: \d+ \}/)
   })
 })
 
@@ -3212,9 +3243,12 @@ describe('skin profile builder', () => {
   })
 
   it('produces no profile name, score, rank or recommendation', () => {
+    // `font-primary` is the brand serif token. It is stripped before this
+    // scan so the class name does not read as the banned word "primary";
+    // the guard is about profiling output, not about Tailwind classes.
     const sources = [
-      stripComments(profileBuilderSource()),
-      stripComments(skinProfileContentSource()),
+      stripComments(profileBuilderSource()).split('font-primary').join(''),
+      stripComments(skinProfileContentSource()).split('font-primary').join(''),
     ]
     for (const source of sources) {
       for (const banned of [
@@ -3445,7 +3479,7 @@ describe('start interpretation invitation — gold treatment', () => {
   })
 
   it('wears the muted gold fill with deep green text', () => {
-    const source = methodSource()
+    const source = sciencePageSource()
     assert.match(source, /bg-nfe-gold\b/)
     assert.match(source, /text-nfe-green-900/)
     assert.match(source, /border-nfe-gold-hover/)
@@ -3453,8 +3487,8 @@ describe('start interpretation invitation — gold treatment', () => {
   })
 
   it('keeps a focus ring that is visible against the gold', () => {
-    const source = methodSource()
-    assert.match(source, /focus-visible:ring-nfe-green-900/)
+    const source = sciencePageSource()
+    assert.match(source, /focus-visible:ring-nfe-paper/)
     assert.ok(
       !/focus-visible:ring-nfe-gold\b/.test(source),
       'a gold ring on a gold fill would not be visible'
@@ -3478,10 +3512,14 @@ describe('start interpretation invitation — gold treatment', () => {
 
   it('remains a plain anchor to the same destination', () => {
     assert.equal(SCIENCE_PAGE.scienceMethod.ctaHref, '#build-your-nfe-skin-profile')
-    const source = stripComments(methodSource())
-    assert.match(source, /<Link\s+href=\{ctaHref\}/)
+    const source = stripComments(sciencePageSource())
+    assert.match(source, /<Link\s+href=\{scienceMethod\.ctaHref\}/)
+    // Scoped to the invitation itself: the page has other links, and this
+    // guard is about how this one behaves.
+    const start = source.indexOf('<Link')
+    const cta = source.slice(start, source.indexOf('</Link>', start))
     for (const banned of ['<button', 'role="button"', 'onClick', 'type="submit"', 'target=']) {
-      assert.ok(!source.includes(banned), `the invitation must not use ${banned}`)
+      assert.ok(!cta.includes(banned), `the invitation must not use ${banned}`)
     }
   })
 })
@@ -3514,7 +3552,7 @@ describe('dual entry regression', () => {
   })
 
   it('leaves the schematic, taxonomy and matrix untouched', () => {
-    assert.match(schematicSource(), /viewBox="0 0 620 300"/)
+    assert.match(schematicSource(), /const VIEW = \{ width: 620, height: \d+ \}/)
     assert.equal(INGREDIENT_FAMILY_TAXONOMY.length, 8)
     assert.equal(CONCERN_FORMULA_MATRIX.length, 5)
     assert.equal(LAYER_CONTEXT_PANELS.length, 5)
@@ -3537,5 +3575,374 @@ describe('dual entry regression', () => {
   it('adds no route', () => {
     assert.ok(!existsSync(src('app/(education)/science/profile')))
     assert.ok(!existsSync(src('app/(education)/science/[mode]')))
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * Science introduction — shared editorial grid and interval
+ * ------------------------------------------------------------------ */
+
+/**
+ * The explanation block, sliced from code rather than from a comment.
+ *
+ * Comments are stripped first, so the slice must be anchored on markup that
+ * survives stripping — anchoring on the `{/* 2 — Why NFE Science … *\/}` label
+ * produced an empty string and made every assertion pass for the wrong reason.
+ */
+const explanationBlockSource = () => {
+  const page = stripComments(sciencePageSource())
+  const start = page.indexOf('<section className="px-6 pt-24 pb-14 md:px-12">')
+  const end = page.indexOf('<ScienceMethod />')
+  return start > -1 && end > start ? page.slice(start, end) : ''
+}
+
+describe('science introduction alignment', () => {
+  it('keeps the approved copy of both introductory blocks', () => {
+    assert.equal(SCIENCE_PAGE.method.eyebrow, 'Why this reads differently')
+    assert.equal(SCIENCE_PAGE.method.heading, 'An explanation, not an assessment.')
+    assert.equal(SCIENCE_PAGE.scienceMethod.eyebrow, 'Method')
+    assert.equal(SCIENCE_PAGE.scienceMethod.heading, 'How the NFE Science Map works.')
+  })
+
+  it('puts both blocks on the same container pattern', () => {
+    // max-w-5xl sets the editorial left edge; max-w-3xl keeps the reading
+    // measure. Measured at 1440 this is x=201, the same spine as formulation
+    // principles and ingredient families below.
+    const page = sciencePageSource()
+    assert.match(
+      page,
+      /<section className="px-6 pt-24 pb-14 md:px-12">\s*<div className="mx-auto max-w-5xl">\s*<div className="max-w-3xl">/
+    )
+    const method = methodSource()
+    assert.match(method, /<div className="mx-auto max-w-5xl">\s*<div className="max-w-3xl">/)
+  })
+
+  it('no longer centres the explanation on its own narrow container', () => {
+    const intro = explanationBlockSource()
+    // Guard the guard: anchoring on a comment would slice to '' once comments
+    // are stripped, and every assertion below would pass vacuously.
+    assert.ok(intro.length > 200, 'the explanation block slice must be real')
+    assert.ok(
+      !/mx-auto max-w-3xl/.test(intro),
+      'the explanation must not sit on a centred max-w-3xl container'
+    )
+  })
+
+  it('shares the left edge with the sections below', () => {
+    // Formulation principles and ingredient families are the reference spine.
+    const page = sciencePageSource()
+    assert.ok(
+      (page.match(/mx-auto max-w-5xl/g) ?? []).length >= 4,
+      'the 5xl editorial column must be the shared container'
+    )
+  })
+})
+
+describe('science introduction interval', () => {
+  it('closes the gap between the two blocks with existing tokens', () => {
+    // 192px (py-24 + py-24) became 128px (pb-16 + pt-16) in the approved
+    // alignment pass, then 112px (pb-14 + pt-14) as a finishing adjustment.
+    assert.match(sciencePageSource(), /className="px-6 pt-24 pb-14 md:px-12"/)
+    assert.match(methodSource(), /className="px-6 pt-14 pb-24 md:px-12"/)
+  })
+
+  it('preserves the space above the first block and below the cards', () => {
+    assert.match(sciencePageSource(), /pt-24/)
+    assert.match(methodSource(), /pb-24/)
+  })
+
+  it('uses no arbitrary pixel offset or negative margin', () => {
+    const sources = [stripComments(sciencePageSource()), stripComments(methodSource())]
+    for (const source of sources) {
+      // Class-boundary aware: a bare '-mt-' substring also matches
+      // scroll-mt-24, which is legitimate scroll-margin, not a negative margin.
+      assert.ok(
+        !/(^|["'\s])-m[trblxy]?-/.test(source),
+        'alignment must not use a negative margin'
+      )
+      for (const banned of ['translate-', 'absolute', 'ml-[']) {
+        assert.ok(!source.includes(banned), `alignment must not use ${banned}`)
+      }
+    }
+  })
+})
+
+describe('science introduction structure unchanged', () => {
+  it('keeps three method cards below the heading', () => {
+    assert.equal(SCIENCE_PAGE.scienceMethod.steps.length, 3)
+    const method = methodSource()
+    const heading = method.indexOf('nfe-science-method-heading')
+    const cards = method.indexOf('<ol className=')
+    assert.ok(cards > heading, 'the cards must follow the heading')
+    assert.match(method, /sm:grid-cols-2 lg:grid-cols-3/)
+  })
+
+  it('keeps the section order, with Layer Science after Method', () => {
+    const page = sciencePageSource()
+    const order = [
+      '{hero.heading}',
+      '{method.heading}',
+      '<ScienceMethod />',
+      '<LayerScienceModule />',
+      '<ScienceMapExperience',
+    ]
+    const positions = order.map((m) => {
+      const i = page.indexOf(m)
+      assert.ok(i > -1, `${m} missing`)
+      return i
+    })
+    for (let i = 1; i < positions.length; i += 1) {
+      assert.ok(positions[i] > positions[i - 1], `${order[i]} must follow ${order[i - 1]}`)
+    }
+  })
+
+  it('changes no copy and adds no decoration', () => {
+    const intro = explanationBlockSource()
+    assert.ok(intro.length > 200, 'the explanation block slice must be real')
+    assert.match(intro, /\{method\.eyebrow\}/)
+    assert.match(intro, /\{method\.heading\}/)
+    assert.match(intro, /\{method\.body\.map/)
+    for (const banned of ['border-l', '<hr', 'divide-', 'bg-gradient']) {
+      assert.ok(!intro.includes(banned), `the introduction must not add ${banned}`)
+    }
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * Typography, hero invitation, and diagram labelling
+ * ------------------------------------------------------------------ */
+
+const SCIENCE_TYPE_SURFACE = [
+  'app/(education)/science/page.tsx',
+  'components/science/ScienceMapExperience.tsx',
+  'components/science/ScienceMethod.tsx',
+  'components/science/LayerScienceModule.tsx',
+  'components/science/LayerContextPanels.tsx',
+  'components/science/ConcernFormulaMatrix.tsx',
+  'components/science/SkinProfileBuilder.tsx',
+  'components/science/SkinLayerSchematic.tsx',
+]
+
+describe('science serif family', () => {
+  it('uses the brand serif token, never the generic one', () => {
+    // font-serif resolves to Tailwind's ui-serif stack, which renders Times on
+    // Windows and New York on macOS. font-primary is the token the rest of the
+    // site uses and resolves to Georgia while the Garamond licence is on hold.
+    for (const path of SCIENCE_TYPE_SURFACE) {
+      const source = stripComments(readFileSync(src(path), 'utf8'))
+      assert.ok(
+        !source.includes('font-serif'),
+        `${path} must use font-primary, not the generic font-serif`
+      )
+    }
+  })
+
+  it('actually applies the brand token to the headings', () => {
+    const page = sciencePageSource()
+    assert.ok(
+      (page.match(/font-primary/g) ?? []).length >= 10,
+      'the Science page headings must carry font-primary'
+    )
+  })
+
+  it('declares no font family the config does not define', () => {
+    // The config defines `primary` and `ui` only. font-sans would fall through
+    // to Tailwind's default stack and render Segoe UI instead of the page's
+    // Inter, so the schematic deliberately inherits rather than naming a token.
+    const schematic = stripComments(schematicSource())
+    assert.ok(!schematic.includes('font-sans'))
+    assert.ok(!schematic.includes('fontFamily'))
+    assert.ok(!schematic.includes('font-family'))
+  })
+})
+
+describe('science heading ladder', () => {
+  it('uses no arbitrary rem type size', () => {
+    for (const path of SCIENCE_TYPE_SURFACE) {
+      const source = stripComments(readFileSync(src(path), 'utf8'))
+      // Headings only. The 0.625rem eyebrow and 1.0625rem reading size are a
+      // deliberate repeated micro-scale, not one-offs, and are approved.
+      const headings = source.match(/<h[1-6][^>]*>/g) ?? []
+      for (const heading of headings) {
+        assert.ok(
+          !/text-\[[0-9.]+rem\]/.test(heading),
+          `${path} must not size a heading with an arbitrary value: ${heading.slice(0, 80)}`
+        )
+      }
+    }
+  })
+
+  it('keeps the chapter heading voice on one ladder', () => {
+    // Layer Science was the odd chapter head at 30/36/44. It now matches.
+    assert.match(
+      stripComments(readFileSync(src('components/science/LayerScienceModule.tsx'), 'utf8')),
+      /text-3xl leading-tight text-nfe-green-900 md:text-5xl/
+    )
+    assert.match(methodSource(), /text-3xl leading-tight text-nfe-green-900 md:text-5xl/)
+  })
+
+  it('never renders a heading larger than the heading above it', () => {
+    // The pathway card title is an h4 whose parent is the pathway h3. Both
+    // rendered at 24/30, so the child matched its own parent.
+    const source = stripComments(experienceSource())
+    const h3 = /id="nfe-pathways-label"\s*className="font-primary text-3xl text-nfe-gold md:text-4xl"/
+    const h4 = /<h4 className="mt-3 font-primary text-xl text-nfe-paper md:text-2xl">/
+    assert.match(source, h3)
+    assert.match(source, h4)
+  })
+
+  it('gives the two entry modes the same heading scale', () => {
+    // "Choose a pathway..." and the Skin Profile heading render into the same
+    // slot, so a visitor switching modes must not see the heading resize.
+    const experience = stripComments(experienceSource())
+    const builder = stripComments(
+      readFileSync(src('components/science/SkinProfileBuilder.tsx'), 'utf8')
+    )
+    assert.match(experience, /text-3xl text-nfe-gold md:text-4xl/)
+    assert.match(builder, /text-3xl[^"]*md:text-4xl/)
+  })
+
+  it('leaves no heading without a responsive step', () => {
+    const page = stripComments(sciencePageSource())
+    const headings = page.match(/<h[2-4][^>]*className="[^"]*"/g) ?? []
+    for (const heading of headings) {
+      if (!/text-(xs|sm|base|lg|xl|\dxl)/.test(heading)) continue
+      assert.ok(
+        heading.includes('md:text-'),
+        `every sized heading needs a responsive step: ${heading.slice(0, 90)}`
+      )
+    }
+  })
+})
+
+describe('the invitation sits in the hero', () => {
+  it('renders inside the dark hero, after the hero copy', () => {
+    const page = stripComments(sciencePageSource())
+    const heroStart = page.indexOf('bg-nfe-green-900 px-6 py-24')
+    const subIntro = page.indexOf('{hero.subIntro}')
+    const cta = page.indexOf('{scienceMethod.ctaLabel}')
+    // stripComments removes the JSX section markers, so the next section is
+    // located by its first piece of content instead.
+    const heroEnd = page.indexOf('{method.eyebrow}')
+    assert.ok(heroStart > -1 && subIntro > heroStart, 'hero copy must open the hero')
+    assert.ok(cta > subIntro, 'the invitation follows the hero paragraphs')
+    assert.ok(cta < heroEnd, 'the invitation must stay inside the hero section')
+  })
+
+  it('is the only one on the page', () => {
+    const page = stripComments(sciencePageSource())
+    const method = stripComments(methodSource())
+    assert.equal(
+      (page.match(/scienceMethod\.ctaLabel/g) ?? []).length,
+      1,
+      'exactly one invitation, never a second'
+    )
+    assert.ok(!method.includes('ctaLabel'), 'the Method section no longer carries it')
+    assert.ok(!method.includes('ctaHref'))
+    assert.ok(!method.includes("from 'next/link'"), 'and no longer needs Link')
+  })
+
+  it('keeps the gold fill and takes a focus ring the dark ground can show', () => {
+    const page = stripComments(sciencePageSource())
+    const cta = page.slice(page.indexOf('{scienceMethod.ctaHref}') - 400, page.indexOf('{scienceMethod.ctaLabel}'))
+    assert.match(cta, /bg-nfe-gold\b/)
+    assert.match(cta, /text-nfe-green-900/)
+    assert.match(cta, /min-h-\[44px\]/)
+    // A deep-green ring was legible on paper; on this hero it would vanish.
+    assert.match(cta, /focus-visible:ring-nfe-paper/)
+    assert.match(cta, /focus-visible:ring-offset-nfe-green-900/)
+  })
+
+  it('leaves the Method cards otherwise untouched', () => {
+    assert.equal(SCIENCE_PAGE.scienceMethod.steps.length, 3)
+    assert.match(methodSource(), /sm:grid-cols-2 lg:grid-cols-3/)
+  })
+})
+
+describe('skin layer schematic labelling', () => {
+  it('names the top band Stratum Corneum', () => {
+    const source = schematicSource()
+    assert.match(source, /\{ label: 'Stratum Corneum', band: 'surface' \}/)
+    // Named by band, not by coordinate: each label is centred on the band it
+    // sits over, so it stays centred at any block height.
+    const { bands } = schematicGeometry()
+    const surface = bands.find((b) => b.id === 'surface')
+    assert.ok(surface && surface.midY > 10, 'the surface band must have a centre')
+  })
+
+  it('renames none of the existing anatomical labels', () => {
+    const source = schematicSource()
+    for (const label of ['Epidermis', 'Dermis', 'Hypodermis']) {
+      assert.ok(source.includes(`label: '${label}'`), `${label} must be unchanged`)
+    }
+    const count = (source.match(/\{ label: '[^']+', band: '\w+' \}/g) ?? []).length
+    assert.equal(count, 4, 'four anatomical labels: one added, none removed')
+  })
+
+  it('does not fade the anatomical labels', () => {
+    // At 0.7 these measured 3.83:1, 2.93:1 and 4.47:1 against their bands.
+    const source = stripComments(schematicSource())
+    const group = source.slice(source.indexOf('<g fill="#0a1f17"'), source.indexOf('</g>', source.indexOf('<g fill="#0a1f17"')))
+    assert.ok(!group.includes('opacity'), 'the anatomical group must not carry an opacity')
+    assert.match(group, /fill="#0a1f17"/)
+  })
+
+  it('keeps the cosmetic zone labels light on the dark ground', () => {
+    // These sit on the deep-green chapter, so "darker" would cost contrast.
+    const source = schematicSource()
+    assert.match(source, /fill=\{active \? '#e6ca8c' : 'rgba\(253,252,248,0\.82\)'\}/)
+  })
+
+  it('keeps the anatomical labels quieter than the zone labels', () => {
+    const source = schematicSource()
+    assert.match(source, /className="text-\[15px\] uppercase tracking-\[0\.06em\]"/)
+    assert.match(
+      source,
+      /className="font-primary text-\[22px\] uppercase tracking-\[0\.05em\]"/
+    )
+    // The anatomical labels deliberately do NOT take the serif: they are the
+    // eyebrow voice, and the column beside the drawing sets its eyebrow in the
+    // supporting sans too.
+    assert.ok(
+      !/className="font-primary text-\[15px\]/.test(source),
+      'anatomical labels stay in the supporting sans'
+    )
+  })
+})
+
+describe('science reads without em dashes', () => {
+  it('has none in any rendered string or JSX text', () => {
+    const files = [
+      'content/science/page.ts',
+      'content/science/pathways.ts',
+      'content/science/layers.ts',
+      'content/science/layer-context.ts',
+      'content/science/ingredient-families.ts',
+      'content/science/skin-profile.ts',
+      'app/(education)/science/page.tsx',
+      'components/science/ScienceMapExperience.tsx',
+      'components/science/ScienceMethod.tsx',
+      'components/science/LayerScienceModule.tsx',
+      'components/science/LayerContextPanels.tsx',
+      'components/science/ConcernFormulaMatrix.tsx',
+      'components/science/SkinProfileBuilder.tsx',
+      'components/science/SkinLayerSchematic.tsx',
+    ]
+    for (const path of files) {
+      const source = stripComments(readFileSync(src(path), 'utf8'))
+      assert.ok(
+        !source.includes('—'),
+        `${path} must not use an em dash in rendered copy`
+      )
+    }
+  })
+
+  it('kept the copy, not just the punctuation', () => {
+    // The rewrites replaced the dash; they did not shorten the sentences.
+    assert.match(SCIENCE_PAGE.hero.intro, /Comfort, hydration, tone, texture and resilience move together, and they are/)
+    assert.match(
+      SCIENCE_PAGE.scienceMethod.steps[1].description,
+      /connected to what you chose, without producing a diagnosis, a score, or a saved profile/
+    )
   })
 })

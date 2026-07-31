@@ -79,7 +79,7 @@ export function LayerContextPanels({
           <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">{eyebrow}</p>
           <h3
             id={headingId}
-            className="mt-4 font-serif text-3xl leading-tight text-nfe-paper md:text-4xl"
+            className="mt-4 font-primary text-3xl leading-tight text-nfe-paper md:text-4xl"
           >
             {heading}
           </h3>
@@ -146,7 +146,7 @@ export function LayerContextPanels({
                     </p>
 
                     <h4
-                      className={`mt-3 font-serif text-2xl leading-snug transition-colors duration-200 ease-out md:text-[1.75rem] ${
+                      className={`mt-3 font-primary text-2xl leading-snug transition-colors duration-200 ease-out md:text-3xl ${
                         active ? 'text-[#d3b478]' : 'text-nfe-paper'
                       }`}
                     >

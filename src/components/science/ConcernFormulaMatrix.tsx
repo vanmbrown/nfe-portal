@@ -73,7 +73,7 @@ export function ConcernFormulaMatrix({ rows, emphasized }: ConcernFormulaMatrixP
                 >
                   <th
                     scope="row"
-                    className={`border-l-2 px-5 py-7 text-left font-serif text-xl font-normal leading-snug transition-colors duration-200 ease-out ${
+                    className={`border-l-2 px-5 py-7 text-left font-primary text-xl font-normal leading-snug transition-colors duration-200 ease-out ${
                       active
                         ? 'border-l-nfe-gold text-nfe-gold'
                         : 'border-l-transparent text-nfe-paper'
@@ -116,7 +116,7 @@ export function ConcernFormulaMatrix({ rows, emphasized }: ConcernFormulaMatrixP
                 }`}
               >
                 <h4
-                  className={`font-serif text-xl leading-snug transition-colors duration-200 ease-out ${
+                  className={`font-primary text-xl leading-snug transition-colors duration-200 ease-out ${
                     active ? 'text-nfe-gold' : 'text-nfe-paper'
                   }`}
                 >

@@ -18,7 +18,7 @@ export const SCIENCE_PAGE: SciencePageContent = {
     eyebrow: 'NFE Science',
     heading: 'Science that interprets skin, not just ingredients.',
     intro:
-      'Mature melanated skin is rarely one need at a time. Comfort, hydration, tone, texture and resilience move together — and they are usually discussed separately, if they are discussed at all.',
+      'Mature melanated skin is rarely one need at a time. Comfort, hydration, tone, texture and resilience move together, and they are usually discussed separately, if they are discussed at all.',
     subIntro:
       'This is where NFE explains how it thinks about that relationship. You can read all of it without choosing anything.',
   },
@@ -28,7 +28,7 @@ export const SCIENCE_PAGE: SciencePageContent = {
     eyebrow: 'Why this reads differently',
     heading: 'An explanation, not an assessment.',
     body: [
-      'Most skincare education begins by asking what is wrong with you. It sorts, scores, and returns a verdict — and the verdict usually resolves into a product.',
+      'Most skincare education begins by asking what is wrong with you. It sorts, scores, and returns a verdict, and the verdict usually resolves into a product.',
       'NFE does not do that. Nothing here assesses your skin, and nothing here is a diagnosis. What follows is an account of how experienced, melanated skin tends to behave, and how NFE formulates in response.',
       'If a topic below draws you, you can follow it. If you would rather simply read, the whole page is written to be read.',
     ],
@@ -52,7 +52,7 @@ export const SCIENCE_PAGE: SciencePageContent = {
         stepLabel: 'Step 2',
         title: 'See the relationships by layer',
         description:
-          'The schematic brings forward the surface and appearance layers connected to what you chose — without producing a diagnosis, a score, or a saved profile.',
+          'The schematic brings forward the surface and appearance layers connected to what you chose, without producing a diagnosis, a score, or a saved profile.',
       },
       {
         id: 'formulation',
@@ -138,7 +138,7 @@ export const SCIENCE_PAGE: SciencePageContent = {
     heading: 'Where visible needs appear, and how they relate.',
     body: 'Dryness can flatten radiance. Barrier stress can make tone look more uneven than it is. Fine lines read deeper when skin is depleted. This map holds those relationships in one view.',
     defaultInterpretation:
-      'Explore how barrier comfort, hydration, tone integrity, texture and visible resilience relate across the skin. Choose a pathway to bring one relationship forward — or read the layers as they are.',
+      'Explore how barrier comfort, hydration, tone integrity, texture and visible resilience relate across the skin. Choose a pathway to bring one relationship forward, or read the layers as they are.',
     cosmeticFrameworkNote:
       'This map is an educational cosmetic framework. It describes where visible needs appear, not where an ingredient travels. NFE products are not intended to diagnose, treat, cure, or prevent disease, and NFE makes no claim to change dermal structure.',
   },
@@ -146,7 +146,7 @@ export const SCIENCE_PAGE: SciencePageContent = {
   layerContext: {
     eyebrow: 'Layer Context',
     heading: 'Where visible concerns begin. How NFE supports them.',
-    body: 'Each panel reads one band of the map above. All five are here whether or not you choose a pathway — choosing one simply brings its panel forward.',
+    body: 'Each panel reads one band of the map above. All five are here whether or not you choose a pathway. Choosing one simply brings its panel forward.',
     zonesLabel: 'Cosmetic support zones',
   },
 
@@ -168,7 +168,7 @@ export const SCIENCE_PAGE: SciencePageContent = {
     {
       id: 'barrier-first',
       title: 'Barrier first',
-      body: 'Comfort is the foundation everything else is built on. When the surface is well conditioned, tone and texture support work better — and irritate less.',
+      body: 'Comfort is the foundation everything else is built on. When the surface is well conditioned, tone and texture support work better, and irritate less.',
     },
     {
       id: 'fewer-better',
@@ -212,13 +212,13 @@ export const SCIENCE_PAGE: SciencePageContent = {
   founderNote: {
     eyebrow: 'Founder note',
     heading: 'Mature melanated skin should not be treated as an afterthought.',
-    body: 'NFE was not built around one hero ingredient. It was built as a layered system — barrier comfort, hydration, tone support, antioxidant care, and visible well-aging working together. This page exists so you can see the reasoning, not just the result.',
+    body: 'NFE was not built around one hero ingredient. It was built as a layered system: barrier comfort, hydration, tone support, antioxidant care, and visible well-aging working together. This page exists so you can see the reasoning, not just the result.',
   },
 
   productContext: {
     eyebrow: 'Formulation in practice',
     heading: 'Where this thinking becomes a formula.',
-    body: 'Two elixirs, formulated on the principles above. The Atelier holds the full dossier for each — how it is composed, how it is meant to be used, and what it is honestly for.',
+    body: 'Two elixirs, formulated on the principles above. The Atelier holds the full dossier for each: how it is composed, how it is meant to be used, and what it is honestly for.',
     links: [
       { label: 'Face Elixir', href: '/products/face-elixir' },
       { label: 'Body Elixir', href: '/products/body-elixir' },
