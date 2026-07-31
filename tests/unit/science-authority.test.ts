@@ -354,6 +354,34 @@ const experienceSource = () =>
   readFileSync(src('components/science/ScienceMapExperience.tsx'), 'utf8')
 const schematicSource = () =>
   readFileSync(src('components/science/SkinLayerSchematic.tsx'), 'utf8')
+
+/**
+ * Derives band geometry from the schematic the same way the component does:
+ * from the declared VIEW box and the relative band weights. The drawing is
+ * parameterised rather than written out as absolute offsets, so a test that
+ * pinned literal y/height values would only be re-copying the source.
+ */
+const schematicGeometry = () => {
+  const source = schematicSource()
+  const view = source.match(/const VIEW = \{ width: (\d+), height: (\d+) \}/)
+  assert.ok(view, 'schematic needs a VIEW constant')
+  const width = Number(view[1])
+  const height = Number(view[2])
+  const blockHeight = height - 20
+  const weights = Array.from(
+    source.matchAll(/\{ id: '(\w+)', weight: (\d+) \}/g),
+    (m) => ({ id: m[1], weight: Number(m[2]) })
+  )
+  const total = weights.reduce((sum, w) => sum + w.weight, 0)
+  let cursor = 10
+  const bands = weights.map((w) => {
+    const h = (w.weight / total) * blockHeight
+    const band = { id: w.id, weight: w.weight, y: cursor, height: h, midY: cursor + h / 2 }
+    cursor += h
+    return band
+  })
+  return { width, height, blockHeight, bands }
+}
 const LAYER_BY_ID_FOR_TEST = Object.fromEntries(
   SKIN_LAYERS.map((layer) => [layer.id, layer])
 ) as Record<string, (typeof SKIN_LAYERS)[number]>
@@ -1163,33 +1191,39 @@ describe('schematic scale', () => {
 
   it('anchors block geometry to one constant', () => {
     const source = schematic()
-    assert.match(source, /const BLOCK = \{ x: 16, y: 10, width: 360, height: 280 \}/)
+    assert.match(source, /const VIEW = \{ width: 620, height: \d+ \}/)
+    assert.match(
+      source,
+      /const BLOCK = \{ x: 16, y: 10, width: 360, height: VIEW\.height - 20 \}/
+    )
     assert.match(source, /x=\{BLOCK\.x\}/)
     assert.match(source, /width=\{BLOCK\.width\}/)
+    // The clip path and the block must read the same constant, or the bands
+    // clip against a rectangle that is no longer where the block is.
+    assert.ok(
+      (source.match(/height=\{BLOCK\.height\}/g) ?? []).length >= 3,
+      'block, sheen and clip path must all size from BLOCK.height'
+    )
   })
 
   it('uses a viewBox the drawing nearly fills', () => {
-    const source = schematic()
-    const vb = source.match(/viewBox="0 0 (\d+) (\d+)"/)
-    assert.ok(vb, 'schematic needs an explicit viewBox')
-    const [width, height] = [Number(vb[1]), Number(vb[2])]
-    // Block is 320x272. Vertical dead space must stay small.
-    assert.ok(280 / height >= 0.85, `block fills only ${Math.round((280 / height) * 100)}% of viewBox height`)
-    assert.ok(360 / width >= 0.55, `block fills only ${Math.round((360 / width) * 100)}% of viewBox width`)
+    const { width, height, blockHeight } = schematicGeometry()
+    assert.ok(
+      blockHeight / height >= 0.85,
+      `block fills only ${Math.round((blockHeight / height) * 100)}% of viewBox height`
+    )
+    assert.ok(
+      360 / width >= 0.55,
+      `block fills only ${Math.round((360 / width) * 100)}% of viewBox width`
+    )
   })
 
   it('is larger than the previous implementation in both dimensions', () => {
     // Previous: 286x232 in a 566x292 viewBox.
-    const source = schematic()
-    const vb = source.match(/viewBox="0 0 (\d+) (\d+)"/)
-    assert.ok(vb, 'schematic needs an explicit viewBox')
-    const scaleRatio = 566 / Number(vb[1])
+    const { width, blockHeight } = schematicGeometry()
+    const scaleRatio = 566 / width
     const widthGain = (360 * scaleRatio) / 286
-    const heightGain = (280 * scaleRatio) / 232
-    // 1.10, not 1.15: the viewBox has to be wide enough to hold "Texture and
-    // suppleness" on one line, and that width costs scale. Wrapping bought a
-    // bigger block but collided with the next zone's label, so this is the
-    // honest ceiling while the labels stay legible and correct.
+    const heightGain = (blockHeight * scaleRatio) / 232
     assert.ok(widthGain >= 1.1, `width gain only ${widthGain.toFixed(2)}x`)
     assert.ok(heightGain >= 1.1, `height gain only ${heightGain.toFixed(2)}x`)
   })
@@ -1211,20 +1245,14 @@ describe('schematic scale', () => {
     // next zone's label. This checks the arithmetic the browser proved wrong --
     // main baseline at midY-8, sub at midY+18, next main at nextMidY-8, and a
     // 22-unit glyph box needs the gap to exceed the font size.
-    const source = schematic()
-    const bands = Array.from(
-      source.matchAll(/id: '(\w+)', y: (\d+), height: (\d+)/g),
-      (m) => ({ id: m[1], y: Number(m[2]), height: Number(m[3]) })
-    )
+    const { bands } = schematicGeometry()
     assert.equal(bands.length, 5)
     for (let i = 0; i < bands.length - 1; i += 1) {
-      const midY = bands[i].y + bands[i].height / 2
-      const nextMidY = bands[i + 1].y + bands[i + 1].height / 2
-      const subBaseline = midY + 18
-      const nextMainBaseline = nextMidY - 8
+      const subBaseline = bands[i].midY + 18
+      const nextMainBaseline = bands[i + 1].midY - 8
       assert.ok(
         nextMainBaseline - subBaseline >= 22,
-        `${bands[i].id} sub-label sits ${nextMainBaseline - subBaseline} units from the next label; needs 22`
+        `${bands[i].id} sub-label sits ${Math.round(nextMainBaseline - subBaseline)} units from the next label; needs 22`
       )
     }
   })
@@ -1254,20 +1282,21 @@ describe('schematic scale', () => {
   })
 
   it('keeps band proportions and order unchanged', () => {
-    const source = schematic()
-    const heights = Array.from(
-      source.matchAll(/id: '(\w+)', y: \d+, height: (\d+)/g),
-      (m) => ({ id: m[1], h: Number(m[2]) })
-    )
+    const { bands, blockHeight } = schematicGeometry()
     assert.deepEqual(
-      heights.map((h) => h.id),
+      bands.map((b) => b.id),
       ['surface', 'barrier', 'tone', 'texture', 'radiance']
     )
-    // Previous heights 46,46,48,48,44 — same relative ordering, all scaled up.
+    // The relative depths are the approved ones. They are now weights rather
+    // than pixel heights, so the block can deepen without the proportions
+    // drifting.
     assert.deepEqual(
-      heights.map((h) => h.h),
+      bands.map((b) => b.weight),
       [56, 56, 58, 58, 52]
     )
+    // And they must still tile the block exactly, leaving no seam or overlap.
+    const covered = bands.reduce((sum, b) => sum + b.height, 0)
+    assert.ok(Math.abs(covered - blockHeight) < 0.001, 'bands must fill the block')
   })
 
   it('keeps the schematic labelled and adds no biological claim', () => {
@@ -2802,7 +2831,9 @@ describe('return continuity regression', () => {
 
   it('keeps the layer science module and the schematic exactly as approved', () => {
     assert.equal(SCIENCE_PAGE.layerScience.cards.length, 3)
-    assert.match(schematicSource(), /viewBox="0 0 620 300"/)
+    // The schematic was deepened so it runs the length of the interpretation
+    // column beside it. Width, band proportions and label sizes are unchanged.
+    assert.match(schematicSource(), /const VIEW = \{ width: 620, height: \d+ \}/)
   })
 })
 
@@ -3521,7 +3552,7 @@ describe('dual entry regression', () => {
   })
 
   it('leaves the schematic, taxonomy and matrix untouched', () => {
-    assert.match(schematicSource(), /viewBox="0 0 620 300"/)
+    assert.match(schematicSource(), /const VIEW = \{ width: 620, height: \d+ \}/)
     assert.equal(INGREDIENT_FAMILY_TAXONOMY.length, 8)
     assert.equal(CONCERN_FORMULA_MATRIX.length, 5)
     assert.equal(LAYER_CONTEXT_PANELS.length, 5)
@@ -3831,9 +3862,12 @@ describe('the invitation sits in the hero', () => {
 describe('skin layer schematic labelling', () => {
   it('names the top band Stratum Corneum', () => {
     const source = schematicSource()
-    assert.match(source, /\{ label: 'Stratum Corneum', y: 38 \}/)
-    // y=38 is the vertical centre of the surface band (10..66), the same rule
-    // the three existing names already follow.
+    assert.match(source, /\{ label: 'Stratum Corneum', band: 'surface' \}/)
+    // Named by band, not by coordinate: each label is centred on the band it
+    // sits over, so it stays centred at any block height.
+    const { bands } = schematicGeometry()
+    const surface = bands.find((b) => b.id === 'surface')
+    assert.ok(surface && surface.midY > 10, 'the surface band must have a centre')
   })
 
   it('renames none of the existing anatomical labels', () => {
@@ -3841,7 +3875,7 @@ describe('skin layer schematic labelling', () => {
     for (const label of ['Epidermis', 'Dermis', 'Hypodermis']) {
       assert.ok(source.includes(`label: '${label}'`), `${label} must be unchanged`)
     }
-    const count = (source.match(/\{ label: '[^']+', y: \d+ \}/g) ?? []).length
+    const count = (source.match(/\{ label: '[^']+', band: '\w+' \}/g) ?? []).length
     assert.equal(count, 4, 'four anatomical labels: one added, none removed')
   })
 
@@ -3862,7 +3896,17 @@ describe('skin layer schematic labelling', () => {
   it('keeps the anatomical labels quieter than the zone labels', () => {
     const source = schematicSource()
     assert.match(source, /className="text-\[15px\] uppercase tracking-\[0\.06em\]"/)
-    assert.match(source, /className="text-\[22px\] uppercase tracking-\[0\.05em\]"/)
+    assert.match(
+      source,
+      /className="font-primary text-\[22px\] uppercase tracking-\[0\.05em\]"/
+    )
+    // The anatomical labels deliberately do NOT take the serif: they are the
+    // eyebrow voice, and the column beside the drawing sets its eyebrow in the
+    // supporting sans too.
+    assert.ok(
+      !/className="font-primary text-\[15px\]/.test(source),
+      'anatomical labels stay in the supporting sans'
+    )
   })
 })
 
