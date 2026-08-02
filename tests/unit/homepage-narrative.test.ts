@@ -138,7 +138,7 @@ describe('homepage call-to-action discipline', () => {
   it('adds no third hero action and no purchase control', () => {
     const page = stripComments(homepageSource())
     const hero = page.slice(page.indexOf('<h1'), page.indexOf('id="brand-thesis"'))
-    const links = (hero.match(/<MaisonLink|<QuietLink|<Link/g) ?? []).length
+    const links = (hero.match(/<Action\b/g) ?? []).length
     assert.equal(links, 2, 'the hero carries exactly two actions')
     for (const banned of ['Add to cart', 'Buy now', 'Shop now', 'Best seller']) {
       assert.ok(!page.includes(banned), `the homepage must not use "${banned}"`)
@@ -153,7 +153,12 @@ describe('homepage typography', () => {
       !page.includes('font-serif'),
       'font-serif resolves to ui-serif and renders Times on Windows'
     )
-    assert.ok((page.match(/font-primary/g) ?? []).length >= 10)
+    // The roles are named constants now, so the token appears once per role
+    // rather than once per element.
+    assert.ok((page.match(/font-primary/g) ?? []).length >= 3)
+    for (const role of ['const CHAPTER', 'const SUB']) {
+      assert.match(page.slice(page.indexOf(role), page.indexOf(role) + 120), /font-primary/)
+    }
   })
 
   it('keeps the approved heading sizes', () => {
@@ -161,22 +166,31 @@ describe('homepage typography', () => {
     // already shipped with.
     const page = homepageSource()
     assert.match(page, /font-primary text-5xl leading-\[0\.95\][^"]*md:text-7xl/)
+    // One chapter scale, declared once and used by every chapter heading.
+    assert.match(page, /const CHAPTER = 'mt-5 font-primary text-4xl leading-tight md:text-5xl'/)
+    const stripped = stripComments(page)
     assert.ok(
-      (page.match(/font-primary text-4xl leading-tight[^"]*md:text-5xl/g) ?? []).length >= 8,
-      'section headings stay at 4xl/5xl'
+      (stripped.match(/\{CHAPTER\}/g) ?? []).length >= 8,
+      'every chapter heading uses the one scale'
     )
   })
 })
 
 describe('homepage mobile parity', () => {
-  it('gives both product actions a 44px touch target', () => {
+  it('gives every control a 44px box that a border cannot change', () => {
     const page = homepageSource()
-    // QuietLink is the shared control both product links use.
-    const quiet = page.slice(page.indexOf('function QuietLink'), page.indexOf('export default'))
-    assert.match(quiet, /min-h-\[44px\]/)
-    assert.match(quiet, /inline-flex/)
-    const stripped = stripComments(page)
-    assert.match(stripped, /<QuietLink href=\{elixir\.href\} tone="gold">/)
+    const base = page.slice(page.indexOf('const CONTROL_BASE'), page.indexOf('const CONTROL_TONE'))
+    assert.match(base, /min-h-\[44px\]/)
+    assert.match(base, /\bborder\b/)
+    assert.match(base, /rounded-sm/)
+    const tone = page.slice(page.indexOf('const CONTROL_TONE'), page.indexOf('function Action'))
+    assert.equal(
+      (tone.match(/border-transparent/g) ?? []).length,
+      2,
+      'both filled tiers carry a transparent border so heights match'
+    )
+    const textAction = page.slice(page.indexOf('function TextAction'), page.indexOf('export default'))
+    assert.match(textAction, /min-h-\[44px\]/)
   })
 
   it('states a mobile value wherever the hero sets a desktop one', () => {
@@ -274,5 +288,189 @@ describe('homepage leaves Science alone', () => {
     ]) {
       assert.ok(!page.includes(banned), `the homepage must not pull in ${banned}`)
     }
+  })
+})
+
+
+/* ------------------------------------------------------------------ *
+ * Phase C: the consistency system
+ * ------------------------------------------------------------------ */
+
+describe('homepage control system', () => {
+  it('retires the pill', () => {
+    const page = stripComments(homepageSource())
+    assert.ok(!page.includes('rounded-full'), 'no rounded-full control remains')
+    assert.match(homepageSource(), /const CONTROL_BASE[\s\S]{0,400}rounded-sm/)
+  })
+
+  it('carries exactly three control tiers and no more', () => {
+    const page = homepageSource()
+    const tone = page.slice(page.indexOf('const CONTROL_TONE'), page.indexOf('function Action'))
+    const keys = tone.match(/'(primary|secondary)-(light|dark)'/g) ?? []
+    assert.equal(keys.length, 4, 'two tiers x two grounds')
+    assert.ok(page.includes('function TextAction'))
+    assert.ok(!page.includes('function MaisonLink'), 'the old four-variant control is gone')
+    assert.ok(!page.includes('function QuietLink'))
+  })
+
+  it('uses one control typography everywhere', () => {
+    const page = homepageSource()
+    const base = page.slice(page.indexOf('const CONTROL_BASE'), page.indexOf('const CONTROL_TONE'))
+    const textAction = page.slice(page.indexOf('function TextAction'), page.indexOf('export default'))
+    for (const source of [base, textAction]) {
+      assert.match(source, /text-sm/)
+      assert.match(source, /font-medium/)
+      assert.match(source, /tracking-\[0\.18em\]/)
+    }
+  })
+
+  it('gives gold a standing role on dark ground rather than one use', () => {
+    const page = stripComments(homepageSource())
+    // Two call sites, three rendered controls: the two elixirs share one
+    // mapped call site. Either way gold is a system, not a single use.
+    const gold = (page.match(/tier="primary" ground="dark"/g) ?? []).length
+    assert.ok(gold >= 2, 'gold primary must be a system, found ' + gold)
+    assert.match(page, /<Action href={elixir.href} tier="primary" ground="dark">/)
+  })
+
+  it('keeps focus visible on every tier', () => {
+    const page = homepageSource()
+    const tone = page.slice(page.indexOf('const CONTROL_TONE'), page.indexOf('function Action'))
+    for (const key of ['primary-light', 'primary-dark', 'secondary-light', 'secondary-dark']) {
+      const slice = tone.slice(tone.indexOf(key))
+      assert.match(slice.slice(0, 320), /focus-visible:ring-/)
+    }
+  })
+})
+
+describe('homepage repeated labels', () => {
+  const occurrences = (label: string) => {
+    const page = stripComments(homepageSource())
+    const re = new RegExp('<Action[^>]*>\\s*' + label + '\\s*</Action>', 'g')
+    return page.match(re) ?? []
+  }
+
+  it('renders Join Founder Access the same way in both places', () => {
+    const hits = occurrences('Join Founder Access')
+    assert.equal(hits.length, 2, 'hero and closing')
+    for (const hit of hits) {
+      assert.ok(!hit.includes('tier="primary"'), 'both occurrences are the same tier')
+    }
+  })
+
+  it('renders Enter The Atelier the same way in both places', () => {
+    const hits = occurrences('Enter The Atelier')
+    assert.equal(hits.length, 2, 'product philosophy and closing')
+    for (const hit of hits) {
+      assert.ok(!hit.includes('tier="primary"'))
+      assert.ok(!hit.includes('ground="dark"'))
+    }
+  })
+})
+
+describe('homepage typography roles', () => {
+  it('declares one treatment per role rather than repeating utilities', () => {
+    const page = homepageSource()
+    for (const token of ['const EYEBROW', 'const CHAPTER', 'const SUB', 'const LEAD', 'const BODY']) {
+      assert.ok(page.includes(token), token + ' must be a named role')
+    }
+  })
+
+  it('uses one section-eyebrow tracking and one hero kicker', () => {
+    const page = homepageSource()
+    assert.match(page, /const EYEBROW = 'text-xs uppercase tracking-\[0\.3em\]'/)
+    const kicker = (page.match(/tracking-\[0\.32em\]/g) ?? []).length
+    assert.equal(kicker, 1, 'the hero kicker is the only 0.32em label')
+    for (const dead of ['tracking-[0.25em]', 'tracking-[0.22em]']) {
+      assert.ok(!page.includes(dead), dead + ' was an unexplained eyebrow variant')
+    }
+  })
+
+  it('gives the third tier one scale whatever element carries it', () => {
+    const page = homepageSource()
+    assert.match(page, /const SUB = 'font-primary text-2xl leading-snug md:text-3xl'/)
+    const stripped = stripComments(page)
+    assert.ok((stripped.match(/\{SUB\}/g) ?? []).length >= 3)
+    const journal = stripped.slice(
+      stripped.indexOf('nfe-journal-heading'),
+      stripped.indexOf('nfe-concierge-heading')
+    )
+    assert.match(journal, /<h3 className=/, 'Journal titles are headings, not styled spans')
+  })
+
+  it('gives the founder lead the same colour as every other lead', () => {
+    const page = stripComments(homepageSource())
+    const founder = page.slice(
+      page.indexOf('nfe-founder-heading'),
+      page.indexOf('nfe-formulation-heading')
+    )
+    assert.match(founder, /LEAD\} text-nfe-ink\/75/)
+    assert.ok(!founder.includes('text-nfe-muted'), 'the founder lead is no longer the odd one out')
+  })
+})
+
+describe('homepage grounds and rhythm', () => {
+  it('uses two grounds, not an imperceptible three', () => {
+    const page = stripComments(homepageSource())
+    const sections = page.match(/<section[^>]*>/g) ?? []
+    const white = sections.filter((x) => /\bbg-white\b/.test(x))
+    assert.deepEqual(white, [], 'nfe-paper and white measure 1.045:1 against each other')
+    const dark = sections.filter((x) => /bg-nfe-green-900/.test(x))
+    assert.equal(dark.length, 2, 'exactly two dark chapters')
+  })
+
+  it('uses exactly the three approved section intervals', () => {
+    const page = homepageSource()
+    assert.match(page, /related: 'py-16 md:py-24'/)
+    assert.match(page, /movement: 'py-20 md:py-28'/)
+    assert.match(page, /event: 'py-24 md:py-32'/)
+    const stripped = stripComments(page)
+    const inline = stripped.match(/<section[^>]*\bpy-\d+ md:py-\d+/g) ?? []
+    assert.deepEqual(inline, [], 'section intervals come from the scale, not call sites')
+  })
+
+  it('does not give every section the same interval', () => {
+    const page = stripComments(homepageSource())
+    const used = new Set(
+      (page.match(/SPACE\.(related|movement|event)/g) ?? []).map((m) => m.split('.')[1])
+    )
+    assert.equal(used.size, 3, 'all three tiers are actually in use')
+  })
+})
+
+describe('homepage maison naming', () => {
+  it('names the maison sections consistently', () => {
+    const page = stripComments(homepageSource())
+    for (const name of ['The Atelier', 'The Ritual', 'The Vessel', 'The Journal', 'Concierge']) {
+      assert.ok(page.includes(name), name + ' must appear')
+    }
+    for (const wrong of ['>The ritual<', '>The vessel<', 'Enter the Atelier', 'Read the Journal<']) {
+      assert.ok(!page.includes(wrong), 'inconsistent naming: ' + wrong)
+    }
+    assert.ok(!page.includes('The Concierge'), 'Concierge takes no article')
+  })
+
+  it('names the vessel action after its destination', () => {
+    const page = stripComments(homepageSource())
+    assert.ok(!page.includes('Continue the ritual'), 'that label described a ritual, not an article')
+    assert.match(page, /Read the refill note/)
+    const vessel = page.slice(
+      page.indexOf('nfe-vessel-heading'),
+      page.indexOf('nfe-journal-heading')
+    )
+    assert.match(vessel, /\/articles\/refill-culture-quiet-sustainable-luxury/)
+  })
+})
+
+describe('homepage layout stability', () => {
+  it('keeps the hero metadata row on the control tracking', () => {
+    // Not cosmetic. At 0.3em the three items sit on their flex-wrap threshold,
+    // so the row wrapped under fallback metrics and unwrapped when Inter
+    // loaded. Measured, that reflow took desktop CLS from 0.0036 to 0.0692.
+    const page = stripComments(homepageSource())
+    const hero = page.slice(page.indexOf('<h1'), page.indexOf('id="brand-thesis"'))
+    const meta = hero.slice(hero.indexOf('Barrier comfort') - 400, hero.indexOf('Barrier comfort'))
+    assert.match(meta, /tracking-\[0\.18em\]/)
+    assert.ok(!meta.includes('tracking-[0.3em]'), 'widening this row reintroduces the shift')
   })
 })
