@@ -474,3 +474,150 @@ describe('homepage layout stability', () => {
     assert.ok(!meta.includes('tracking-[0.3em]'), 'widening this row reintroduces the shift')
   })
 })
+
+/* ------------------------------------------------------------------ *
+ * Founder review: Atelier copy and action semantics
+ * ------------------------------------------------------------------ */
+
+describe('atelier heading', () => {
+  it('carries the founder-approved wording', () => {
+    const page = stripComments(homepageSource())
+    assert.match(page, /Two elixirs\. One considered philosophy\./)
+    assert.ok(!page.includes('Two considered objects'), 'the prior heading is gone')
+    // "elixirs" is the approved noun; no synonym substitution.
+    for (const wrong of ['Two formulations', 'Two products', 'Two objects']) {
+      assert.ok(!page.includes(wrong), `must not say "${wrong}"`)
+    }
+  })
+
+  it('keeps the heading at the chapter level and scale', () => {
+    const page = stripComments(homepageSource())
+    const atelier = page.slice(page.indexOf('nfe-elixirs-heading'), page.indexOf('nfe-science-heading'))
+    // h2, the shared CHAPTER scale, gold on the dark ground: all unchanged.
+    assert.match(atelier, /<h2 id="nfe-elixirs-heading" className=\{`\$\{CHAPTER\} text-nfe-gold`\}>/)
+  })
+})
+
+describe('homepage action semantics', () => {
+  /** Every <Action> call site with its href, tier and ground. */
+  const actions = () => {
+    const page = stripComments(homepageSource())
+    return Array.from(page.matchAll(/<Action\s+href=(?:"([^"]+)"|\{([^}]+)\})([^>]*)>\s*([^<]*?)\s*</g), (m) => ({
+      href: m[1] ?? m[2],
+      tier: /tier="primary"/.test(m[3]) ? 'primary' : 'secondary',
+      ground: /ground="dark"/.test(m[3]) ? 'dark' : 'light',
+      label: m[4].trim(),
+    }))
+  }
+  const textActions = () => {
+    const page = stripComments(homepageSource())
+    return Array.from(page.matchAll(/<TextAction\s+href="([^"]+)"[^>]*>\s*([^<]*?)\s*</g), (m) => ({
+      href: m[1],
+      label: m[2].trim(),
+    }))
+  }
+
+  it('gives The Ritual a principal action on its light ground', () => {
+    const ritual = actions().find((a) => a.href === '/ritual')
+    assert.ok(ritual, 'the Ritual action must exist')
+    assert.equal(ritual.tier, 'primary', 'The Ritual is a principal maison experience')
+    assert.equal(ritual.ground, 'light')
+  })
+
+  it('keeps Science as a principal action on its light ground', () => {
+    const science = actions().find((a) => a.href === '/science')
+    assert.ok(science)
+    assert.equal(science.tier, 'primary')
+    assert.equal(science.ground, 'light')
+  })
+
+  it('keeps both elixirs as equal principal actions on the dark ground', () => {
+    const page = stripComments(homepageSource())
+    // One mapped call site serves both products, which is what makes them equal.
+    assert.match(page, /<Action href=\{elixir\.href\} tier="primary" ground="dark">/)
+    assert.equal(
+      (page.match(/<Action href=\{elixir\.href\}/g) ?? []).length,
+      1,
+      'both products render from one call site, so neither can drift above the other'
+    )
+  })
+
+  it('keeps Concierge on the same dark-ground primary as the elixirs', () => {
+    const concierge = actions().find((a) => a.href === '/concierge')
+    assert.ok(concierge)
+    assert.equal(concierge.tier, 'primary')
+    assert.equal(concierge.ground, 'dark')
+  })
+
+  it('routes every reading destination through the one editorial treatment', () => {
+    const reading = textActions()
+    const hrefs = reading.map((r) => r.href)
+    assert.ok(hrefs.includes('/skin-ritual-quiz'), 'the quiz is a supporting path')
+    assert.ok(
+      hrefs.some((h) => h.startsWith('/articles/')),
+      'the refill note is reading, not a product entrance'
+    )
+    // None of these may be boxed.
+    const boxed = actions().map((a) => a.href)
+    for (const href of hrefs) {
+      assert.ok(!boxed.includes(href), `${href} must not also render as a boxed control`)
+    }
+  })
+
+  it('keeps the refill note pointing at the approved article', () => {
+    const refill = textActions().find((r) => r.href.startsWith('/articles/'))
+    assert.ok(refill, 'a reading destination must exist')
+    assert.equal(refill.href, '/articles/refill-culture-quiet-sustainable-luxury')
+    assert.equal(refill.label, 'Read the refill note')
+  })
+
+  it('leaves outlined controls only in the hero and closing hierarchies', () => {
+    // Everything still secondary must be a documented subordinate action:
+    // the hero pair and the closing pair, plus the two single-action sections
+    // reported to the founder rather than changed unilaterally.
+    const secondary = actions().filter((a) => a.tier === 'secondary').map((a) => a.href).sort()
+    assert.deepEqual(secondary, [
+      '/founder-access', '/founder-access', '/journal', '/our-story', '/shop', '/shop',
+    ])
+  })
+
+  it('never gives one label two treatments', () => {
+    const seen: Record<string, string> = {}
+    for (const a of [...actions()]) {
+      const key = a.label + '|' + a.href
+      const treatment = a.tier + '-' + a.ground
+      if (seen[key] && seen[key] !== treatment) {
+        assert.fail(`${a.label} renders as both ${seen[key]} and ${treatment}`)
+      }
+      seen[key] = treatment
+    }
+  })
+})
+
+describe('editorial link treatment', () => {
+  it('gives every reading destination the same at-rest rule', () => {
+    const page = homepageSource()
+    // The two short text actions use the shared TextAction component.
+    const textAction = page.slice(page.indexOf('function TextAction'), page.indexOf('export default'))
+    assert.match(textAction, /border-b border-current/)
+    // The Journal titles are headings that link. They keep their scale but
+    // carry the same rule, so a reading destination always looks like one.
+    const stripped = stripComments(page)
+    const journal = stripped.slice(
+      stripped.indexOf('nfe-journal-heading'),
+      stripped.indexOf('nfe-concierge-heading')
+    )
+    assert.match(journal, /<span className="border-b border-current pb-1">/)
+    assert.ok(
+      !journal.includes('hover:underline'),
+      'the rule is present at rest, not summoned by hover'
+    )
+  })
+
+  it('keeps the Journal titles at the sub-tier heading scale', () => {
+    // Normalising them down to control text would delete a type role.
+    const page = stripComments(homepageSource())
+    const journal = page.slice(page.indexOf('nfe-journal-heading'), page.indexOf('nfe-concierge-heading'))
+    assert.match(journal, /<h3 className=\{`\$\{SUB\} text-nfe-green-900`\}>/)
+  })
+})
