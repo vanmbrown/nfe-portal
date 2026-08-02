@@ -402,7 +402,7 @@ export default function NFEHomePage() {
           <div className={MEASURE}>
             <p className={`${EYEBROW} text-nfe-gold`}>The Atelier</p>
             <h2 id="nfe-elixirs-heading" className={`${CHAPTER} text-nfe-gold`}>
-              Two considered objects.
+              Two elixirs. One considered philosophy.
             </h2>
           </div>
           <div className="mt-14 grid gap-12 md:grid-cols-2 md:gap-16">
@@ -476,8 +476,19 @@ export default function NFEHomePage() {
                 looked after at the end of a day.
               </p>
             </div>
+            {/* The Ritual is a principal maison experience, so its action takes
+                the light-ground primary rather than an outline. It was outlined,
+                which put it in the same treatment as the hero's subordinate
+                action and left the hierarchy here unreadable: two actions of
+                apparently equal weight, one boxed and one not, with nothing
+                saying which was the way in.
+
+                The quiz stays a reading action. It is the quieter reflective
+                path, not a second entrance. */}
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
-              <Action href="/ritual">Enter The Ritual</Action>
+              <Action href="/ritual" tier="primary">
+                Enter The Ritual
+              </Action>
               <TextAction href="/skin-ritual-quiz">Explore your ritual</TextAction>
             </div>
           </div>
@@ -535,12 +546,18 @@ export default function NFEHomePage() {
           <ul className="mt-14 grid gap-x-12 gap-y-10 md:grid-cols-3">
             {journalSelection.map((entry) => (
               <li key={entry.slug} className="border-t border-nfe-green-900/15 pt-6">
+                {/* A reading destination, so it carries the same at-rest rule
+                    as the other editorial actions. It keeps its heading
+                    typography: these are sub-tier headings that happen to link,
+                    and collapsing them to control text would remove a type role
+                    from the approved system. What is normalised is the
+                    interaction signal, not the scale. */}
                 <h3 className={`${SUB} text-nfe-green-900`}>
                   <Link
                     href={`/articles/${entry.slug}`}
-                    className="inline-flex min-h-[44px] items-center underline-offset-8 transition-colors hover:text-nfe-green-700 hover:underline focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-green-900 focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-paper"
+                    className="inline-flex min-h-[44px] items-center transition-colors hover:text-nfe-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-green-900 focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-paper"
                   >
-                    {entry.title}
+                    <span className="border-b border-current pb-1">{entry.title}</span>
                   </Link>
                 </h3>
                 <p className={`mt-2 ${BODY} text-nfe-ink/70`}>{entry.note}</p>
