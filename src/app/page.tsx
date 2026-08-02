@@ -12,30 +12,55 @@ export const metadata: Metadata = {
 /**
  * The homepage.
  *
- * The narrative runs philosophy, worldview, trust, formulation intention,
- * product, science, ritual, editorial authority, private guidance, invitation.
- * Product arrives at position five, after the visitor has been told what NFE
- * believes and why the line is only two elixirs. It is deliberately not a
- * conversion-first sequence.
+ * Narrative order, section content and destinations are the approved Wave 2
+ * architecture and are unchanged. What changed in this pass is the system the
+ * page is dressed in: the page carried 28 rendered type voices and 6 control
+ * styles, and two labels rendered two ways each, so a treatment could not
+ * teach a visitor anything.
  *
- * THREE WIDTH SYSTEMS, and only three:
+ * THREE WIDTH SYSTEMS
+ *   SHELL    principal editorial spine, mx-auto max-w-6xl inside px-6/md:px-12
+ *   MEASURE  reading measure inside the spine; sets no left edge of its own
+ *   full     bleed, for the hero and the two dark chapters
  *
- *   SHELL    the principal editorial spine. `mx-auto max-w-6xl` inside
- *            `px-6 md:px-12`. Every section that carries reading copy uses it,
- *            so headings share one left edge instead of the six unrelated
- *            edges the previous page had.
- *   MEASURE  the reading measure inside the spine. Never sets a left edge of
- *            its own; it only limits line length.
- *   Full     bleed, for the hero and the two dark chapters, where the
- *            composition is the point.
+ * TWO GROUNDS
+ *   nfe-paper for every narrative chapter, nfe-green-900 for exactly two.
+ *   The previous page alternated nfe-paper (#FAFAF8) with white (#FFFFFF),
+ *   which measures 1.045:1 against each other. That is below the threshold at
+ *   which a change reads as deliberate, so it produced unevenness rather than
+ *   rhythm. White is gone.
  *
- * The spine is related to Science but not copied from it: Science holds a
- * max-w-5xl column, this holds max-w-6xl, so the homepage reads as the wider
- * entrance to the same house.
+ * THREE SECTION INTERVALS
+ *   96px  closely related continuation      py-16 md:py-24
+ *   112px new movement                      py-20 md:py-28
+ *   128px chapter event                     py-24 md:py-32
+ *   Assigned by narrative relationship, not by position.
+ *
+ * THREE UPPERCASE TRACKINGS, each with one job
+ *   0.32em hero kicker, once on the page
+ *   0.3em  section eyebrow and metadata
+ *   0.18em every control and text action
  */
 const SHELL = 'mx-auto max-w-6xl'
 const SECTION = 'px-6 md:px-12'
 const MEASURE = 'max-w-2xl'
+
+const SPACE = {
+  related: 'py-16 md:py-24',
+  movement: 'py-20 md:py-28',
+  event: 'py-24 md:py-32',
+}
+
+/** Section eyebrow. One treatment; only the colour answers to the ground. */
+const EYEBROW = 'text-xs uppercase tracking-[0.3em]'
+/** Chapter heading. One scale. */
+const CHAPTER = 'mt-5 font-primary text-4xl leading-tight md:text-5xl'
+/** Sub-tier heading. One scale, whatever element carries it. */
+const SUB = 'font-primary text-2xl leading-snug md:text-3xl'
+/** Lead paragraph. */
+const LEAD = 'text-lg leading-8'
+/** Body paragraph. */
+const BODY = 'leading-7'
 
 const thesisPoints = [
   {
@@ -82,67 +107,83 @@ const journalSelection = [
     note: 'Why aging melanated skin ages differently, and what that asks of care.',
   },
   {
-    // Not the refill note: that one is already the destination of the vessel
-    // section above, and the same article twice reads as a thin selection.
     slug: 'body-care-neglected-prestige-beauty',
     title: 'Body Care',
     note: 'Prestige beauty has a missing ritual, and body skin has been held to a lower standard.',
   },
 ]
 
-function MaisonLink({
+/**
+ * The control system. Two tiers, each with a light and a dark form, plus the
+ * text action below. Nothing else on the page is allowed to look actionable.
+ *
+ * Every control carries `border` — transparent on the filled tiers — so a
+ * border can never change the rendered height. Previously filled controls came
+ * out at 44px and outlined ones at 46px, and the two sat side by side in the
+ * hero. Fixed interface height is the specific discipline the reference gets
+ * right, and it is now enforced by the shared base rather than by each call
+ * site remembering.
+ *
+ * Radius is `rounded-sm`, not `rounded-full`: the pill read as ecommerce.
+ */
+const CONTROL_BASE =
+  'inline-flex min-h-[44px] items-center justify-center rounded-sm border px-6 py-3 text-sm font-medium uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
+
+const CONTROL_TONE = {
+  'primary-light':
+    'border-transparent bg-nfe-green-900 text-nfe-paper hover:bg-nfe-green-700 focus-visible:ring-nfe-green-900 focus-visible:ring-offset-nfe-paper',
+  'primary-dark':
+    'border-transparent bg-nfe-gold text-nfe-green-900 hover:bg-nfe-gold-hover focus-visible:ring-nfe-paper focus-visible:ring-offset-nfe-green-900',
+  'secondary-light':
+    'border-nfe-green-900 text-nfe-green-900 hover:bg-nfe-green-900 hover:text-nfe-paper focus-visible:ring-nfe-green-900 focus-visible:ring-offset-nfe-paper',
+  'secondary-dark':
+    'border-nfe-gold/60 text-nfe-gold hover:bg-nfe-gold hover:text-nfe-green-900 focus-visible:ring-nfe-paper focus-visible:ring-offset-nfe-green-900',
+}
+
+function Action({
   href,
   children,
-  variant = 'dark',
+  tier = 'secondary',
+  ground = 'light',
 }: {
   href: string
   children: ReactNode
-  variant?: 'dark' | 'light' | 'outline' | 'outlineLight'
+  tier?: 'primary' | 'secondary'
+  ground?: 'light' | 'dark'
 }) {
-  const classes = {
-    dark: 'bg-nfe-green-900 text-nfe-paper hover:bg-nfe-green-700 focus:bg-nfe-green-700',
-    light: 'bg-nfe-gold text-nfe-green-900 hover:bg-nfe-paper focus:bg-nfe-paper',
-    outline:
-      'border border-nfe-green-900 text-nfe-green-900 hover:bg-nfe-green-900 hover:text-nfe-paper focus:bg-nfe-green-900 focus:text-nfe-paper',
-    outlineLight:
-      'border border-nfe-gold/60 text-nfe-gold hover:bg-nfe-gold hover:text-nfe-green-900 focus:bg-nfe-gold focus:text-nfe-green-900',
-  }
-
   return (
-    <Link
-      href={href}
-      className={`${classes[variant]} inline-flex min-h-[44px] items-center justify-center rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.18em] transition-colors`}
-    >
+    <Link href={href} className={`${CONTROL_BASE} ${CONTROL_TONE[`${tier}-${ground}`]}`}>
       {children}
     </Link>
   )
 }
 
 /**
- * A quiet action. It reads as a text link, not a filled control, but the whole
- * thing is a 44px target: the previous product links were 20px tall, which is
- * under the minimum on every phone. Padding does the work so the restraint is
- * unchanged.
+ * The third tier: a reading action, not a button.
+ *
+ * The rule sits on an inner span so it stays tight to the type while the
+ * interactive box is still 44px. The previous version was a bare 20px text
+ * link, under the touch minimum on every phone.
  */
-function QuietLink({
+function TextAction({
   href,
   children,
-  tone = 'dark',
+  ground = 'light',
 }: {
   href: string
   children: ReactNode
-  tone?: 'dark' | 'gold'
+  ground?: 'light' | 'dark'
 }) {
-  const colour =
-    tone === 'gold'
-      ? 'text-nfe-gold hover:text-nfe-paper focus-visible:text-nfe-paper'
-      : 'text-nfe-green-900 hover:text-nfe-green-700 focus-visible:text-nfe-green-700'
+  const tone =
+    ground === 'dark'
+      ? 'text-nfe-gold hover:text-nfe-paper focus-visible:ring-nfe-paper focus-visible:ring-offset-nfe-green-900'
+      : 'text-nfe-green-900 hover:text-nfe-green-700 focus-visible:ring-nfe-green-900 focus-visible:ring-offset-nfe-paper'
   return (
     <Link
       href={href}
-      className={`${colour} inline-flex min-h-[44px] items-center py-3 text-sm font-medium uppercase tracking-[0.2em] underline-offset-8 transition-colors hover:underline focus-visible:underline`}
+      className={`inline-flex min-h-[44px] items-center text-sm font-medium uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${tone}`}
     >
-      {children}
+      <span className="border-b border-current pb-1">{children}</span>
     </Link>
   )
 }
@@ -155,11 +196,8 @@ export default function NFEHomePage() {
   // deliberately NOT routed through next/image's runtime optimizer for this
   // one hero. Confirmed via a Laplacian-variance audit (2026-07-19/20) that
   // the runtime resize pipeline was producing measurably softer output than
-  // a proper Lanczos downscale (desktop: 60.48 vs 76.63 sharpness; a static
-  // Lanczos variant lands within 1.5% of an unprocessed reference). Source
-  // is unchanged — same crop, same color, same composition, just a better
-  // resize. Route-scoped: this does not change next.config.mjs or affect
-  // any other image on the site.
+  // a proper Lanczos downscale. Route-scoped: this does not change
+  // next.config.mjs or affect any other image on the site.
   const desktopHeroSrcSet = [
     '/images/homepage/nfe-home-hero-product-vessel-desktop-960w.webp 960w',
     '/images/homepage/nfe-home-hero-product-vessel-desktop-1600w.webp 1600w',
@@ -172,13 +210,13 @@ export default function NFEHomePage() {
 
   return (
     <div className="bg-nfe-paper text-nfe-ink">
-      {/* 1 — Quiet hero. Full bleed.
+      {/* 1 — Quiet hero. Full bleed, warm ground.
 
-          The mobile column no longer inherits the 86vh floor, and the image
-          panel is shorter there: measured, the old hero ran 1.56 viewports at
-          375 and 1.89 at 320, so the second chapter never appeared until the
-          visitor had scrolled most of a screen past the fold. Desktop
-          proportions are unchanged. No hero copy was removed. */}
+          The opening line keeps its seven words and its period. It is not a
+          section eyebrow and is no longer dressed as one: it is the hero
+          kicker, the only 0.32em label on the page, in the warm-ground eyebrow
+          colour this brand already uses on Science, shop, Concierge, Discovery
+          and Founder Access. */}
       <section className="grid bg-[#efe4d5] lg:min-h-[86vh] lg:grid-cols-[1.05fr_0.95fr]">
         <div className="flex flex-col justify-center px-6 py-10 md:px-12 md:py-20 lg:px-16">
           <p className="mb-4 text-xs uppercase tracking-[0.32em] text-[#7a4f22] md:mb-5">
@@ -192,21 +230,30 @@ export default function NFEHomePage() {
             tone integrity, and quiet radiance, without asking mature skin to
             perform youth.
           </p>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-nfe-ink/70 md:mt-5">
+          <p className={`mt-4 max-w-2xl ${BODY} text-nfe-ink/70 md:mt-5`}>
             Built for dryness, barrier stress, crepey-looking texture,
             uneven-looking tone, and radiance loss. Well-aging care, made with
             restraint.
           </p>
-          {/* Two actions, never three. The philosophy leads; Founder Access is
-              the quieter outline beside it, and appears only once more on the
-              page, in the closing invitation. */}
+          {/* Two actions, never three. Founder Access is secondary here and
+              secondary again in the closing: one label, one treatment. */}
           <div className="mt-8 flex flex-wrap gap-4 md:mt-10">
-            <MaisonLink href="#brand-thesis">Discover the Philosophy</MaisonLink>
-            <MaisonLink href="/founder-access" variant="outline">
-              Join Founder Access
-            </MaisonLink>
+            <Action href="#brand-thesis" tier="primary">
+              Discover the Philosophy
+            </Action>
+            <Action href="/founder-access">Join Founder Access</Action>
           </div>
-          <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-xs uppercase tracking-[0.22em] text-nfe-green-900/70 md:mt-8">
+          {/* Metadata, not a section eyebrow, so it takes the control tracking
+              rather than the eyebrow's 0.3em.
+
+              This is also a layout-stability fix. At 0.3em these three items
+              sit right on their flex-wrap threshold, so the row wrapped to two
+              lines under the fallback metrics and unwrapped once Inter loaded.
+              Measured, that single reflow took desktop CLS from 0.0036 to
+              0.0692. At 0.18em the row is comfortably inside one line at every
+              width and CLS is back to 0.0036. Widening this row again will
+              reintroduce the shift. */}
+          <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-xs uppercase tracking-[0.18em] text-nfe-green-900/70 md:mt-8">
             <span>Barrier comfort</span>
             <span>Visible radiance</span>
             <span>Tone integrity</span>
@@ -237,30 +284,21 @@ export default function NFEHomePage() {
         </div>
       </section>
 
-      {/* 2 — Brand thesis. Principal spine.
-
-          This is what the page used to say last, in a row of four bordered
-          cards at position eleven. It says it first now, and says it as a
-          statement rather than a grid: the three supporting points sit on a
-          rule, not in boxes. */}
+      {/* 2 — Brand thesis. Opens the argument, so it takes the movement
+          interval rather than the close one. */}
       <section
         id="brand-thesis"
         aria-labelledby="nfe-thesis-heading"
-        className={`${SECTION} scroll-mt-24 py-20 md:py-24`}
+        className={`${SECTION} ${SPACE.movement} scroll-mt-24`}
       >
         <div className={SHELL}>
           <div className={MEASURE}>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-              What NFE believes
-            </p>
-            <h2
-              id="nfe-thesis-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-green-900 md:text-5xl"
-            >
+            <p className={`${EYEBROW} text-nfe-green-700`}>What NFE believes</p>
+            <h2 id="nfe-thesis-heading" className={`${CHAPTER} text-nfe-green-900`}>
               Aging is a privilege. Mature skin deserves the same intelligence
               luxury reserves for everyone else.
             </h2>
-            <p className="mt-8 text-lg leading-8 text-nfe-ink/75">
+            <p className={`mt-8 ${LEAD} text-nfe-ink/75`}>
               NFE is built around specificity rather than scale. Melanated skin
               with decades behind it is not a niche to be served last, and
               well-aging is not a softer word for correction. The work is to
@@ -270,33 +308,29 @@ export default function NFEHomePage() {
           <dl className="mt-14 grid gap-x-12 gap-y-10 md:grid-cols-3">
             {thesisPoints.map((point) => (
               <div key={point.title} className="border-t border-nfe-green-900/15 pt-6">
-                <dt className="font-primary text-2xl text-nfe-green-900">
-                  {point.title}
-                </dt>
-                <dd className="mt-3 leading-7 text-nfe-muted">{point.body}</dd>
+                <dt className={`${SUB} text-nfe-green-900`}>{point.title}</dt>
+                <dd className={`mt-3 ${BODY} text-nfe-ink/70`}>{point.body}</dd>
               </div>
             ))}
           </dl>
         </div>
       </section>
 
-      {/* 3 — Founder proof. Wide two-column module on the same spine. */}
+      {/* 3 — Founder proof. Continues the thesis directly, so it takes the
+          related interval. */}
       <section
         aria-labelledby="nfe-founder-heading"
-        className={`${SECTION} bg-white py-20 md:py-24`}
+        className={`${SECTION} ${SPACE.related}`}
       >
         <div className={`${SHELL} grid gap-10 md:grid-cols-[0.85fr_1.15fr] md:items-center`}>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
+            <p className={`${EYEBROW} text-nfe-green-700`}>
               Made for me. Shared with you.
             </p>
-            <h2
-              id="nfe-founder-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-green-900 md:text-5xl"
-            >
+            <h2 id="nfe-founder-heading" className={`${CHAPTER} text-nfe-green-900`}>
               Made from the questions mainstream skincare did not answer well.
             </h2>
-            <div className="relative mt-8 aspect-[4/5] max-w-sm overflow-hidden rounded-3xl bg-white shadow-sm">
+            <div className="relative mt-8 aspect-[4/5] max-w-sm overflow-hidden rounded-sm bg-white shadow-sm">
               <Image
                 src="/images/founder/vanessa-founder-portrait.webp"
                 alt="Vanessa McCaleb, founder of NFE Beauty"
@@ -307,7 +341,9 @@ export default function NFEHomePage() {
               />
             </div>
           </div>
-          <div className="space-y-6 text-lg leading-8 text-nfe-muted">
+          {/* Lead role, same colour as every other lead. It was the only lead
+              on the page in the weaker grey. */}
+          <div className={`space-y-6 ${LEAD} text-nfe-ink/75`}>
             <p>
               NFE began with Vanessa McCaleb&apos;s search for care that could
               meet tone-rich, experienced skin with specificity and restraint.
@@ -315,32 +351,25 @@ export default function NFEHomePage() {
               to build a disciplined beauty house for skin that has lived.
             </p>
             <div>
-              <MaisonLink href="/our-story" variant="outline">
-                Read the Philosophy
-              </MaisonLink>
+              <Action href="/our-story">Read the Philosophy</Action>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4 — Product philosophy. Principal spine. Prepares the elixirs without
-          showing them, so restraint is explained before it is demonstrated. */}
+      {/* 4 — Product philosophy. New movement: from what NFE believes to how
+          it makes. */}
       <section
         aria-labelledby="nfe-formulation-heading"
-        className={`${SECTION} py-20 md:py-24`}
+        className={`${SECTION} ${SPACE.movement}`}
       >
         <div className={SHELL}>
           <div className={MEASURE}>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-              Formulation intention
-            </p>
-            <h2
-              id="nfe-formulation-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-green-900 md:text-5xl"
-            >
+            <p className={`${EYEBROW} text-nfe-green-700`}>Formulation intention</p>
+            <h2 id="nfe-formulation-heading" className={`${CHAPTER} text-nfe-green-900`}>
               Two elixirs. One restrained ritual.
             </h2>
-            <div className="mt-8 space-y-6 text-lg leading-8 text-nfe-ink/75">
+            <div className={`mt-8 space-y-6 ${LEAD} text-nfe-ink/75`}>
               <p>
                 A short line is a decision, not a limitation. Two elixirs let
                 each one be complete, layered with intention, and finished
@@ -353,50 +382,39 @@ export default function NFEHomePage() {
               </p>
             </div>
             <div className="mt-10">
-              <MaisonLink href="/shop" variant="outline">
-                Enter the Atelier
-              </MaisonLink>
+              <Action href="/shop">Enter The Atelier</Action>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5 — The elixirs. Full-bleed dark chapter.
+      {/* 5 — The Atelier. Dark chapter, so it takes the event interval and
+          lands as a change of room.
 
-          Two editorial studies rather than a product grid: no price, no badge,
-          no cart control, no comparison. The actions were 20px text links,
-          which is under the touch minimum on every phone; they are now 44px
-          targets that still read as links rather than filled buttons. */}
+          Both products take the dark-ground primary. Gold is now the standard
+          primary on dark rather than a single-use style, and the two elixirs
+          hold equal weight. */}
       <section
         aria-labelledby="nfe-elixirs-heading"
-        className="bg-nfe-green-900 px-6 py-20 text-nfe-paper md:px-12 md:py-24"
+        className={`bg-nfe-green-900 px-6 text-nfe-paper md:px-12 ${SPACE.event}`}
       >
         <div className={SHELL}>
           <div className={MEASURE}>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
-              The Atelier
-            </p>
-            <h2
-              id="nfe-elixirs-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-gold md:text-5xl"
-            >
+            <p className={`${EYEBROW} text-nfe-gold`}>The Atelier</p>
+            <h2 id="nfe-elixirs-heading" className={`${CHAPTER} text-nfe-gold`}>
               Two considered objects.
             </h2>
           </div>
           <div className="mt-14 grid gap-12 md:grid-cols-2 md:gap-16">
             {elixirs.map((elixir) => (
               <article key={elixir.href} className="border-t border-nfe-gold/30 pt-8">
-                <p className="text-xs uppercase tracking-[0.25em] text-nfe-gold">
-                  {elixir.eyebrow}
-                </p>
-                <h3 className="mt-4 font-primary text-2xl leading-snug text-nfe-paper md:text-3xl">
-                  {elixir.heading}
-                </h3>
-                <p className="mt-5 leading-7 text-nfe-paper/85">{elixir.body}</p>
-                <div className="mt-6">
-                  <QuietLink href={elixir.href} tone="gold">
+                <p className={`${EYEBROW} text-nfe-gold`}>{elixir.eyebrow}</p>
+                <h3 className={`mt-4 ${SUB} text-nfe-paper`}>{elixir.heading}</h3>
+                <p className={`mt-5 ${BODY} text-nfe-paper/85`}>{elixir.body}</p>
+                <div className="mt-8">
+                  <Action href={elixir.href} tier="primary" ground="dark">
                     {elixir.cta}
-                  </QuietLink>
+                  </Action>
                 </div>
               </article>
             ))}
@@ -404,27 +422,19 @@ export default function NFEHomePage() {
         </div>
       </section>
 
-      {/* 6 — Science. Principal spine.
-
-          One invitation, pointing at the whole experience rather than at a
-          roadmap anchor deep inside it. The homepage introduces Science; the
-          Science page contains it. Nothing interactive is reproduced here. */}
+      {/* 6 — Science. The authority chapter, so it takes the event interval
+          even on a light ground. One invitation, to the whole experience. */}
       <section
         aria-labelledby="nfe-science-heading"
-        className={`${SECTION} bg-white py-20 md:py-24`}
+        className={`${SECTION} ${SPACE.event}`}
       >
         <div className={SHELL}>
           <div className={MEASURE}>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-              The NFE Science Map
-            </p>
-            <h2
-              id="nfe-science-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-green-900 md:text-5xl"
-            >
+            <p className={`${EYEBROW} text-nfe-green-700`}>The NFE Science Map</p>
+            <h2 id="nfe-science-heading" className={`${CHAPTER} text-nfe-green-900`}>
               Science that interprets skin, not just ingredients.
             </h2>
-            <div className="mt-8 space-y-6 text-lg leading-8 text-nfe-ink/75">
+            <div className={`mt-8 space-y-6 ${LEAD} text-nfe-ink/75`}>
               <p>
                 Comfort, hydration, tone, texture and resilience move together.
                 NFE reads them as relationships across the layers of the skin
@@ -438,30 +448,27 @@ export default function NFEHomePage() {
               </p>
             </div>
             <div className="mt-10">
-              <MaisonLink href="/science">Explore the NFE Science Map</MaisonLink>
+              <Action href="/science" tier="primary">
+                Explore the NFE Science Map
+              </Action>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 7 — Ritual. Principal spine. The quiz lives here now, as a quiet way
-          to reflect on care rather than as a conversion slab. */}
+      {/* 7 — The Ritual. Continues from Science. The quiz sits here as a
+          reading action, not a conversion slab. */}
       <section
         aria-labelledby="nfe-ritual-heading"
-        className={`${SECTION} py-20 md:py-24`}
+        className={`${SECTION} ${SPACE.related}`}
       >
         <div className={SHELL}>
           <div className={MEASURE}>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-              The ritual
-            </p>
-            <h2
-              id="nfe-ritual-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-green-900 md:text-5xl"
-            >
+            <p className={`${EYEBROW} text-nfe-green-700`}>The Ritual</p>
+            <h2 id="nfe-ritual-heading" className={`${CHAPTER} text-nfe-green-900`}>
               Application is the part that becomes care.
             </h2>
-            <div className="mt-8 space-y-6 text-lg leading-8 text-nfe-ink/75">
+            <div className={`mt-8 space-y-6 ${LEAD} text-nfe-ink/75`}>
               <p>
                 A ritual is not a routine with more steps. It is the few minutes
                 where attention, warmth and touch do as much as the formula:
@@ -469,152 +476,133 @@ export default function NFEHomePage() {
                 looked after at the end of a day.
               </p>
             </div>
-            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-2">
-              <MaisonLink href="/ritual" variant="outline">
-                Enter the Ritual
-              </MaisonLink>
-              <QuietLink href="/skin-ritual-quiz">Explore your ritual</QuietLink>
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
+              <Action href="/ritual">Enter The Ritual</Action>
+              <TextAction href="/skin-ritual-quiz">Explore your ritual</TextAction>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 8 — The vessel. Principal spine.
+      {/* 8 — The Vessel. Continues the ritual. Scope is bounded by what the
+          Atelier already states in shipped copy: building toward fewer, better
+          objects and refill-minded luxury, editorial for now rather than a live
+          refill flow. No date, cost, saving, cadence, subscription, shipping or
+          sustainability-impact claim, because none is confirmed.
 
-          Scope is bounded by what the Atelier already says in shipped copy:
-          NFE is building toward fewer, better objects and refill-minded
-          luxury, and the vessel story is editorial rather than a live refill
-          flow. No date, cost, saving, cadence, subscription, shipping or
-          sustainability-impact claim is made, because none is confirmed. */}
+          The action names its destination: it goes to the published refill
+          note in the Journal, so it says so. */}
       <section
         aria-labelledby="nfe-vessel-heading"
-        className={`${SECTION} bg-white py-20 md:py-24`}
+        className={`${SECTION} ${SPACE.related}`}
       >
         <div className={SHELL}>
           <div className={MEASURE}>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-              The vessel
-            </p>
-            <h2
-              id="nfe-vessel-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-green-900 md:text-5xl"
-            >
+            <p className={`${EYEBROW} text-nfe-green-700`}>The Vessel</p>
+            <h2 id="nfe-vessel-heading" className={`${CHAPTER} text-nfe-green-900`}>
               Preserve the vessel. Designed to stay.
             </h2>
-            <p className="mt-8 text-lg leading-8 text-nfe-ink/75">
+            <p className={`mt-8 ${LEAD} text-nfe-ink/75`}>
               NFE is building toward fewer, better objects and refill-minded
               luxury. The vessel story is editorial for now rather than a live
               refill flow, and it is written down before it is sold.
             </p>
             <div className="mt-10">
-              <QuietLink href="/articles/refill-culture-quiet-sustainable-luxury">
-                Continue the ritual
-              </QuietLink>
+              <TextAction href="/articles/refill-culture-quiet-sustainable-luxury">
+                Read the refill note
+              </TextAction>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 9 — Editorial invitation. Wide module on the spine.
+      {/* 9 — The Journal. New movement: from the object to the writing.
 
-          Three real entries, each a direct link. No blog cards, no dense grid,
-          and nothing that requires a horizontal swipe to reach. */}
+          The three titles are sub-tier headings that happen to be linked, not
+          controls. They were styled spans, which told the document outline they
+          were not peers of the other sub-headings. They are h3 now. */}
       <section
         aria-labelledby="nfe-journal-heading"
-        className={`${SECTION} py-20 md:py-24`}
+        className={`${SECTION} ${SPACE.movement}`}
       >
         <div className={SHELL}>
           <div className={MEASURE}>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-              The Journal
-            </p>
-            <h2
-              id="nfe-journal-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-green-900 md:text-5xl"
-            >
+            <p className={`${EYEBROW} text-nfe-green-700`}>The Journal</p>
+            <h2 id="nfe-journal-heading" className={`${CHAPTER} text-nfe-green-900`}>
               Reading for skin that has lived.
             </h2>
           </div>
           <ul className="mt-14 grid gap-x-12 gap-y-10 md:grid-cols-3">
             {journalSelection.map((entry) => (
               <li key={entry.slug} className="border-t border-nfe-green-900/15 pt-6">
-                <Link
-                  href={`/articles/${entry.slug}`}
-                  className="group inline-flex min-h-[44px] flex-col justify-center py-1"
-                >
-                  <span className="font-primary text-2xl text-nfe-green-900 underline-offset-8 group-hover:underline group-focus-visible:underline">
+                <h3 className={`${SUB} text-nfe-green-900`}>
+                  <Link
+                    href={`/articles/${entry.slug}`}
+                    className="inline-flex min-h-[44px] items-center underline-offset-8 transition-colors hover:text-nfe-green-700 hover:underline focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-green-900 focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-paper"
+                  >
                     {entry.title}
-                  </span>
-                </Link>
-                <p className="mt-2 leading-7 text-nfe-muted">{entry.note}</p>
+                  </Link>
+                </h3>
+                <p className={`mt-2 ${BODY} text-nfe-ink/70`}>{entry.note}</p>
               </li>
             ))}
           </ul>
           <div className="mt-12">
-            <MaisonLink href="/journal" variant="outline">
-              Read the Journal
-            </MaisonLink>
+            <Action href="/journal">Read The Journal</Action>
           </div>
         </div>
       </section>
 
-      {/* 10 — Concierge. Full-bleed dark chapter, the second and last one. */}
+      {/* 10 — Concierge. The second and last dark chapter, so it takes the
+          event interval. Gold primary, the same control the Atelier uses. */}
       <section
         aria-labelledby="nfe-concierge-heading"
-        className="bg-nfe-green-900 px-6 py-20 text-nfe-paper md:px-12 md:py-24"
+        className={`bg-nfe-green-900 px-6 text-nfe-paper md:px-12 ${SPACE.event}`}
       >
         <div className={SHELL}>
           <div className={MEASURE}>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-gold">
-              Concierge
-            </p>
-            <h2
-              id="nfe-concierge-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-gold md:text-5xl"
-            >
+            <p className={`${EYEBROW} text-nfe-gold`}>Concierge</p>
+            <h2 id="nfe-concierge-heading" className={`${CHAPTER} text-nfe-gold`}>
               Private guidance, when you would rather ask.
             </h2>
-            <p className="mt-8 text-lg leading-8 text-nfe-paper/85">
+            <p className={`mt-8 ${LEAD} text-nfe-paper/85`}>
               Some questions are better answered in a conversation than on a
               page. Concierge is thoughtful care inside the maison: considered
               answers about ritual, layering and fit, given without pressure.
             </p>
             <div className="mt-10">
-              <MaisonLink href="/concierge" variant="light">
+              <Action href="/concierge" tier="primary" ground="dark">
                 Speak with NFE
-              </MaisonLink>
+              </Action>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 11 — Closing invitation. Principal spine.
+      {/* 11 — Closing invitation.
 
-          One clear step, and the second and final appearance of Founder Access
-          on the page. No email wall, no countdown, no scarcity. */}
+          Founder Access is secondary here because it is secondary in the hero,
+          and one label takes one treatment. The emphasis at the close is
+          carried by the heading and the space around it rather than by a
+          filled control. */}
       <section
         aria-labelledby="nfe-closing-heading"
-        className={`${SECTION} py-20 md:py-28`}
+        className={`${SECTION} ${SPACE.movement}`}
       >
         <div className={SHELL}>
           <div className={MEASURE}>
-            <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-              An invitation
-            </p>
-            <h2
-              id="nfe-closing-heading"
-              className="mt-5 font-primary text-4xl leading-tight text-nfe-green-900 md:text-5xl"
-            >
+            <p className={`${EYEBROW} text-nfe-green-700`}>An invitation</p>
+            <h2 id="nfe-closing-heading" className={`${CHAPTER} text-nfe-green-900`}>
               Private notes before the full ritual opens.
             </h2>
-            <p className="mt-8 text-lg leading-8 text-nfe-ink/75">
+            <p className={`mt-8 ${LEAD} text-nfe-ink/75`}>
               Founder Access is the way in while ordering is being prepared:
-              private notes, early ritual guidance, and word when the Atelier
+              private notes, early ritual guidance, and word when The Atelier
               opens.
             </p>
-            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-2">
-              <MaisonLink href="/founder-access">Join Founder Access</MaisonLink>
-              <QuietLink href="/shop">Enter the Atelier</QuietLink>
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
+              <Action href="/founder-access">Join Founder Access</Action>
+              <Action href="/shop">Enter The Atelier</Action>
             </div>
           </div>
         </div>
