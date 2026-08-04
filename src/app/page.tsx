@@ -164,6 +164,15 @@ function Action({
  * The rule sits on an inner span so it stays tight to the type while the
  * interactive box is still 44px. The previous version was a bare 20px text
  * link, under the touch minimum on every phone.
+ *
+ * The rule is transparent at rest and takes the text colour on hover and on
+ * keyboard focus. A permanent line made these read as conventional web links
+ * rather than editorial invitations. The border box is still present and still
+ * the same size, so the line appearing costs no reflow: only its colour
+ * changes, and nothing above or below it moves.
+ *
+ * Colour alone is not the affordance. The focus ring is unchanged and still
+ * does the accessible work; the rule is the visible confirmation beside it.
  */
 function TextAction({
   href,
@@ -181,9 +190,11 @@ function TextAction({
   return (
     <Link
       href={href}
-      className={`inline-flex min-h-[44px] items-center text-sm font-medium uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${tone}`}
+      className={`group inline-flex min-h-[44px] items-center text-sm font-medium uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${tone}`}
     >
-      <span className="border-b border-current pb-1">{children}</span>
+      <span className="border-b border-transparent pb-1 transition-colors group-hover:border-current group-focus-visible:border-current">
+        {children}
+      </span>
     </Link>
   )
 }
@@ -546,18 +557,27 @@ export default function NFEHomePage() {
           <ul className="mt-14 grid gap-x-12 gap-y-10 md:grid-cols-3">
             {journalSelection.map((entry) => (
               <li key={entry.slug} className="border-t border-nfe-green-900/15 pt-6">
-                {/* A reading destination, so it carries the same at-rest rule
-                    as the other editorial actions. It keeps its heading
-                    typography: these are sub-tier headings that happen to link,
-                    and collapsing them to control text would remove a type role
-                    from the approved system. What is normalised is the
-                    interaction signal, not the scale. */}
+                {/* A reading destination sharing the editorial action's
+                    treatment, and keeping its heading typography: these are
+                    sub-tier headings that happen to link, and collapsing them
+                    to control text would remove a type role from the approved
+                    system.
+
+                    The rule is transparent at rest. A permanent line under a
+                    serif heading read as a conventional web link rather than an
+                    editorial invitation, which is the opposite of what a
+                    Journal index should feel like. It takes the text colour on
+                    hover and on keyboard focus, so the title reads first as a
+                    heading and second as a destination. The border box does not
+                    change size, so nothing reflows when the line appears. */}
                 <h3 className={`${SUB} text-nfe-green-900`}>
                   <Link
                     href={`/articles/${entry.slug}`}
-                    className="inline-flex min-h-[44px] items-center transition-colors hover:text-nfe-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-green-900 focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-paper"
+                    className="group inline-flex min-h-[44px] items-center transition-colors hover:text-nfe-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nfe-green-900 focus-visible:ring-offset-2 focus-visible:ring-offset-nfe-paper"
                   >
-                    <span className="border-b border-current pb-1">{entry.title}</span>
+                    <span className="border-b border-transparent pb-1 transition-colors group-hover:border-current group-focus-visible:border-current">
+                      {entry.title}
+                    </span>
                   </Link>
                 </h3>
                 <p className={`mt-2 ${BODY} text-nfe-ink/70`}>{entry.note}</p>
