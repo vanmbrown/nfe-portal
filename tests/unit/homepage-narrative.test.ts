@@ -595,23 +595,69 @@ describe('homepage action semantics', () => {
 })
 
 describe('editorial link treatment', () => {
-  it('gives every reading destination the same at-rest rule', () => {
+  /** The two short text actions share the TextAction component. */
+  const textActionSource = () => {
     const page = homepageSource()
-    // The two short text actions use the shared TextAction component.
-    const textAction = page.slice(page.indexOf('function TextAction'), page.indexOf('export default'))
-    assert.match(textAction, /border-b border-current/)
-    // The Journal titles are headings that link. They keep their scale but
-    // carry the same rule, so a reading destination always looks like one.
-    const stripped = stripComments(page)
-    const journal = stripped.slice(
-      stripped.indexOf('nfe-journal-heading'),
-      stripped.indexOf('nfe-concierge-heading')
+    return page.slice(page.indexOf('function TextAction'), page.indexOf('export default'))
+  }
+  /** The Journal titles are heading links carrying the same treatment. */
+  const journalSource = () => {
+    const page = stripComments(homepageSource())
+    return page.slice(
+      page.indexOf('nfe-journal-heading'),
+      page.indexOf('nfe-concierge-heading')
     )
-    assert.match(journal, /<span className="border-b border-current pb-1">/)
-    assert.ok(
-      !journal.includes('hover:underline'),
-      'the rule is present at rest, not summoned by hover'
-    )
+  }
+
+  it('shows no rule at rest on any reading destination', () => {
+    // A permanent line made these read as conventional web links rather than
+    // editorial invitations.
+    for (const [name, source] of [
+      ['TextAction', textActionSource()],
+      ['Journal titles', journalSource()],
+    ] as const) {
+      assert.ok(
+        !/border-b border-current/.test(source),
+        `${name} must not carry a visible rule at rest`
+      )
+      assert.match(
+        source,
+        /border-b border-transparent/,
+        `${name} keeps a transparent border so the rule costs no reflow`
+      )
+    }
+  })
+
+  it('reveals the rule on hover and on keyboard focus', () => {
+    for (const [name, source] of [
+      ['TextAction', textActionSource()],
+      ['Journal titles', journalSource()],
+    ] as const) {
+      assert.match(source, /group-hover:border-current/, `${name} needs a hover rule`)
+      assert.match(
+        source,
+        /group-focus-visible:border-current/,
+        `${name} needs the same rule on keyboard focus, not hover alone`
+      )
+      // The rule lives on an inner span, so the parent must open the group.
+      assert.match(source, /className="group |className=\{`group /, `${name} needs the group parent`)
+    }
+  })
+
+  it('keeps the accessible focus ring rather than relying on the rule', () => {
+    for (const [name, source] of [
+      ['TextAction', textActionSource()],
+      ['Journal titles', journalSource()],
+    ] as const) {
+      assert.match(source, /focus-visible:ring-2/, `${name} must keep its focus ring`)
+    }
+  })
+
+  it('adds no arrow, icon or read-more copy', () => {
+    const page = stripComments(homepageSource())
+    for (const banned of ['→', '›', '»', 'Read more', '<svg', 'ChevronRight', 'ArrowRight']) {
+      assert.ok(!page.includes(banned), `the quieter treatment must not gain "${banned}"`)
+    }
   })
 
   it('keeps the Journal titles at the sub-tier heading scale', () => {
