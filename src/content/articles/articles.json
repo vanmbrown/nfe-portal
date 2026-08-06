@@ -297,8 +297,8 @@
   {
     "slug": "whats-in-my-beauty-cabinet",
     "title": "What’s in My Beauty Cabinet?",
-    "date": null,
-    "published": false,
+    "date": "2026-08-06",
+    "published": true,
     "author": "Vanessa McCaleb",
     "excerpt": "A founder’s reflection on four products, four distinct purposes, and why every product should earn its place.",
     "file": "whats-in-my-beauty-cabinet.mdx",
@@ -320,8 +320,8 @@
   {
     "slug": "the-scent-of-feeling-beautiful",
     "title": "The Scent of Feeling Beautiful",
-    "date": null,
-    "published": false,
+    "date": "2026-08-06",
+    "published": true,
     "author": "Vanessa McCaleb",
     "excerpt": "On fragrance, emotional memory, and the quiet sensory rituals that help us feel fully at home in ourselves.",
     "file": "the-scent-of-feeling-beautiful.mdx",
