@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { articleMDX, allArticleSlugs, type ArticleSlug } from '@/content/articles/registry'
 import {
+  getAllArticles,
   getArticleBySlug,
   getArticleHeroImage,
   getPillarLabel,
@@ -21,7 +22,12 @@ type Props = {
 }
 
 export function generateStaticParams() {
-  return allArticleSlugs.map((slug) => ({ slug }))
+  // Only published articles get a generated route, so an article withheld from
+  // the index and the sitemap is not quietly reachable by direct URL either.
+  const publishedSlugs = new Set(getAllArticles().map((article) => article.slug))
+  return allArticleSlugs
+    .filter((slug) => publishedSlugs.has(slug))
+    .map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -44,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description: meta.excerpt,
       type: 'article',
-      publishedTime: meta.date,
+      ...(meta.date ? { publishedTime: meta.date } : {}),
       authors: [meta.author],
       images: heroImage ? [{ url: heroImage, alt: meta.imageAlt ?? meta.title }] : [],
     },
@@ -74,27 +80,32 @@ export default async function ArticlePage({ params }: Props) {
       ? `/articles/${WELL_AGING_SERIES_SLUG}`
       : undefined
 
-  const formattedDate = new Date(`${meta.date}T12:00:00Z`).toLocaleDateString(
-    'en-US',
-    {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      timeZone: 'UTC',
-    }
-  )
+  // `date` is null until a publication date is supplied; such an article is
+  // unpublished and only reachable in a local preview build.
+  const formattedDate = meta.date
+    ? new Date(`${meta.date}T12:00:00Z`).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        timeZone: 'UTC',
+      })
+    : null
 
   return (
     <div className="bg-nfe-paper text-nfe-ink">
-      <ArticleJsonLd
-        slug={meta.slug}
-        title={meta.title}
-        description={meta.excerpt}
-        image={
-          heroImage ?? '/images/homepage/nfe-home-hero-product-vessel-desktop.webp'
-        }
-        publishedAt={meta.date}
-      />
+      {/* Structured data is emitted only once a publication date exists, so an
+          unpublished article never advertises a date it does not have. */}
+      {meta.date ? (
+        <ArticleJsonLd
+          slug={meta.slug}
+          title={meta.title}
+          description={meta.excerpt}
+          image={
+            heroImage ?? '/images/homepage/nfe-home-hero-product-vessel-desktop.webp'
+          }
+          publishedAt={meta.date}
+        />
+      ) : null}
 
       <section className="border-b border-nfe-green-900/10 bg-nfe-green-900 text-nfe-paper">
         <div className="mx-auto max-w-6xl px-6 py-10 md:py-12">
@@ -111,7 +122,7 @@ export default async function ArticlePage({ params }: Props) {
               For the primary series, begin with{' '}
               <Link
                 href={`/articles/${WELL_AGING_SERIES_SLUG}`}
-                className="text-nfe-gold underline-offset-4 hover:underline"
+                className="text-nfe-gold underline underline-offset-4 hover:text-nfe-paper"
               >
                 The New Language of Well-Aging
               </Link>
@@ -135,8 +146,12 @@ export default async function ArticlePage({ params }: Props) {
 
           <div className="mt-8 flex flex-wrap gap-3 text-sm text-nfe-paper/70">
             <span>{meta.author}</span>
-            <span>•</span>
-            <span>{formattedDate}</span>
+            {formattedDate ? (
+              <>
+                <span>•</span>
+                <span>{formattedDate}</span>
+              </>
+            ) : null}
             {meta.readingMinutes ? (
               <>
                 <span>•</span>
@@ -158,18 +173,40 @@ export default async function ArticlePage({ params }: Props) {
                     : 'aspect-[4/5] max-h-[70vh] md:aspect-[16/10] md:max-h-[620px]'
               }`}
             >
-              <Image
-                src={heroImage}
-                alt={meta.imageAlt ?? meta.title}
-                fill
-                priority
-                className={`object-cover ${
-                  meta.imageType === 'editorial-science'
-                    ? 'object-center md:object-[center_18%]'
-                    : ''
-                }`}
-                sizes="(max-width: 768px) 100vw, 1152px"
-              />
+              {meta.mobileImage ? (
+                /* Art direction: a dedicated 4:5 crop below the md breakpoint,
+                   the approved desktop asset above it. One <picture> means the
+                   browser fetches exactly one of the two. */
+                <picture>
+                  <source
+                    media="(max-width: 767px)"
+                    srcSet={meta.mobileImage}
+                    type="image/webp"
+                  />
+                  <source srcSet={heroImage} type="image/webp" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={heroImage}
+                    alt={meta.imageAlt ?? meta.title}
+                    fetchPriority="high"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </picture>
+              ) : (
+                <Image
+                  src={heroImage}
+                  alt={meta.imageAlt ?? meta.title}
+                  fill
+                  priority
+                  className={`object-cover ${
+                    meta.imageType === 'editorial-science'
+                      ? 'object-center md:object-[center_18%]'
+                      : ''
+                  }`}
+                  sizes="(max-width: 768px) 100vw, 1152px"
+                />
+              )}
             </div>
           </div>
         ) : null}
