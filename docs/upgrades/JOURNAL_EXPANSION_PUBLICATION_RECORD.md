@@ -3,8 +3,9 @@
 Recorded 2026-08-05. Covers two supporting editorial notes:
 *What's in My Beauty Cabinet?* and *The Scent of Feeling Beautiful*.
 
-Branch `feature/nfe-journal-beauty-cabinet-scent`. Nothing deployed. Both
-articles are held unpublished pending a founder-supplied publication date.
+Branch `feature/nfe-journal-beauty-cabinet-scent`. **Nothing deployed.** Both
+articles are **published** as Supporting Editorial Notes on release date
+**2026-08-06**, pending founder visual review before deployment.
 
 ## Founder decisions implemented
 
@@ -16,7 +17,7 @@ articles are held unpublished pending a founder-supplied publication date.
 | Scent section | Ritual Notes, in the `body-sensuality-ritual` group |
 | Scent role | Ritual Intelligence (`pillar: "ritual-intelligence"`) |
 | Byline, both | **Vanessa McCaleb** |
-| Publication date | `date: null`, `published: false` — no invented or backdated value |
+| Publication date | `date: "2026-08-06"`, `published: true` — the authorization date, not a backdated or provisional value |
 | Primary essays | untouched; the count remains nine |
 | Homepage | untouched; its three approved Journal entries are unchanged |
 
@@ -172,17 +173,37 @@ added to any article body, and the Scent essay remains heading-free.
 The shared fix repaired two pre-existing legacy failures as a side effect and
 regressed nothing.
 
-## Outstanding blockers
+## Journal accessibility now 100
 
-1. **Final publication date.** Both articles are held with `date: null` and
-   `published: false`. Publication cannot proceed until the founder supplies the
-   date.
-2. **`/journal` accessibility 96.** The two Supporting Editorial Note spans that
-   failed were corrected (`text-nfe-ink/45` → `/65`, **3.04:1 → 5.86:1**). The
-   remaining failures sit in `JournalArticleCard` and `JournalThemeSection` —
-   the presentation of the **primary authority essays**, at 3.01–4.17:1. Raising
-   those is a visible change to the primary collection, which this task was told
-   to preserve unchanged, so it was not made. It needs a founder decision.
-3. **`black-dont-crack` heading order.** A pre-existing `h3` in that legacy
-   article's own body. Rewriting legacy article copy is outside this task.
-4. **Hero crop visual confirmation**, as described above.
+The founder subsequently authorized correcting the shared defects outright. All
+muted Journal metadata labels were lifted to `text-nfe-ink/65`:
+
+| Element | Ground | Before | After |
+| --- | --- | ---: | ---: |
+| Supporting-note label and theme eyebrow | `#fafaf8` | 3.02:1 | **5.76:1** |
+| Theme-section card metadata (×2) | `#fdfdfc` | 3.02:1 | **5.82:1** |
+| Featured card metadata | `#ffffff` | 4.17:1 | **5.92:1** |
+
+Measured result: `/journal` **96 → 100** on desktop and mobile. The typography,
+hierarchy and layout are unchanged; only the muted grey was deepened.
+
+## Structured data
+
+`ArticleJsonLd` previously hardcoded an Organization author. It now accepts an
+optional byline: founder-written pieces emit
+`author: { "@type": "Person", "name": "Vanessa McCaleb" }`, while house-written
+articles keep `{ "@type": "Organization", "name": "NFE Beauty" }` exactly as
+before. Verified on both new articles and on a control article.
+
+## Outstanding item
+
+**Hero crop visual confirmation.** The crops are measured and verified to fill
+the 4:5 mobile frame with no further cropping, and the file geometry and
+skin-tone corroboration are recorded above. Nobody has yet *looked* at them to
+confirm the Beauty Cabinet crop retains the intended products or that the Scent
+crop frames the face as intended. This is the remaining item for founder visual
+review before deployment.
+
+`black-dont-crack` sits at 98 rather than 100 because of an `h3` in that legacy
+article's own body. The shared fix lifted it from 95; going further means
+rewriting legacy article copy, which is outside this task.
