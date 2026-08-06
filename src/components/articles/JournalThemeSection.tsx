@@ -46,7 +46,7 @@ export function JournalSupportingNoteCard({
       ) : null}
 
       <div className={cardImage ? 'min-w-0 flex-1' : undefined}>
-        <div className="flex flex-wrap items-center gap-2 text-[0.68rem] uppercase tracking-[0.24em] text-nfe-ink/45">
+        <div className="flex flex-wrap items-center gap-2 text-[0.68rem] uppercase tracking-[0.24em] text-nfe-ink/65">
           <span>{label}</span>
           {themeEyebrow ? (
             <>
@@ -61,7 +61,7 @@ export function JournalSupportingNoteCard({
         <p className="mt-3 line-clamp-2 text-sm leading-6 text-nfe-ink/58">
           {article.excerpt}
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-nfe-ink/45">
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-nfe-ink/65">
           <span>{formatArticleDate(article.date)}</span>
           {article.readingMinutes ? (
             <>
@@ -115,7 +115,7 @@ export function JournalThemeSection({
         <div
           className={`${primaryArticles.length > 0 ? 'mt-8 border-t border-nfe-green-900/8 pt-8' : ''}`}
         >
-          <p className="mb-4 text-xs uppercase tracking-[0.28em] text-nfe-ink/45">
+          <p className="mb-4 text-xs uppercase tracking-[0.28em] text-nfe-ink/65">
             Supporting Editorial Notes
           </p>
           <div className="grid gap-4 md:grid-cols-2">

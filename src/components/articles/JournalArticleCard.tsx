@@ -80,7 +80,7 @@ export function JournalArticleCard({
           {article.excerpt}
         </p>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-nfe-ink/55">
+        <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-nfe-ink/65">
           <span>{formatArticleDate(article.date)}</span>
           {article.readingMinutes ? (
             <>
