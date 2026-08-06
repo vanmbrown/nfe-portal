@@ -104,6 +104,7 @@ export default async function ArticlePage({ params }: Props) {
             heroImage ?? '/images/homepage/nfe-home-hero-product-vessel-desktop.webp'
           }
           publishedAt={meta.date}
+          author={meta.author}
         />
       ) : null}
 

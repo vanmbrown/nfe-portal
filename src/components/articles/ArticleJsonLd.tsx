@@ -10,6 +10,11 @@ type ArticleJsonLdProps = {
   image: string;
   publishedAt: string;
   modifiedAt?: string;
+  /**
+   * Byline for founder-written pieces. Omitted for house-written articles,
+   * which stay attributed to the organization exactly as before.
+   */
+  author?: string;
 };
 
 export function ArticleJsonLd({
@@ -19,6 +24,7 @@ export function ArticleJsonLd({
   image,
   publishedAt,
   modifiedAt,
+  author,
 }: ArticleJsonLdProps) {
   const siteUrl = getSiteUrl();
 
@@ -32,10 +38,10 @@ export function ArticleJsonLd({
     headline: title,
     description,
     image: [`${siteUrl}${image}`],
-    author: {
-      '@type': 'Organization',
-      name: 'NFE Beauty',
-    },
+    author:
+      author && author !== 'NFE Beauty'
+        ? { '@type': 'Person', name: author }
+        : { '@type': 'Organization', name: 'NFE Beauty' },
     publisher: {
       '@type': 'Organization',
       name: 'NFE Beauty',
