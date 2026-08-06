@@ -5,7 +5,8 @@ import { getArticleCardImage } from '@/lib/articles'
 import type { JournalSupportingNoteLabel } from '@/content/articles/journal-supporting-notes'
 import { JournalArticleCard } from '@/components/articles/JournalArticleCard'
 
-function formatArticleDate(date: string) {
+function formatArticleDate(date: string | null) {
+  if (!date) return ''
   return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',

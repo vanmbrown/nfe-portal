@@ -39,12 +39,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
           : 0.8,
   }))
 
-  const articleRoutes: MetadataRoute.Sitemap = getAllArticles().map((article) => ({
-    url: `${baseUrl}/articles/${article.slug}`,
-    lastModified: new Date(article.date),
-    changeFrequency: 'monthly',
-    priority: article.editorialTier === 'primary' ? 0.75 : 0.45,
-  }))
+  // getAllArticles() already excludes unpublished articles, so an article
+  // without a publication date can never reach the sitemap.
+  const articleRoutes: MetadataRoute.Sitemap = getAllArticles()
+    .filter((article) => Boolean(article.date))
+    .map((article) => ({
+      url: `${baseUrl}/articles/${article.slug}`,
+      lastModified: new Date(article.date as string),
+      changeFrequency: 'monthly',
+      priority: article.editorialTier === 'primary' ? 0.75 : 0.45,
+    }))
 
   return [...staticRoutes, ...articleRoutes]
 }

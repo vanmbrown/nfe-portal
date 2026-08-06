@@ -6,7 +6,8 @@ import {
   getPillarLabel,
 } from '@/lib/articles'
 
-function formatArticleDate(date: string) {
+function formatArticleDate(date: string | null) {
+  if (!date) return ''
   return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',

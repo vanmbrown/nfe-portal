@@ -23,7 +23,18 @@ export type EditorialTier = 'primary' | 'legacy'
 export type ArticleMeta = {
   slug: string
   title: string
-  date: string
+  /**
+   * Publication date in the Journal's existing YYYY-MM-DD format.
+   * `null` means the final date has not been supplied yet; such an article
+   * must also carry `published: false` and is excluded from every surface.
+   */
+  date: string | null
+  /**
+   * Omitted or `true` for every article published to date. `false` withholds
+   * the article from the Journal index, the sitemap, related reading, metadata
+   * and static route generation, consistently and in one place.
+   */
+  published?: boolean
   author: string
   excerpt: string
   file?: string
@@ -33,6 +44,8 @@ export type ArticleMeta = {
   imageAlt?: string
   imageType?: ArticleImageType
   imageCredit?: string | null
+  /** Dedicated 4:5 crop served below the md breakpoint. */
+  mobileImage?: string
   pillar: JournalPillarId
   editorialTier?: EditorialTier
   featured?: boolean
@@ -43,9 +56,32 @@ export type ArticleMeta = {
   relatedSlugs?: string[]
 }
 
+/**
+ * A local preview build may opt in to unpublished articles so the founder can
+ * review them before a publication date is set. It is never enabled in a
+ * production build, so unpublished articles stay off every production surface.
+ */
+const INCLUDE_UNPUBLISHED =
+  process.env.NEXT_PUBLIC_INCLUDE_UNPUBLISHED === 'true'
+
+export function isPublished(article: ArticleMeta): boolean {
+  return article.published !== false
+}
+
+/**
+ * The single gate. Every Journal surface reads through this, so the index, the
+ * sitemap, related reading, article metadata and static route generation can
+ * never disagree about whether an article is public.
+ */
 export function getAllArticles(): ArticleMeta[] {
   const articles = articlesIndex as ArticleMeta[]
-  return [...articles].sort((a, b) => (a.date < b.date ? 1 : -1))
+  return articles
+    .filter((article) => INCLUDE_UNPUBLISHED || isPublished(article))
+    .sort((a, b) => {
+      if (!a.date) return 1
+      if (!b.date) return -1
+      return a.date < b.date ? 1 : -1
+    })
 }
 
 export function getPrimaryArticles(): ArticleMeta[] {
@@ -141,6 +177,8 @@ export function getRelatedArticles(slug: string, limit = 3): ArticleMeta[] {
         (b.series && b.series === current.series ? 1 : 0)
 
       if (aScore !== bScore) return bScore - aScore
+      if (!a.date) return 1
+      if (!b.date) return -1
       return a.date < b.date ? 1 : -1
     })
     .slice(0, limit)

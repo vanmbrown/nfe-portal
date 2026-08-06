@@ -4,6 +4,8 @@ export type JournalSupportingNoteLabel =
   | 'Earlier Note'
   | 'Foundational Essay'
   | 'From the NFE Archive'
+  | 'Founder Notes'
+  | 'Ritual Notes'
 
 export type JournalSupportingNote = {
   slug: string
@@ -17,6 +19,7 @@ export const JOURNAL_SUPPORTING_NOTES_BY_GROUP: Record<
   'philosophy-presence': [
     { slug: 'clean-beauty-myths-future-nfe', label: 'Foundational Essay' },
     { slug: 'refill-culture-quiet-sustainable-luxury', label: 'Earlier Note' },
+    { slug: 'whats-in-my-beauty-cabinet', label: 'Founder Notes' },
   ],
   'barrier-intelligence': [
     { slug: 'barrier-wealth-aging-melanated-skin', label: 'Foundational Essay' },
@@ -30,7 +33,9 @@ export const JOURNAL_SUPPORTING_NOTES_BY_GROUP: Record<
     },
     { slug: 'black-dont-crack', label: 'Earlier Note' },
   ],
-  'body-sensuality-ritual': [],
+  'body-sensuality-ritual': [
+    { slug: 'the-scent-of-feeling-beautiful', label: 'Ritual Notes' },
+  ],
   'modern-care': [],
 }
 
