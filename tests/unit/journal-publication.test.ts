@@ -119,17 +119,29 @@ describe('journal publication: editorial placement', () => {
 })
 
 describe('journal publication: publication state', () => {
-  it('holds both essays unpublished with no invented date', () => {
+  it('publishes both essays with a real release date', () => {
     for (const slug of NEW) {
       const e = bySlug(slug)
-      assert.equal(e?.published, false, `${slug} is not held unpublished`)
-      assert.equal(e?.date, null, `${slug} carries a date before authorization`)
+      assert.equal(e?.published, true, `${slug} is not published`)
+      assert.match(
+        e?.date ?? '',
+        /^\d{4}-\d{2}-\d{2}$/,
+        `${slug} has no release date in the Journal's date format`
+      )
     }
   })
 
   it('never reintroduces the rejected provisional date', () => {
     const raw = read(...articlesPath)
     assert.ok(!raw.includes('2026-08-05'), 'the provisional date came back')
+  })
+
+  it('publishes both essays on the same release date', () => {
+    assert.equal(
+      bySlug(CABINET)?.date,
+      bySlug(SCENT)?.date,
+      'the two essays were released on different dates'
+    )
   })
 
   it('leaves every published article published, with a real date', () => {
@@ -158,6 +170,15 @@ describe('journal publication: publication state', () => {
     const route = read('src', 'app', 'articles', '[slug]', 'page.tsx')
     assert.match(route, /meta\.date \? \(\s*<ArticleJsonLd/,
       'JSON-LD is emitted without a publication date')
+  })
+
+  it('carries the founder byline into structured data, not the house name', () => {
+    const route = read('src', 'app', 'articles', '[slug]', 'page.tsx')
+    assert.match(route, /author=\{meta\.author\}/, 'byline is not passed to JSON-LD')
+    const jsonld = read('src', 'components', 'articles', 'ArticleJsonLd.tsx')
+    assert.match(jsonld, /'@type': 'Person', name: author/, 'no Person author branch')
+    // house-written articles must keep the Organization author exactly as before
+    assert.match(jsonld, /'@type': 'Organization',\s*name: 'NFE Beauty'/)
   })
 })
 

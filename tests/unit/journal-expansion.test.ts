@@ -232,12 +232,12 @@ describe('journal expansion: manifest and registry', () => {
   })
 })
 
-describe('journal expansion: held unpublished until a date is supplied', () => {
-  it('withholds both essays from every surface via the publication flag', () => {
+describe('journal expansion: published as supporting editorial notes', () => {
+  it('publishes both essays without promoting either to featured', () => {
     for (const slug of NEW_SLUGS) {
       const entry = bySlug(slug)
-      assert.equal(entry?.published, false, `${slug} is not held unpublished`)
-      assert.equal(entry?.date, null, `${slug} carries a date before authorization`)
+      assert.equal(entry?.published, true, `${slug} is not published`)
+      assert.match(entry?.date ?? '', /^\d{4}-\d{2}-\d{2}$/, `${slug} release date`)
       assert.notEqual(entry?.featured, true, `${slug} is flagged featured`)
     }
   })
