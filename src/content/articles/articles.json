@@ -293,5 +293,46 @@
     "imageAlt": "Editorial illustration on refill culture and quiet sustainable luxury.",
     "imageType": "illustration",
     "imageCredit": null
+  },
+  {
+    "slug": "whats-in-my-beauty-cabinet",
+    "title": "What’s in My Beauty Cabinet?",
+    "date": "2026-08-05",
+    "author": "Vanessa Brown",
+    "excerpt": "A founder’s reflection on four products, four distinct purposes, and why every product should earn its place.",
+    "file": "whats-in-my-beauty-cabinet.mdx",
+    "pillar": "proof-discipline",
+    "readingMinutes": 8,
+    "pullQuote": "A product should earn its place in your beauty cabinet.",
+    "heroImage": "/images/journal/the-new-language-of-well-aging/whats-in-my-beauty-cabinet.webp",
+    "cardImage": "/images/journal/the-new-language-of-well-aging/whats-in-my-beauty-cabinet.webp",
+    "imageAlt": "Four skincare products arranged on a vanity: a gentle cleanser, NFE Face Elixir, tinted sunscreen, and prescription tretinoin.",
+    "imageCredit": null,
+    "relatedSlugs": [
+      "what-mature-skin-needs-from-makeup",
+      "refill-culture-quiet-sustainable-luxury",
+      "mature-skin-is-underbuilt"
+    ]
+  },
+  {
+    "slug": "the-scent-of-feeling-beautiful",
+    "title": "The Scent of Feeling Beautiful",
+    "date": "2026-08-05",
+    "author": "Vanessa Brown",
+    "excerpt": "On fragrance, emotional memory, and the quiet sensory rituals that help us feel fully at home in ourselves.",
+    "file": "the-scent-of-feeling-beautiful.mdx",
+    "pillar": "ritual-intelligence",
+    "readingMinutes": 5,
+    "pullQuote": "Sometimes, beauty is a feeling. And sometimes, that feeling has a scent.",
+    "heroImage": "/images/journal/the-new-language-of-well-aging/the-scent-of-feeling-beautiful.webp",
+    "cardImage": "/images/journal/the-new-language-of-well-aging/the-scent-of-feeling-beautiful.webp",
+    "imageAlt": "A mature Black woman in a cream dress resting with her eyes closed in a wildflower meadow.",
+    "imageType": "editorial-portrait",
+    "imageCredit": null,
+    "relatedSlugs": [
+      "sensuality-gap-in-skincare",
+      "body-care-neglected-prestige-beauty",
+      "well-aging-is-not-disappearing"
+    ]
   }
 ]

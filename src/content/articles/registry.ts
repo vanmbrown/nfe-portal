@@ -24,6 +24,9 @@ export const articleMDX = {
     import('./drier_skin_after_45.mdx'),
   'black-dont-crack': () => import('./black-dont-crack.mdx'),
   'water-vs-oil': () => import('./water-vs-oil.mdx'),
+  'whats-in-my-beauty-cabinet': () => import('./whats-in-my-beauty-cabinet.mdx'),
+  'the-scent-of-feeling-beautiful': () =>
+    import('./the-scent-of-feeling-beautiful.mdx'),
 } as const
 
 export type ArticleSlug = keyof typeof articleMDX
