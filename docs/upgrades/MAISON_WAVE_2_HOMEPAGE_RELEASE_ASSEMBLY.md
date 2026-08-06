@@ -362,3 +362,224 @@ tags are unmoved.
 
 Release assembly complete and validated. **Not deployed.** Awaiting founder
 deployment authorization.
+
+---
+
+# Production closeout
+
+Recorded 2026-08-05. Deployment executed 2026-08-04. This section supersedes the
+"Not deployed" status above; the assembly record preceding it is preserved
+unchanged as the predeployment evidence.
+
+## Authorization
+
+The founder approved the Maison Wave 2 homepage after visual review, then
+separately authorized deployment of the exact approved application source, and
+then separately authorized release tagging and closeout. Each gate was a
+distinct written authorization. No application, copy, design, layout,
+typography, responsive, route, environment, Worker, traffic or deployment change
+was made during closeout.
+
+## Deployed state
+
+| Item | Value |
+| --- | --- |
+| Application source | `16ab5384938abb1dcb4ab46d72dbccf1da67efc0` |
+| Release branch | `release/maison-wave-2-homepage-continuity` |
+| Predeployment documentation HEAD | `b1978902f281bc7f71091e09d322d512f0ef6c15` |
+| Production Worker | `3844a3a7-983e-409d-9ea0-d71e1b2e63b2` |
+| Worker version created | 2026-08-04T13:29:35.513Z |
+| Deployment timestamp | 2026-08-04T13:29:37.200Z |
+| Traffic | 100% |
+| Previous Worker (immediate rollback) | `c44359b1-cbd7-443c-9439-f2fe84e916bb` |
+| Second-level fallback | `c25b8b8a-5a4a-44ea-8812-df0ccf619008` |
+| Rollback executed | **no** |
+
+The artifact was built in a fresh detached worktree checked out at `16ab538`
+exactly, not from the release branch tip. The only commit above the approved
+source is documentation, and the application-source diff between them, across
+`src`, `public`, `tests`, `package.json`, `package-lock.json` and
+`tailwind.config.js`, is empty. The custom domain trigger `www.nfebeauty.com`
+(zone `nfebeauty.com`), the `env.ASSETS` binding, DNS and traffic rules were all
+left as they were.
+
+## Build and environment gate
+
+| Command | Exit | Result |
+| --- | ---: | --- |
+| `npm ci` | 0 | lockfile unchanged |
+| `npx tsc --noEmit` | 0 | clean |
+| `npm run lint` | 0 | zero warning or error lines |
+| `npm test` | 0 | 412 tests, 412 pass, 0 fail, 0 skipped, 89 suites |
+| `npm run build` | 0 | 63 routes |
+| `npx opennextjs-cloudflare build` | 0 | Worker written |
+
+Build-time values came from the canonical `.env.production`, exported into the
+build shell only, plus `NEXT_PUBLIC_SITE_URL` set to the production site and
+`NEXT_PUBLIC_BUILD_SHA` set to `16ab5384938abb1dcb4ab46d72dbccf1da67efc0`. No
+value was printed, echoed, logged, committed or copied into the worktree, and
+`.env.local` was not used. `package.json`, `package-lock.json` and the
+dependency counts (28 production, 21 development) are unchanged.
+
+The mandatory gate was run against the exact artifact before deployment:
+`/focus-group/login` 200 with the real form rendering (email and password, both
+required, one form element, "Sign In"), `/focus-group/enclave` 200,
+`/focus-group/feedback` 200, zero missing-variable or auth-initialisation
+errors, zero 500s on any canonical route, footer build SHA correct.
+
+Two gate checks initially read as empty against raw HTML and were resolved
+rather than assumed: `/focus-group/login` is a client component that mounts
+after hydration, so the server HTML carries no form markup, and React renders
+the footer label separately from the interpolated SHA. Both were confirmed
+correct in the browser and in the markup. Neither indicated a source defect.
+
+## Production route validation
+
+All twenty canonical routes returned 200 with zero redirects: `/`, `/science`,
+`/science?pathways=barrier-comfort`,
+`/science?pathways=hydration,tone-integrity`, `/inci`,
+`/inci?from=science&pathways=hydration#humectants`, `/products/face-elixir`,
+`/products/body-elixir`, `/ritual`, `/skin-ritual-quiz`, `/journal`, the three
+Journal article destinations, the refill article, `/concierge`,
+`/founder-access`, `/focus-group/login`, `/focus-group/enclave` and
+`/focus-group/feedback`. `/study-circle` and `/dev/token-specimen` remain 404.
+
+No console error, no hydration warning, no unexpected redirect. Both homepage
+images load (hero 614px, founder portrait 621px natural width); zero broken
+images.
+
+## Cache propagation note
+
+The first post-deployment probe, roughly sixty seconds after the version went
+live, returned the **pre-deployment homepage** at the bare `/` cache key, while
+every other route already served the new build. A cache-busted request served
+Wave 2 immediately, which established that the Worker itself was correct and the
+stale response was a caching artifact rather than a deployment fault. The
+condition resolved without intervention: six consecutive probes and a no-cache
+request all subsequently returned Wave 2 with the correct build SHA. No source
+defect and no Worker defect was found, and no cache setting was changed.
+
+## Desktop validation
+
+Validated live at 1440, 1280, 1024 and 768. At every width: twelve sections in
+the approved order, seventeen links, all boxed controls 46px and all editorial
+links at least 44px, zero fully-rounded controls, no resting rule on any
+editorial link, focus revealing the rule with a visible ring, no clipping, no
+overlap, no text inside a 16px gutter, no horizontal overflow. Section rhythm
+96 / 112 / 128. Grounds: one warm hero, nine paper, two green. Both elixir
+controls render as identical gold primaries.
+
+## Mobile validation
+
+Validated live at 430, 390, 375 and 320, as a hard release gate.
+
+Parity is exact rather than approximate: the rendered text of the main region
+measures **4594 characters at 1440 and 4594 at 320**, with identical occurrence
+counts for all thirteen action labels, the same seventeen destinations and the
+same three Journal entries. Zero elements hidden at any width, zero horizontal
+scroll containers, no mobile-only copy or control treatment. Section rhythm
+64 / 80 / 96. The Atelier heading remains complete, both elixirs remain equally
+visible, the Science invitation, Ritual hierarchy, Vessel editorial link,
+Concierge and closing invitation are all complete, and wrapped Journal titles
+expand to 71px rather than clipping.
+
+## Editorial-link interaction, measured live
+
+| Link type | Resting | Hover | Focus | Ring | Reflow |
+| --- | --- | --- | --- | --- | --- |
+| Ritual support link | absent | `rgb(20,84,60)` | `rgb(11,41,30)` | present | none |
+| Vessel reading link | absent | `rgb(20,84,60)` | `rgb(11,41,30)` | present | none |
+| Journal titles | absent | `rgb(20,84,60)` | `rgb(11,41,30)` | present | none |
+
+Real pointer hover, three separate targets: exactly one element carried a rule
+each time and it was the hovered one, with the previous hover cleared. The
+hovered Journal span measured 41px against its unhovered peer at 41px. Real
+keyboard tabbing ran Enter The Ritual, Explore your ritual, Read the refill
+note, Well-Aging Is Not Disappearing, each matching `:focus-visible`, each
+revealing the rule, each carrying the ring `rgb(250,250,248) 0 0 0 2px` plus
+`rgb(11,41,30) 0 0 0 4px`, each releasing the previous. Transitions were frozen
+in the live DOM for measurement only, because the preview pane does not
+composite frames; no source file and no transition duration was changed.
+
+## Copy and claims, measured live
+
+The Atelier heading renders exactly **Two elixirs. One considered philosophy.**
+Rendered em dashes: 0. En dashes: 0. Prohibited-language scan across all
+twenty-four listed terms on the live rendered page: **0 hits**. No urgency, no
+price, no cart, no badge, no unsupported refill claim. The cosmetic-claims
+disclaimer remains in section twelve.
+
+## Accessibility
+
+| URL | Mode | Accessibility | CLS |
+| --- | --- | ---: | ---: |
+| `/` | desktop | **100** | 0.0036 |
+| `/` | mobile | **100** | 0.0001 |
+| `/science` | desktop | **100** | 0.0000 |
+| Selected `/science` | desktop | **100** | 0.0000 |
+| `/inci` | desktop | **100** | 0.0000 |
+| Contextual `/inci` | desktop | **100** | 0.0000 |
+
+Zero failing accessibility audits on every URL. No contrast failure, no
+target-size failure, no duplicate ID, no broken ARIA. Visible focus throughout.
+No horizontal overflow at any of the eight widths.
+
+## Performance observations
+
+| Metric | Reviewed baseline | Live | Difference |
+| --- | ---: | ---: | ---: |
+| Homepage desktop Performance | 100 | **99** | -1 |
+| Homepage mobile Performance | 98 | **97** | -1 |
+| Desktop LCP | 0.7 s | **0.9 s** | +0.2 s |
+| Mobile LCP | 2.3 s | **2.5 s** | +0.2 s |
+| Desktop CLS | 0.0036 | **0.0036** | 0 |
+| Mobile CLS | 0.0001 | **0.0001** | 0 |
+| Accessibility, all six URLs | 100 | **100** | 0 |
+
+CLS matches the founder-reviewed reference exactly on both desktop and mobile.
+The Performance and LCP deltas are the expected cost of measuring across the
+real network rather than a localhost Worker.
+
+Ingredients returned **90** on its first live run. It was then re-measured three
+times and returned **100, 99, 99**, each with CLS 0 and total blocking time 0ms,
+and its contextual variant scored 100 in the same first pass. **No Ingredients
+source changed in this release** — the release diff touches zero files on that
+surface — so the single 90 was run-to-run network variance, not a regression.
+**No hotfix was made**, and none is warranted. This matches the behaviour
+recorded at the previous release, where Ingredients production performance was
+observed at 92 and later at 100 without any change to that route.
+
+## Source integrity
+
+The release diff against the previously deployed production source is six files:
+the homepage implementation, the homepage test suite, three Maison Wave 2
+strategy documents, and the inherited Science closeout documentation. No change
+to Science, Ingredients, products, product data, formulas, pricing, checkout,
+Shopify, Sanity, Supabase, focus-group logic, navigation, footer application
+code, dependencies, lockfile, environment configuration, Cloudflare
+configuration, DNS, Worker bindings or Worker traffic.
+
+## Rollback readiness
+
+The immediate rollback target `c44359b1-cbd7-443c-9439-f2fe84e916bb` and the
+second-level fallback `c25b8b8a-5a4a-44ea-8812-df0ccf619008` were both verified
+present after deployment. The procedure is a Wrangler rollback to the chosen
+version against `nfe-portal`, followed by reverification of the route matrix.
+**No rollback occurred.** No rollback condition was met at any point.
+
+## Release tag
+
+`nfe-maison-wave-2-homepage-continuity-2026-08-04`, annotated, following the
+established `nfe-<release>-<date>` convention used by every existing tag in this
+repository. It points at the production closeout documentation head, which
+carries the deployed application source `16ab538` as an ancestor. The annotation
+records the deployed application SHA, the production Worker, the release branch,
+accessibility, traffic and the rollback Worker.
+
+## Final production status
+
+NFE Maison Wave 2 homepage narrative continuity is live at 100% traffic on
+Worker version `3844a3a7-983e-409d-9ea0-d71e1b2e63b2`, serving application
+source `16ab5384938abb1dcb4ab46d72dbccf1da67efc0`. Accessibility is 100 on all
+six required URLs. Desktop and mobile were validated as equal experiences. The
+previous Worker is retained as an immediate rollback anchor.
