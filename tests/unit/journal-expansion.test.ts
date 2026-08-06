@@ -28,7 +28,9 @@ const IMAGE_DIR = '/images/journal/the-new-language-of-well-aging/'
 type ArticleEntry = {
   slug: string
   title: string
-  date: string
+  date: string | null
+  published?: boolean
+  mobileImage?: string
   author: string
   excerpt: string
   file?: string
@@ -159,11 +161,16 @@ describe('journal expansion: manifest and registry', () => {
     for (const slug of NEW_SLUGS) {
       const entry = bySlug(slug)
       assert.ok(entry, `${slug} missing`)
-      for (const key of ['title', 'date', 'author', 'excerpt', 'pillar'] as const) {
+      // `date` is checked separately below: null is a valid unpublished state.
+      for (const key of ['title', 'author', 'excerpt', 'pillar'] as const) {
         assert.ok(entry[key], `${slug} is missing required field ${key}`)
       }
       assert.equal(typeof entry.readingMinutes, 'number', `${slug} readingMinutes`)
-      assert.match(entry.date, /^\d{4}-\d{2}-\d{2}$/, `${slug} date format`)
+      // The date is null until the founder supplies a publication date; when
+      // present it must use the Journal's existing YYYY-MM-DD format.
+      if (entry.date !== null) {
+        assert.match(entry.date, /^\d{4}-\d{2}-\d{2}$/, `${slug} date format`)
+      }
     }
   })
 
@@ -173,11 +180,18 @@ describe('journal expansion: manifest and registry', () => {
         .filter((entry) => !NEW_SLUGS.includes(entry.slug as never))
         .flatMap((entry) => Object.keys(entry))
     )
+    // Added to the shared article model for these two essays, and declared on
+    // ArticleMeta so every article may use them.
+    known.add('published')
+    known.add('mobileImage')
     for (const slug of NEW_SLUGS) {
       for (const key of Object.keys(bySlug(slug) as object)) {
         assert.ok(known.has(key), `${slug} introduces unsupported field "${key}"`)
       }
     }
+    const model = readFileSync(join(root, 'src', 'lib', 'articles.ts'), 'utf8')
+    assert.match(model, /published\?: boolean/, 'published is not on the model')
+    assert.match(model, /mobileImage\?: string/, 'mobileImage is not on the model')
   })
 
   it('points every related slug at a real article', () => {
@@ -218,27 +232,25 @@ describe('journal expansion: manifest and registry', () => {
   })
 })
 
-describe('journal expansion: unpublished until founder approval', () => {
-  it('keeps both essays off every Journal index surface', () => {
+describe('journal expansion: held unpublished until a date is supplied', () => {
+  it('withholds both essays from every surface via the publication flag', () => {
     for (const slug of NEW_SLUGS) {
       const entry = bySlug(slug)
-      assert.equal(
-        entry?.editorialTier,
-        undefined,
-        `${slug} carries an editorialTier and would enter a Journal count`
-      )
+      assert.equal(entry?.published, false, `${slug} is not held unpublished`)
+      assert.equal(entry?.date, null, `${slug} carries a date before authorization`)
       assert.notEqual(entry?.featured, true, `${slug} is flagged featured`)
     }
   })
 
-  it('leaves the rendered primary and legacy counts untouched', () => {
+  it('classifies both as supporting notes, never as primary essays', () => {
     const primary = entries.filter((e) => e.editorialTier === 'primary').length
-    const legacy = entries.filter((e) => e.editorialTier === 'legacy').length
     assert.equal(primary, 9, 'primary essay count changed')
-    assert.equal(legacy, 7, 'supporting note count changed')
+    for (const slug of NEW_SLUGS) {
+      assert.equal(bySlug(slug)?.editorialTier, 'legacy', `${slug} tier`)
+    }
   })
 
-  it('adds neither essay to the well-aging series or supporting notes', () => {
+  it('places both in supporting notes and neither in the primary series', () => {
     const series = readFileSync(
       join(root, 'src', 'content', 'articles', 'well-aging-series.ts'),
       'utf8'
@@ -249,7 +261,7 @@ describe('journal expansion: unpublished until founder approval', () => {
     )
     for (const slug of NEW_SLUGS) {
       assert.ok(!series.includes(slug), `${slug} was added to the series config`)
-      assert.ok(!notes.includes(slug), `${slug} was added to supporting notes`)
+      assert.ok(notes.includes(slug), `${slug} is missing from supporting notes`)
     }
   })
 })
@@ -308,13 +320,14 @@ describe('journal expansion: editorial requirements', () => {
     )
   })
 
-  it('still carries the Zoe Saldana reference, which needs attribution review', () => {
+  it('carries no celebrity attribution and no invented citation', () => {
+    // The founder directed removal of the named reference rather than sourcing
+    // it; the underlying idea stays, the borrowed authority does not.
     const body = readFileSync(mdxPath('the-scent-of-feeling-beautiful.mdx'), 'utf8')
-    assert.match(body, /Zoe Saldañ?a/)
-    // no invented citation may appear until the source is confirmed
+    assert.ok(!/Zoe\s+Saldañ?a/i.test(body), 'the celebrity name is still present')
     assert.ok(
       !/\]\(https?:\/\//.test(body),
-      'an external citation URL was added before attribution approval'
+      'an external citation URL was added'
     )
   })
 
