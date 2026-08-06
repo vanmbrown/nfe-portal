@@ -6,9 +6,12 @@ export function ArticleRelatedLinks({ slug }: { slug: string }) {
 
   return (
     <section className="mt-16 border-t border-nfe-green-900/10 pt-10">
-      <p className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
+      {/* A real h2: this labels a section of the page, so the card headings
+          below land at h3 without skipping a level, including on articles whose
+          body carries no subheadings. Visual styling is unchanged. */}
+      <h2 className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
         Related Reading
-      </p>
+      </h2>
       <div className="mt-6 grid gap-4">
         {related.map((article) => (
           <Link
@@ -40,9 +43,9 @@ export function ArticleMaisonLinks() {
 
   return (
     <section className="mt-12 rounded-[1.5rem] border border-nfe-green-900/10 bg-nfe-green-900/[0.03] p-6">
-      <p className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
+      <h2 className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
         Continue Inside the Maison
-      </p>
+      </h2>
       <div className="mt-4 flex flex-wrap gap-3">
         {links.map((link) => (
           <Link

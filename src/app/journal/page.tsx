@@ -97,13 +97,13 @@ export default function JournalLandingPage() {
                     href={`/articles/${article.slug}`}
                     className="transition hover:text-nfe-green-700"
                   >
-                    <span className="text-[0.68rem] uppercase tracking-[0.22em] text-nfe-ink/45">
+                    <span className="text-[0.68rem] uppercase tracking-[0.22em] text-nfe-ink/65">
                       {label}
                     </span>
                     <span className="mx-2 text-nfe-ink/25">·</span>
                     <span>{article.title}</span>
                   </Link>
-                  <span className="mt-1 block text-xs text-nfe-ink/45">
+                  <span className="mt-1 block text-xs text-nfe-ink/65">
                     {themeEyebrow}
                   </span>
                 </li>
