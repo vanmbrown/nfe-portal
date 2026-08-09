@@ -1,14 +1,9 @@
 import Link from 'next/link'
 
-const navItems = [
-  { href: '/our-story', label: 'Philosophy' },
-  { href: '/shop', label: 'The Atelier' },
-  { href: '/science', label: 'Science' },
-  { href: '/ritual', label: 'Ritual' },
-  { href: '/journal', label: 'Journal' },
-  { href: '/concierge', label: 'Concierge' },
-]
+import { navItems } from './navItems'
 
+/** The navigation row from md upward. Below md the drawer in MobileNav
+ *  carries the same list; both read it from ./navItems. */
 export default function PrimaryNav() {
   return (
     <nav role="navigation" aria-label="Main navigation">
@@ -17,7 +12,7 @@ export default function PrimaryNav() {
           <li key={item.href}>
             <Link
               href={item.href}
-              className="hover:text-nfe-gold focus:text-nfe-gold transition-colors duration-motion-base"
+              className="transition-colors duration-200 hover:text-nfe-gold focus:text-nfe-gold"
             >
               {item.label}
             </Link>
@@ -27,5 +22,3 @@ export default function PrimaryNav() {
     </nav>
   )
 }
-
-
