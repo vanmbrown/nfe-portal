@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { NFE_EVENT_NAMES } from '@/lib/analytics/events'
 import { trackNfeEvent } from '@/lib/analytics/track'
@@ -430,6 +430,11 @@ export default function SkinRitualQuiz() {
   const [hasStarted, setHasStarted] = useState(false)
   const [showResult, setShowResult] = useState(false)
 
+  const resultRef = useRef<HTMLDivElement>(null)
+  const questionHeadingRef = useRef<HTMLHeadingElement>(null)
+  const wasShowingResult = useRef(false)
+  const returnToFirstQuestion = useRef(false)
+
   const currentQuestion = QUESTIONS[step]
   const selectedAnswer = answers[currentQuestion.id]
   const progress = Math.round(((step + 1) / QUESTIONS.length) * 100)
@@ -494,11 +499,25 @@ export default function SkinRitualQuiz() {
   }
 
   function resetQuiz() {
+    returnToFirstQuestion.current = true
     setAnswers({})
     setStep(0)
     setHasStarted(false)
     setShowResult(false)
   }
+
+  // Move focus deliberately when the panel swaps, in an effect so it runs after
+  // the new markup exists. Into the recommendation when it appears; back to the
+  // first question when the visitor retakes.
+  useEffect(() => {
+    if (showResult && !wasShowingResult.current) {
+      resultRef.current?.focus()
+    } else if (!showResult && wasShowingResult.current && returnToFirstQuestion.current) {
+      questionHeadingRef.current?.focus()
+      returnToFirstQuestion.current = false
+    }
+    wasShowingResult.current = showResult
+  }, [showResult])
 
   function trackCta(label: string, destination: string) {
     trackNfeEvent({
@@ -550,7 +569,7 @@ export default function SkinRitualQuiz() {
                 guidance, a clinician is the right path.
               </p>
             </div>
-            <div className="mt-8 rounded-2xl border border-nfe-green-100 bg-nfe-paper p-4">
+            <div className="mt-8 rounded-2xl border border-nfe-green-900/10 bg-nfe-paper p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-nfe-green-700">
                 Progress
               </p>
@@ -568,9 +587,13 @@ export default function SkinRitualQuiz() {
             </div>
           </aside>
 
-          <div className="rounded-3xl border border-nfe-green-100 bg-white p-6 shadow-sm md:p-8">
+          <div className="rounded-3xl border border-nfe-green-900/10 bg-white p-6 shadow-sm md:p-8">
             {showResult ? (
-              <div>
+              // Focus lands here when the question interface is replaced, so
+              // the change of state is understood rather than inferred. Focus
+              // management alone, deliberately: adding a live region as well
+              // would announce the recommendation twice.
+              <div ref={resultRef} tabIndex={-1} className="focus:outline-none">
                 <p className="mb-4 text-xs uppercase tracking-[0.3em] text-nfe-green-700">
                   {recommendation.eyebrow}
                 </p>
@@ -584,7 +607,7 @@ export default function SkinRitualQuiz() {
                   {recommendation.ritualNotes.map((note) => (
                     <li
                       key={note}
-                      className="rounded-2xl border border-nfe-green-100 bg-nfe-paper p-4 leading-7 text-nfe-muted"
+                      className="rounded-2xl border border-nfe-green-900/10 bg-nfe-paper p-4 leading-7 text-nfe-muted"
                     >
                       {note}
                     </li>
@@ -625,50 +648,74 @@ export default function SkinRitualQuiz() {
               </div>
             ) : (
               <div>
-                <p className="mb-4 text-xs uppercase tracking-[0.3em] text-nfe-green-700">
-                  {currentQuestion.eyebrow}
-                </p>
-                <h2 className="font-serif text-3xl leading-tight text-nfe-green-900 md:text-5xl">
-                  {currentQuestion.title}
-                </h2>
-                <p className="mt-4 max-w-3xl leading-7 text-nfe-muted">
-                  {currentQuestion.helper}
-                </p>
-                <div className="mt-8 grid gap-3" role="radiogroup">
-                  {currentQuestion.options.map((option) => {
-                    const isSelected = selectedAnswer === option.value
+                {/* A real fieldset with a real legend, and real radios beneath
+                    it. This was a div with role="radiogroup" holding buttons
+                    with role="radio" and aria-checked, which announces a radio
+                    group and then supplies none of the keyboard behaviour one
+                    provides: arrow keys did nothing. Native inputs are visually
+                    hidden and the labels carry the existing card treatment, so
+                    the appearance is unchanged and the mechanics come from the
+                    browser. */}
+                <fieldset className="border-0 p-0">
+                  <legend className="w-full p-0">
+                    <span className="mb-4 block text-xs uppercase tracking-[0.3em] text-nfe-green-700">
+                      {currentQuestion.eyebrow}
+                    </span>
+                    <h2
+                      ref={questionHeadingRef}
+                      tabIndex={-1}
+                      className="font-serif text-3xl leading-tight text-nfe-green-900 focus:outline-none md:text-5xl"
+                    >
+                      {currentQuestion.title}
+                    </h2>
+                  </legend>
+                  <p className="mt-4 max-w-3xl leading-7 text-nfe-muted">
+                    {currentQuestion.helper}
+                  </p>
+                  <div className="mt-8 grid gap-3">
+                    {currentQuestion.options.map((option) => {
+                      const isSelected = selectedAnswer === option.value
+                      const inputId = `${currentQuestion.id}-${option.value}`
 
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        role="radio"
-                        aria-checked={isSelected}
-                        onClick={() =>
-                          selectAnswer(currentQuestion.id, option.value)
-                        }
-                        className={`rounded-2xl border p-4 text-left transition-colors ${
-                          isSelected
-                            ? 'border-nfe-green-900 bg-nfe-green-900 text-nfe-paper'
-                            : 'border-nfe-green-100 bg-nfe-paper text-nfe-ink hover:border-nfe-green-700'
-                        }`}
-                      >
-                        <span className="block font-medium">{option.label}</span>
-                        {option.note ? (
-                          <span
-                            className={`mt-2 block text-sm leading-6 ${
+                      return (
+                        <div key={option.value} className="contents">
+                          <input
+                            type="radio"
+                            id={inputId}
+                            name={currentQuestion.id}
+                            value={option.value}
+                            checked={isSelected}
+                            onChange={() =>
+                              selectAnswer(currentQuestion.id, option.value)
+                            }
+                            className="peer sr-only"
+                          />
+                          <label
+                            htmlFor={inputId}
+                            className={`cursor-pointer rounded-2xl border p-4 text-left transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[color:var(--focus-ring-on-light)] ${
                               isSelected
-                                ? 'text-nfe-paper/80'
-                                : 'text-nfe-muted'
+                                ? 'border-nfe-green-900 bg-nfe-green-900 text-nfe-paper'
+                                : 'border-nfe-green-900/50 bg-nfe-paper text-nfe-ink hover:border-nfe-green-700'
                             }`}
                           >
-                            {option.note}
-                          </span>
-                        ) : null}
-                      </button>
-                    )
-                  })}
-                </div>
+                            <span className="block font-medium">{option.label}</span>
+                            {option.note ? (
+                              <span
+                                className={`mt-2 block text-sm leading-6 ${
+                                  isSelected
+                                    ? 'text-nfe-paper/80'
+                                    : 'text-nfe-muted'
+                                }`}
+                              >
+                                {option.note}
+                              </span>
+                            ) : null}
+                          </label>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </fieldset>
                 <div className="mt-8 flex flex-wrap items-center gap-4">
                   <button
                     type="button"
