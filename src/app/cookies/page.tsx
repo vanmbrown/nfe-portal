@@ -54,6 +54,26 @@ export default function CookiesPage() {
                   If you decline analytics cookies, no tracking scripts are loaded.
                 </p>
               </div>
+
+              <div>
+                <h3 className="font-semibold text-nfe-ink mb-2">
+                  Referral context (consent required)
+                </h3>
+                <p className="text-nfe-muted leading-relaxed text-sm">
+                  If you accept, we keep a single record in your browser&apos;s session
+                  storage, under the key <code>nfe.attribution.v1</code>, noting how you
+                  reached us: the referring site, the page you arrived on, and any campaign
+                  parameters in the link you followed. It helps us understand which
+                  conversations bring people to NFE. It holds nothing about you, and it is
+                  discarded when you close the tab.
+                </p>
+                <p className="text-nfe-muted leading-relaxed text-sm mt-2">
+                  We keep it only from the moment you accept. Before you decide, and if you
+                  decline, nothing is recorded and nothing is sent with a Founder Access or
+                  Concierge enquiry. If you later withdraw consent, anything already held is
+                  deleted. We would rather lose the record than keep one you did not agree to.
+                </p>
+              </div>
             </div>
           </section>
 

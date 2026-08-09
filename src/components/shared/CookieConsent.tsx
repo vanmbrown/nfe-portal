@@ -3,6 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { setAnalyticsConsent, trackConsentGiven, trackConsentDenied } from '@/lib/analytics';
+import {
+  clearStoredAttribution,
+  preserveAttributionFromLocation,
+} from '@/lib/analytics/utm';
 
 interface CookieConsentProps {
   onConsentChange?: (consent: boolean) => void;
@@ -31,6 +35,11 @@ export function CookieConsent({ onConsentChange }: CookieConsentProps) {
       // Enable analytics
       setAnalyticsConsent(true);
       trackConsentGiven();
+
+      // Capture begins here, not on arrival. Attribution is deliberately
+      // forward-looking: whatever brought this visitor to the site is only
+      // recorded once they have agreed to it.
+      preserveAttributionFromLocation();
       
       // Hide banner
       setIsVisible(false);
@@ -55,6 +64,10 @@ export function CookieConsent({ onConsentChange }: CookieConsentProps) {
       // Disable analytics
       setAnalyticsConsent(false);
       trackConsentDenied();
+
+      // Withdrawal is retrospective: anything captured under an earlier
+      // acceptance is forgotten rather than merely left unread.
+      clearStoredAttribution();
       
       // Hide banner
       setIsVisible(false);
