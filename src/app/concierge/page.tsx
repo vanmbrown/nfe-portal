@@ -166,7 +166,11 @@ export default function ConciergePage() {
                 key={step.title}
                 className="rounded-3xl bg-nfe-paper p-8 shadow-sm"
               >
-                <p className="mb-4 text-xs uppercase tracking-[0.25em] text-nfe-gold">
+                {/* Gold on paper measures 2.22:1, which fails at this size.
+                    The ratified on-light accent keeps the same warm character
+                    at 5.53:1. Gold still reads on the deep greens elsewhere on
+                    this page and is unchanged there. */}
+                <p className="mb-4 text-xs uppercase tracking-[0.25em] text-maison-accent-on-light">
                   Step {index + 1}
                 </p>
                 <h3 className="font-serif text-2xl text-nfe-green-900">
