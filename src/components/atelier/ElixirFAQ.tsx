@@ -39,7 +39,7 @@ export function ElixirFAQ({
                 </span>
               </button>
               {openIndex === index ? (
-                <div className="pb-6 leading-7 text-nfe-ink/72">{item.a}</div>
+                <div className="pb-6 leading-7 text-nfe-ink/70">{item.a}</div>
               ) : null}
             </div>
           ))}

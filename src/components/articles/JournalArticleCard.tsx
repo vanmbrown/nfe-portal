@@ -73,7 +73,7 @@ export function JournalArticleCard({
         </h3>
 
         <p
-          className={`mt-4 leading-7 text-nfe-ink/72 ${
+          className={`mt-4 leading-7 text-nfe-ink/70 ${
             featured ? 'text-lg' : 'text-base'
           }`}
         >
@@ -143,7 +143,7 @@ export function JournalMaisonLinks() {
           <p className="text-xs uppercase tracking-[0.24em] text-nfe-green-700">
             {link.label}
           </p>
-          <p className="mt-3 text-sm leading-6 text-nfe-ink/72">{link.body}</p>
+          <p className="mt-3 text-sm leading-6 text-nfe-ink/70">{link.body}</p>
         </Link>
       ))}
     </div>

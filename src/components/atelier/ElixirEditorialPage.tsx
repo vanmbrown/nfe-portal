@@ -95,7 +95,7 @@ export function ElixirEditorialPage({
             <h2 className="font-serif text-3xl text-nfe-green-900 md:text-4xl">
               A dossier, not a discount shelf.
             </h2>
-            <p className="mt-6 leading-8 text-nfe-ink/72">
+            <p className="mt-6 leading-8 text-nfe-ink/70">
               {editorial.formulationThesis}
             </p>
           </div>
@@ -107,7 +107,7 @@ export function ElixirEditorialPage({
               {editorial.whoItIsFor.map((item) => (
                 <li
                   key={item}
-                  className="rounded-[1.25rem] border border-nfe-green-900/10 bg-white/70 p-5 leading-7 text-nfe-ink/72"
+                  className="rounded-[1.25rem] border border-nfe-green-900/10 bg-white/70 p-5 leading-7 text-nfe-ink/70"
                 >
                   {item}
                 </li>
@@ -123,13 +123,13 @@ export function ElixirEditorialPage({
             <p className="mb-3 text-xs uppercase tracking-[0.28em] text-nfe-green-700">
               Texture and Finish
             </p>
-            <p className="leading-8 text-nfe-ink/72">{editorial.textureFinish}</p>
+            <p className="leading-8 text-nfe-ink/70">{editorial.textureFinish}</p>
           </div>
           <div>
             <p className="mb-3 text-xs uppercase tracking-[0.28em] text-nfe-green-700">
               Ritual Guidance
             </p>
-            <p className="leading-8 text-nfe-ink/72">{editorial.ritualGuidance}</p>
+            <p className="leading-8 text-nfe-ink/70">{editorial.ritualGuidance}</p>
           </div>
         </div>
       </section>
@@ -162,7 +162,7 @@ export function ElixirEditorialPage({
             {product.benefits.map((benefit) => (
               <li
                 key={benefit}
-                className="rounded-[1.25rem] border border-nfe-green-900/10 bg-nfe-paper p-5 leading-7 text-nfe-ink/72"
+                className="rounded-[1.25rem] border border-nfe-green-900/10 bg-nfe-paper p-5 leading-7 text-nfe-ink/70"
               >
                 {benefit}
               </li>
@@ -228,7 +228,7 @@ export function ElixirEditorialPage({
                 <h3 className="mt-2 font-serif text-2xl text-nfe-green-900">
                   {article.title}
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-nfe-ink/68">
+                <p className="mt-3 text-sm leading-6 text-nfe-ink/70">
                   {article.excerpt}
                 </p>
               </Link>
@@ -245,7 +245,7 @@ export function ElixirEditorialPage({
           <h2 className="mt-4 font-serif text-3xl text-nfe-green-900 md:text-4xl">
             Ordering is not live yet.
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl leading-7 text-nfe-ink/72">
+          <p className="mx-auto mt-6 max-w-2xl leading-7 text-nfe-ink/70">
             Checkout remains inactive. Founder Access is the primary conversion
             path while The Atelier stays open as an editorial product room.
           </p>

@@ -45,7 +45,7 @@ export default function WellAgingPillarPage() {
           <p className="mt-8 max-w-3xl text-lg leading-8 text-nfe-paper/85 md:text-xl">
             {WELL_AGING_SERIES_DEK}
           </p>
-          <p className="mt-6 max-w-3xl text-base leading-7 text-nfe-paper/72">
+          <p className="mt-6 max-w-3xl text-base leading-7 text-nfe-paper/70">
             Well-aging requires a different vocabulary. Not reversal culture
             softened into luxury language. For NFE, well-aging means care that
             supports skin that has lived: skin with memory, melanin, texture,

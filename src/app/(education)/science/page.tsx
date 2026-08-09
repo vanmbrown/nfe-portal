@@ -241,12 +241,12 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
             {formulationPrinciples.map((principle) => (
               <div
                 key={principle.id}
-                className="grid gap-4 border-t border-nfe-green-900/12 pt-8 md:grid-cols-[0.8fr_1.2fr] md:gap-10"
+                className="grid gap-4 border-t border-nfe-green-900/10 pt-8 md:grid-cols-[0.8fr_1.2fr] md:gap-10"
               >
                 <h3 className="font-primary text-2xl text-nfe-green-900 md:text-3xl">
                   {principle.title}
                 </h3>
-                <p className="text-lg leading-8 text-nfe-ink/72">
+                <p className="text-lg leading-8 text-nfe-ink/70">
                   {principle.body}
                 </p>
               </div>
@@ -264,7 +264,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <h2 className="mt-5 max-w-2xl font-primary text-3xl leading-tight text-nfe-green-900 md:text-5xl">
             Families, not a catalogue.
           </h2>
-          <p className="mt-8 max-w-2xl text-lg leading-8 text-nfe-ink/72">
+          <p className="mt-8 max-w-2xl text-lg leading-8 text-nfe-ink/70">
             NFE formulates with families that work in relation to each other.
             These describe the character of that thinking. The specifics of any
             single ingredient, and what is in each formula, live on Ingredients.
@@ -273,12 +273,12 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
             {INGREDIENT_FAMILIES.map((family) => (
               <div
                 key={family.id}
-                className="border-t border-nfe-green-900/12 pt-6"
+                className="border-t border-nfe-green-900/10 pt-6"
               >
                 <dt className="font-primary text-xl text-nfe-green-900">
                   {FAMILY_LABELS[family.id].label}
                 </dt>
-                <dd className="mt-3 leading-7 text-nfe-ink/72">
+                <dd className="mt-3 leading-7 text-nfe-ink/70">
                   {family.role}
                   {/* /55 composited to #7c7c7c on this white ground — 4.17:1,
                       short of AA. /70 clears it. */}
@@ -313,12 +313,12 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
             {proof.stages.map((stage) => (
               <div
                 key={stage.id}
-                className="grid gap-4 border-t border-nfe-green-900/12 pt-8 md:grid-cols-[0.8fr_1.2fr] md:gap-10"
+                className="grid gap-4 border-t border-nfe-green-900/10 pt-8 md:grid-cols-[0.8fr_1.2fr] md:gap-10"
               >
                 <h3 className="font-primary text-2xl text-nfe-green-900 md:text-3xl">
                   {stage.title}
                 </h3>
-                <p className="text-lg leading-8 text-nfe-ink/72">{stage.body}</p>
+                <p className="text-lg leading-8 text-nfe-ink/70">{stage.body}</p>
               </div>
             ))}
           </div>
@@ -349,7 +349,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <h2 className="mt-5 font-primary text-3xl leading-tight text-nfe-green-900 md:text-4xl">
             {productContext.heading}
           </h2>
-          <p className="mt-8 text-lg leading-8 text-nfe-ink/72">
+          <p className="mt-8 text-lg leading-8 text-nfe-ink/70">
             {productContext.body}
           </p>
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
@@ -374,7 +374,7 @@ export default async function SciencePage({ searchParams }: SciencePageProps) {
           <h2 className="mt-5 font-primary text-3xl leading-tight text-nfe-green-900 md:text-4xl">
             {concierge.heading}
           </h2>
-          <p className="mt-6 text-lg leading-8 text-nfe-ink/72">
+          <p className="mt-6 text-lg leading-8 text-nfe-ink/70">
             {concierge.body}
           </p>
           <p className="mt-8">

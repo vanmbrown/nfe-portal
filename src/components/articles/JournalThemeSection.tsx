@@ -29,7 +29,7 @@ export function JournalSupportingNoteCard({
   return (
     <Link
       href={`/articles/${article.slug}`}
-      className={`group overflow-hidden rounded-[1.25rem] border border-nfe-green-900/8 bg-white/60 transition hover:border-nfe-gold/25 hover:bg-white ${
+      className={`group overflow-hidden rounded-[1.25rem] border border-nfe-green-900/10 bg-white/60 transition hover:border-nfe-gold/25 hover:bg-white ${
         cardImage ? 'flex gap-4 p-4 md:p-5' : 'block p-5 md:p-6'
       }`}
     >
@@ -58,7 +58,7 @@ export function JournalSupportingNoteCard({
         <h3 className="mt-3 font-serif text-xl leading-snug text-nfe-green-900/90 transition group-hover:text-nfe-green-700">
           {article.title}
         </h3>
-        <p className="mt-3 line-clamp-2 text-sm leading-6 text-nfe-ink/58">
+        <p className="mt-3 line-clamp-2 text-sm leading-6 text-nfe-ink/60">
           {article.excerpt}
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-nfe-ink/65">
@@ -113,7 +113,7 @@ export function JournalThemeSection({
 
       {supportingNotes.length > 0 ? (
         <div
-          className={`${primaryArticles.length > 0 ? 'mt-8 border-t border-nfe-green-900/8 pt-8' : ''}`}
+          className={`${primaryArticles.length > 0 ? 'mt-8 border-t border-nfe-green-900/10 pt-8' : ''}`}
         >
           <p className="mb-4 text-xs uppercase tracking-[0.28em] text-nfe-ink/65">
             Supporting Editorial Notes

@@ -179,7 +179,7 @@ export function FounderAccessForm() {
         <h2 className="mt-4 font-serif text-3xl text-nfe-green-900 md:text-4xl">
           Request received.
         </h2>
-        <p className="mt-6 leading-8 text-nfe-ink/72">
+        <p className="mt-6 leading-8 text-nfe-ink/70">
           {FOUNDER_ACCESS_SUCCESS_MESSAGE}
         </p>
         <div className="mt-8">
@@ -206,7 +206,7 @@ export function FounderAccessForm() {
       <h2 className="mt-4 font-serif text-3xl text-nfe-green-900 md:text-4xl">
         Request Founder Access.
       </h2>
-      <p className="mt-6 leading-8 text-nfe-ink/72">
+      <p className="mt-6 leading-8 text-nfe-ink/70">
         Join the private Founder Access list for release updates, founder notes,
         and early invitation into NFE&apos;s first Founder&apos;s Edition
         allocation.
@@ -306,7 +306,7 @@ export function FounderAccessForm() {
           {FOUNDER_ACCESS_SKIN_INTERESTS.map((interest) => (
             <label
               key={interest}
-              className="flex items-start gap-3 rounded-xl border border-nfe-green-900/10 bg-nfe-paper px-4 py-3 text-sm leading-6 text-nfe-ink/72"
+              className="flex items-start gap-3 rounded-xl border border-nfe-green-900/10 bg-nfe-paper px-4 py-3 text-sm leading-6 text-nfe-ink/70"
             >
               <input
                 type="checkbox"
@@ -367,7 +367,7 @@ export function FounderAccessForm() {
       </div>
 
       <div className="mt-8 space-y-4">
-        <label className="flex items-start gap-3 text-sm leading-6 text-nfe-ink/72">
+        <label className="flex items-start gap-3 text-sm leading-6 text-nfe-ink/70">
           <input
             type="checkbox"
             checked={privacyAccepted}
@@ -383,7 +383,7 @@ export function FounderAccessForm() {
             . NFE provides cosmetic ritual guidance only, not medical advice.
           </span>
         </label>
-        <label className="flex items-start gap-3 text-sm leading-6 text-nfe-ink/72">
+        <label className="flex items-start gap-3 text-sm leading-6 text-nfe-ink/70">
           <input
             type="checkbox"
             checked={newsletterOptIn}

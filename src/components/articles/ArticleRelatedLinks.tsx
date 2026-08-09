@@ -23,7 +23,7 @@ export function ArticleRelatedLinks({ slug }: { slug: string }) {
               {getPillarLabel(article.pillar)}
             </p>
             <h3 className="mt-2 font-serif text-2xl text-nfe-green-900">{article.title}</h3>
-            <p className="mt-3 text-sm leading-6 text-nfe-ink/72">{article.excerpt}</p>
+            <p className="mt-3 text-sm leading-6 text-nfe-ink/70">{article.excerpt}</p>
           </Link>
         ))}
       </div>

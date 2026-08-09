@@ -51,7 +51,7 @@ export default function AtelierPage() {
           <h2 className="font-serif text-3xl text-nfe-green-900 md:text-4xl">
             Fewer products. More complete rituals.
           </h2>
-          <p className="mt-6 leading-8 text-nfe-ink/72">
+          <p className="mt-6 leading-8 text-nfe-ink/70">
             NFE is intentionally restrained. Face Elixir and Body Elixir are
             designed as complete formulas, not steps in an overcrowded routine.
             The Atelier exists to study them with the same editorial calm as the
@@ -97,7 +97,7 @@ export default function AtelierPage() {
                     <h3 className="mt-3 font-serif text-3xl text-nfe-green-900">
                       {product.title}
                     </h3>
-                    <p className="mt-4 leading-7 text-nfe-ink/72">
+                    <p className="mt-4 leading-7 text-nfe-ink/70">
                       {product.short_description}
                     </p>
                     <Link
@@ -122,7 +122,7 @@ export default function AtelierPage() {
           <h2 className="mt-4 max-w-3xl font-serif text-3xl text-nfe-green-900 md:text-4xl">
             Face and body as one editorial house.
           </h2>
-          <p className="mt-6 max-w-3xl leading-8 text-nfe-ink/72">
+          <p className="mt-6 max-w-3xl leading-8 text-nfe-ink/70">
             The Founder&apos;s Set is a future ritual pairing, not a live bundle.
             Explore each elixir on its own first, then use the Skin Ritual Quiz
             or Discovery Ritual pathway when you want guidance on where to begin.
@@ -147,7 +147,7 @@ export default function AtelierPage() {
             <h2 className="font-serif text-3xl text-nfe-green-900 md:text-4xl">
               The first experience when ordering opens.
             </h2>
-            <p className="mt-6 leading-8 text-nfe-ink/72">
+            <p className="mt-6 leading-8 text-nfe-ink/70">
               Discovery Ritual is the future first-purchase pathway: a measured
               introduction to NFE before full-size commitment. Commerce is not
               live yet, but the experience is being prepared with care.
@@ -163,7 +163,7 @@ export default function AtelierPage() {
             <h2 className="font-serif text-3xl text-nfe-green-900 md:text-4xl">
               Refill culture, quietly considered.
             </h2>
-            <p className="mt-6 leading-8 text-nfe-ink/72">
+            <p className="mt-6 leading-8 text-nfe-ink/70">
               NFE is building toward fewer, better objects and refill-minded
               luxury. The vessel story is editorial for now, not a live refill
               checkout flow.
@@ -183,7 +183,7 @@ export default function AtelierPage() {
           <p className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
             Pre-Commerce
           </p>
-          <p className="mx-auto mt-4 max-w-2xl leading-7 text-nfe-ink/72">
+          <p className="mx-auto mt-4 max-w-2xl leading-7 text-nfe-ink/70">
             Checkout is inactive. Join Founder Access for launch notes and early
             ritual guidance while The Atelier remains open for study.
           </p>

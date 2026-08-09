@@ -140,7 +140,7 @@ export default async function ArticlePage({ params }: Props) {
           </Link>
 
           {!primary ? (
-            <div className="mt-6 rounded-[1.25rem] border border-nfe-paper/15 bg-nfe-paper/5 px-5 py-4 text-sm leading-6 text-nfe-paper/78">
+            <div className="mt-6 rounded-[1.25rem] border border-nfe-paper/15 bg-nfe-paper/5 px-5 py-4 text-sm leading-6 text-nfe-paper/80">
               This supporting editorial note remains part of the NFE Journal.
               For the primary series, begin with{' '}
               <Link
@@ -162,7 +162,7 @@ export default async function ArticlePage({ params }: Props) {
           </h1>
 
           {meta.excerpt ? (
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-nfe-paper/82 md:text-xl">
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-nfe-paper/80 md:text-xl">
               {meta.excerpt}
             </p>
           ) : null}

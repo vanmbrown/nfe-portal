@@ -81,7 +81,7 @@ export default function JournalLandingPage() {
           <p className="mt-6 max-w-3xl text-lg leading-8 text-nfe-ink/75">
             {WELL_AGING_SERIES_DEK}
           </p>
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-nfe-ink/58">
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-nfe-ink/60">
             {primaryCount} primary essays anchor the Journal. {legacyCount} earlier
             notes remain part of the house, illustrated where available and woven
             into the themes below as supporting editorial reading.
@@ -90,7 +90,7 @@ export default function JournalLandingPage() {
             <p className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
               Supporting Editorial Notes · {legacyCount}
             </p>
-            <ul className="mt-4 columns-1 gap-x-8 text-sm leading-7 text-nfe-ink/68 sm:columns-2 lg:columns-3">
+            <ul className="mt-4 columns-1 gap-x-8 text-sm leading-7 text-nfe-ink/70 sm:columns-2 lg:columns-3">
               {supportingNotes.map(({ article, label, themeEyebrow }) => (
                 <li key={article.slug} className="mb-2 break-inside-avoid">
                   <Link
@@ -181,7 +181,7 @@ export default function JournalLandingPage() {
           <p className="text-xs uppercase tracking-[0.28em] text-nfe-green-700">
             Editorial Note
           </p>
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-nfe-ink/72">
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-nfe-ink/70">
             NFE Journal content is educational and cosmetic in nature. It does not
             diagnose, treat, cure, or prevent disease. Results and experiences vary.
             The primary editorial experience centers on {primaryCount} essays in{' '}

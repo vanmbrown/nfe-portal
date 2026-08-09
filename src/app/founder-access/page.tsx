@@ -42,17 +42,17 @@ export default function FounderAccessPage() {
         <h1 className="mx-auto max-w-4xl font-serif text-4xl leading-tight text-nfe-green-900 md:text-6xl">
           The first chapter of NFE, released with intention.
         </h1>
-        <p className="mx-auto mt-8 max-w-3xl text-lg leading-8 text-nfe-ink/72 md:text-xl">
+        <p className="mx-auto mt-8 max-w-3xl text-lg leading-8 text-nfe-ink/70 md:text-xl">
           A limited first release of founder-developed skincare for mature,
           melanated skin.
         </p>
-        <p className="mx-auto mt-6 max-w-3xl leading-8 text-nfe-ink/68">
+        <p className="mx-auto mt-6 max-w-3xl leading-8 text-nfe-ink/70">
           NFE began as Vanessa&apos;s personal solution after years of searching
           for skincare that could support skin through dryness, uneven-looking
           tone, texture changes, and barrier stress without asking mature skin to
           perform youth.
         </p>
-        <p className="mx-auto mt-6 max-w-3xl leading-8 text-nfe-ink/68">
+        <p className="mx-auto mt-6 max-w-3xl leading-8 text-nfe-ink/70">
           The first Founder&apos;s Edition release will be intentionally limited.
           Founder Access members will receive private updates, release
           information, and the opportunity to join NFE&apos;s first paid
@@ -83,7 +83,7 @@ export default function FounderAccessPage() {
                 <h2 className="font-serif text-2xl text-nfe-green-900 md:text-3xl">
                   {pillar.title}
                 </h2>
-                <p className="mt-4 leading-7 text-nfe-ink/72">{pillar.body}</p>
+                <p className="mt-4 leading-7 text-nfe-ink/70">{pillar.body}</p>
               </article>
             ))}
           </div>
@@ -95,7 +95,7 @@ export default function FounderAccessPage() {
           <p className="text-xs uppercase tracking-[0.28em] text-[#7a4f22]">
             Made for me. Shared with you.
           </p>
-          <div className="mt-6 space-y-6 leading-8 text-nfe-ink/72">
+          <div className="mt-6 space-y-6 leading-8 text-nfe-ink/70">
             <p>
               NFE was created from lived experience, not trend forecasting.
               Vanessa developed the Face Elixir after years of navigating mature
@@ -120,7 +120,7 @@ export default function FounderAccessPage() {
           <h2 className="font-serif text-3xl text-nfe-green-900 md:text-4xl">
             An early release, shown with intention.
           </h2>
-          <p className="mt-6 leading-8 text-nfe-ink/72">
+          <p className="mt-6 leading-8 text-nfe-ink/70">
             The Founder&apos;s Edition is an early, limited release of NFE Face
             Elixir before the official luxury launch. The formula is
             founder-developed and produced in small batches. Packaging may

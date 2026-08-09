@@ -59,7 +59,7 @@ export function AtelierMaisonLinks({
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-nfe-green-900">
                 {link.label}
               </p>
-              <p className="mt-3 text-sm leading-6 text-nfe-ink/68">
+              <p className="mt-3 text-sm leading-6 text-nfe-ink/70">
                 {link.description}
               </p>
             </Link>
