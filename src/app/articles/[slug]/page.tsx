@@ -12,6 +12,7 @@ import {
   type ArticleMeta,
 } from '@/lib/articles'
 import { WELL_AGING_SERIES_SLUG } from '@/content/articles/well-aging-series'
+import { SOCIAL_IMAGE } from '@/lib/social-image'
 import { ArticleJsonLd } from '@/components/articles/ArticleJsonLd'
 import {
   ArticleMaisonLinks,
@@ -58,13 +59,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description: meta.excerpt,
+    alternates: { canonical: `/articles/${meta.slug}` },
     openGraph: {
       title,
       description: meta.excerpt,
       type: 'article',
+      siteName: 'NFE Beauty',
+      locale: 'en_US',
+      url: `/articles/${meta.slug}`,
       ...(meta.date ? { publishedTime: meta.date } : {}),
       authors: [meta.author],
-      images: heroImage ? [{ url: heroImage, alt: meta.imageAlt ?? meta.title }] : [],
+      // Relative paths resolve against metadataBase, so these are absolute by
+      // the time a crawler sees them.
+      images: heroImage
+        ? [{ url: heroImage, alt: meta.imageAlt ?? meta.title }]
+        : [SOCIAL_IMAGE],
     },
   }
 }

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import INCITransparencyTabs from '@/components/education/INCITransparencyTabs'
@@ -11,6 +12,18 @@ import {
   parsePathwayQuery,
   type SearchParamValue,
 } from '@/lib/science-pathway-state'
+
+/**
+ * The route carried no metadata of its own, so the browser tab and the
+ * accessible document title both read the root fallback, "NFE Beauty", on a
+ * page whose heading is "NFE Ingredient Transparency".
+ */
+export const metadata: Metadata = {
+  title: 'Ingredients | NFE Beauty',
+  description:
+    'Every ingredient in the NFE ritual, grouped by family, with what each one is for and why it earns its place in the formula.',
+  alternates: { canonical: '/inci' },
+}
 
 /**
  * Ingredients.

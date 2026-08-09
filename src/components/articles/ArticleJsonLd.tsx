@@ -1,7 +1,13 @@
-'use client';
-
-import Script from 'next/script';
 import { getSiteUrl } from '@/lib/site-url';
+
+/**
+ * Server-rendered, deliberately.
+ *
+ * This was a client component using next/script, so the structured data was
+ * injected after hydration and the markup a crawler receives on its first fetch
+ * carried none of it. Nothing here needs the browser: it is a pure function of
+ * its props, so it renders on the server and ships inside the HTML.
+ */
 
 type ArticleJsonLdProps = {
   slug: string;
@@ -55,9 +61,9 @@ export function ArticleJsonLd({
   };
 
   return (
-    <Script
-      id={`article-jsonld-${slug}`}
+    <script
       type="application/ld+json"
+      // The payload is built here from typed props, never from user input.
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
   );
