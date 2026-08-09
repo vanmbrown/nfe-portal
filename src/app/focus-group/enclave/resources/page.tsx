@@ -13,7 +13,7 @@ export default function EnclaveResourcesPage() {
         <li className="mb-2"><a className="text-nfe-green underline" href="/inci">Ingredient Glossary</a></li>
       </ul>
       <div className="mt-6">
-        <a className="text-nfe-green underline" href="/focus-group/enclave/upload">Go to Upload</a>
+        <a className="text-nfe-green underline" href="/focus-group/upload">Go to Upload</a>
       </div>
     </section>
   );
