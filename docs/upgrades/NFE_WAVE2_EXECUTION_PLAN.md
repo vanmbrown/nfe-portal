@@ -90,7 +90,28 @@ now all derive from it.
    release, the memo's own fallback applies: stop publishing the current list under the
    heading "Full INCI List".
 
-## 7. Progress
+## 7. Dependency advisory dispositions
+
+Target applied: **next 16.2.11**, **@opennextjs/cloudflare 1.20.2**. The adapter's
+declared peer range is `>=15.5.21 <16 || >=16.2.11`, which the installed Next satisfies.
+No `npm audit fix --force`. Four further advisories were cleared by in-range updates of
+transitive packages (`js-yaml` 3.14.1 to 3.15.1, `nanoid` 3.3.11 to 3.3.18, `picomatch`
+2.3.1 to 2.3.2, `ws` 8.18.3 to 8.21.3).
+
+`npm audit --omit=dev` went from **8 high** to **4 high**, 0 critical. Each survivor,
+with whether it applies to this deployment:
+
+| Package | Applies here? | Disposition |
+|---|---|---|
+| **next** | **No.** It carries no advisory of its own. `npm audit` reports it solely because it depends on `postcss` and `sharp`, both listed below. The 16.2.11 upgrade cleared Next's own SSRF, open-redirect and App Router DoS advisories. | Resolved. The residual flag is inherited, not intrinsic. |
+| **postcss** | **No.** Declared as a **devDependency**, used at build time to process CSS. It is not part of the Worker bundle, so none of the four advisories (all requiring attacker-controlled CSS or `sourceMappingURL` input) can be reached by a visitor. NFE authors its own stylesheets. | Accepted for this release. A fixed version is in range but is pinned by the toolchain; revisit when Next ships a newer postcss. |
+| **sharp** | **No.** Image optimisation on Cloudflare is performed by the adapter, not by `sharp`, which is a build-time and local-tooling dependency. The libvips CVEs require processing attacker-supplied images; NFE processes only committed brand assets. | Accepted for this release. The fix is a **major** bump (0.34.5 to 0.35.3) and was not taken, because a major image-library change during a QA release has a regression surface of its own. Recommend upgrading in a dedicated tranche with visual regression over every hero. |
+| **next-mdx-remote** | **No, and it is dead.** The advisory concerns server-rendering **untrusted** MDX. This project renders no untrusted MDX, and more decisively, `next-mdx-remote` is **imported nowhere** in `src`, `tests` or `scripts`. MDX compiles through `@next/mdx` at build time. | Remove the dependency in the cleanup tranche (W2-37), rather than take a major upgrade of something unused. Removal resolves the advisory outright. |
+
+Nothing above is a live exposure on the deployed Worker. Two are build-time only, one is
+inherited from those two, and one is an unused package scheduled for deletion.
+
+## 8. Progress
 
 | Tranche | State |
 |---|---|
