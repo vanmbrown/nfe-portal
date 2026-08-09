@@ -8,10 +8,19 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      // /dev/ holds internal review surfaces (e.g. the Maison token specimen).
-      // Those routes already return 404 in production builds; this is a second
-      // layer so they are never crawled even in a preview deployment.
-      disallow: ['/admin/', '/api/', '/_next/', '/private/', '/dev/'],
+      // Internal surfaces. Each already returns 404 in a production build or
+      // sits behind authentication; this is the second layer, so they are never
+      // crawled even from a preview deployment where the gate is open.
+      disallow: [
+        '/admin/',
+        '/api/',
+        '/_next/',
+        '/private/',
+        '/dev/',
+        '/focus-group/',
+        '/skin-strategy',
+        '/community-input',
+      ],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   }

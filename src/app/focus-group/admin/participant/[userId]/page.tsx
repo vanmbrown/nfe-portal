@@ -9,6 +9,7 @@ import type { Database } from '@/types/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Summary from '@/app/focus-group/profile/Summary';
+import { FOCUS_GROUP_LOGIN_ROUTE } from '@/lib/auth/routes';
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 type FeedbackRow = Database['public']['Tables']['focus_group_feedback']['Row'];
@@ -35,7 +36,7 @@ export default function ParticipantDetailPage() {
         const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
 
         if (userError || !currentUser) {
-          router.push('/login');
+          router.push(FOCUS_GROUP_LOGIN_ROUTE);
           return;
         }
 

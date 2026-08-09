@@ -13,6 +13,7 @@ import {
   type UploadFile,
 } from '@/lib/storage/admin-storage';
 import { Download, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { FOCUS_GROUP_LOGIN_ROUTE } from '@/lib/auth/routes';
 
 interface Profile {
   user_id: string;
@@ -38,7 +39,7 @@ export default function AdminUploadsPage() {
         const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
 
         if (userError || !currentUser) {
-          router.push('/login');
+          router.push(FOCUS_GROUP_LOGIN_ROUTE);
           return;
         }
 

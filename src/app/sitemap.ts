@@ -7,6 +7,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = getSiteUrl()
   const now = new Date()
 
+  // Canonical public destinations only.
+  //
+  // Deliberately absent, and each for its own reason:
+  //   /articles, /subscribe  redirect-only shims. Listing a redirect
+  //                          advertises a hop instead of the page, and both
+  //                          destinations are already here in their own right.
+  //   /learn                 retired; now a permanent redirect to /science.
+  //   /skin-strategy         withdrawn from the public maison.
+  //   /community-input       research, not a public destination.
+  //   /focus-group/*         authenticated participant portal.
+  //
+  // The redirects themselves stay in next.config.mjs; they protect old inbound
+  // links. They simply are not pages, so they are not advertised as pages.
   const staticRoutes: MetadataRoute.Sitemap = [
     '/',
     '/journal',
@@ -15,9 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/discovery',
     '/founder-access',
     '/our-story',
-    '/articles',
     '/inci',
-    '/learn',
     '/privacy',
     '/shop',
     '/products/face-elixir',
@@ -25,7 +36,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/ritual',
     '/science',
     '/skin-ritual-quiz',
-    '/subscribe',
     '/cookies',
   ].map((path) => ({
     url: `${baseUrl}${path}`,

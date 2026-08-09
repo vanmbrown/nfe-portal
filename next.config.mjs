@@ -71,6 +71,13 @@ const nextConfig = {
         destination: "/founder-access",
         permanent: true,
       },
+      {
+        // /learn was a second, older Science experience. One authoritative
+        // Science surface; the redirect keeps old inbound links working.
+        source: "/learn",
+        destination: "/science",
+        permanent: true,
+      },
     ];
   },
   webpack: (config, { isServer }) => {
