@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import { INCIEntry } from '@/types/actives';
@@ -19,8 +19,10 @@ const loadINCIData = async (source: 'face' | 'body'): Promise<INCIEntry[]> => {
       throw new Error(`Failed to load ${source} elixir data`);
     }
     const data = await response.json();
-    // Parse wrapped structure: { product, ingredients: [...] }
-    return data.ingredients || [];
+    // Parse wrapped structure: { product, ingredients: [...] }.
+    // A formula still in development ships `"ingredients": {}`, and `{} || []`
+    // is truthy, so the shape has to be checked rather than just its presence.
+    return Array.isArray(data.ingredients) ? data.ingredients : [];
   } catch (error) {
     console.error(`Error loading ${source} elixir:`, error);
     return [];
@@ -47,8 +49,15 @@ export default function INCILists() {
     loadData();
   }, []);
 
-  const currentData = product === 'face' ? faceData : bodyData;
-  const isPlaceholder = currentData.length === 0 || (bodyData.length === 0 && product === 'body');
+  // Second guard, independent of the loader: whatever reaches the render must
+  // be an array before anything iterates it.
+  const currentData = useMemo(() => {
+    const selected = product === 'face' ? faceData : bodyData;
+    return Array.isArray(selected) ? selected : [];
+  }, [product, faceData, bodyData]);
+
+  const isPlaceholder =
+    currentData.length === 0 || (bodyData.length === 0 && product === 'body');
 
   // Group by phase
   const groupedByPhase = useMemo(() => {
