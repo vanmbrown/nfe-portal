@@ -5,7 +5,6 @@ import '../styles/globals.scss'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { CookieConsent } from '@/components/shared/CookieConsent'
-import SkipLinkHandler from '@/components/shared/SkipLinkHandler'
 import { SOCIAL_IMAGE } from '@/lib/social-image'
 import { getSiteUrl } from '@/lib/site-url'
 
@@ -35,11 +34,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SkipLinkHandler />
-
         <Header />
 
-        <main id="main-content">
+        {/* tabIndex={-1} is what makes the skip link work. A fragment link
+            moves focus only to something focusable; without this, activating
+            "Skip to main content" scrolled the page but left focus on the link,
+            so the next Tab went straight back into the navigation.
+
+            A client-side handler used to try to force this and could not: it
+            called focus() on an element that was not focusable, then cancelled
+            the browser's own fragment navigation. Removed in favour of the
+            native behaviour. */}
+        <main id="main-content" tabIndex={-1}>
           {children}
         </main>
 

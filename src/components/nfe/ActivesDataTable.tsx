@@ -154,7 +154,7 @@ export default function ActivesDataTable() {
                   <div className="text-xs text-gray-500">
                     <span className="font-medium">Targets:</span> {active.targets.join(', ')}
                   </div>
-                  <div className="text-xs text-gray-400 mt-2">Source: {active.source}</div>
+                  <div className="text-xs text-nfe-muted mt-2">Source: {active.source}</div>
                 </div>
               ))}
             </div>

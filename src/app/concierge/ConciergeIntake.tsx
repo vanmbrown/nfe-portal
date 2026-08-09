@@ -163,7 +163,7 @@ export default function ConciergeIntake() {
       <div
         role="status"
         aria-live="polite"
-        className="rounded-3xl border border-nfe-green-100 bg-nfe-paper p-8 text-center shadow-sm"
+        className="rounded-3xl border border-nfe-green-900/10 bg-nfe-paper p-8 text-center shadow-sm"
       >
         <p className="text-xs uppercase tracking-[0.3em] text-nfe-green-700">
           Note Received
@@ -189,7 +189,7 @@ export default function ConciergeIntake() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid gap-5 rounded-3xl border border-nfe-green-100 bg-nfe-paper p-6 shadow-sm md:p-8"
+      className="grid gap-5 rounded-3xl border border-nfe-green-900/10 bg-nfe-paper p-6 shadow-sm md:p-8"
     >
       <div className="grid gap-5 md:grid-cols-2">
         <Field label="First name" id="concierge-first-name">
@@ -200,7 +200,7 @@ export default function ConciergeIntake() {
             onChange={(event) => updateField('firstName', event.target.value)}
             maxLength={80}
             autoComplete="given-name"
-            className="w-full rounded-xl border border-nfe-green-100 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
+            className="w-full rounded-xl border border-nfe-green-900/50 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
           />
         </Field>
         <Field label="Email" id="concierge-email" required>
@@ -213,7 +213,7 @@ export default function ConciergeIntake() {
             maxLength={180}
             autoComplete="email"
             required
-            className="w-full rounded-xl border border-nfe-green-100 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
+            className="w-full rounded-xl border border-nfe-green-900/50 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
           />
         </Field>
       </div>
@@ -230,7 +230,7 @@ export default function ConciergeIntake() {
             value={form.primaryArea}
             onChange={(event) => updateField('primaryArea', event.target.value)}
             required
-            className="w-full rounded-xl border border-nfe-green-100 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
+            className="w-full rounded-xl border border-nfe-green-900/50 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
           >
             <option value="">Select one</option>
             <option value="face">Face</option>
@@ -247,7 +247,7 @@ export default function ConciergeIntake() {
             onChange={(event) =>
               updateField('productInterest', event.target.value)
             }
-            className="w-full rounded-xl border border-nfe-green-100 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
+            className="w-full rounded-xl border border-nfe-green-900/50 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
           >
             <option value="">Select if known</option>
             <option value="face-elixir">Face Elixir</option>
@@ -269,7 +269,7 @@ export default function ConciergeIntake() {
             }
             maxLength={260}
             placeholder="Example: dryness, texture, comfort, radiance"
-            className="w-full rounded-xl border border-nfe-green-100 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
+            className="w-full rounded-xl border border-nfe-green-900/50 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
           />
         </Field>
         <Field
@@ -283,7 +283,7 @@ export default function ConciergeIntake() {
             onChange={(event) =>
               updateField('discoveryInterest', event.target.value)
             }
-            className="w-full rounded-xl border border-nfe-green-100 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
+            className="w-full rounded-xl border border-nfe-green-900/50 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
           >
             <option value="">Select if relevant</option>
             <option value="face">Face Discovery</option>
@@ -308,7 +308,7 @@ export default function ConciergeIntake() {
           maxLength={500}
           rows={3}
           placeholder="Share what feels crowded, uncomfortable, underwhelming, or difficult to sustain."
-          className="w-full rounded-xl border border-nfe-green-100 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
+          className="w-full rounded-xl border border-nfe-green-900/50 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
         />
       </Field>
 
@@ -323,7 +323,7 @@ export default function ConciergeIntake() {
           onChange={(event) => updateField('quizResult', event.target.value)}
           maxLength={180}
           placeholder="Example: Discovery Ritual, Face Elixir, Body Elixir"
-          className="w-full rounded-xl border border-nfe-green-100 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
+          className="w-full rounded-xl border border-nfe-green-900/50 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
         />
       </Field>
 
@@ -337,11 +337,11 @@ export default function ConciergeIntake() {
           rows={5}
           required
           placeholder="Ask for cosmetic ritual support or product-fit guidance. Please do not include clinical history, medication details, photos, or private clinical information."
-          className="w-full rounded-xl border border-nfe-green-100 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
+          className="w-full rounded-xl border border-nfe-green-900/50 bg-white px-4 py-3 text-nfe-ink outline-none transition focus:border-nfe-green-700"
         />
       </Field>
 
-      <label className="flex gap-3 rounded-2xl border border-nfe-green-100 bg-white p-4 text-sm leading-6 text-nfe-muted">
+      <label className="flex gap-3 rounded-2xl border border-nfe-green-900/10 bg-white p-4 text-sm leading-6 text-nfe-muted">
         <input
           type="checkbox"
           checked={form.consent}

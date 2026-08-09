@@ -31,8 +31,24 @@
   --motion-slow: 240ms;
 
   // A11y
-  --focus-ring: 2px solid var(--nfe-gold);
+  //
+  // The focus ring is split by surface role, exactly as the accent token
+  // already is. Gold reads on the deep greens (5.38:1 and 6.70:1) and fails on
+  // paper (2.22:1); the ratified on-light accent reads on paper, white and the
+  // warm card (5.53:1, 5.78:1, 4.60:1) and fails on green. Neither works
+  // everywhere, so neither is used everywhere.
+  //
+  // A focus indicator must reach 3:1 against what sits next to it.
+  --focus-ring-on-dark: var(--nfe-gold);
+  --focus-ring-on-light: #77633c; // maison-accent-on-light, already ratified
+  // Gold is itself a light surface, and the on-light accent is too close to it
+  // to read (2.49:1). Primary CTAs take the deepest green instead (6.68:1).
+  --focus-ring-on-accent: var(--nfe-green-900);
+  --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
+
+  // Retained so anything still reading it keeps a working ring.
+  --focus-ring: var(--focus-ring-width) solid var(--focus-ring-on-light);
 
   // Min contrast guidance: 4.5:1 for normal text, 3:1 for large text
 }

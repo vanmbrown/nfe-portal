@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { createClientSupabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
-import SkipLinkHandler from '@/components/shared/SkipLinkHandler';
 import { useFocusGroup } from '../context/FocusGroupContext';
 import { useNotifications } from '../hooks/useNotifications';
 
@@ -177,10 +176,12 @@ export default function FocusGroupClientLayout({
           </div>
         </div>
       </nav>
+      {/* Already focusable, so the fragment link works natively. The
+          client-side handler that used to sit here was redundant and, on the
+          public layout where main was not focusable, actively harmful. */}
       <main id="main-content" tabIndex={-1}>
         {children}
       </main>
-      <SkipLinkHandler />
     </div>
   );
 }

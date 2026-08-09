@@ -125,8 +125,10 @@ test.describe('after accepting', () => {
     await page.goto(CAMPAIGN)
     await page.waitForLoadState('networkidle')
 
+    // Capture happens in a client effect, so poll rather than read once:
+    // networkidle can resolve before hydration under parallel load.
+    await expect.poll(() => stored(page), { timeout: 10000 }).not.toBeNull()
     const raw = await stored(page)
-    expect(raw, 'nothing captured despite consent').not.toBeNull()
     const record = JSON.parse(raw as string)
     expect(record.utmSource).toBe('test-source')
     expect(record.utmCampaign).toBe('test-campaign')
@@ -166,7 +168,7 @@ test.describe('withdrawing consent', () => {
     await seedConsent(page, 'accepted')
     await page.goto(CAMPAIGN)
     await page.waitForLoadState('networkidle')
-    expect(await stored(page), 'nothing to withdraw').not.toBeNull()
+    await expect.poll(() => stored(page), { timeout: 10000 }).not.toBeNull()
 
     // Withdraw the way the banner does, then let the gate run again.
     await page.evaluate((k) => window.localStorage.setItem(k, 'declined'), CONSENT)

@@ -71,10 +71,43 @@ h6 {
   }
 }
 
-/* Focus management */
+/* Focus management.
+ *
+ * The ring defaults to the on-light accent, because most of the maison is
+ * paper. Deep-green surfaces switch it to gold. A light card sitting inside a
+ * green section switches it back, which is why the light rule comes last: at
+ * equal specificity the later rule wins, and a white card inside a green
+ * section is the case that would otherwise get an unreadable ring. */
 :focus-visible {
-  outline: var(--focus-ring);
+  outline: var(--focus-ring-width) solid var(--focus-ring-on-light);
   outline-offset: var(--focus-ring-offset);
+}
+
+.bg-nfe-green,
+.bg-nfe-green-800,
+.bg-nfe-green-900 {
+  &:focus-visible,
+  :focus-visible {
+    outline-color: var(--focus-ring-on-dark);
+  }
+}
+
+.bg-nfe-paper,
+.bg-white {
+  &:focus-visible,
+  :focus-visible {
+    outline-color: var(--focus-ring-on-light);
+  }
+}
+
+/* Gold CTAs last. Gold is a light surface, but the on-light accent is a warm
+ * mid-tone too close to it to read (2.49:1), so the primary button would have
+ * carried an invisible ring. The deepest green reads at 6.68:1. */
+.bg-nfe-gold {
+  &:focus-visible,
+  :focus-visible {
+    outline-color: var(--focus-ring-on-accent);
+  }
 }
 
 .sr-only {
