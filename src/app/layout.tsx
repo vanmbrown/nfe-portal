@@ -36,6 +36,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <Header />
 
+        {/* Before main, not after the footer. It is visually pinned to the
+            bottom, but in the document it sits early enough that a keyboard
+            visitor reaches the choice without traversing the entire site
+            first. It takes no focus on appearance. */}
+        <CookieConsent />
+
         {/* tabIndex={-1} is what makes the skip link work. A fragment link
             moves focus only to something focusable; without this, activating
             "Skip to main content" scrolled the page but left focus on the link,
@@ -50,8 +56,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
 
         <Footer />
-
-        <CookieConsent />
       </body>
     </html>
   )

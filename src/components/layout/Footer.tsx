@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+import { CookiePreferencesButton } from '@/components/shared/CookiePreferencesButton'
+
 const footerLinks = [
   { href: '/', label: 'Home' },
   { href: '/inci', label: 'Ingredients' },
@@ -27,6 +29,12 @@ export default function Footer() {
                 </Link>
               </li>
             ))}
+            {/* Sits with the other legal utilities: the cookie notice does not
+                return once dismissed, so this is the way back to that choice,
+                and the place focus lands after one is made. */}
+            <li>
+              <CookiePreferencesButton className="text-nfe-paper/80" />
+            </li>
           </ul>
         </nav>
         <p>© 2025 NFE Beauty. All rights reserved.</p>
