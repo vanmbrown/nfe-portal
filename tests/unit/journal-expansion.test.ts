@@ -184,6 +184,7 @@ describe('journal expansion: manifest and registry', () => {
     // ArticleMeta so every article may use them.
     known.add('published')
     known.add('mobileImage')
+    known.add('heroAspect')
     for (const slug of NEW_SLUGS) {
       for (const key of Object.keys(bySlug(slug) as object)) {
         assert.ok(known.has(key), `${slug} introduces unsupported field "${key}"`)
@@ -192,6 +193,7 @@ describe('journal expansion: manifest and registry', () => {
     const model = readFileSync(join(root, 'src', 'lib', 'articles.ts'), 'utf8')
     assert.match(model, /published\?: boolean/, 'published is not on the model')
     assert.match(model, /mobileImage\?: string/, 'mobileImage is not on the model')
+    assert.match(model, /heroAspect\?:/, 'heroAspect is not on the model')
   })
 
   it('points every related slug at a real article', () => {

@@ -308,7 +308,7 @@
     "pullQuote": "A product should earn its place in your beauty cabinet.",
     "heroImage": "/images/journal/the-new-language-of-well-aging/whats-in-my-beauty-cabinet.webp",
     "cardImage": "/images/journal/the-new-language-of-well-aging/whats-in-my-beauty-cabinet.webp",
-    "mobileImage": "/images/journal/the-new-language-of-well-aging/whats-in-my-beauty-cabinet-mobile.webp",
+    "heroAspect": "4/3",
     "imageAlt": "A considered beauty cabinet with everyday skincare and personal-care products arranged alongside NFE on a vanity.",
     "imageCredit": null,
     "relatedSlugs": [

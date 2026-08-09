@@ -9,6 +9,7 @@ import {
   getArticleHeroImage,
   getPillarLabel,
   isPrimaryArticle,
+  type ArticleMeta,
 } from '@/lib/articles'
 import { WELL_AGING_SERIES_SLUG } from '@/content/articles/well-aging-series'
 import { ArticleJsonLd } from '@/components/articles/ArticleJsonLd'
@@ -19,6 +20,17 @@ import {
 
 type Props = {
   params: Promise<{ slug: string }>
+}
+
+/** Hero ratios below the md breakpoint, spelled out so Tailwind can see every
+ *  class it must generate. An article opting in here is served whole on a
+ *  phone: the container takes the asset's own ratio and the image is contained
+ *  rather than covered, so no edge of the composition is ever cut away. */
+const MOBILE_HERO_ASPECT: Record<NonNullable<ArticleMeta['heroAspect']>, string> = {
+  '4/3': 'aspect-[4/3]',
+  '3/2': 'aspect-[3/2]',
+  '1/1': 'aspect-square',
+  '4/5': 'aspect-[4/5]',
 }
 
 export function generateStaticParams() {
@@ -74,6 +86,7 @@ export default async function ArticlePage({ params }: Props) {
   const MDXContent = mod.default
   const heroImage = getArticleHeroImage(meta)
   const primary = isPrimaryArticle(meta)
+  const mobileHeroAspect = meta.heroAspect ? MOBILE_HERO_ASPECT[meta.heroAspect] : undefined
   const backHref = primary ? '/journal' : '/journal'
   const seriesHref =
     meta.seriesSlug === WELL_AGING_SERIES_SLUG
@@ -166,15 +179,17 @@ export default async function ArticlePage({ params }: Props) {
           <div className="relative mx-auto max-w-6xl px-6 pb-10 md:px-12 md:pb-12">
             <div
               className={`relative overflow-hidden rounded-[1.75rem] border border-nfe-paper/10 bg-nfe-green-900/40 ${
-                meta.imageType === 'editorial-science'
-                  ? 'aspect-[4/3] md:aspect-[16/9]'
-                  : meta.imageType === 'editorial-portrait' &&
-                      heroImage.includes('well-aging-not-disappearing')
-                    ? 'aspect-[16/9]'
-                    : 'aspect-[4/5] max-h-[70vh] md:aspect-[16/10] md:max-h-[620px]'
+                mobileHeroAspect
+                  ? `${mobileHeroAspect} md:aspect-[16/10] md:max-h-[620px]`
+                  : meta.imageType === 'editorial-science'
+                    ? 'aspect-[4/3] md:aspect-[16/9]'
+                    : meta.imageType === 'editorial-portrait' &&
+                        heroImage.includes('well-aging-not-disappearing')
+                      ? 'aspect-[16/9]'
+                      : 'aspect-[4/5] max-h-[70vh] md:aspect-[16/10] md:max-h-[620px]'
               }`}
             >
-              {meta.mobileImage ? (
+              {meta.mobileImage && !mobileHeroAspect ? (
                 /* Art direction: a dedicated 4:5 crop below the md breakpoint,
                    the approved desktop asset above it. One <picture> means the
                    browser fetches exactly one of the two. */
@@ -200,7 +215,9 @@ export default async function ArticlePage({ params }: Props) {
                   alt={meta.imageAlt ?? meta.title}
                   fill
                   priority
-                  className={`object-cover ${
+                  className={`${
+                    mobileHeroAspect ? 'object-contain md:object-cover' : 'object-cover'
+                  } ${
                     meta.imageType === 'editorial-science'
                       ? 'object-center md:object-[center_18%]'
                       : ''

@@ -44,8 +44,17 @@ export type ArticleMeta = {
   imageAlt?: string
   imageType?: ArticleImageType
   imageCredit?: string | null
-  /** Dedicated 4:5 crop served below the md breakpoint. */
+  /** Dedicated 4:5 crop served below the md breakpoint.
+   *
+   *  Only safe when the discarded edges carry nothing but background. An image
+   *  whose composition runs to its own edges — a product line-up, embedded
+   *  headline type — must use `heroAspect` instead and stay whole. */
   mobileImage?: string
+  /** Renders the hero below md at the asset's own ratio, contained rather than
+   *  cropped, so a composed plate arrives on a phone entire. Desktop geometry
+   *  is unaffected. Values are matched against a fixed table in the article
+   *  route so Tailwind can see every class it has to generate. */
+  heroAspect?: '4/3' | '3/2' | '1/1' | '4/5'
   pillar: JournalPillarId
   editorialTier?: EditorialTier
   featured?: boolean

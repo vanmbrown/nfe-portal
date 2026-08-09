@@ -27,6 +27,7 @@ type Entry = {
   pillar: string
   heroImage?: string
   mobileImage?: string
+  heroAspect?: string
   imageAlt?: string
   featured?: boolean
 }
@@ -182,47 +183,100 @@ describe('journal publication: publication state', () => {
   })
 })
 
-describe('journal publication: responsive hero crops', () => {
-  const MOBILE = {
-    [CABINET]: 'whats-in-my-beauty-cabinet-mobile.webp',
-    [SCENT]: 'the-scent-of-feeling-beautiful-mobile.webp',
-  } as Record<string, string>
+describe('journal publication: hero composition survives the mobile breakpoint', () => {
+  /** Canvas size of a WebP, whichever of the three chunk forms it uses. */
+  function webpSize(file: string): { w: number; h: number } {
+    const buf = readFileSync(file)
+    assert.equal(buf.toString('ascii', 0, 4), 'RIFF', `${file} is not RIFF`)
+    assert.equal(buf.toString('ascii', 8, 12), 'WEBP', `${file} is not WebP`)
+    const fourcc = buf.toString('ascii', 12, 16)
+
+    if (fourcc === 'VP8X') {
+      return { w: buf.readUIntLE(24, 3) + 1, h: buf.readUIntLE(27, 3) + 1 }
+    }
+    if (fourcc === 'VP8L') {
+      const b = buf.readUInt32LE(21)
+      return { w: (b & 0x3fff) + 1, h: ((b >> 14) & 0x3fff) + 1 }
+    }
+    const i = buf.indexOf(Buffer.from([0x9d, 0x01, 0x2a]))
+    assert.ok(i > 0, `${file} has no VP8 keyframe header`)
+    return { w: buf.readUInt16LE(i + 3) & 0x3fff, h: buf.readUInt16LE(i + 5) & 0x3fff }
+  }
+
+  const ASPECT_VALUE: Record<string, number> = {
+    '4/3': 4 / 3,
+    '3/2': 3 / 2,
+    '1/1': 1,
+    '4/5': 4 / 5,
+  }
+
+  // The defect this suite exists to prevent: the cabinet plate is a composed
+  // four-product line-up with headline type set into it, and a 4:5 crop threw
+  // away a third of its width - the Cetaphil at the left edge, its caption, and
+  // the first letter of two lines of type - while the plate still read
+  // "FOUR PRODUCTS". A composition that runs to its own edges is served whole.
+  it('serves the cabinet plate whole rather than cropping it', () => {
+    const e = bySlug(CABINET)!
+    assert.equal(e.heroAspect, '4/3', 'cabinet no longer declares its native ratio')
+    assert.ok(!e.mobileImage, 'cabinet still declares a cropping mobile asset')
+    assert.ok(
+      !existsSync(
+        join(
+          root,
+          'public/images/journal/the-new-language-of-well-aging',
+          'whats-in-my-beauty-cabinet-mobile.webp'
+        )
+      ),
+      'the discarded 4:5 cabinet crop is still on disk'
+    )
+  })
+
+  it('matches every declared heroAspect to the real asset, so nothing is cut', () => {
+    for (const e of entries) {
+      if (!e.heroAspect) continue
+      const declared = ASPECT_VALUE[e.heroAspect as string]
+      assert.ok(declared, `${e.slug} declares unknown heroAspect ${e.heroAspect}`)
+      const { w, h } = webpSize(join(root, 'public', e.heroImage as string))
+      const actual = w / h
+      assert.ok(
+        Math.abs(actual - declared) < 0.01,
+        `${e.slug} declares ${e.heroAspect} (${declared.toFixed(3)}) but the asset ` +
+          `is ${w}x${h} (${actual.toFixed(3)}); the difference would be cropped away`
+      )
+    }
+  })
+
+  it('never declares both a mobile crop and a native ratio', () => {
+    for (const e of entries) {
+      assert.ok(
+        !(e.mobileImage && e.heroAspect),
+        `${e.slug} declares both mobileImage and heroAspect; only one can govern`
+      )
+    }
+  })
+
+  // The scent hero is a photograph whose discarded edges carry only meadow, so
+  // a portrait crop remains the right call there.
+  it('keeps the scent crop, and keeps it at the container ratio', () => {
+    const e = bySlug(SCENT)!
+    assert.ok(e.mobileImage, 'scent lost its mobile crop')
+    assert.ok(
+      (e.mobileImage as string).startsWith(
+        '/images/journal/the-new-language-of-well-aging/'
+      ),
+      'scent mobile crop is outside the approved directory'
+    )
+    const file = join(root, 'public', e.mobileImage as string)
+    assert.ok(existsSync(file), 'missing scent mobile crop')
+    const { w, h } = webpSize(file)
+    const ratio = w / h
+    assert.ok(
+      Math.abs(ratio - 0.8) < 0.02,
+      `scent crop is ${w}x${h} (${ratio.toFixed(3)}); the 4:5 container would crop it again`
+    )
+  })
 
   for (const slug of NEW) {
-    it(`${slug} declares a dedicated mobile crop`, () => {
-      const e = bySlug(slug)
-      assert.ok(e?.mobileImage, `${slug} has no mobileImage`)
-      assert.ok(
-        (e!.mobileImage as string).endsWith(MOBILE[slug]),
-        `${slug} mobile filename is not ${MOBILE[slug]}`
-      )
-      assert.ok(
-        (e!.mobileImage as string).startsWith(
-          '/images/journal/the-new-language-of-well-aging/'
-        ),
-        `${slug} mobile crop is outside the approved directory`
-      )
-    })
-
-    it(`${slug} mobile crop exists on disk and is 4:5 WebP`, () => {
-      const e = bySlug(slug)!
-      const file = join(root, 'public', e.mobileImage as string)
-      assert.ok(existsSync(file), `missing mobile crop for ${slug}`)
-      const buf = readFileSync(file)
-      assert.equal(buf.toString('ascii', 0, 4), 'RIFF', 'not RIFF')
-      assert.equal(buf.toString('ascii', 8, 12), 'WEBP', 'not WebP')
-      // VP8 lossy keyframe header carries the canvas size
-      const i = buf.indexOf(Buffer.from([0x9d, 0x01, 0x2a]))
-      assert.ok(i > 0, 'no VP8 keyframe header')
-      const w = buf.readUInt16LE(i + 3) & 0x3fff
-      const h = buf.readUInt16LE(i + 5) & 0x3fff
-      const ratio = w / h
-      assert.ok(
-        Math.abs(ratio - 0.8) < 0.02,
-        `${slug} mobile crop is ${w}x${h} (ratio ${ratio.toFixed(3)}), expected ~0.800`
-      )
-    })
-
     it(`${slug} keeps its approved desktop asset unchanged`, () => {
       const e = bySlug(slug)!
       assert.ok(
@@ -234,10 +288,33 @@ describe('journal publication: responsive hero crops', () => {
     })
   }
 
-  it('serves the mobile crop below the md breakpoint via art direction', () => {
+  it('wires both hero treatments in the article route', () => {
     const route = read('src', 'app', 'articles', '[slug]', 'page.tsx')
+    // art direction still available for photographic heroes
     assert.match(route, /media="\(max-width: 767px\)"/, 'no mobile media query')
     assert.match(route, /srcSet=\{meta\.mobileImage\}/, 'mobile source not wired')
+    // and the uncropped treatment for composed plates
+    assert.match(route, /MOBILE_HERO_ASPECT/, 'no mobile aspect table')
+    assert.match(route, /'4\/3': 'aspect-\[4\/3\]'/, 'the 4/3 class is not spelled out')
+    assert.match(
+      route,
+      /object-contain md:object-cover/,
+      'the native-ratio hero is not contained, so it can still be cropped'
+    )
+    assert.match(
+      route,
+      /meta\.mobileImage && !mobileHeroAspect/,
+      'a native-ratio article could still fall into the cropping picture element'
+    )
+  })
+
+  it('holds the desktop hero geometry unchanged', () => {
+    const route = read('src', 'app', 'articles', '[slug]', 'page.tsx')
+    assert.match(
+      route,
+      /md:aspect-\[16\/10\] md:max-h-\[620px\]/,
+      'desktop hero geometry moved'
+    )
   })
 })
 
