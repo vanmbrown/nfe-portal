@@ -1,18 +1,20 @@
-/** The image a shared NFE link carries.
+/** The image a shared NFE link carries when the page authors none of its own.
  *
- *  This is the approved homepage hero at its own ratio, not a purpose-made
- *  sharing card. No 1200x630 asset exists in the repository, and cropping an
- *  approved brand image to make one is a founder decision rather than an
- *  engineering one, so the native asset is declared and the platforms letterbox
- *  or centre-crop it themselves.
+ *  A purpose-built card at the platforms' native 1200x630, drawn from the
+ *  maison tokens rather than cropped from a photograph: deep green ground, the
+ *  wordmark in warm gold, warm-bone supporting type, generous negative space.
+ *  Typographic and architectural by decision, because a card built from type
+ *  survives every crop a platform applies, and forcing a composed photograph
+ *  into 1.91 is what cost the Beauty Cabinet plate a product.
  *
- *  When a dedicated card is approved, replace the three values below and every
- *  surface picks it up: the root layout, and any route that does not declare
- *  its own image.
+ *  Regenerate with `node scripts/build-social-card.js`.
+ *
+ *  Articles keep their own authored imagery. This is the fallback for the
+ *  homepage and the core routes only.
  */
 export const SOCIAL_IMAGE = {
-  url: '/images/homepage/nfe-home-hero-product-vessel-desktop-1600w.webp',
-  width: 1600,
-  height: 1132,
-  alt: 'An NFE elixir vessel resting on a quiet, warm surface.',
+  url: '/images/social/nfe-default-share-card.png',
+  width: 1200,
+  height: 630,
+  alt: 'NFE. Not for everyone. Luxury-performance skincare for skin that has lived.',
 } as const
