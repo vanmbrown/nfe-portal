@@ -63,9 +63,13 @@ test.describe('retired and legacy paths redirect rather than 404', () => {
     })
   }
 
-  test('/learn is a permanent redirect, not a temporary one', async ({ request }) => {
-    expect((await probe(request, '/learn')).status).toBe(308)
-  })
+  // Retired URLs, not detours. A 307 tells a crawler the move is temporary and
+  // leaves the old URL indexed; 308 retires it.
+  for (const path of ['/learn', '/articles', '/subscribe', '/about', '/products']) {
+    test(`${path} is permanent, not temporary`, async ({ request }) => {
+      expect((await probe(request, path)).status).toBe(308)
+    })
+  }
 })
 
 test.describe('the participant portal has no dead destinations', () => {

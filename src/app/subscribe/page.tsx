@@ -1,5 +1,6 @@
-import { redirect } from 'next/navigation'
+import { permanentRedirect } from 'next/navigation'
 
 export default function SubscribePage() {
-  redirect('/founder-access')
+  // Permanent, not temporary: /subscribe is retired in favour of Founder Access.
+  permanentRedirect('/founder-access')
 }
